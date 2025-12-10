@@ -1,18 +1,16 @@
 // UC Davis Soil Series API client and data processor
-// API Documentation: https://casoilresource.lawr.ucdavis.edu/
+// Uses Next.js API proxy to avoid CORS issues
 
 import type { OSDResponse, FormattedOSDData, OSDClimateData } from '#src/types/osd'
 
-const OSD_API_BASE = 'https://casoilresource.lawr.ucdavis.edu/api/soil-series.php'
-
 /**
- * Fetch OSD data for a soil series from UC Davis API
+ * Fetch OSD data for a soil series via our API proxy
  * @param seriesName - Name of the soil series (e.g., "ABBOTT")
  * @returns Complete OSD data response
  */
 export async function fetchOSDData(seriesName: string): Promise<OSDResponse | null> {
   try {
-    const url = `${OSD_API_BASE}?q=all&s=${encodeURIComponent(seriesName.toLowerCase())}`
+    const url = `/api/osd?series=${encodeURIComponent(seriesName)}`
     console.log(`[OSD API] Fetching data for series: ${seriesName}`)
 
     const response = await fetch(url)

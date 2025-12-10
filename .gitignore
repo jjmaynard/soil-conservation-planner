@@ -39,3 +39,6 @@ next-env.d.ts
 # VS Code Editor
 .vscode
 .vscode/*
+
+# Documentation and Guides
+Property_Panel_Guide/

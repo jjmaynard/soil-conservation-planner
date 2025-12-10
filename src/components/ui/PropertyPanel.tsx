@@ -23,6 +23,7 @@ import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import { useOSDData } from '#src/hooks/useOSDData'
 import OSDPanel from '#src/components/ui/OSDPanel'
+import { getDescriptionText } from '#src/utils/osdDescriptionLoader'
 import {
   Bar,
   BarChart,
@@ -345,15 +346,411 @@ function getTextureClassColor(textureClass: string): string {
   return colorMap[textureClass] || '#d1d5db'
 }
 
-// Component to display OSD data for a single soil component
-function ComponentOSDSection({ componentName }: { componentName: string }) {
-  const { osdData, isLoading, error } = useOSDData(componentName, true)
+// Component to display just the OSD text description at the top of each component
+// Component to display just the OSD text description at the top of each component
+function ComponentOSDDescription({ componentName }: { componentName: string }) {
+  const [descriptionText, setDescriptionText] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (componentName) {
+      setLoading(true)
+      getDescriptionText(componentName)
+        .then(text => {
+          setDescriptionText(text)
+          setLoading(false)
+        })
+        .catch(error => {
+          console.error('Failed to load description:', error)
+          setLoading(false)
+        })
+    }
+  }, [componentName])
+
+  if (!descriptionText || loading) return null
 
   return (
-    <div className="border-gray-200 mt-4 border-t pt-4">
-      <h4 className="text-gray-900 mb-3 text-xs font-bold">Official Series Description</h4>
-      <OSDPanel osdData={osdData} isLoading={isLoading} />
+    <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4 rounded-r">
+      <h4 className="text-xs font-bold text-blue-900 mb-2">Soil Description</h4>
+      <p className="text-xs text-blue-800 leading-relaxed whitespace-pre-line">{descriptionText}</p>
     </div>
+  )
+}
+
+// Component for comparing all component profiles side-by-side
+function ProfileComparisonModal({ 
+  components, 
+  onClose 
+}: { 
+  components: any[]
+  onClose: () => void 
+}) {
+  const [compareProperty, setCompareProperty] = useState<'texture' | 'clay' | 'om' | 'ph' | 'awc' | 'ksat'>('texture')
+
+  return (
+    <div 
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      onClick={onClose}
+    >
+      <div 
+        className="rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        style={{ backgroundColor: '#ffffff' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-6 py-4 flex items-center justify-between" style={{ backgroundColor: '#2563eb', color: '#ffffff' }}>
+          <div>
+            <h2 className="text-xl" style={{ fontWeight: 'bold', fontSize: '20px' }}>Component Profile Comparison</h2>
+            <p className="text-sm mt-1" style={{ fontSize: '14px', opacity: 0.9 }}>Compare soil horizons across all components</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded p-2 transition-colors"
+            style={{ color: '#ffffff' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: '24px', height: '24px' }}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Property Selector */}
+        <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-gray-700">Display Property:</span>
+            <select
+              value={compareProperty}
+              onChange={e => setCompareProperty(e.target.value as any)}
+              className="border-gray-300 rounded border bg-white px-3 py-1.5 text-sm"
+            >
+              <option value="texture">Texture</option>
+              <option value="clay">Clay %</option>
+              <option value="om">Organic Matter %</option>
+              <option value="ph">pH</option>
+              <option value="awc">AWC</option>
+              <option value="ksat">Ksat</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-auto p-6">
+          {(() => {
+            // Calculate the maximum depth across ALL components for consistent y-axis
+            const globalMaxDepth = Math.max(
+              ...components
+                .filter(comp => comp.horizons && comp.horizons.length > 0)
+                .map(comp => Math.max(...comp.horizons.map((h: any) => Number(h.hzdepb_r) || 0)))
+            )
+
+            return (
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: `repeat(${Math.min(components.length, 4)}, minmax(200px, 1fr))`,
+                gap: '24px',
+                alignItems: 'start'
+              }}>
+                {components.map((comp, compIdx) => {
+                  if (!comp.horizons || comp.horizons.length === 0) return null
+
+                  return (
+                    <div key={compIdx} style={{ display: 'flex', flexDirection: 'column' }}>
+                  {/* Component Header */}
+                  <div 
+                    className="px-3 py-2 rounded-t-lg"
+                    style={{ 
+                      backgroundColor: '#2563eb', 
+                      color: '#ffffff',
+                      background: '#2563eb'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontWeight: 'bold', fontSize: '14px' }}>{comp.compname}</span>
+                      {comp.majcompflag === 'Yes' && (
+                        <span 
+                          style={{ 
+                            backgroundColor: '#d97706',
+                            color: '#ffffff',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            borderRadius: '9999px',
+                            paddingLeft: '8px',
+                            paddingRight: '8px',
+                            paddingTop: '2px',
+                            paddingBottom: '2px',
+                            display: 'inline-block'
+                          }}
+                        >
+                          Major
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '12px', opacity: 0.9 }}>{comp.comppct_r}% of map unit</div>
+                  </div>
+
+                  {/* Profile Visualization */}
+                  <div className="border border-t-0 border-gray-300 rounded-b-lg p-3" style={{ backgroundColor: '#f9fafb', flex: 1 }}>
+                    <div className="relative h-96">
+                      <div style={{ width: '100%', height: '100%', position: 'relative', paddingLeft: '40px' }}>
+                        {/* Y-axis line */}
+                        <div style={{
+                          position: 'absolute',
+                          left: '35px',
+                          top: '0',
+                          bottom: '0',
+                          width: '1px',
+                          backgroundColor: '#666',
+                          opacity: 0.3,
+                        }} />
+                        
+                        {comp.horizons.map((hz: any, hzIdx: number) => {
+                          const top = Number(hz.hzdept_r) || 0
+                          const bottom = Number(hz.hzdepb_r) || 0
+                          const thickness = bottom - top
+                          const topPercent = (top / globalMaxDepth) * 100
+                          const heightPercent = (thickness / globalMaxDepth) * 100
+
+                          let displayColor = '#d1d5db'
+                          let textColor = 'white'
+
+                          const sand = Number(hz.sandtotal_r)
+                          const silt = Number(hz.silttotal_r)
+                          const clay = Number(hz.claytotal_r)
+
+                          if (compareProperty === 'texture') {
+                            if (!isNaN(sand) && !isNaN(silt) && !isNaN(clay)) {
+                              const textureClass = getTextureClass(sand, silt, clay)
+                              displayColor = getTextureClassColor(textureClass)
+                              textColor = ['Sand', 'Loamy sand', 'Silt'].includes(textureClass) ? '#333' : 'white'
+                            }
+                          } else {
+                            const propertyMap: Record<string, string> = {
+                              clay: 'claytotal_r',
+                              om: 'om_r',
+                              ph: 'ph1to1h2o_r',
+                              awc: 'awc_r',
+                              ksat: 'ksat_r',
+                            }
+
+                            const fieldName = propertyMap[compareProperty]
+                            const value = Number((hz as any)[fieldName])
+
+                            if (!isNaN(value)) {
+                              const classification = classifyProperty(value, compareProperty)
+                              displayColor = classification.color
+                              const isDark = compareProperty === 'ksat' || (compareProperty === 'clay' && value > 25) || (compareProperty === 'om' && value > 1)
+                              textColor = isDark ? 'white' : '#333'
+                            }
+                          }
+
+                          return (
+                            <div
+                              key={hzIdx}
+                              style={{
+                                position: 'absolute',
+                                top: `${topPercent}%`,
+                                left: '40px',
+                                right: '0',
+                                height: `${heightPercent}%`,
+                                background: displayColor,
+                                backgroundColor: displayColor,
+                                border: '1px solid #666',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: textColor,
+                                fontWeight: 'bold',
+                                fontSize: '11px',
+                                textShadow: textColor === 'white' ? '1px 1px 2px rgba(0,0,0,0.8)' : 'none',
+                              }}
+                              title={`${hz.hzname || `H${hzIdx + 1}`} (${top}-${bottom} cm)\nTexture: ${
+                                !isNaN(sand) && !isNaN(silt) && !isNaN(clay) ? getTextureClass(sand, silt, clay) : 'N/A'
+                              }\nClay: ${!isNaN(clay) ? clay.toFixed(1) : 'N/A'}%\nOM: ${
+                                !isNaN(Number(hz.om_r)) ? Number(hz.om_r).toFixed(2) : 'N/A'
+                              }%\npH: ${
+                                !isNaN(Number(hz.ph1to1h2o_r)) ? Number(hz.ph1to1h2o_r).toFixed(1) : 'N/A'
+                              }\nAWC: ${
+                                !isNaN(Number(hz.awc_r)) ? Number(hz.awc_r).toFixed(2) : 'N/A'
+                              }\nKsat: ${
+                                !isNaN(Number(hz.ksat_r)) ? Number(hz.ksat_r).toFixed(1) : 'N/A'
+                              } µm/s`}
+                            >
+                              {hz.hzname || `H${hzIdx + 1}`}
+                            </div>
+                          )
+                        })}
+
+                        {/* Depth scale */}
+                        <div style={{
+                          position: 'absolute',
+                          left: '0',
+                          top: '0',
+                          height: '100%',
+                          width: '35px',
+                          fontSize: '9px',
+                          color: '#666',
+                        }}>
+                          {(() => {
+                            const depths = new Set<number>()
+                            depths.add(0)
+                            depths.add(globalMaxDepth)
+                            comp.horizons.forEach((h: any) => {
+                              const top = Number(h.hzdept_r)
+                              const bottom = Number(h.hzdepb_r)
+                              if (!isNaN(top)) depths.add(top)
+                              if (!isNaN(bottom)) depths.add(bottom)
+                            })
+
+                            return Array.from(depths)
+                              .sort((a, b) => a - b)
+                              .map((depth, idx) => {
+                                const topPercent = (depth / globalMaxDepth) * 100
+                                return (
+                                  <div
+                                    key={idx}
+                                    style={{
+                                      position: 'absolute',
+                                      top: `${topPercent}%`,
+                                      right: '0',
+                                      width: '100%',
+                                      textAlign: 'right',
+                                      transform: 'translateY(-50%)',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'flex-end',
+                                      gap: '2px',
+                                    }}
+                                  >
+                                    <span style={{ fontWeight: depth === 0 || depth === globalMaxDepth ? 'bold' : 'normal' }}>
+                                      {depth}
+                                    </span>
+                                    <div style={{
+                                      width: '5px',
+                                      height: '1px',
+                                      backgroundColor: '#666',
+                                      opacity: 0.3,
+                                    }} />
+                                  </div>
+                                )
+                              })
+                          })()}
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                  </div>
+                )
+              })}
+              </div>
+            )
+          })()}          {/* Legend */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="text-gray-600 text-sm">
+              {compareProperty === 'texture' ? (
+                <>
+                  <div className="mb-2 font-semibold">USDA Texture Classes:</div>
+                  <div className="grid grid-cols-3 gap-x-6 gap-y-2">
+                    {[
+                      { color: '#f4e4c1', label: 'Sand' },
+                      { color: '#e6d4a8', label: 'Loamy sand' },
+                      { color: '#d9c48f', label: 'Sandy loam' },
+                      { color: '#8b7355', label: 'Loam' },
+                      { color: '#a0826d', label: 'Silt loam' },
+                      { color: '#c8b597', label: 'Silt' },
+                      { color: '#9d7f5c', label: 'Sandy clay loam' },
+                      { color: '#7a5c3f', label: 'Clay loam' },
+                      { color: '#8d6e4f', label: 'Silty clay loam' },
+                      { color: '#6b4e3d', label: 'Sandy clay' },
+                      { color: '#5c4033', label: 'Silty clay' },
+                      { color: '#4a3728', label: 'Clay' },
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <div className="h-4 w-4 rounded" style={{ backgroundColor: item.color }} />
+                        <span>{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-2 font-semibold">
+                    {compareProperty === 'clay' && 'Clay Content (%)'}
+                    {compareProperty === 'om' && 'Organic Matter (%)'}
+                    {compareProperty === 'ph' && 'pH'}
+                    {compareProperty === 'awc' && 'Available Water Capacity'}
+                    {compareProperty === 'ksat' && 'Saturated Hydraulic Conductivity (µm/s)'}
+                  </div>
+                  <div className="grid grid-cols-4 gap-x-6 gap-y-2">
+                    {soilPropertyRanges[compareProperty]?.map((range, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <div className="h-4 w-4 rounded" style={{ backgroundColor: range.color }} />
+                        <span>
+                          {range.label} ({range.min}
+                          {idx === soilPropertyRanges[compareProperty].length - 1 ? '+' : `-${range.max}`})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Component for individual component details with OSD integration
+function ComponentDetailsSection({ 
+  comp, 
+  idx 
+}: { 
+  comp: any
+  idx: number 
+}) {
+  const { osdData, isLoading: osdLoading } = useOSDData(comp.compname, true)
+  
+  return (
+    <details key={idx} open={idx === 0} className="border-gray-300 group border-b">
+      <summary className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer list-none px-6 py-4 transition-colors" style={{ backgroundColor: '#2563eb', color: '#ffffff' }}>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <svg
+              className="h-4 w-4 transition-transform group-open:rotate-90"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M6 6L14 10L6 14V6Z" />
+            </svg>
+            <h3 className="text-xl font-bold">{comp.compname}</h3>
+            {comp.majcompflag === 'Yes' && (
+              <span 
+                className="rounded-full px-2 py-0.5 text-xs font-medium"
+                style={{ backgroundColor: '#d97706', color: '#ffffff' }}
+              >
+                Major
+              </span>
+            )}
+          </div>
+          <span className="text-lg font-bold">{comp.comppct_r}%</span>
+        </div>
+      </summary>
+      <div className="bg-gray-50 pt-4">
+        {/* OSD Panel Content - Direct Integration */}
+        <div className="px-2 pb-4">
+          <OSDPanel 
+            osdData={osdData} 
+            isLoading={osdLoading} 
+            interpretations={comp.interpretations}
+            ssurgoHorizons={comp.horizons}
+          />
+        </div>
+      </div>
+    </details>
   )
 }
 
@@ -373,7 +770,7 @@ export default function PropertyPanel({
   className = '',
 }: PropertyPanelProps) {
   const [activeTab, setActiveTab] = useState<
-    'profile' | 'ssurgo' | 'components' | 'taxonomy' | 'horizons' | 'cropland'
+    'profile' | 'ssurgo' | 'components' | 'horizons' | 'cropland'
   >('ssurgo')
   const [compositionView, setCompositionView] = useState<'bar' | 'pie'>('bar')
   const [chartKey, setChartKey] = useState(0)
@@ -384,6 +781,7 @@ export default function PropertyPanel({
     'texture',
   )
   const [showExpandedCDLChart, setShowExpandedCDLChart] = useState(false)
+  const [showProfileComparison, setShowProfileComparison] = useState(false)
 
   // Force chart re-render when composition view changes
   useEffect(() => {
@@ -434,30 +832,6 @@ export default function PropertyPanel({
           borderBottomColor: '#fed7aa',
         }}
       >
-        {/* Panel/Dashboard Toggle at Top */}
-        <div className="mb-4 flex items-center justify-center">
-          <div className="border-green-700 flex items-center space-x-0 rounded-lg border-2 bg-white p-1 shadow-sm">
-            <button
-              className="rounded-md px-4 py-2 text-base font-bold transition-all"
-              style={{ backgroundColor: '#15803d', color: 'white' }}
-            >
-              Panel
-            </button>
-            <button
-              onClick={() => setShowFullDashboard(true)}
-              onMouseEnter={() => setDashboardHover(true)}
-              onMouseLeave={() => setDashboardHover(false)}
-              className="rounded-md px-4 py-2 text-base font-bold transition-all"
-              style={{
-                backgroundColor: dashboardHover ? '#fff7ed' : 'transparent',
-                color: dashboardHover ? '#ea580c' : '#374151',
-              }}
-            >
-              Dashboard
-            </button>
-          </div>
-        </div>
-
         <div className="flex items-start justify-between">
           <div className="flex-1">
             {/* Main title */}
@@ -479,22 +853,50 @@ export default function PropertyPanel({
                   {ssurgoData.muacres && (
                     <span className="font-medium">{ssurgoData.muacres.toLocaleString()} acres</span>
                   )}
+                  
+                  {/* Coordinates with icon */}
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-3 w-3" />
+                    <span className="text-xs">
+                      {formatCoordinates(
+                        ssurgoData.coordinates[0] || 0,
+                        ssurgoData.coordinates[1] || 0,
+                      )}
+                    </span>
+                  </div>
+
+                  {/* View Dashboard Button */}
+                  <button
+                    onClick={() => setShowFullDashboard(true)}
+                    onMouseEnter={() => setDashboardHover(true)}
+                    onMouseLeave={() => setDashboardHover(false)}
+                    className="rounded-md px-3 py-1 text-xs font-semibold transition-all shadow-sm ml-2"
+                    style={{
+                      backgroundColor: dashboardHover ? '#166534' : '#15803d',
+                      color: 'white',
+                    }}
+                    title="Open full dashboard view"
+                  >
+                    View Dashboard
+                  </button>
                 </div>
               </>
             )}
 
             {profile && !ssurgoData && <h2 className="text-gray-900 text-lg font-bold">Soil Profile Data</h2>}
 
-            {/* Coordinates with icon */}
-            <div className="text-gray-600 mt-2 flex items-center space-x-2 text-xs">
-              <MapPin className="h-3 w-3" />
-              <span>
-                {formatCoordinates(
-                  profile?.coordinates[0] || ssurgoData?.coordinates[0] || 0,
-                  profile?.coordinates[1] || ssurgoData?.coordinates[1] || 0,
-                )}
-              </span>
-            </div>
+            {/* Coordinates with icon - for profile only */}
+            {profile && !ssurgoData && (
+              <div className="text-gray-600 mt-2 flex items-center space-x-2 text-xs">
+                <MapPin className="h-3 w-3" />
+                <span>
+                  {formatCoordinates(
+                    profile?.coordinates[0] || 0,
+                    profile?.coordinates[1] || 0,
+                  )}
+                </span>
+              </div>
+            )}
           </div>
 
           <button
@@ -510,40 +912,6 @@ export default function PropertyPanel({
 
       {/* Tabs */}
       <div className="border-gray-200 flex overflow-x-auto border-b" style={{ backgroundColor: '#f9fafb' }}>
-        {profile && (
-          <button
-            type="button"
-            onClick={() => setActiveTab('profile')}
-            className="flex-1 whitespace-nowrap px-4 py-3 text-sm font-medium transition-all"
-            style={
-              activeTab === 'profile'
-                ? {
-                    backgroundColor: 'white',
-                    color: '#b45309',
-                    borderBottom: '2px solid #d97706',
-                    boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                  }
-                : {
-                    backgroundColor: '#f9fafb',
-                    color: '#4b5563',
-                  }
-            }
-            onMouseEnter={e => {
-              if (activeTab !== 'profile') {
-                e.currentTarget.style.backgroundColor = '#f3f4f6'
-                e.currentTarget.style.color = '#111827'
-              }
-            }}
-            onMouseLeave={e => {
-              if (activeTab !== 'profile') {
-                e.currentTarget.style.backgroundColor = '#f9fafb'
-                e.currentTarget.style.color = '#4b5563'
-              }
-            }}
-          >
-            Profiles
-          </button>
-        )}
         {ssurgoData && (
           <>
             <button
@@ -614,70 +982,6 @@ export default function PropertyPanel({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('taxonomy')}
-                  className="flex-1 whitespace-nowrap px-4 py-3 text-sm font-medium transition-all"
-                  style={
-                    activeTab === 'taxonomy'
-                      ? {
-                          backgroundColor: 'white',
-                          color: '#b45309',
-                          borderBottom: '2px solid #d97706',
-                          boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                        }
-                      : {
-                          backgroundColor: '#f9fafb',
-                          color: '#4b5563',
-                        }
-                  }
-                  onMouseEnter={e => {
-                    if (activeTab !== 'taxonomy') {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6'
-                      e.currentTarget.style.color = '#111827'
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (activeTab !== 'taxonomy') {
-                      e.currentTarget.style.backgroundColor = '#f9fafb'
-                      e.currentTarget.style.color = '#4b5563'
-                    }
-                  }}
-                >
-                  Taxonomy
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('horizons')}
-                  className="flex-1 whitespace-nowrap px-4 py-3 text-sm font-medium transition-all"
-                  style={
-                    activeTab === 'horizons'
-                      ? {
-                          backgroundColor: 'white',
-                          color: '#b45309',
-                          borderBottom: '2px solid #d97706',
-                          boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                        }
-                      : {
-                          backgroundColor: '#f9fafb',
-                          color: '#4b5563',
-                        }
-                  }
-                  onMouseEnter={e => {
-                    if (activeTab !== 'horizons') {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6'
-                      e.currentTarget.style.color = '#111827'
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (activeTab !== 'horizons') {
-                      e.currentTarget.style.backgroundColor = '#f9fafb'
-                      e.currentTarget.style.color = '#4b5563'
-                    }
-                  }}
-                >
-                  Profile
-                </button>
-                <button
-                  type="button"
                   onClick={() => setActiveTab('cropland')}
                   className="flex-1 whitespace-nowrap px-4 py-3 text-sm font-medium transition-all"
                   style={
@@ -716,125 +1020,9 @@ export default function PropertyPanel({
 
       {/* Content Area */}
       <div className="flex-1 space-y-4 p-4" style={{ maxHeight: 'calc(100vh - 250px)', overflowY: 'auto' }}>
-        {/* Profile Tab */}
-        {activeTab === 'profile' && profile && properties && (
-          <>
-            {/* Classification */}
-            <section>
-              <h3 className="text-gray-900 mb-2 flex items-center gap-2 font-semibold">Classification</h3>
-              <div className="space-y-2">
-                <PropertyRow label="Soil Order" value={profile.soil_order}>
-                  <div
-                    className="border-gray-300 h-4 w-4 rounded border"
-                    style={{ backgroundColor: getSoilOrderColor(profile.soil_order) }}
-                  />
-                </PropertyRow>
-                <PropertyRow label="Map Unit" value={profile.map_unit} />
-                <PropertyRow label="Survey Area" value={profile.survey_area} />
-              </div>
-            </section>
-
-            {/* Soil Properties */}
-            <section>
-              <h3 className="text-gray-900 mb-2 font-semibold">Properties at {firstDepth}</h3>
-              <div className="space-y-2">
-                <PropertyRow label="Organic Carbon" value={`${properties.organic_carbon.toFixed(2)}%`} />
-                <PropertyRow label="pH" value={properties.ph.toFixed(2)} />
-                <PropertyRow label="Bulk Density" value={`${properties.bulk_density.toFixed(2)} g/cm³`} />
-                <PropertyRow label="Texture Class" value={properties.texture_class}>
-                  <div
-                    className="border-gray-300 h-4 w-4 rounded border"
-                    style={{ backgroundColor: getTextureColor(properties.texture_class) }}
-                  />
-                </PropertyRow>
-              </div>
-            </section>
-
-            {/* Particle Size Distribution */}
-            <section>
-              <h3 className="text-gray-900 mb-2 font-semibold">Particle Size Distribution</h3>
-              <div className="space-y-2">
-                <PropertyRow label="Clay" value={`${properties.clay_percent.toFixed(1)}%`} />
-                <PropertyRow label="Silt" value={`${properties.silt_percent.toFixed(1)}%`} />
-                <PropertyRow label="Sand" value={`${properties.sand_percent.toFixed(1)}%`} />
-              </div>
-              {/* Texture Triangle Visualization */}
-              <div className="bg-gray-50 mt-3 rounded p-3">
-                <div className="flex h-6 gap-1">
-                  <div
-                    className="bg-orange-900 flex items-center justify-center text-xs text-white"
-                    style={{ width: `${properties.clay_percent}%` }}
-                    title={`Clay: ${properties.clay_percent.toFixed(1)}%`}
-                  >
-                    {properties.clay_percent > 15 ? 'Clay' : ''}
-                  </div>
-                  <div
-                    className="bg-yellow-700 flex items-center justify-center text-xs text-white"
-                    style={{ width: `${properties.silt_percent}%` }}
-                    title={`Silt: ${properties.silt_percent.toFixed(1)}%`}
-                  >
-                    {properties.silt_percent > 15 ? 'Silt' : ''}
-                  </div>
-                  <div
-                    className="bg-yellow-300 text-gray-800 flex items-center justify-center text-xs"
-                    style={{ width: `${properties.sand_percent}%` }}
-                    title={`Sand: ${properties.sand_percent.toFixed(1)}%`}
-                  >
-                    {properties.sand_percent > 15 ? 'Sand' : ''}
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* MIR Data */}
-            {profile.mir_data && (
-              <section>
-                <h3 className="text-gray-900 mb-2 font-semibold">MIR Spectroscopy</h3>
-                <div className="space-y-2">
-                  <PropertyRow
-                    label="Prediction Confidence"
-                    value={`${(profile.mir_data.prediction_confidence * 100).toFixed(1)}%`}
-                  />
-                  <PropertyRow
-                    label="Andic Properties"
-                    value={profile.mir_data.andic_properties ? 'Detected' : 'Not Detected'}
-                  >
-                    <div
-                      className={`h-3 w-3 rounded-full ${
-                        profile.mir_data.andic_properties ? 'bg-green-500' : 'bg-gray-400'
-                      }`}
-                    />
-                  </PropertyRow>
-                </div>
-              </section>
-            )}
-
-            {/* All Depths */}
-            {depths.length > 1 && (
-              <section>
-                <h3 className="text-gray-900 mb-2 font-semibold">Available Depths</h3>
-                <div className="flex flex-wrap gap-2">
-                  {depths.map(depth => (
-                    <span key={depth} className="bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm">
-                      {depth}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            )}
-          </>
-        )}
-
         {/* SSURGO Tab */}
         {activeTab === 'ssurgo' && ssurgoData && (
           <div className="-mx-4 -mt-4">
-            {/* Map Unit Header */}
-            <div className="border-black border-b-4 bg-white px-6 py-4">
-              <h2 className="text-gray-900 text-base font-bold">
-                {ssurgoData.musym} - {ssurgoData.muname}
-              </h2>
-            </div>
-
             {/* Map Unit Composition */}
             <details open className="border-gray-300 group border-b">
               <summary className="bg-gray-100 hover:bg-gray-200 cursor-pointer list-none px-6 py-3">
@@ -972,6 +1160,34 @@ export default function PropertyPanel({
                         </div>
                       </div>
                     )}
+
+                    {/* Compare Profiles Button */}
+                    <div className="mt-6 flex justify-center">
+                      <button
+                        onClick={() => setShowProfileComparison(true)}
+                        className="px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
+                        style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2563eb'}
+                        title="Compare all component profiles side-by-side"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                          />
+                        </svg>
+                        <span>Compare Profiles</span>
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <div className="text-gray-700 text-sm">
@@ -1138,29 +1354,29 @@ export default function PropertyPanel({
                   <span>Map Unit Composition</span>
                 </h3>
                 <div className="bg-gray-200 flex gap-1 rounded p-0.5">
-                  <button
-                    onClick={() => setCompositionView('bar')}
-                    className="rounded p-1.5 transition-colors"
-                    style={{
-                      backgroundColor: compositionView === 'bar' ? '#ffffff' : 'transparent',
-                      color: compositionView === 'bar' ? '#b45309' : '#6b7280',
-                    }}
-                    title="Bar chart view"
-                  >
-                    <BarChart3 size={16} />
-                  </button>
-                  <button
-                    onClick={() => setCompositionView('pie')}
-                    className="rounded p-1.5 transition-colors"
-                    style={{
-                      backgroundColor: compositionView === 'pie' ? '#ffffff' : 'transparent',
-                      color: compositionView === 'pie' ? '#b45309' : '#6b7280',
-                    }}
-                    title="Pie chart view"
-                  >
-                    <PieChart size={16} />
-                  </button>
-                </div>
+                    <button
+                      onClick={() => setCompositionView('bar')}
+                      className="rounded p-1.5 transition-colors"
+                      style={{
+                        backgroundColor: compositionView === 'bar' ? '#ffffff' : 'transparent',
+                        color: compositionView === 'bar' ? '#b45309' : '#6b7280',
+                      }}
+                      title="Bar chart view"
+                    >
+                      <BarChart3 size={16} />
+                    </button>
+                    <button
+                      onClick={() => setCompositionView('pie')}
+                      className="rounded p-1.5 transition-colors"
+                      style={{
+                        backgroundColor: compositionView === 'pie' ? '#ffffff' : 'transparent',
+                        color: compositionView === 'pie' ? '#b45309' : '#6b7280',
+                      }}
+                      title="Pie chart view"
+                    >
+                      <PieChart size={16} />
+                    </button>
+                  </div>
               </div>
 
               {compositionView === 'bar' ? (
@@ -1251,172 +1467,39 @@ export default function PropertyPanel({
                   </div>
                 </>
               )}
+
+              {/* Compare Profiles Button */}
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => setShowProfileComparison(true)}
+                  className="px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
+                  style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2563eb'}
+                  title="Compare all component profiles side-by-side"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                  <span>Compare Profiles</span>
+                </button>
+              </div>
             </div>
 
             {/* Component Details */}
             {ssurgoData.components.map((comp, idx) => (
-              <details key={idx} open={idx === 0} className="border-gray-300 group border-b">
-                <summary className="from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-150 cursor-pointer list-none bg-gradient-to-r px-6 py-3 transition-colors">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className="text-amber-600 h-3 w-3 transition-transform group-open:rotate-90"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M6 6L14 10L6 14V6Z" />
-                      </svg>
-                      <h3 className="text-gray-900 text-sm font-bold">{comp.compname}</h3>
-                      {comp.majcompflag === 'Yes' && (
-                        <span className="bg-emerald-100 text-emerald-700 border-emerald-200 rounded-full border px-2 py-0.5 text-xs font-medium">
-                          Major
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-amber-700 text-sm font-bold">{comp.comppct_r}%</span>
-                  </div>
-                </summary>
-                <div className="bg-white px-2 pb-4 pt-3">
-                  <table className="w-full text-xs">
-                    <tbody>
-                      {comp.slope_r != null && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Local Phase:</td>
-                          <td className="text-gray-600 py-1.5">{comp.localphase}</td>
-                        </tr>
-                      )}
-                      {comp.slope_r !== undefined && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Slope (%):</td>
-                          <td className="text-gray-600 py-1.5">{comp.slope_r}</td>
-                        </tr>
-                      )}
-                      {comp.runoff && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Runoff:</td>
-                          <td className="text-gray-600 py-1.5">{comp.runoff}</td>
-                        </tr>
-                      )}
-                      {comp.elev_r !== undefined && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Elevation (m):</td>
-                          <td className="text-gray-600 py-1.5">{comp.elev_r}</td>
-                        </tr>
-                      )}
-                      {comp.landform && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Landform:</td>
-                          <td className="text-gray-600 py-1.5">{comp.landform}</td>
-                        </tr>
-                      )}
-                      {comp.pmorigin && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Parent Material Origin:</td>
-                          <td className="text-gray-600 py-1.5">{comp.pmorigin}</td>
-                        </tr>
-                      )}
-                      {comp.pmkind && (
-                        <tr>
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Parent Material Kind:</td>
-                          <td className="text-gray-600 py-1.5">{comp.pmkind}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-
-                  {/* Interpretations Section */}
-                  {comp.interpretations && comp.interpretations.length > 0 && (
-                    <div className="border-gray-200 mt-4 border-t pt-3">
-                      <div className="mb-2 flex items-center justify-between">
-                        <h4 className="text-gray-900 text-xs font-bold">Interpretations</h4>
-                        <span className="text-gray-500 text-xs">{comp.interpretations.length} total</span>
-                      </div>
-                      <InterpretationsDisplay interpretations={comp.interpretations} />
-                    </div>
-                  )}
-
-                  {/* Official Series Description Section */}
-                  <ComponentOSDSection componentName={comp.compname} />
-                </div>
-              </details>
-            ))}
-          </div>
-        )}
-
-        {/* Taxonomy Tab */}
-        {activeTab === 'taxonomy' && ssurgoData?.components && (
-          <div className="space-y-4">
-            {ssurgoData.components.map((comp, idx) => (
-              <details key={idx} open={idx === 0} className="border-gray-300 group border-b">
-                <summary className="bg-gray-100 hover:bg-gray-200 -mx-4 -mt-4 cursor-pointer list-none px-6 py-3">
-                  <div className="flex items-center gap-2">
-                    <svg
-                      className="text-black h-3 w-3 transition-transform group-open:rotate-90"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M6 6L14 10L6 14V6Z" />
-                    </svg>
-                    <h3 className="text-gray-900 text-sm font-bold">
-                      {comp.compname} ({comp.comppct_r}%)
-                    </h3>
-                  </div>
-                </summary>
-                <div className="bg-white px-2 pb-4 pt-3">
-                  <table className="w-full text-xs">
-                    <tbody>
-                      {comp.taxclname && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Taxonomic Class:</td>
-                          <td className="text-gray-600 py-1.5 italic">{comp.taxclname}</td>
-                        </tr>
-                      )}
-                      {comp.taxorder && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Order:</td>
-                          <td className="text-gray-600 py-1.5">{comp.taxorder}</td>
-                        </tr>
-                      )}
-                      {comp.taxsuborder && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Suborder:</td>
-                          <td className="text-gray-600 py-1.5">{comp.taxsuborder}</td>
-                        </tr>
-                      )}
-                      {comp.taxgrtgroup && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Great Group:</td>
-                          <td className="text-gray-600 py-1.5">{comp.taxgrtgroup}</td>
-                        </tr>
-                      )}
-                      {comp.taxsubgrp && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Subgroup:</td>
-                          <td className="text-gray-600 py-1.5">{comp.taxsubgrp}</td>
-                        </tr>
-                      )}
-                      {comp.taxpartsize && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Particle Size:</td>
-                          <td className="text-gray-600 py-1.5">{comp.taxpartsize}</td>
-                        </tr>
-                      )}
-                      {comp.taxtempcl && (
-                        <tr className="border-gray-200 border-b">
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Temperature Class:</td>
-                          <td className="text-gray-600 py-1.5">{comp.taxtempcl}</td>
-                        </tr>
-                      )}
-                      {comp.taxmoistscl && (
-                        <tr>
-                          <td className="text-gray-700 py-1.5 pr-4 font-semibold">Moisture Regime:</td>
-                          <td className="text-gray-600 py-1.5">{comp.taxmoistscl}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </details>
+              <ComponentDetailsSection key={idx} comp={comp} idx={idx} />
             ))}
           </div>
         )}
@@ -1460,7 +1543,10 @@ export default function PropertyPanel({
                         </svg>
                         <h3 className="text-gray-900 text-sm font-bold">{comp.compname} - Soil Profile</h3>
                         {comp.majcompflag === 'Yes' && (
-                          <span className="bg-emerald-100 text-emerald-700 border-emerald-200 rounded-full border px-2 py-0.5 text-xs font-medium">
+                          <span 
+                            className="rounded-full px-2 py-0.5 text-xs font-medium"
+                            style={{ backgroundColor: '#d97706', color: '#ffffff' }}
+                          >
                             Major
                           </span>
                         )}
@@ -2359,6 +2445,14 @@ export default function PropertyPanel({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Profile Comparison Modal */}
+      {showProfileComparison && ssurgoData?.components && (
+        <ProfileComparisonModal
+          components={ssurgoData.components}
+          onClose={() => setShowProfileComparison(false)}
+        />
       )}
     </div>
   )
