@@ -6,8 +6,8 @@ import { useCallback, useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import Header from '#components/layout/Header'
-import LayerControl from '#components/map/LayerControl'
-import CroplandLegend from '#components/map/CroplandLegend'
+import LayerControl from '#components/Map/LayerControl'
+import CroplandLegend from '#components/Map/CroplandLegend'
 import PropertyPanel from '#components/ui/PropertyPanel'
 import LoadingSpinner from '#components/ui/LoadingSpinner'
 import { useDepthSelection } from '#src/hooks/useDepthSelection'
@@ -15,7 +15,7 @@ import { queryCDLHistory, type CDLYearData } from '#src/utils/cdlQuery'
 import type { SoilLayer, SoilProfile, SSURGOData } from '#src/types/soil'
 
 // Lazy load map to avoid SSR issues with Leaflet
-const SoilMap = dynamic(() => import('#components/map/SoilMap'), {
+const SoilMap = dynamic(() => import('#components/Map/SoilMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-gray-100">
