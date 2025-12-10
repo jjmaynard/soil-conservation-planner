@@ -1,7 +1,7 @@
 // CDL (Cropland Data Layer) Query Utilities
 // Query crop types at a specific point for multiple years
 
-import { CROP_TYPE_MAP, analyzeCropHistory, getEstimatedAccuracy, type CropType } from './cdlCropTypes'
+import { analyzeCropHistory, CROP_TYPE_MAP, getEstimatedAccuracy, type CropType } from './cdlCropTypes'
 
 export interface CDLYearData {
   year: number
@@ -152,11 +152,7 @@ export const CDL_CROP_CODES: Record<number, { name: string; color: string }> = {
 /**
  * Query CDL crop type for a specific point and year
  */
-export async function queryCDLPoint(
-  lat: number,
-  lng: number,
-  year: number
-): Promise<CDLYearData | null> {
+export async function queryCDLPoint(lat: number, lng: number, year: number): Promise<CDLYearData | null> {
   try {
     // Use CropScape's GetCDLValue API via our proxy
     const params = new URLSearchParams({
@@ -167,9 +163,9 @@ export async function queryCDLPoint(
 
     const url = `/api/cdl-value?${params.toString()}`
     console.log(`[CDL Query] Querying year ${year} at (${lat}, ${lng})`)
-    
+
     const response = await fetch(url)
-    
+
     if (!response.ok) {
       console.error(`[CDL Query] Failed for year ${year}: ${response.status}`)
       return null
@@ -177,7 +173,7 @@ export async function queryCDLPoint(
 
     const text = await response.text()
     console.log(`[CDL Query] Response for ${year}:`, text.substring(0, 200))
-    
+
     // Parse the XML response - CropScape returns XML with either:
     // Simple format: <Result>1</Result>
     // JSON format: <Result>{x: ..., y: ..., value: 24, category: "...", color: "..."}</Result>
@@ -190,7 +186,7 @@ export async function queryCDLPoint(
     const resultContent = resultMatch[1]
     let cropCode: number
     let confidence: number | undefined
-    
+
     // Check if it's JSON format
     if (resultContent.trim().startsWith('{')) {
       // Parse JSON format: {x: ..., y: ..., value: 24, category: "...", color: "..."}
@@ -201,7 +197,7 @@ export async function queryCDLPoint(
         return null
       }
       cropCode = parseInt(valueMatch[1], 10)
-      
+
       // Try to extract confidence if present (though typically not included)
       const confidenceMatch = resultContent.match(/confidence:\s*(\d+(?:\.\d+)?)/)
       if (confidenceMatch) {
@@ -215,20 +211,20 @@ export async function queryCDLPoint(
         return null
       }
     }
-    
+
     // Skip no-data values (0, 81)
     if (cropCode === 0 || cropCode === 81) {
       console.log(`[CDL Query] No data value (${cropCode}) for ${year}`)
       return null
     }
-    
-    const cropInfo = CDL_CROP_CODES[cropCode] || { 
-      name: `Unknown (${cropCode})`, 
-      color: '#cccccc'
+
+    const cropInfo = CDL_CROP_CODES[cropCode] || {
+      name: `Unknown (${cropCode})`,
+      color: '#cccccc',
     }
-    
+
     const cropType = CROP_TYPE_MAP[cropCode] || 'other'
-    
+
     // If no confidence from API, use estimated accuracy based on crop type
     // CropScape GetCDLValue doesn't return per-pixel confidence, so we use
     // NASS accuracy assessment data as proxy (major crops ~85-90%, specialty ~65-75%)
@@ -253,35 +249,34 @@ export async function queryCDLPoint(
 /**
  * Query CDL crop history for all available years (2008-2023)
  */
-export async function queryCDLHistory(
-  lat: number,
-  lng: number
-): Promise<CDLYearData[]> {
+export async function queryCDLHistory(lat: number, lng: number): Promise<CDLYearData[]> {
   const years = Array.from({ length: 16 }, (_, i) => 2023 - i) // 2023 down to 2008
-  
+
   console.log(`[CDL History] Querying ${years.length} years for (${lat}, ${lng})`)
-  
+
   // Query years sequentially to avoid overwhelming the slow CropScape service
   const results: CDLYearData[] = []
-  
+
   for (const year of years) {
     const result = await queryCDLPoint(lat, lng, year)
     if (result !== null) {
       results.push(result)
     }
   }
-  
+
   // Sort by year (newest first)
   results.sort((a, b) => b.year - a.year)
-  
+
   // Analyze for unlikely transitions and add warnings
-  const warnings = analyzeCropHistory(results.map(r => ({
-    year: r.year,
-    cropType: r.cropType,
-    cropName: r.cropName,
-    confidence: r.confidence
-  })))
-  
+  const warnings = analyzeCropHistory(
+    results.map(r => ({
+      year: r.year,
+      cropType: r.cropType,
+      cropName: r.cropName,
+      confidence: r.confidence,
+    })),
+  )
+
   // Apply warnings to results
   warnings.forEach(w => {
     const result = results.find(r => r.year === w.year)
@@ -289,7 +284,9 @@ export async function queryCDLHistory(
       result.transitionWarning = w.warning
     }
   })
-  
-  console.log(`[CDL History] Found ${results.length} valid results with ${warnings.length} transition warnings`)
+
+  console.log(
+    `[CDL History] Found ${results.length} valid results with ${warnings.length} transition warnings`,
+  )
   return results
 }

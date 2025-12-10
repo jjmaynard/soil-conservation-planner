@@ -2,11 +2,13 @@
 
 'use client'
 
-import { useEffect, useRef } from 'react'
 import L from 'leaflet'
+import { useEffect, useRef } from 'react'
+
 import 'leaflet/dist/leaflet.css'
+
 import { useSoilData } from '#src/hooks/useSoilData'
-import type { SoilDepth, SoilProfile, SoilLayer } from '#src/types/soil'
+import type { SoilDepth, SoilLayer, SoilProfile } from '#src/types/soil'
 
 // Fix Leaflet default icon issue with Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -23,7 +25,13 @@ interface SoilMapProps {
   activeLayers: string[]
   soilLayers: SoilLayer[]
   onSoilClick: (profile: SoilProfile) => void
-  onSSURGOClick?: (data: { mukey: string; musym: string; muname: string; muacres: string; coordinates: [number, number] }) => void
+  onSSURGOClick?: (data: {
+    mukey: string
+    musym: string
+    muname: string
+    muacres: string
+    coordinates: [number, number]
+  }) => void
   className?: string
 }
 
@@ -40,13 +48,13 @@ export default function SoilMap({
   console.log('SoilMap component rendering...')
   console.log('Props - activeLayers:', activeLayers)
   console.log('Props - soilLayers:', soilLayers)
-  
+
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const clickMarkerRef = useRef<L.Marker | null>(null)
   const layersRef = useRef<Map<string, L.Layer>>(new Map())
   const activeLayersRef = useRef<string[]>(activeLayers)
-  
+
   const { fetchSoilProfile } = useSoilData()
 
   // Keep activeLayersRef in sync with activeLayers prop
@@ -59,12 +67,12 @@ export default function SoilMap({
     console.log('Map initialization effect running...')
     console.log('containerRef.current:', containerRef.current)
     console.log('mapRef.current:', mapRef.current)
-    
+
     if (!containerRef.current) {
       console.log('No container, exiting')
       return
     }
-    
+
     if (mapRef.current) {
       console.log('Map already exists, exiting')
       return
@@ -102,38 +110,37 @@ export default function SoilMap({
 
     // Define base layers
     const baseLayers = {
-      'OpenStreetMap': L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-          attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          maxZoom: 19,
-        }
-      ),
-      'Satellite': L.tileLayer(
+      OpenStreetMap: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+      }),
+      Satellite: L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
-          attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+          attribution:
+            'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
           maxZoom: 19,
-        }
+        },
       ),
-      'Terrain': L.tileLayer(
+      Terrain: L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
         {
-          attribution: 'Tiles © Esri — Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
+          attribution:
+            'Tiles © Esri — Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
           maxZoom: 19,
-        }
+        },
       ),
       'Light Gray': L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
         {
           attribution: 'Tiles © Esri — Esri, DeLorme, NAVTEQ',
           maxZoom: 16,
-        }
+        },
       ),
     }
 
     // Add default base layer
-    baseLayers['OpenStreetMap'].addTo(map)
+    baseLayers.OpenStreetMap.addTo(map)
 
     // Add layer control for base layers
     L.control.layers(baseLayers, {}, { position: 'topright' }).addTo(map)
@@ -171,22 +178,22 @@ export default function SoilMap({
         if (activeLayersRef.current.includes('ssurgo-mapunits')) {
           console.log('✓ SSURGO layer is active, querying API...')
           console.log('Active layers list:', activeLayersRef.current)
-          
+
           try {
             const ssurgoInfo = await querySSURGOMapUnit(map, e)
             console.log('SSURGO query result:', ssurgoInfo)
-            
+
             if (ssurgoInfo) {
               console.log('Updating PropertyPanel with SSURGO data...')
-              
+
               // Call callback to update property panel with full data
               if (onSSURGOClick) {
                 onSSURGOClick({
                   ...ssurgoInfo,
-                  coordinates: [lat, lng]
+                  coordinates: [lat, lng],
                 })
               }
-              
+
               return // Exit here - don't continue to fallback
             }
           } catch (queryError) {
@@ -211,7 +218,7 @@ export default function SoilMap({
                 <p class="text-xs"><strong>Map Unit:</strong> ${profile.map_unit}</p>
                 <p class="text-xs text-gray-500">Click for details →</p>
               </div>
-            `
+            `,
               )
               .openPopup()
           }
@@ -227,7 +234,7 @@ export default function SoilMap({
                 <p class="text-xs"><strong>Longitude:</strong> ${lng.toFixed(5)}</p>
                 <p class="text-xs text-gray-500 mt-2">Backend API not configured</p>
               </div>
-            `
+            `,
               )
               .openPopup()
           }
@@ -236,9 +243,7 @@ export default function SoilMap({
         console.error('Error handling map click:', error)
         if (clickMarkerRef.current) {
           clickMarkerRef.current
-            .bindPopup(
-              '<p class="text-red-600 text-xs">An error occurred processing your request</p>'
-            )
+            .bindPopup('<p class="text-red-600 text-xs">An error occurred processing your request</p>')
             .openPopup()
         }
       }
@@ -271,8 +276,8 @@ export default function SoilMap({
     })
 
     // Add new active layers or update existing ones
-    activeLayers.forEach((layerId) => {
-      const layerConfig = soilLayers.find((l) => l.id === layerId)
+    activeLayers.forEach(layerId => {
+      const layerConfig = soilLayers.find(l => l.id === layerId)
       if (!layerConfig) return
 
       if (!layersRef.current.has(layerId)) {
@@ -289,7 +294,7 @@ export default function SoilMap({
         // Update existing layer opacity
         const existingLayer = layersRef.current.get(layerId)
         if (existingLayer && 'setOpacity' in existingLayer) {
-          (existingLayer as any).setOpacity(layerConfig.opacity)
+          ;(existingLayer as any).setOpacity(layerConfig.opacity)
         }
       }
     })
@@ -304,7 +309,7 @@ export default function SoilMap({
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full soil-map ${className}`}
+      className={`soil-map h-full w-full ${className}`}
       style={{ minHeight: '500px', background: '#e5e7eb' }}
     />
   )
@@ -317,10 +322,10 @@ async function querySSURGOMapUnit(map: L.Map, event: L.LeafletMouseEvent): Promi
   try {
     const { lat, lng } = event.latlng
     console.log('Querying SSURGO at coordinates:', lat, lng)
-    
+
     // Use NRCS SDA REST API - comprehensive query
     const sdaUrl = 'https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest'
-    
+
     // Comprehensive query for all soil data with interpretations
     const comprehensiveQuery = `SELECT 
     -- Map Unit Information
@@ -379,20 +384,20 @@ WHERE mp.mupolygongeo.STIntersects(
 ) = 1
 
 ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
-    
+
     console.log('Querying comprehensive SSURGO data...')
     console.log('Query:', comprehensiveQuery)
-    
+
     const params = new URLSearchParams()
     params.append('query', comprehensiveQuery)
     params.append('format', 'JSON')
-    
+
     console.log('Sending request to:', sdaUrl)
-    
+
     // Add timeout to fetch
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
-    
+
     let response
     try {
       response = await fetch(sdaUrl, {
@@ -401,7 +406,7 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: params.toString(),
-        signal: controller.signal
+        signal: controller.signal,
       })
       clearTimeout(timeoutId)
     } catch (fetchError) {
@@ -416,21 +421,21 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
       console.error('Full error:', fetchError)
       throw fetchError
     }
-    
+
     console.log('Response received!')
     console.log('Response status:', response.status, response.statusText)
     console.log('Response ok:', response.ok)
-    
+
     if (!response.ok) {
       console.error(`Query failed: ${response.status} ${response.statusText}`)
       const text = await response.text()
       console.error('Response body:', text)
       return null
     }
-    
+
     const responseText = await response.text()
     console.log('Response length:', responseText.length)
-    
+
     let data
     try {
       data = JSON.parse(responseText)
@@ -439,14 +444,14 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
       console.error('Could not parse response (first 500 chars):', responseText.substring(0, 500))
       return null
     }
-    
+
     console.log('Number of rows:', data?.Table?.length || 0)
-    
+
     if (!data || !data.Table || data.Table.length === 0) {
       console.log('No data found at this location')
       return null
     }
-    
+
     // Parse comprehensive query results
     // Field mapping by index:
     // 0-5: Map Unit & Legend (mukey, musym, muname, muacres, areasymbol, areaname)
@@ -454,12 +459,12 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
     // 12-16: Taxonomy (taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp)
     // 17-29: Horizon (chkey, hzname, hzdept_r, hzdepb_r, sandtotal_r, silttotal_r, claytotal_r, om_r, ph1to1h2o_r, awc_r, ksat_r, dbthirdbar_r, cec7_r)
     // 30-33: Interpretations (rulename, ruledepth, interphrc, interphr)
-    
+
     const componentsMap = new Map()
-    
+
     data.Table.forEach((row: any[]) => {
       const cokey = row[6]
-      
+
       // Create component if not exists
       if (cokey && !componentsMap.has(cokey)) {
         componentsMap.set(cokey, {
@@ -475,12 +480,13 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
           taxgrtgroup: row[15],
           taxsubgrp: row[16],
           horizons: [],
-          interpretations: []
+          interpretations: [],
         })
       }
-      
+
       // Add horizon data if present
-      if (cokey && row[17]) { // chkey exists
+      if (cokey && row[17]) {
+        // chkey exists
         const component = componentsMap.get(cokey)
         // Check if this horizon is already added (avoid duplicates)
         if (!component.horizons.some((h: any) => h.chkey === row[17])) {
@@ -497,13 +503,14 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
             awc_r: row[26],
             ksat_r: row[27],
             dbthirdbar_r: row[28],
-            cec7_r: row[29]
+            cec7_r: row[29],
           })
         }
       }
-      
+
       // Add interpretation data if present
-      if (cokey && row[30]) { // rulename exists
+      if (cokey && row[30]) {
+        // rulename exists
         const component = componentsMap.get(cokey)
         // Check if this interpretation is already added (avoid duplicates)
         const interpKey = `${row[30]}_${row[31]}` // rulename + ruledepth
@@ -512,12 +519,12 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
             rulename: row[30],
             ruledepth: row[31],
             interphrc: row[32],
-            interphr: row[33]
+            interphr: row[33],
           })
         }
       }
     })
-    
+
     const firstRow = data.Table[0]
     return {
       mukey: firstRow[0],
@@ -526,7 +533,7 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
       muacres: firstRow[3],
       areasymbol: firstRow[4],
       areaname: firstRow[5],
-      components: Array.from(componentsMap.values())
+      components: Array.from(componentsMap.values()),
     }
   } catch (error) {
     console.error('Error querying SSURGO:', error)
@@ -547,7 +554,7 @@ function createLeafletLayer(config: SoilLayer): L.Layer | null {
         let wmsAttribution = 'USDA-NRCS Soil Survey'
         let wmsVersion = '1.1.1'
         let additionalParams: any = {}
-        
+
         if (config.id === 'cdl') {
           // Use year from config, default to 2023
           const year = config.year || 2023
@@ -558,16 +565,16 @@ function createLeafletLayer(config: SoilLayer): L.Layer | null {
           // We need to request tiles in 4326 and override the getTileUrl to convert bounds
           additionalParams = {
             pane: 'overlayPane',
-            zIndex: 400
+            zIndex: 400,
           }
         } else if (config.id === 'ssurgo-mapunits') {
           // SSURGO map units should render on top with higher z-index
           additionalParams = {
             pane: 'overlayPane',
-            zIndex: 500
+            zIndex: 500,
           }
         }
-        
+
         const wmsOptions: any = {
           layers: wmsLayerName,
           format: 'image/png',
@@ -577,18 +584,18 @@ function createLeafletLayer(config: SoilLayer): L.Layer | null {
           version: wmsVersion,
           styles: '',
           maxZoom: 18,
-          ...additionalParams
+          ...additionalParams,
         }
-        
+
         console.log('WMS URL:', config.url)
         console.log('WMS Options:', wmsOptions)
-        
+
         const layer = L.tileLayer.wms(config.url, wmsOptions)
-        
+
         // Special handling for CDL to convert bbox to EPSG:4326
         if (config.id === 'cdl') {
           const originalGetTileUrl = layer.getTileUrl.bind(layer)
-          layer.getTileUrl = function(coords: any) {
+          layer.getTileUrl = function (coords: any) {
             // Get the original URL
             const url = originalGetTileUrl(coords)
             // Replace EPSG:3857 with EPSG:4326 and convert bbox
@@ -598,38 +605,38 @@ function createLeafletLayer(config: SoilLayer): L.Layer | null {
               const [minx, miny, maxx, maxy] = bbox.split(',').map(Number)
               // Convert Web Mercator (EPSG:3857) to WGS84 (EPSG:4326)
               const minLng = (minx / 20037508.34) * 180
-              const minLat = (Math.atan(Math.exp((miny / 20037508.34) * Math.PI)) * 360 / Math.PI) - 90
+              const minLat = (Math.atan(Math.exp((miny / 20037508.34) * Math.PI)) * 360) / Math.PI - 90
               const maxLng = (maxx / 20037508.34) * 180
-              const maxLat = (Math.atan(Math.exp((maxy / 20037508.34) * Math.PI)) * 360 / Math.PI) - 90
+              const maxLat = (Math.atan(Math.exp((maxy / 20037508.34) * Math.PI)) * 360) / Math.PI - 90
               urlObj.searchParams.set('bbox', `${minLng},${minLat},${maxLng},${maxLat}`)
               urlObj.searchParams.set('srs', 'EPSG:4326')
             }
             return urlObj.toString().replace(window.location.origin, '')
           }
         }
-        
+
         // Add event handlers to debug tile loading
         const layerName = config.id === 'cdl' ? 'CDL' : config.id === 'ssurgo-mapunits' ? 'SSURGO' : 'WMS'
-        
+
         layer.on('tileerror', (error: any) => {
           console.error(`${layerName} Tile load error:`, error)
           console.error('Tile URL that failed:', error.tile?.src || 'unknown')
           console.error('Tile coords:', error.coords)
         })
-        
+
         layer.on('tileload', (event: any) => {
           console.log(`${layerName} Tile loaded successfully:`, event.coords)
           console.log('Tile URL:', event.tile?.src)
         })
-        
+
         layer.on('loading', () => {
           console.log(`${layerName} Layer starting to load tiles...`)
         })
-        
+
         layer.on('load', () => {
           console.log(`${layerName} Layer finished loading tiles`)
         })
-        
+
         return layer
 
       case 'raster':

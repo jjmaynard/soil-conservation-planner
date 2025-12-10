@@ -83,13 +83,9 @@ export const nrcsColors = {
 /**
  * Get color from a color ramp based on value interpolation
  */
-export function getColorFromRamp(
-  value: number,
-  colorRamp: Array<{ value: number; color: string }>
-): string {
+export function getColorFromRamp(value: number, colorRamp: Array<{ value: number; color: string }>): string {
   if (value <= colorRamp[0].value) return colorRamp[0].color
-  if (value >= colorRamp[colorRamp.length - 1].value)
-    return colorRamp[colorRamp.length - 1].color
+  if (value >= colorRamp[colorRamp.length - 1].value) return colorRamp[colorRamp.length - 1].color
 
   for (let i = 0; i < colorRamp.length - 1; i++) {
     if (value >= colorRamp[i].value && value <= colorRamp[i + 1].value) {

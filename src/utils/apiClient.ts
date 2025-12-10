@@ -1,6 +1,7 @@
 // API Client for Soil Survey Backend Services
 
 import axios, { type AxiosInstance } from 'axios'
+
 import type {
   MIRAnalysisRequest,
   MIRAnalysisResponse,
@@ -24,20 +25,20 @@ class SoilAPIClient {
 
     // Add request interceptor for logging
     this.client.interceptors.request.use(
-      (config) => {
+      config => {
         console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`)
         return config
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error),
     )
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      response => response,
+      error => {
         console.error('API Error:', error.response?.data || error.message)
         return Promise.reject(error)
-      }
+      },
     )
   }
 
@@ -48,7 +49,7 @@ class SoilAPIClient {
     lat: number,
     lon: number,
     depth: string,
-    includeMIR = false
+    includeMIR = false,
   ): Promise<SoilProfile> {
     const request: SoilPredictionRequest = {
       coordinates: [lat, lon],
@@ -56,10 +57,7 @@ class SoilAPIClient {
       include_mir: includeMIR,
     }
 
-    const response = await this.client.post<SoilPredictionResponse>(
-      '/predict/soil-properties',
-      request
-    )
+    const response = await this.client.post<SoilPredictionResponse>('/predict/soil-properties', request)
 
     return response.data.data
   }
@@ -72,7 +70,7 @@ class SoilAPIClient {
     south: number,
     east: number,
     north: number,
-    attributes?: string[]
+    attributes?: string[],
   ): Promise<any> {
     const request: SSURGOQueryRequest = {
       bbox: [west, south, east, north],
@@ -86,34 +84,21 @@ class SoilAPIClient {
   /**
    * Get MIR spectroscopy analysis for a location
    */
-  async getMIRAnalysis(
-    lat: number,
-    lon: number,
-    spectrumData?: number[]
-  ): Promise<MIRAnalysisResponse> {
+  async getMIRAnalysis(lat: number, lon: number, spectrumData?: number[]): Promise<MIRAnalysisResponse> {
     const request: MIRAnalysisRequest = {
       coordinates: [lat, lon],
       spectrum_data: spectrumData,
     }
 
-    const response = await this.client.post<MIRAnalysisResponse>(
-      '/mir/analyze',
-      request
-    )
+    const response = await this.client.post<MIRAnalysisResponse>('/mir/analyze', request)
     return response.data
   }
 
   /**
    * Get soil properties for multiple depths at once
    */
-  async getSoilProfileByDepth(
-    lat: number,
-    lon: number,
-    depths: string[]
-  ): Promise<SoilProfile[]> {
-    const requests = depths.map((depth) =>
-      this.predictSoilProperties(lat, lon, depth)
-    )
+  async getSoilProfileByDepth(lat: number, lon: number, depths: string[]): Promise<SoilProfile[]> {
+    const requests = depths.map(depth => this.predictSoilProperties(lat, lon, depth))
     return Promise.all(requests)
   }
 

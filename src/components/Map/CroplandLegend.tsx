@@ -2,8 +2,8 @@
 
 'use client'
 
+import { ChevronDown, ChevronRight, ChevronUp, X } from 'lucide-react'
 import { useState } from 'react'
-import { X, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
 
 interface CroplandLegendProps {
   onClose?: () => void
@@ -28,7 +28,7 @@ const CROP_GROUPS = [
       { value: 28, label: 'Oats', color: '#a05989' },
       { value: 29, label: 'Millet', color: '#700049' },
       { value: 30, label: 'Speltz', color: '#d69ebc' },
-    ]
+    ],
   },
   {
     name: 'Oilseeds',
@@ -43,14 +43,12 @@ const CROP_GROUPS = [
       { value: 34, label: 'Rape Seed', color: '#d1ff00' },
       { value: 35, label: 'Mustard', color: '#00af49' },
       { value: 38, label: 'Camelina', color: '#00af49' },
-    ]
+    ],
   },
   {
     name: 'Fiber Crops',
     color: '#a8a8a8',
-    crops: [
-      { value: 2, label: 'Cotton', color: '#ff2626' },
-    ]
+    crops: [{ value: 2, label: 'Cotton', color: '#ff2626' }],
   },
   {
     name: 'Vegetables',
@@ -69,7 +67,7 @@ const CROP_GROUPS = [
       { value: 52, label: 'Lentils', color: '#00ddaf' },
       { value: 53, label: 'Peas', color: '#54ff00' },
       { value: 54, label: 'Tomatoes', color: '#f2a377' },
-    ]
+    ],
   },
   {
     name: 'Fruits and Nuts',
@@ -84,7 +82,7 @@ const CROP_GROUPS = [
       { value: 75, label: 'Almonds', color: '#00a582' },
       { value: 76, label: 'Walnuts', color: '#e8d6af' },
       { value: 77, label: 'Pears', color: '#af9970' },
-    ]
+    ],
   },
   {
     name: 'Herbs and Spices',
@@ -92,7 +90,7 @@ const CROP_GROUPS = [
     crops: [
       { value: 14, label: 'Mint', color: '#7fd3ff' },
       { value: 57, label: 'Herbs', color: '#7fd3ff' },
-    ]
+    ],
   },
   {
     name: 'Forage and Turf',
@@ -102,7 +100,7 @@ const CROP_GROUPS = [
       { value: 37, label: 'Other Hay/Non Alfalfa', color: '#a5f28c' },
       { value: 58, label: 'Clover/Wildflowers', color: '#e8bfff' },
       { value: 59, label: 'Sod/Grass Seed', color: '#aaffdd' },
-    ]
+    ],
   },
   {
     name: 'Sugar and Sweeteners',
@@ -110,7 +108,7 @@ const CROP_GROUPS = [
     crops: [
       { value: 41, label: 'Sugarbeets', color: '#a800e2' },
       { value: 45, label: 'Sugarcane', color: '#af7cff' },
-    ]
+    ],
   },
   {
     name: 'Specialty Crops',
@@ -124,14 +122,12 @@ const CROP_GROUPS = [
       { value: 60, label: 'Switchgrass', color: '#00af49' },
       { value: 70, label: 'Christmas Trees', color: '#007777' },
       { value: 71, label: 'Other Tree Crops', color: '#af9970' },
-    ]
+    ],
   },
   {
     name: 'Double Cropping Systems',
     color: '#91798c',
-    crops: [
-      { value: 26, label: 'Dbl Crop WinWht/Soybeans', color: '#707000' },
-    ]
+    crops: [{ value: 26, label: 'Dbl Crop WinWht/Soybeans', color: '#707000' }],
   },
   {
     name: 'Miscellaneous',
@@ -139,7 +135,7 @@ const CROP_GROUPS = [
     crops: [
       { value: 61, label: 'Fallow/Idle Cropland', color: '#bfbf77' },
       { value: 92, label: 'Aquaculture', color: '#00ffff' },
-    ]
+    ],
   },
   {
     name: 'Non-Cropland Classes',
@@ -167,14 +163,11 @@ const CROP_GROUPS = [
       { value: 176, label: 'Grassland/Pasture', color: '#e8ffbf' },
       { value: 190, label: 'Woody Wetlands', color: '#7cafaf' },
       { value: 195, label: 'Herbaceous Wetlands', color: '#7cafaf' },
-    ]
+    ],
   },
 ]
 
-export default function CroplandLegend({
-  onClose,
-  className = '',
-}: CroplandLegendProps) {
+export default function CroplandLegend({ onClose, className = '' }: CroplandLegendProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
@@ -198,35 +191,33 @@ export default function CroplandLegend({
 
   return (
     <div
-      className={`absolute top-[30rem] left-4 z-[400] bg-white/95 backdrop-blur-sm rounded-lg shadow-lg max-w-xs ${className}`}
+      className={`absolute top-[30rem] left-4 z-[400] max-w-xs rounded-lg bg-white/95 shadow-lg backdrop-blur-sm ${className}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b">
+      <div className="flex items-center justify-between border-b p-3">
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 flex-1 hover:bg-gray-50 -mx-3 -my-3 px-3 py-3 rounded-t-lg transition-colors"
+          className="hover:bg-gray-50 -mx-3 -my-3 flex flex-1 items-center gap-2 rounded-t-lg px-3 py-3 transition-colors"
         >
           <div className="flex-1 text-left">
-            <h3 className="font-semibold text-gray-900 text-sm">
-              Cropland Data Layer
-            </h3>
-            <p className="text-xs text-gray-500 mt-0.5">Land Cover Legend</p>
+            <h3 className="text-gray-900 text-sm font-semibold">Cropland Data Layer</h3>
+            <p className="text-gray-500 mt-0.5 text-xs">Land Cover Legend</p>
           </div>
           {isExpanded ? (
-            <ChevronUp className="w-4 h-4 text-gray-500" />
+            <ChevronUp className="text-gray-500 h-4 w-4" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-gray-500" />
+            <ChevronDown className="text-gray-500 h-4 w-4" />
           )}
         </button>
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded transition-colors ml-2"
+            className="hover:bg-gray-100 ml-2 rounded p-1 transition-colors"
             aria-label="Close legend"
           >
-            <X className="w-4 h-4 text-gray-500" />
+            <X className="text-gray-500 h-4 w-4" />
           </button>
         )}
       </div>
@@ -234,19 +225,19 @@ export default function CroplandLegend({
       {/* Legend Items - only show when expanded */}
       {isExpanded && (
         <>
-          <div className="p-3 max-h-[70vh] overflow-y-auto">
+          <div className="max-h-[70vh] overflow-y-auto p-3">
             {/* Expand/Collapse All Controls */}
-            <div className="flex gap-2 mb-2 pb-2 border-b border-gray-200">
+            <div className="border-gray-200 mb-2 flex gap-2 border-b pb-2">
               <button
                 onClick={expandAll}
-                className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                className="text-blue-600 hover:text-blue-800 text-xs hover:underline"
               >
                 Expand All
               </button>
-              <span className="text-xs text-gray-400">|</span>
+              <span className="text-gray-400 text-xs">|</span>
               <button
                 onClick={collapseAll}
-                className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                className="text-blue-600 hover:text-blue-800 text-xs hover:underline"
               >
                 Collapse All
               </button>
@@ -254,39 +245,37 @@ export default function CroplandLegend({
 
             {/* Crop Groups */}
             <div className="space-y-1.5">
-              {CROP_GROUPS.map((group) => {
+              {CROP_GROUPS.map(group => {
                 const isGroupExpanded = expandedGroups.has(group.name)
                 return (
-                  <div key={group.name} className="border border-gray-200 rounded">
+                  <div key={group.name} className="border-gray-200 rounded border">
                     {/* Group Header */}
                     <button
                       onClick={() => toggleGroup(group.name)}
-                      className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-gray-50 transition-colors rounded"
+                      className="hover:bg-gray-50 flex w-full items-center gap-2 rounded px-2 py-1.5 transition-colors"
                     >
                       {isGroupExpanded ? (
-                        <ChevronDown className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                        <ChevronDown className="text-gray-500 h-3.5 w-3.5 flex-shrink-0" />
                       ) : (
-                        <ChevronRight className="w-3.5 h-3.5 text-gray-500 flex-shrink-0" />
+                        <ChevronRight className="text-gray-500 h-3.5 w-3.5 flex-shrink-0" />
                       )}
                       <div
-                        className="w-4 h-4 rounded border border-gray-400 flex-shrink-0"
+                        className="border-gray-400 h-4 w-4 flex-shrink-0 rounded border"
                         style={{ backgroundColor: group.color }}
                       />
-                      <span className="text-xs font-semibold text-gray-700 flex-1 text-left">
+                      <span className="text-gray-700 flex-1 text-left text-xs font-semibold">
                         {group.name}
                       </span>
-                      <span className="text-xs text-gray-500">
-                        ({group.crops.length})
-                      </span>
+                      <span className="text-gray-500 text-xs">({group.crops.length})</span>
                     </button>
 
                     {/* Crop Items */}
                     {isGroupExpanded && (
-                      <div className="px-7 py-1 pb-2 space-y-0.5 bg-gray-50">
-                        {group.crops.map((crop) => (
-                          <div key={crop.value} className="flex items-center gap-2 text-xs py-0.5">
+                      <div className="bg-gray-50 space-y-0.5 px-7 py-1 pb-2">
+                        {group.crops.map(crop => (
+                          <div key={crop.value} className="flex items-center gap-2 py-0.5 text-xs">
                             <div
-                              className="w-3 h-3 rounded border border-gray-300 flex-shrink-0"
+                              className="border-gray-300 h-3 w-3 flex-shrink-0 rounded border"
                               style={{ backgroundColor: crop.color }}
                             />
                             <span className="text-gray-600 truncate">{crop.label}</span>
@@ -300,21 +289,21 @@ export default function CroplandLegend({
             </div>
           </div>
 
-        {/* Footer */}
-        <div className="p-3 border-t bg-gray-50 text-xs text-gray-600">
-          <p>
-            Source:{' '}
-            <a
-              href="https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              USDA NASS CropScape
-            </a>
-          </p>
-        </div>
-      </>
+          {/* Footer */}
+          <div className="bg-gray-50 text-gray-600 border-t p-3 text-xs">
+            <p>
+              Source:{' '}
+              <a
+                href="https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                USDA NASS CropScape
+              </a>
+            </p>
+          </div>
+        </>
       )}
     </div>
   )

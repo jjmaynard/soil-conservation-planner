@@ -42,13 +42,7 @@ export interface LegendItem {
   value?: number | string
 }
 
-export type SoilDepth =
-  | '0-5cm'
-  | '5-15cm'
-  | '15-30cm'
-  | '30-60cm'
-  | '60-100cm'
-  | '100-200cm'
+export type SoilDepth = '0-5cm' | '5-15cm' | '15-30cm' | '30-60cm' | '60-100cm' | '100-200cm'
 
 export interface SSURGOData {
   mukey: string

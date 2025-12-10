@@ -2,23 +2,24 @@
 
 'use client'
 
-import { useCallback, useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
+import { useCallback, useEffect, useState } from 'react'
+
 import Header from '#components/layout/Header'
-import LayerControl from '#components/Map/LayerControl'
 import CroplandLegend from '#components/Map/CroplandLegend'
-import PropertyPanel from '#components/ui/PropertyPanel'
+import LayerControl from '#components/Map/LayerControl'
 import LoadingSpinner from '#components/ui/LoadingSpinner'
+import PropertyPanel from '#components/ui/PropertyPanel'
 import { useDepthSelection } from '#src/hooks/useDepthSelection'
-import { queryCDLHistory, type CDLYearData } from '#src/utils/cdlQuery'
 import type { SoilLayer, SoilProfile, SSURGOData } from '#src/types/soil'
+import { queryCDLHistory, type CDLYearData } from '#src/utils/cdlQuery'
 
 // Lazy load map to avoid SSR issues with Leaflet
 const SoilMap = dynamic(() => import('#components/Map/SoilMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+    <div className="bg-gray-100 flex h-full w-full items-center justify-center">
       <LoadingSpinner message="Loading soil maps..." />
     </div>
   ),
@@ -49,7 +50,7 @@ export default function Home() {
       type: 'wms',
       url: '/api/cropscape',
       visible: false,
-      opacity: layerOpacities['cdl'] ?? 0.7,
+      opacity: layerOpacities.cdl ?? 0.7,
       year: cdlYear, // Store year in layer config
     },
     {
@@ -94,7 +95,7 @@ export default function Home() {
   const handleSSURGOClick = useCallback(async (data: SSURGOData) => {
     setSSURGOData(data)
     setSelectedProfile(null) // Clear profile when showing SSURGO
-    
+
     // Query CDL history for the clicked location
     if (data.coordinates) {
       console.log('[Home] Querying CDL history for coordinates:', data.coordinates)
@@ -110,21 +111,19 @@ export default function Home() {
   }, [])
 
   const handleLayerToggle = useCallback((layerId: string) => {
-    setActiveLayers((prev) =>
-      prev.includes(layerId) ? prev.filter((id) => id !== layerId) : [...prev, layerId]
-    )
+    setActiveLayers(prev => (prev.includes(layerId) ? prev.filter(id => id !== layerId) : [...prev, layerId]))
   }, [])
 
   // Create layers with visibility based on activeLayers
   const layersWithVisibility = soilLayers.map(layer => ({
     ...layer,
-    visible: activeLayers.includes(layer.id)
+    visible: activeLayers.includes(layer.id),
   }))
 
   const handleOpacityChange = useCallback((layerId: string, opacity: number) => {
     setLayerOpacities(prev => ({
       ...prev,
-      [layerId]: opacity
+      [layerId]: opacity,
     }))
   }, [])
 
@@ -149,10 +148,10 @@ export default function Home() {
         />
       </Head>
 
-      <div className="h-screen flex flex-col overflow-hidden">
+      <div className="flex h-screen flex-col overflow-hidden">
         <Header />
 
-        <div className="flex-1 relative">
+        <div className="relative flex-1">
           <SoilMap
             initialCenter={[44.5, -123.5]} // Oregon coordinates - change to your study area
             initialZoom={8}

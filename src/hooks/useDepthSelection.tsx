@@ -3,6 +3,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+
 import type { SoilDepth } from '#src/types/soil'
 
 export const AVAILABLE_DEPTHS: SoilDepth[] = [
@@ -20,7 +21,7 @@ export function useDepthSelection(initialDepth: SoilDepth = '0-5cm') {
 
   const changeDepth = useCallback((newDepth: SoilDepth) => {
     setSelectedDepth(newDepth)
-    setDepthHistory((prev) => [...prev, newDepth])
+    setDepthHistory(prev => [...prev, newDepth])
   }, [])
 
   const goToPreviousDepth = useCallback(() => {
@@ -33,9 +34,7 @@ export function useDepthSelection(initialDepth: SoilDepth = '0-5cm') {
 
   const getNextDepth = useCallback((): SoilDepth | null => {
     const currentIndex = AVAILABLE_DEPTHS.indexOf(selectedDepth)
-    return currentIndex < AVAILABLE_DEPTHS.length - 1
-      ? AVAILABLE_DEPTHS[currentIndex + 1]
-      : null
+    return currentIndex < AVAILABLE_DEPTHS.length - 1 ? AVAILABLE_DEPTHS[currentIndex + 1] : null
   }, [selectedDepth])
 
   const getPreviousDepth = useCallback((): SoilDepth | null => {

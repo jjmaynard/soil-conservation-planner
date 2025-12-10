@@ -37,23 +37,23 @@ interface STACSearchResponse {
  */
 export async function getCDLItems(bbox: number[], year = 2023): Promise<STACItem[]> {
   const searchUrl = `${STAC_API_URL}/search`
-  
+
   const searchParams = {
     collections: ['usda-cdl'],
-    bbox: bbox, // [west, south, east, north]
+    bbox, // [west, south, east, north]
     datetime: `${year}-01-01T00:00:00Z/${year}-12-31T23:59:59Z`,
-    limit: 100
+    limit: 100,
   }
 
   try {
     console.log('🔍 Searching STAC for CDL data:', searchParams)
-    
+
     const response = await fetch(searchUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(searchParams)
+      body: JSON.stringify(searchParams),
     })
 
     if (!response.ok) {
@@ -62,7 +62,7 @@ export async function getCDLItems(bbox: number[], year = 2023): Promise<STACItem
 
     const data: STACSearchResponse = await response.json()
     console.log(`✅ Found ${data.features?.length || 0} CDL items`)
-    
+
     return data.features || []
   } catch (error) {
     console.error('❌ Error fetching CDL data:', error)
@@ -87,19 +87,19 @@ export async function getSignedAssetUrl(item: STACItem, assetKey = 'image'): Pro
 
     // Microsoft Planetary Computer provides a signing service
     // The href already includes a token in query params
-    const href = asset.href
-    
+    const { href } = asset
+
     // If href contains 'blob.core.windows.net', it needs signing
     if (href.includes('blob.core.windows.net') && !href.includes('st=')) {
       // Request signed URL from Planetary Computer
       const signUrl = `https://planetarycomputer.microsoft.com/api/sas/v1/sign`
-      
+
       const response = await fetch(signUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ href })
+        body: JSON.stringify({ href }),
       })
 
       if (response.ok) {
@@ -111,7 +111,6 @@ export async function getSignedAssetUrl(item: STACItem, assetKey = 'image'): Pro
 
     // Return href as-is if already signed or doesn't need signing
     return href
-    
   } catch (error) {
     console.error('Error signing asset URL:', error)
     return null
@@ -137,7 +136,7 @@ export async function getCDLTileUrl(year = 2023, bbox?: number[]): Promise<strin
       // Use first item
       const item = items[0]
       const signedUrl = await getSignedAssetUrl(item, 'image')
-      
+
       if (signedUrl) {
         // Use Planetary Computer's titiler endpoint with signed COG URL
         const tileUrl = `https://planetarycomputer.microsoft.com/api/data/v1/item/tiles/WebMercatorQuad/{z}/{x}/{y}@1x.png?collection=usda-cdl&item=${item.id}&assets=image&asset_bidx=image%7C1&nodata=0&resampling=nearest`
@@ -148,7 +147,6 @@ export async function getCDLTileUrl(year = 2023, bbox?: number[]): Promise<strin
     // Fallback: Use collection-level tiles (works for full CONUS)
     const collectionTileUrl = `https://planetarycomputer.microsoft.com/api/data/v1/collection/tiles/WebMercatorQuad/{z}/{x}/{y}@1x.png?collection=usda-cdl&assets=image&asset_bidx=image%7C1&nodata=0&colormap_name=viridis&resampling=nearest`
     return collectionTileUrl
-    
   } catch (error) {
     console.error('Error getting CDL tile URL:', error)
     return null
@@ -157,77 +155,77 @@ export async function getCDLTileUrl(year = 2023, bbox?: number[]): Promise<strin
 
 // CDL Classification Colors (USDA NASS standard colors)
 export const CDL_COLORS: { [key: number]: string } = {
-  1: '#FFD300',   // Corn
-  2: '#FFD300',   // Cotton
-  3: '#267000',   // Rice
-  4: '#FFD300',   // Sorghum
-  5: '#267000',   // Soybeans
-  6: '#FFD300',   // Sunflower
-  10: '#70A800',  // Peanuts
-  11: '#00AF49',  // Tobacco
-  12: '#DDA50A',  // Sweet Corn
-  13: '#DDA50A',  // Pop or Orn Corn
-  14: '#7CD3FF',  // Mint
-  21: '#E2007C',  // Barley
-  22: '#896054',  // Durum Wheat
-  23: '#D8B56B',  // Spring Wheat
-  24: '#A57000',  // Winter Wheat
-  25: '#D69EBC',  // Other Small Grains
-  26: '#707000',  // Dbl Crop WinWht/Soybeans
-  27: '#AA007C',  // Rye
-  28: '#A05989',  // Oats
-  29: '#700049',  // Millet
-  30: '#D69EBC',  // Speltz
-  31: '#D1FF00',  // Canola
-  32: '#7C99FF',  // Flaxseed
-  33: '#D6D600',  // Safflower
-  34: '#D1FF00',  // Rape Seed
-  35: '#00AF49',  // Mustard
-  36: '#FFA800',  // Alfalfa
-  37: '#267000',  // Other Hay/Non Alfalfa
-  38: '#FFFF00',  // Camelina
-  39: '#70A800',  // Buckwheat
-  41: '#00AF49',  // Sugarbeets
-  42: '#B35C00',  // Dry Beans
-  43: '#B35C00',  // Potatoes
-  44: '#267000',  // Other Crops
-  45: '#E07400',  // Sugarcane
-  46: '#B35C00',  // Sweet Potatoes
-  47: '#FFD300',  // Misc Vegs & Fruits
-  48: '#B35C00',  // Watermelons
-  49: '#267000',  // Onions
-  50: '#267000',  // Cucumbers
-  51: '#FFA800',  // Chick Peas
-  52: '#FFA800',  // Lentils
-  53: '#267000',  // Peas
-  54: '#00AF49',  // Tomatoes
-  55: '#B35C00',  // Caneberries
-  56: '#267000',  // Hops
-  57: '#267000',  // Herbs
-  58: '#FFD300',  // Clover/Wildflowers
-  59: '#70A800',  // Sod/Grass Seed
-  60: '#267000',  // Switchgrass
-  61: '#000000',  // Fallow/Idle Cropland
-  63: '#00AF49',  // Forest
-  64: '#00AF49',  // Shrubland
-  65: '#FFFF00',  // Barren
-  66: '#FFFF00',  // Cherries
-  67: '#FFA800',  // Peaches
-  68: '#00AF49',  // Apples
-  69: '#FFA800',  // Grapes
-  70: '#FF6666',  // Christmas Trees
-  71: '#00AF49',  // Other Tree Crops
-  72: '#B35C00',  // Citrus
-  74: '#B35C00',  // Pecans
-  75: '#FFA800',  // Almonds
-  76: '#FFA800',  // Walnuts
-  77: '#B35C00',  // Pears
-  81: '#CCFFCC',  // Clouds/No Data
-  82: '#00AF49',  // Developed
-  83: '#00AF49',  // Water
-  87: '#FFFF00',  // Wetlands
-  88: '#267000',  // Nonag/Undefined
-  92: '#00AF49',  // Aquaculture
+  1: '#FFD300', // Corn
+  2: '#FFD300', // Cotton
+  3: '#267000', // Rice
+  4: '#FFD300', // Sorghum
+  5: '#267000', // Soybeans
+  6: '#FFD300', // Sunflower
+  10: '#70A800', // Peanuts
+  11: '#00AF49', // Tobacco
+  12: '#DDA50A', // Sweet Corn
+  13: '#DDA50A', // Pop or Orn Corn
+  14: '#7CD3FF', // Mint
+  21: '#E2007C', // Barley
+  22: '#896054', // Durum Wheat
+  23: '#D8B56B', // Spring Wheat
+  24: '#A57000', // Winter Wheat
+  25: '#D69EBC', // Other Small Grains
+  26: '#707000', // Dbl Crop WinWht/Soybeans
+  27: '#AA007C', // Rye
+  28: '#A05989', // Oats
+  29: '#700049', // Millet
+  30: '#D69EBC', // Speltz
+  31: '#D1FF00', // Canola
+  32: '#7C99FF', // Flaxseed
+  33: '#D6D600', // Safflower
+  34: '#D1FF00', // Rape Seed
+  35: '#00AF49', // Mustard
+  36: '#FFA800', // Alfalfa
+  37: '#267000', // Other Hay/Non Alfalfa
+  38: '#FFFF00', // Camelina
+  39: '#70A800', // Buckwheat
+  41: '#00AF49', // Sugarbeets
+  42: '#B35C00', // Dry Beans
+  43: '#B35C00', // Potatoes
+  44: '#267000', // Other Crops
+  45: '#E07400', // Sugarcane
+  46: '#B35C00', // Sweet Potatoes
+  47: '#FFD300', // Misc Vegs & Fruits
+  48: '#B35C00', // Watermelons
+  49: '#267000', // Onions
+  50: '#267000', // Cucumbers
+  51: '#FFA800', // Chick Peas
+  52: '#FFA800', // Lentils
+  53: '#267000', // Peas
+  54: '#00AF49', // Tomatoes
+  55: '#B35C00', // Caneberries
+  56: '#267000', // Hops
+  57: '#267000', // Herbs
+  58: '#FFD300', // Clover/Wildflowers
+  59: '#70A800', // Sod/Grass Seed
+  60: '#267000', // Switchgrass
+  61: '#000000', // Fallow/Idle Cropland
+  63: '#00AF49', // Forest
+  64: '#00AF49', // Shrubland
+  65: '#FFFF00', // Barren
+  66: '#FFFF00', // Cherries
+  67: '#FFA800', // Peaches
+  68: '#00AF49', // Apples
+  69: '#FFA800', // Grapes
+  70: '#FF6666', // Christmas Trees
+  71: '#00AF49', // Other Tree Crops
+  72: '#B35C00', // Citrus
+  74: '#B35C00', // Pecans
+  75: '#FFA800', // Almonds
+  76: '#FFA800', // Walnuts
+  77: '#B35C00', // Pears
+  81: '#CCFFCC', // Clouds/No Data
+  82: '#00AF49', // Developed
+  83: '#00AF49', // Water
+  87: '#FFFF00', // Wetlands
+  88: '#267000', // Nonag/Undefined
+  92: '#00AF49', // Aquaculture
   111: '#FFFF00', // Open Water
   112: '#00AF49', // Perennial Ice/Snow
   121: '#FFFF00', // Developed/Open Space
