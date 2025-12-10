@@ -113,3 +113,5 @@ export default function DepthSelector({ selectedDepth, onDepthChange, className 
     </div>
   )
 }
+
+export default DepthSelector
