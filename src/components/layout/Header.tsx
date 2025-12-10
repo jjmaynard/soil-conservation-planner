@@ -36,9 +36,7 @@ export default function Header({ className = '' }: HeaderProps) {
             </div>
           </div>
         </div>
-      </nav>
+      </div>
     </header>
   )
 }
-
-export default Header
