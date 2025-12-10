@@ -1,0 +1,107 @@
+LOCATION TAVERNIER              FL
+
+Established Series
+Rev. GWH/CAP/RBT
+03/2021
+
+TAVERNIER SERIES
+
+MLRA(s): 156A
+Soil Survey Regional Office (SSRO) Responsible: Auburn, Alabama
+Depth Class: Shallow
+Drainage Class: Very poorly drained
+Saturated Hydraulic Conductivity:  High to very high in the organic material and negligible in the rock material
+Index Surface Runoff: Medium
+Parent Material: Organic materials over oolitic limestone bedrock
+Slope: 0 to 1 percent
+Elevation: -1.0 to 3 feet above mean sea level.  
+Mean Annual Air Temperature: 26 degrees C. (78 degrees F.)
+Mean Annual Precipitation: 1270 centimeters (50 inches)
+
+TAXONOMIC CLASS: Euic, isohyperthermic, shallow Typic Sulfisaprists
+
+TYPICAL PEDON:  Tavernier muck in a tidal mangrove swamp. (Colors are for moist soil unless otherwise stated).
+
+     Oase--0 to 20 centimeters (0 to 8 inches); very dark grayish brown (10YR 3/2) muck, dark grayish brown (10YR 4/2), dry; 20 percent unrubbed fiber, 5 percent rubbed fiber; moderate sulfurous odor; many fine and common medium roots throughout; 10 percent limestone gravel; slightly alkaline (pH 7.4); abrupt smooth boundary. [18 to 50 centimeters (7 to 20 inches) thick]
+
+     2R--20 centimeters (8 inches); weakly to strongly cemented oolitic limestone bedrock; solution holes up to 102 centimeters (40 inches) or more deep can be filled with sandy and/or loamy material.
+
+TYPE LOCATION:  Monroe County, Florida; Key Largo; 1,457 feet east of the intersection of State Road 905 and 905A; 400 feet east and 760 feet north of the southwest corner of Sec. 24, T. 59 S., R. 40 E.; latitude 25 degrees 17 minutes 10.53 seconds N longitude 80 degrees 17 minutes 59.11 seconds W; WSG84; USGS Card Sound, FL quadrangle.
+
+RANGE IN CHARACTERISTICS:  
+Solum thickness: 18 to 50 centimeters (7 to 20 inches)
+Depth to seasonally high water table: 0 to 15 centimeters (0 to 6 inches)
+Soil Reaction: Slightly acid to slightly alkaline throughout
+Depth of the organic material: 18 to 50 centimeters (7 to 20 inches)
+Depth to limestone bedrock: 18 to 50 centimeters (7 to 20 inches)
+Fiber content: Un-Rubbed: 15 to 50 percent; rubbed less than 17 percent
+Particle-size control section, mineral (weighted averages):  
+Mineral content: 0 to 10 percent
+
+Oase horizon: 
+Color: Hue 5YR to 10YR or Neutral, value 1 to 3, chroma: 1 to 3 
+Texture: muck or gravelly muck 
+Rock fragments: 0 to 20 percent limestone gravel
+EC (mmhos/cm): 16 to 32 or more
+Exchangeable Sodium: 30 to 60 percent or more
+Sodium Absorption Ratio: 30 to 60 percent or more
+
+2R horizon: weakly to strongly cemented oolitic limestone bedrock; solution holes up to 102 centimeters (40 inches) or more deep can be filled with sandy and/or loamy material.
+
+COMPETING SERIES:  There are no known competing series in this family.  Similar soils in related families include Islamorada, Keylargo, and Matecumbe. 
+Islamorada - are moderately deep to bedrock on similar landform positions.
+Keylargo - are very deep soils to limestone bedrock on similar landforms.
+Matecumbe - are very shallow soils to limestone bedrock on similar landforms.
+
+GEOGRAPHIC SETTING:  
+Landscape: Lower Coastal Plain
+Landform(s): marine marshes, swamps, and low broad tidal flats on the Key West Islands and/or along the southern coast of the Florida Peninsula	 
+Parent material: Well decomposed organic materials over oolitic limestone bedrock
+Mean annual temperature: 25 to 27 degrees C (77 to 81 degrees F)
+Mean annual precipitation: 1067 to 1778 millimeters (42 to 70 inches)
+Frost-free period: 365 days
+
+GEOGRAPHICALLY ASSOCIATED SOILS:  
+Cudjoe - have marly silt loam particle-sized control section, have water tables greater than 15 centimeters (6 inches), and occur on slightly higher positions in the tidal zone.
+Keyvaca - have a loamy-skeletal particle-sized control section, have water tables greater than 91 centimeters and occur on higher landform positions.
+Keywest - have stratification of marl and muck materials over oolitic limestone that is greater than 100 centimeters deep on similar landform positions.
+Lignumvitae - have marly silt loam particle-sized control section, have bedrock at depths greater than 50 centimeters on similar landform positions.
+Saddlebunch - have marly silt loam particle-sized control section and are on slightly higher landform positions.
+
+DRAINAGE AND SATURATED HYDRAULIC CONDUCTIVITY:  
+Drainage class: Very poorly drained 
+Saturated hydraulic conductivity (Ksat): High to very high
+Runoff: Medium
+Depth to seasonal high-water table: 0 to 15 centimeters (0 to 6 inches) 
+Flooding frequency and duration: very frequently and very brief duration from tides, subject to flooding from storm surges and hurricanes
+
+USE AND VEGETATION:  
+Major uses: wildlife habitat and water quality.  
+Dominant vegetation: Red and black mangroves, and saltwort.
+
+DISTRIBUTION AND EXTENT:  MLRA 156A Florida Everglades and Associated Areas. 
+Extent: limited
+
+SOIL SURVEY REGIONAL OFFICE (SSRO) RESPONSIBLE: Auburn, Alabama
+
+SERIES ESTABLISHED:  Monroe County, Florida, 1989.
+
+REMARKS:
+These soils were formerly classified as shallow, Lithic Haplosaprists and are revised here to the twelfth edition of the keys (2014).
+Diagnostic horizons and features recognized in this typical pedon:
+
+1.	Histic epipedon - 0 to 20 centimeters (0 to 8 inches) (Oase horizon)
+2.	Lithic (shallow) contact - 20 centimeters (8 inches) (2R horizon)
+3.	Peraquic feature - the zone from 0 to 203 centimeters (0 to 80 inches).
+4.	Aquic conditions - endosaturation ranges from 0 to 203 centimeters (0 to 80 inches).
+5.	Sulfidic feature - the zone from 0 to 20 centimeters (0 to 8 inches) contains sulfidic soil materials.
+
+ADDITIONAL DATA:  
+Laboratory data is available on the National Soil Survey website at: http://ncsslabdatamart.sc.egov.usda.gov/querypage.aspx
+
+OSD User Site ID: S1987FL087001
+
+OSD User Pedon ID: S1987FL087001
+
+National Cooperative Soil Survey
+U.S.A.

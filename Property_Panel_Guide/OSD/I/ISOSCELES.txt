@@ -1,0 +1,97 @@
+LOCATION ISOSCELES              CA
+
+Established Series
+JBB/CES/JTW
+09/2021
+
+ISOSCELES SERIES
+
+The Isosceles series consists of very shallow and shallow, well drained soils formed in colluvium, slope alluvium and residuum weathered from granitic rocks. The Isosceles soils are on structural benches on cirques and mountain slopes of the Sierra Nevada Mountains. Slopes range from 2 to 45 percent. The mean annual precipitation is about 1075 mm and the mean annual air temperature is about 2 degrees C.
+
+TAXONOMIC CLASS: Loamy, isotic Lithic Humicryepts
+
+TYPICAL PEDON: Isosceles loamy fine sand on a northeast facing (40 degree), 2 percent slope under a cover of threadleaf sedge, Parry's rush, and scattered whitebark pine at an elevation of 3368 meters. (Colors are for dry soils unless otherwise noted. When described on July 21, 2013 the soil was dry throughout.)
+
+ A--0 to 10 cm; dark grayish brown (10YR 4/2) loamy fine sand, very dark brown (10YR 2/2) moist; 4 percent clay; weak fine granular structure; soft, very friable, nonsticky, nonplastic; many very fine and common fine roots throughout; many very fine irregular pores; 5 percent subangular indurated granite gravel, 1 percent subangular indurated granite cobbles; NaF pH 10.0; strongly acid (pH 5.2); abrupt wavy boundary. (3 to 30 cm thick)
+
+ BA--10 to 24 cm; brown (10YR 5/3) gravelly fine sandy loam, very dark grayish brown (10YR 3/2) moist; 10 percent clay; weak very fine subangular blocky structure; soft, very friable, slightly sticky, nonplastic; many very fine, and common fine and medium roots throughout; common very fine irregular pores; 15 percent subangular indurated granite gravel, 5 percent subangular indurated granite cobbles; NaF pH 10.0; strongly acid (pH 5.2); clear wavy boundary. (0 to 15 cm thick) 
+
+ Bw--24 to 44 cm; yellowish brown (10YR 5/4) gravelly fine sandy loam, brown (10YR 4/3) moist; 14 percent clay; weak medium subangular blocky structure; slightly hard, friable, slightly sticky, nonplastic; common fine and medium roots throughout; common very fine and fine tubular pores; 2 percent fine distinct irregular masses of oxidized iron with clear boundaries on surfaces along pores; 10 percent subangular indurated granite gravel, 5 percent subangular indurated granite cobbles; NaF pH 10.0; strongly acid (pH 5.2); very abrupt wavy boundary. (5 to 35 cm thick)
+
+ R--44 to 200 cm; indurated granite bedrock, fractured at intervals of greater than 200 cm.
+
+TYPE LOCATION: Fresno County, California, about 0.5 km north of Lake Marjorie, Kings Canyon National Park;  USGS 7.5 minute topographic quadrangle: Mount Pinchot, California;  WGS84 36.951008 latitude and -118.433464 longitude;  UTM zone 11 4090397 meters N 372372 meters E NAD83.
+
+RANGE IN CHARACTERISTICS:
+Soil temperature: The mean annual soil temperature at 50 cm is -1 to 5 degrees C and the difference between mean summer and mean winter soil temperature is greater than 6 degrees C. The soils have a cryic temperature regime.
+
+Soil moisture: The soils have a xeric soil moisture regime. The soil moisture control section is dry in all parts from about August to October (about 90 days).
+
+Diagnostic Feature(s):
+  Umbric epipedon thickness:  10 to 40 cm
+  Depth to lithic contact:  10 to 50 cm
+
+Organic matter: 1 to 5 percent in the epipedon
+
+Base saturation: less than 50 percent (by ammonium acetate).
+
+Particle size control section weighted average:
+  Rock fragments: 0 to 35 percent, with 0 to 25 percent gravel, 0 to 15 percent cobbles, 0 to 5 percent stones, 0 to 15 percent channers, and 0 to 15 percent flagstones.
+  Clay content: 4 to 12 percent
+  NaF pH: 10.0 to 11.0
+
+A horizons
+  Hue: 7.5YR, 10YR
+  Value: 4 or 5 dry, 2 or 3 moist
+  Chroma: 2 or 3, dry or moist
+  Texture: coarse sand, loamy sand, loamy fine sand,  coarse sandy loam, sandy loam, fine sandy loam
+  Clay content: 1 to 13 percent
+  Rock fragments: 0 to 35 percent
+	0 to 25 percent gravel
+	0 to 15 percent cobbles
+	0 to 5 percent stones
+	0 to 15 percent channers
+	0 to 15 percent flagstones
+  Reaction: extremely to moderately acid
+
+BA or Bw horizons (where present)
+  Hue: 7.5YR, 10YR
+  Value: 4 or 5 dry, 2 to 4 moist
+  Chroma: 3 or 4 dry, 2 to 4 moist
+  Texture: loamy sand, coarse sandy loam, sandy loam, fine sandy loam
+  Clay content: 4 to 15 percent
+  Rock fragments: 0 to 35 percent
+	0 to 30 percent gravel
+	0 to 15 percent cobbles
+	0 to 5 percent stones
+  Reaction: extremely to moderately acid
+
+COMPETING SERIES: These are the Meiss soils. Meiss soils formed in andesitic rock and have ashy textures.
+
+GEOGRAPHIC SETTING: The Isosceles soils are on structural benches of cirques, glacial-valley floors, glacial-valley walls, basin floors, and mountain slopes. Slopes range from 2 to 45 percent. These soils formed in colluvium, slope alluvium, and residuum weathered from granite and granodiorite, often in narrow bedrock fractures and fissures. Elevation is 2275 to 4135 meters. The climate is Mediterranean with warm, dry summers and cool, moist winters. The mean annual precipitation is 545 to 1505 mm and the mean annual air temperature is -2 to 5 degrees C. The frost free season is 40 to 100 days.
+
+GEOGRAPHICALLY ASSOCIATED SOILS: Isosceles soils are typically associated with granitic, glacially scoured rock outcrop, and with the Langille soils. Langille soils are 50 to 100 cm to lithic contact and are found in similar landscape positions.
+
+DRAINAGE AND PERMEABILITY: Well drained, high saturated hydraulic conductivity. Saturated hydraulic conductivity of the bedrock is very low to high.
+
+USE AND VEGETATION: This soil is used for recreation, wildlife habitat, and watershed. Vegetation is whitebark pine, western needlegrass, threadleaf sedge, mountain pride, Ross sedge, bottlebrush squirreltail, and Parry's rush. Sierra juniper may be present in some areas.
+
+DISTRIBUTION AND EXTENT: Sierra Nevada Mountains of California; MLRA 22A. These soils are of moderate extent.
+
+SOIL SURVEY REGIONAL OFFICE (SSRO) RESPONSIBLE: Davis, California
+
+SERIES PROPOSED: Fresno County, California in Sequoia and Kings Canyon National Parks. Source of name from Isosceles Peak in Kings Canyon National Park.
+
+REMARKS: 
+  Particle Size Control Section for this pedon: 25 to 40 cm.
+  Diagnostic horizons and features recognized in this pedon are: 
+     Umbric Epipedon            0 to 24 cm
+     Lithic Contact                  44 cm
+
+ADDITIONAL DATA: 
+  NASIS User Pedon ID: 2013CA7925002
+
+Soil classified using the 12th Edition of the Keys to Soil Taxonomy.
+
+National Cooperative Soil Survey
+U.S.A.

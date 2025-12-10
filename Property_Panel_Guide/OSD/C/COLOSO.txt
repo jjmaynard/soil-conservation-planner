@@ -1,0 +1,109 @@
+LOCATION COLOSO                 PR
+
+Established Series
+Rev. GRB; ASR
+04/2021
+
+COLOSO SERIES
+
+MLRA(s): 271, 272
+Soil Survey Regional Office (SSRO) Responsible: Raleigh, North Carolina
+Depth Class: Very deep
+Drainage Class (Agricultural): Somewhat poorly drained
+Saturated Hydraulic Conductivity:  Moderately low 
+Index Surface Runoff: Slow
+Parent Material: Stratified loamy and clayey alluvial sediments
+Slope: 0 to 2 percent
+Elevation (type location): 11 feet
+Mean Annual Air Temperature (type location): 78 degrees F. 
+Mean Annual Precipitation (type location): 80 inches 
+
+TAXONOMIC CLASS: Fine, mixed, active, nonacid, isohyperthermic Vertic Endoaquepts
+
+TYPICAL PEDON: Coloso silty clay loam - sugarcane. (Colors are for moist soil.)
+
+   Ap--0 to 7 inches; brown (10YR 4/3) silty clay; weak medium granular structure; firm, slightly sticky, plastic; many fine roots; few worm holes; slightly acid; clear smooth boundary (5 to 12 inches thick).
+
+   Bw--7 to 13 inches; brown (10YR 4/3) clay, weak fine subangular blocky structure; firm, slightly sticky, slightly plastic; common fine roots; few worm holes; few fine black (10YR 2/1) concretions; common fine distinct yellowish red (5YR 4/6) masses of iron accumulation and common fine faint light gray (10YR 7/2) areas of iron depletion; slightly acid; clear smooth boundary (0 to 10 inches thick).
+
+   Cg1--13 to 33 inches; about 50 percent dark gray (10YR 4/1) and 50 percent light gray (5Y 7/1) clay; massive; firm, slightly sticky, plastic; few fine roots; few worm holes; common fine black (10YR 2/1) concretions; many medium distinct reddish brown (5YR 4/3) masses of iron accumulation; the areas in colors of dark gray and light gray are iron depletions; slightly acid; gradual smooth boundary(15 to 25 inches thick).
+
+   Cg2--33 to 60 inches; dark gray (10YR 4/1) silty clay; massive; firm, slightly sticky, plastic; few fine roots; few worm holes; common fine black (10YR 2/1) concretions; many fine faint yellowish brown (10YR 5/8) masses of iron accumulation and common fine distinct greenish gray (5GY 5/1) areas of iron depletion; slightly acid.
+
+TYPE LOCATION: Oeste SCD, Puerto Rico. Approximately one kilometer west of the town of Anasco; about 250 meters west of kilometer marker 145.5 of Highway 2, and fifty feet north of farm road.  USGS Anasco topographic quadrangle; lat. 18 degrees, 16 minutes, 47.36 seconds N; long. 67 degrees, 10 minutes, 0.52 seconds W.
+
+RANGE IN CHARACTERISTICS: 
+Solum thickness: 10 to 20 inches  
+Depth to seasonally high water: 6 to 18 inches
+Soil Reaction: Moderately alkaline throughout. This soil is moderately saline throughout. 
+Coarse fragments: Rock fragments range from 0 to 10 percent, by volume, throughout
+
+RANGE OF INDIVIDUAL HORIZONS:
+
+A or Ap horizon: 
+Color--hue of 7.5YR to 5Y, value of 2.5 to 5, and chroma of 1 to 4
+Texture--silty clay loam, silty clay, clay, or clay loam
+
+Bw horizon:
+Color--hue of 10YR or 2.5Y, value of 4 or 5, and chroma of 2 to 6
+Texture--silty clay loam, silty clay, clay, or clay loam
+Redoximorphic features--masses of oxidized iron in shades of yellow, brown, and red range from none to common. Iron depletions in shades of yellow and gray range from few to common
+
+Bg horizon, where present: 
+Color--hue of 10YR or 2.5Y, value of 4 or 5, and chroma of 0 to 2
+Texture--silty clay loam, silty clay, clay, or clay loam
+Redoximorphic features--masses of oxidized iron in shades of yellow, brown, and red range from none to common. Iron depletions in shades of yellow and gray range from few to common
+
+C horizon, where present:
+Color--hue of 10YR to 5Y, value of 4 to 7, and chroma of 2 to 6
+Texture--silty clay loam, clay loam, silty clay or clay
+Redoximorphic features--shades of red, yellow, or brown range from few to many. Common to many iron-manganese concretions, nodules, and/or masses. 
+
+Cg horizon:
+Color--hue of 10YR to 5Y, value of 4 to 7, and chroma of 0 to 2
+Texture--silty clay loam, clay loam, silty clay or clay
+Redoximorphic features--shades of red, yellow, or brown range from few to many. Common to many iron-manganese concretions, nodules, and/or masses. 
+
+2C horizons, when present:
+have variegated colors due to redoximorphic features and can be grayish in color. 
+
+COMPETING SERIES: There are no other known series in the same family.
+
+GEOGRAPHIC SETTING: Coloso soils are on river flood plains and low terraces. They formed in stratified loamy and clayey alluvial sediments of mixed origin. Slopes range from 0 to 2 percent. The climate is humid tropical. The average annual precipitation ranges from 78 to 82 inches and the mean annual air temperature is 77 to 79 degrees F. 
+
+GEOGRAPHICALLY ASSOCIATED SOILS: 
+Bajura soils--have a depth to water table of 0 to 6 inches; on similar landscape positions
+Corcega soils--have a fine-loamy over sandy or sandy-skeletal particle size control section; on similar landscape positions 
+Dique soils--have a fine-loamy particle size control section, have a depth to water table of greater than 60 inches; on slightly higher landscape positions
+Reilly soils--have a sandy skeletal particle size control section and have a water table greater than 60 inches; on slightly higher landscape positions closer to rivers
+Toa soils--have a depth to water table of greater than 60 inches and have a mollic epipedon; on slightly higher landscape positions
+
+DRAINAGE AND SATURATED HYDRAULIC CONDUCTIVITY: 
+Drainage Class (Agricultural): Somewhat poorly drained 
+Saturated Hydraulic Conductivity: Moderately low
+ 
+
+USE AND VEGETATION: 
+Major Uses: Historically used for sugarcane production, currently most areas are used for pasture. 
+Dominant Vegetation: Native and introduced species.
+
+SOIL SURVEY REGIONAL OFFICE (SSRO) RESPONSIBLE: Raleigh, North Carolina.
+
+DISTRIBUTION AND EXTENT: 
+Distribution: River flood plains of Humid Coastal Plains in Puerto Rico 
+Extent: Moderate 
+
+SERIES ESTABLISHED: Soil Survey of Puerto Rico; 1942.
+
+REMARKS: The 2021 update changes the classification from Fine, mixed, active, isohyperthermic Vertic Dystreudepts (2008)
+
+Diagnostic horizons and features recognized in this pedon.
+Ochric epipedon - the zone from 0 to 7 inches (Ap horizon).
+Cambic horizon - the zone from 7 to 13 inches (Bw horizon).
+Aquic conditions - apparent water table; 6 to 18 inches; July through September.
+Redoximorphic features- oxidized iron masses, reduced iron masses, and iron-manganese concretion, nodules, and/or masses (mainly in Cg horizon)
+
+ADDITIONAL DATA: Rio Grande Municipality, Puerto Rico; S93PR-119-009 and S93PR-119-012. Samples by KSSL, Lincoln, NE.
+
+National Cooperative Soil Survey
+U.S.A.

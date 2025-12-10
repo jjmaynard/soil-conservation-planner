@@ -1,0 +1,139 @@
+LOCATION KOLLS                  SD+NE
+
+Established Series
+Rev. MWS-WJB-PTC
+12/2021
+
+KOLLS SERIES
+
+The Kolls series consists of very deep, poorly and very poorly drained soils formed in clayey alluvium. Kolls soils are on upland basins. Permeability is very slow. Slopes are 1 percent or less. Mean annual precipitation is about 432 mm (17 inches), and mean annual air temperature is about 8.3 degrees C (47 degrees F).
+
+TAXONOMIC CLASS: Very-fine, smectitic, mesic Typic Epiaquerts
+
+TYPICAL PEDON: Kolls clay - in a level depression under native grass. When described the soil was dry to 60 inches. (Colors are for moist soil unless otherwise stated)
+
+  A-- 0 to 8 centimeters (0 to 3 inches); black (2.5Y 2.5/1) clay; weak medium granular structure; firm, hard, very sticky, very plastic; common fine roots throughout and common very fine roots throughout; common fine and common very fine pores; 1 percent nonflat rounded indurated 5- to 20-millimeter mixed rock fragments; very slight effervescence, by HCl, 1 normal; neutral, pH 7.0, pH indicator solutions; clear wavy boundary. (5 to 13 cm thick) (2 to 5 inches thick)
+
+  Bg-- 8 to 26 centimeters (3 to 10 inches); very dark grayish brown (2.5Y 3/2) clay; weak coarse prismatic structure; extremely firm, extremely hard, very sticky, very plastic; common fine roots throughout and common very fine roots throughout; common fine and common very fine pores; 50 percent fine prominent irregular weakly cemented strong brown (7.5YR 5/6), moist, masses of oxidized iron with diffuse boundaries in matrix; very slight effervescence, by HCl, 1 normal; slightly alkaline, pH 7.5, pH indicator solutions; gradual wavy boundary. (20 to 76cm thick) (8 to 30 inches thick)
+
+  Bssg-- 26 to 44 centimeters (10 to 17 inches); black (2.5Y 2.5/1) clay; moderate medium subangular blocky structure; very firm, extremely hard, very sticky, very plastic; common fine roots throughout and common medium roots throughout and common very fine roots throughout; common fine and common medium and common very fine pores; 10 percent distinct slickensides (pedogenic); 2 percent fine prominent irregular weakly cemented strong brown (7.5YR 5/6), moist, masses of oxidized iron with diffuse boundaries in matrix; strong effervescence, by HCl, 1 normal; moderately alkaline, pH 8.0, pH indicator solutions; gradual wavy boundary. (0 to 51cm thick) (0 to 20 inches thick)
+
+  Bssyzg-- 44 to 69 centimeters (17 to 27 inches); black (2.5Y 2.5/1) clay; weak coarse subangular blocky structure; extremely firm, extremely hard, very sticky, very plastic; common fine roots throughout and common medium roots throughout and common very fine roots throughout; common fine and common medium and common very fine pores; 15 percent distinct slickensides (pedogenic); 2 percent fine prominent irregular weakly cemented strong brown (7.5YR 5/6), moist, masses of oxidized iron with diffuse boundaries in matrix; 3 percent fine prominent threadlike weakly cemented gypsum masses with clear boundaries on surfaces along root channels and 2 percent fine prominent threadlike weakly cemented salt masses with clear boundaries in matrix; strong effervescence, by HCl, 1 normal; moderately alkaline, pH 8.0, pH indicator solutions; gradual wavy boundary. (0 to 31cm thick) (0 to 12 inches thick)
+
+  BCssyzg1--69 to 95 centimeters (27 to 37 inches); black (5Y 2.5/1) clay; structureless massive structure; very firm, extremely hard, very sticky, very plastic; common fine roots throughout and common very fine roots throughout; common fine and common very fine pores; 15 percent distinct slickensides (pedogenic); 2 percent fine prominent threadlike weakly cemented gypsum masses with clear boundaries in matrix and 2 percent fine prominent threadlike weakly cemented salt masses with clear boundaries in matrix; strong effervescence, by HCl, 1 normal; moderately alkaline, pH 8.0, pH indicator solutions; gradual wavy boundary.
+
+  BCssyzg2--95 to 131 centimeters (37 to 52 inches); dark olive gray (5Y 3/2) clay; structureless massive structure; extremely firm, extremely hard, very sticky, very plastic; common very fine roots throughout; common very fine pores; 15 percent distinct slickensides (pedogenic); 1 percent fine prominent threadlike weakly cemented gypsum masses with clear boundaries in matrix and 1 percent fine prominent threadlike weakly cemented salt masses with clear boundaries in matrix; violent effervescence, by HCl, 1 normal; moderately alkaline, pH 8.0, pH indicator solutions; clear wavy boundary. (combined thickness 36 to 62cm) (14 to 24 inches)
+
+  Cyzg--131 to 200 centimeters (52 to 80 inches); 90 percent olive gray (5Y 4/2) and 10 percent dark olive gray (5Y 3/2) clay; structureless massive structure; extremely firm, extremely hard, very sticky, very plastic; common very fine roots throughout; common very fine pores; 3 percent fine prominent irregular weakly cemented strong brown (7.5YR 5/6), moist, masses of oxidized iron with diffuse boundaries in matrix; 2 percent fine prominent threadlike weakly cemented gypsum masses with clear boundaries in matrix and 2 percent fine prominent threadlike weakly cemented salt masses with clear boundaries in matrix; 1 percent nonflat rounded indurated 5- to 20-millimeter mixed rock fragments; violent effervescence, by HCl, 1 normal; moderately alkaline, pH 8.0, pH indicator solutions.
+
+TYPE LOCATION: Major Land Resource Area 63A- Northern Rolling Pierre Shale Plains; Jones County, South Dakota; about 8 miles north and 0.5 mile west of Draper; 350 feet east and 200 feet north of the southwest corner, sec. 18, T. 1 N., R. 30 E; USGS Topo Map Wendte SE topographic quadrangle; lat. 44 degrees 02 minutes and 20.02 seconds north and long. 100 degrees 33 minutes and 54.09 seconds west, NAD 83.
+
+RANGE IN CHARACTERISTICS: 
+Mollic epipedon thickness -- Typically less than 51 centimeters (20 inches), but exceeds 79 centimeters (30 inches) in some pedons.
+Depth to free calcium carbonates -- at or within a few inches of the surface.
+Depth to redoximorphic concentrations -- upper 91 centimeters (36 inches) in some pedons.
+Particle-size control section (weighted-average)-- Clay content: ranges from 60 to 75 percent clay
+Note -- When the soil is dry, cracks 1/2 to 2 inches wide and several feet long extend downward through the solum.
+
+Ap and A horizons:
+Hue -- 10YR, 2.5Y or neutral 
+Value -- 2 or 3 moist and 4 or 5 dry
+Chroma -- 0 or 1
+Texture -- silty clay but is clay in some pedons. 
+Reaction (pH) - 6.6 to 8.4, neutral to moderately alkaline.
+Thickness -- 5 to 13 cm
+
+Bg horizon -- 
+Hue -- 2.5Y, 5Y or neutral 
+Value -- 2 or 3 moist and 4 or 5 dry 
+Chroma -- 0 to 2. 
+Reaction (pH) -- 7.4 to 8.4, slightly alkaline or moderately alkaline.
+Thickness -- 20 to 76cm
+Note -- Some pedons have a Bw horizon.
+
+Bssg horizon 
+Hue -- 2.5Y, 5Y or neutral 
+Value -- 2 to 5 moist and 4 to 6 dry 
+Chroma -- 0 or 1. 
+Reaction (pH) -- 7.4 to 8.4, slightly alkaline or moderately alkaline.
+Thickness -- 0 to 51cm 
+
+BCssyzg horizon -- 
+Hue -- 2.5Y, 5Y or neutral 
+Value -- 2 to 5 moist and 5 or 6 dry 
+Chroma -- 0 or 1. 
+Reaction (pH) -- 7.4 to 9.0, slightly alkaline to strongly alkaline. 
+Gysum and other salts -- Few to many accumulations
+Thickness - 36 to 62 cm 
+
+Cssyzg and Cyzg horizons -- 
+Hue -- 2.5Y, 5Y or neutral 
+Value -- 3 to 5 moist and 4 to 6 dry 
+Chroma -- 0 to 3. Chroma of 3 is below depths of 40 inches. 
+Calcium carbonate accumulations - - fine accumulations are present in some pedons. 
+Reaction (pH) -- 7.4 to 9.0, slightly alkaline to strongly alkaline.
+Gysum and other salts -- Few to many accumulations. Some pedons do not have salt accumulations.
+Note -- Shale is between depths of 40 and 60 inches in some pedons.
+
+COMPETING SERIES: This is the Beauford soils which do not have carbonates above depths of 28 inches.
+
+GEOGRAPHIC SETTING: 
+Parent Material -- local clayey alluvium
+Landform -- flat basins in the uplands. Microrelief is pronounced in some of the more depressed areas. The basins range in size from a few yards in diameter to several hundred acres.
+Slope -- 0 to 1 percent
+Elevation -- 600 to 900 meters
+Mean annual air temperature -- 7.2 to 10 degrees C (45 to 50 degrees F)
+Mean annual precipitation -- 310 to 610 millimeters (12 to 24 inches)
+Growing season -- 130 to 160 days
+Growing season degree days -- 2700 to 3300
+
+GEOGRAPHICALLY ASSOCIATED SOILS: These are the Hurley, Kyle, Millboro, Opal, Pierre and Promise soils 
+Hurley -- have a natric horizon and are at the edges of basins.
+Kyle -- are well drained soils on higher landscapes.
+Millboro -- are formed in Pierre Shale on rolling uplands
+Opal -has bedrock between 71 and 89 centimeters and are well drained
+Pierre -- are formed in Cretaceous shale and are well drained
+Promise -- are formed in local sediment and are well drained
+
+DRAINAGE AND SATURATED HYDRAULIC CONDUCTIVITY: 
+Drainage class -- very poorly or poorly drained. No surface runoff occurs unless artificially drained. These soils are saturated for 30 to 60 days or more within a depth of 3 feet or more in most years.
+Ponding -- periods of 15 to 60 days in most years from surface runoff from surrounding soils. 
+Saturated hydraulic conductivity -- 0.01 to 0.42 micrometers per second except after periods of drought when initial intake may be rapid due to cracks.
+
+USE AND VEGETATION: Mostly native range and hayland. Western wheatgrass is the principal native grass with smaller amounts of blue grama, buffalograss, and sedges. Ponded areas support a stand of spikesedge, reedgrass, cordgrass, and smartgrass.
+
+DISTRIBUTION AND EXTENT: 
+Physiographic Division -- Interior Plains
+Physiographic Province -- Great Plains
+Physiographic Sections -- Missouri Plateau, Unglaciated
+MLRAs -- Pierre Shale Plains (60A)
+Northern Rolling Pierre Shale Plains (63A)
+Mixed Sandy and Silty Tableland and Badlands (64)
+Southern Rolling Pierre Shale Plains (63B)
+LRR G -- Western Great Plains Range and Irrigated Region, central South Dakota
+Extent -- Moderate
+
+SOIL SURVEY REGIONAL OFFICE (SSRO) RESPONSIBLE:Salina, Kansas.
+
+SERIES ESTABLISHED: Mellette County, South Dakota, 1971.
+
+REMARKS: 
+Diagnostic horizons and features recognized in this pedon are: 
+Particle size control section -- the zone from a depth of 25 to 100 centimeters (Bg, Bssg, Bssyzg, BCssyzg1, and BCssyzg2 horizons).
+Mollic epipedon -- the zone from the surface of the soil to a depth of about 26 centemeters (A and Bg horizons).
+Aquic conditions - the zone from a depth of 8 to 203 centimeters (Bg, Bssg, Bssyzg, BCssyzg1, BCssyzg2, and Cyzg horizons).
+Slickensides -- the zone from a depth of 26 to 131 centimeters (Bssg, Bssyzg, BCssyzg1, and BCssyzg2 horizons).
+Salt accumulations -- the zone from a depth of 44 to 203 centimeters (Bssyzg, BCssyzg1, BCssyzg2, and Cyzg horizons).
+Gypsum accumulations-the zone from a depth of 44 to 203 centimeters (Bssyzg, BCssyzg1, BCssyzg2, and Cyzg horizons).
+
+
+Revised 3/96.
+Revised 11/2021 PTC; metric conversion, changed to tabular formatting, updated pedon description, added Nebraska wetland vegetation to Additional Data.
+
+ADDITIONAL DATA: 
+Laboratory data - Kellogg Soil Survey Laboratory, Lincoln, Nebraska - user pedon id S2013SD075001
+
+In Nebraska, the native vegetative cover is an herbaceous wetland community commonly inhabited with: shortbeak sedge (Carex brevior(Dewey) Mack.), woolly sedge (Carex pellita), ticklegrass(Agrostis hyemalis), bald spikerush (Eleocharis erythropoda), western wheatgrass (Pascopyrum smithii), and rice cutgrass (Leersia oryzoides), plains coreopsis (Coreopsis tinctoria), western water clover, (Marsilea vestita), smartweeds (Persicaria spp.), docks (Rumex spp.), and prairie ironweed (Vernonia fasciculata). Source: Terrestrial Ecological Systems and Natural Communities of Nebraska, Version IV. S.B. Rolfsmeier and G. Steinauer. Nebraska Natural Heritage Program, Nebraska Game and Parks Commission, 2010.
+
+National Cooperative Soil Survey
+U.S.A.

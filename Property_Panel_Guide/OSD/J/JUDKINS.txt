@@ -1,0 +1,91 @@
+LOCATION JUDKINS                ID+WY
+
+Established Series
+Rev. WJ/TB/CLM
+08/2021
+
+JUDKINS SERIES
+
+The Judkins series consists of moderately deep, well drained soils that formed in material weathered from rhyolite and closely related bedrock.  Judkins soils are on uplands and have slopes of 1 to 80 percent.  Permeability is moderately slow.   The mean annual precipitation is about 510 millimeters and the mean annual temperature is about 2 degrees C.
+
+TAXONOMIC CLASS: Loamy-skeletal, mixed, superactive Xeric Palecryalfs
+
+TYPICAL PEDON:  Judkins extremely stony loam, forest. (Colors are for dry soil unless otherwise noted.)
+
+    Oi--0 to 1 cm; slightly decomposed needles, twigs, grass, and cones; moderately acid (pH 5.8). (0 to 13 cm thick)
+
+    Oe--1 to 2 cm; dark grayish brown (10YR 4/2) partially decomposed needles, twigs, grass, and cones, very dark brown (10YR 2/2) moist; somewhat matted; common fibrous roots; strongly acid (pH 5.4); abrupt wavy boundary. (0 to 4 cm thick)
+
+    Oa--2 to 3 cm; very dark brown (10YR 2/2) decomposed organic matter; black (10YR 2/1) moist; moderate fine and very fine granular structure; common fine and medium roots; strongly acid (pH 5.4); abrupt wavy boundary. (0 to 3 cm thick)
+
+    A--3 to 6 cm; dark grayish brown (10YR 4/2) and grayish brown (10YR 5/2), extremely stony loam, 60 percent very dark brown (10YR 2/2) and 40 percent very dark grayish brown (10YR 3/2) moist; weak very fine granular structure; slightly hard, very friable, slightly sticky and slightly plastic; many fine and very fine, common medium, and few coarse roots; the surface is covered with approximately 20 percent stones; few uncoated silt grains; moderately acid (pH 5.6); abrupt broken boundary. (0 to 13 cm thick)
+
+    E--6 to 29 cm; brown (10YR 5/3) and light brownish gray (10YR 6/2) very stony loam, dark brown (10YR 3/3) and (40 percent) pockets of very dark grayish brown (10YR 3/2) moist; weak very thin platy structure parting to weak very fine granular; slightly hard, friable, slightly sticky and slightly plastic; many fine and very fine, and few medium and coarse roots; in places roots are matted on top of stones; many very fine interstitial and tubular pores; approximately 50 percent stones and angular pebbles, the undersides of which are coated with faint clay films; many uncoated silt grains; moderately acid (pH 5.8); clear wavy boundary. (10 to 23 cm thick)
+
+    E/B--29 to 61 cm; light brownish gray (10YR 6/2) extremely stony loam, dark grayish brown (10YR 4/2) moist; few splotches of brown (10YR 5/3), which are dark brown (10YR 3/3) moist; weak medium subangular blocky structure parting to moderate fine and very fine granular; slightly hard, very friable, slightly sticky and slightly plastic; many very fine and fine, and few coarse roots; many very fine interstitial and tubular pores; approximately 75 percent stones and angular pebbles; few thin horizontal clayey bands; mostly E material and uncoated or bleached grains; few soft fine concretions; moderately acid (pH 5.9); clear wavy boundary. (8 to 46 cm thick)
+
+    Bt1--61 to 94 cm; brown (10YR 5/3) extremely stony loam (slightly more clay than horizon above); dark brown (10YR 3/3) moist; weak fine subangular blocky structure, interrupted by stones and gravel; hard, friable, slightly sticky and slightly plastic; common very fine and fine, and few coarse roots; few very fine tubular pores; approximately 85 percent stones and angular pebbles; common bleached silt grains on faces of peds and in pores; moderately acid (pH 6.0); clear wavy boundary. (15 to 41 cm thick)
+
+    Bt2--94 to 99 cm; brown (10YR 5/3) extremely stony light clay loam, brown (10YR 4/3) moist; moderate fine subangular blocky structure; hard, friable, moderately sticky and moderately plastic; few very fine and fine roots; many very fine tubular pores; approximately 85 percent stones and angular pebbles that are coated with clay; moderately acid (pH 5.9); abrupt wavy boundary. (0 to 15 cm thick)
+
+    R--99 cm; light gray (5YR 7/1) and pinkish gray (5YR 6/2) fractured tuffaceous rhyolite.
+
+TYPE LOCATION:  Teton County, Idaho; about 7.2 km north of Felt; 305 meters north and 150 meters west of the southeast corner of the NE1/4 section 18, T.7N., R.45E.
+
+RANGE IN CHARACTERISTICS:
+
+Soil moisture regime - xeric
+Average annual soil temperature - 2 to 6 degrees C.
+Average summer soil temperature - 10 to 13 degrees C. (The thin O horizon was not used in determining the soil temperature regime.) 
+Depth to bedrock - 50 to 100 cm
+Reaction of profile - slightly acid to moderately acid
+
+Control section averages:  clay content - 25 to 35 percent, rock fragments - 45 to 90 percent
+
+A horizon
+Value - 4 or 5 dry, 2 or 3 moist
+Chroma - 2 or 3 dry or moist
+
+E horizon
+Value - 4 to 7 dry or moist
+Chroma - 2 or 3 dry or moist
+Reaction - moderately acid or slightly acid
+
+E/B horizon
+Value - 4 to 6 dry or moist
+Chroma - 2 or 3 dry or moist
+Reaction - moderately acid or slightly acid
+Rock fragment content - 35 to 50 percent
+
+Bt horizon
+Value - 5 to 7 dry, 3 to 6 moist
+Chroma - 2 to 4 dry or moist
+Clay content - 25 to 35 percent
+Texture - STX-L, STX-CL, STV-L
+
+COMPETING SERIES:  These are the Buffmeyer, Condie, Guiser, Jonda(T), Mulgon, Namon, Rocko (T), Scandard (T), Tamred, Timberlin, Wapshilla and Washboard (T) series. All of these soils except Scandard, Tamred and Timberlin are deeper than 100 cm to any bedrock. Buffmeyer soils have gravelly sandy loam Bt horizons. Condie soils have Bt horizons with hue of 5YR through 10R.  Guiser soils have average annual soil temperature of 42 to 47 degrees F.  Jonda soils have a calcic horizon at 25 to 53 cm.  Mulgon soils have hues of 7.5YR or 5YR in the Bt.  Namon soils have Bt horizons of very cobbly very fine sandy loam to very cobbly heavy sandy loam.  Scandard soils have hue of 10R to 5YR in the argillic horizon.  Tamred soils have hue of 5YR or 2.5YR in the argillic horizon and lack E horizons.  Wapshilla soils lack E horizons.  Timberlin soils are over interbedded shale and sandstone, shale material is paralithic, sandstone is lithic and rock fragments are primarily flagstones.
+
+GEOGRAPHIC SETTING:  Judkins soils are on northerly slopes in uplands. Slopes range from 1 to 80 percent but are dominantly 30 to 65 percent. The soils formed in residuum and slope alluvium weathered from rhyolite, rhyolitic tuff, or latite. In some places the upper horizons contain an admixture of loess. Elevations are 1675 to 2125 meters. The climate is cool subhumid continental, having fairly dry late summers and cool moist winters. Mean annual precipitation is 460 to 760 millimeters. The annual temperature is 1 degrees to 4 degrees C.  Frost-free season is about 30 to 70 days.
+
+GEOGRAPHICALLY ASSOCIATED SOILS:  These are the Lantonia, Rammel, Tetonia, and Turnerville soils. Lantonia, Tetonia, and Turnerville soils are nonstony and are deeper than 150 cm to bedrock. Rammel soils contain less than 50 percent rock fragments in the Bt horizon, has a mollic epipedon, and has Bk horizons above depth of 100 cm.
+
+DRAINAGE AND PERMEABILITY:  Well drained; medium or rapid runoff; moderately slow permeability.
+
+USE AND VEGETATION:  Used mostly for range and timber. Vegetation is mainly lodgepole pine, Douglas-fir, scattered aspen, pine reedgrass, dwarf huckleberry, Oregon grape, lichens, and wild rose.
+
+DISTRIBUTION AND EXTENT:  Southeastern Idaho and western Wyoming.  The soils are inextensive.
+
+MLRA SOIL SURVEY REGIONAL OFFICE (MO) RESPONSIBLE: Portland, Oregon
+
+SERIES ESTABLISHED:  Teton County, Idaho, 1975.
+
+REMARKS:  Diagnostic horizons and features recognized in this pedon are:
+
+Ochric epipedon - the zone from 0 to 61 cm (A, E, and E/B horizons).
+
+Argillic horizon - the zone from 61 to 99 cm (Bt1 and Bt2 horizons).
+
+Particle-size control section - the zone from 61 to 99 cm (Bt1 and Bt2 horizons).
+
+National Cooperative Soil Survey
+U.S.A.

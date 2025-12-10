@@ -1,0 +1,115 @@
+LOCATION LACKEY                 CA
+
+Established Series
+JBB/CES
+09/2021
+
+LACKEY SERIES
+
+The Lackey series consists of very deep, somewhat excessively drained soils formed in colluvium and till weathered from granitic rocks. The Lackey soils are on mountain slopes, moraines, colluvial aprons, and talus slopes of the Sierra Nevada Mountains. Slopes range from 2 to 75 percent. The mean annual precipitation is about 800 mm and the mean annual air temperature is about 6 degrees C.
+
+TAXONOMIC CLASS:  Sandy-skeletal, isotic, frigid Vitrandic Xerorthents
+
+TYPICAL PEDON: Lackey cobbly loamy sand on a northeast facing (50 degree), 53 percent slope under a canopy of Jeffrey pine and white fir at an elevation of 2457 meters. (Colors are for dry soils unless otherwise noted. When described on September 14, 2014 the soil was dry throughout.)
+
+ Oi--0 to 7 cm; yellowish brown (10YR 5/4) slightly decomposed plant material, dark yellowish brown (10YR 4/4) moist; very strongly acid (pH 5.0); clear smooth boundary. (0 to 10 cm thick)
+
+ A--7 to 16 cm; grayish brown (10YR 5/2) cobbly loamy sand, very dark grayish brown (10YR 3/2) moist; 6 percent clay; weak fine granular structure; soft, very friable, nonsticky, nonplastic; common very fine, fine, and medium roots throughout; many very fine irregular pores; 10 percent subrounded indurated granite gravel, 10 percent subrounded indurated granite cobbles, 5 percent subrounded indurated granite stones; NaF pH 9.0; slightly acid (pH 6.4); clear smooth boundary. (5 to 30 cm thick)
+
+ Bw1--16 to 34 cm; pale brown (10YR 6/3) very cobbly loamy sand, brown (10YR 4/3) moist; 6 percent clay; weak fine subangular blocky structure; soft, very friable, nonsticky, nonplastic; common very fine, fine, and medium roots throughout; many very fine irregular pores; 15 percent subrounded indurated granite gravel, 15 percent subrounded indurated granite cobbles, 5 percent subrounded indurated granite stones; NaF pH 9.0; moderately acid (pH 6.0); gradual smooth boundary.
+
+ Bw2--34 to 68 cm; pale brown (10YR 6/3) very cobbly loamy sand, brown (10YR 4/3) moist; 5 percent clay; weak fine subangular blocky structure; soft, very friable, nonsticky, nonplastic; common very fine, fine, medium, and coarse roots throughout; many very fine irregular pores; 25 percent subrounded indurated granite gravel, 20 percent subrounded indurated granite cobbles, 5 percent subrounded indurated granite stones; NaF pH 9.0; moderately acid (pH 5.8); clear smooth boundary. (combined thickness of Bw horizons is 15 to 75 cm)
+
+ C1--68 to 92 cm; pale brown (10YR 6/3) very gravelly sand, brown (10YR 4/3) moist; 3 percent clay; structureless single grain; loose, loose, nonsticky, nonplastic; common very fine , fine, medium, and coarse roots throughout; many very fine irregular pores; 30 percent subrounded indurated granite gravel, 15 percent subrounded indurated granite cobbles, 2 percent subrounded indurated granite stones; NaF pH 9.0; moderately acid (pH 5.8); gradual smooth boundary.
+
+ C2--92 to 150 cm; light brownish gray (2.5Y 6/2) very gravelly sand, dark grayish brown (2.5Y 4/2) moist; 2 percent clay; structureless single grain; loose, loose, nonsticky, nonplastic; common fine and medium roots throughout; many very fine interstitial pores; 30 percent subrounded indurated granite gravel, 15 percent subrounded indurated granite cobbles, 2 percent subrounded indurated granite stones; NaF pH 9.0; moderately acid (pH 5.8). 
+
+TYPE LOCATION: Tulare County, California, Deadman's Canyon;  USGS 7.5 minute topographic quadrangle: Sphinx Lakes, California;  WGS84 36.705306 latitude and -118.585094 longitude;  UTM zone 11 4063353 meters N 358417 meters E NAD83.
+
+RANGE IN CHARACTERISTICS:
+Soil temperature: The mean annual soil temperature at 50 cm is 4 to 10 degrees C and the difference between mean summer and mean winter soil temperature is greater than 6 degrees C. The soils have a frigid temperature regime.
+
+Soil moisture: The soils have a xeric soil moisture regime. The soil moisture control section is dry in all parts from about August to October (about 100 days).
+
+Diagnostic Feature(s):
+  Ochric epipedon thickness:  18 cm
+
+Base saturation:  less than 50 percent (by ammonium acetate)
+
+Acid-oxalate extractable Al plus 1/2 Fe:  0.4 to 1.0 percent (by weight) to a depth of 100 cm
+
+Volcanic glass:  5 to 30 percent in the 0.02 to 2.0 mm fraction in an 18 cm thick layer within a depth of 75 cm from the mineral soil surface
+
+Particle size control section weighted average:
+  Rock fragments: 35 to 80 percent, with 15 to 50 percent gravel, 0 to 35 percent cobbles, 0 to 35 percent stones and 0 to 35 percent boulders.
+  Clay content: 1 to 10 percent 
+  NaF pH: 8.5 to 11.0
+
+A horizon (and AB horizons, where present)
+  Hue: 10YR
+  Value: 4 to 6 dry, 2 to 4 moist
+  Chroma: 2 or 3, dry or moist
+  Texture: loamy sand, loamy coarse sand, loamy fine sand
+  Clay content: 1 to 12 percent
+  Rock fragments: 10 to 75 percent
+	10 to 35 percent gravel
+	0 to 35 percent cobbles
+	0 to 15 percent stones
+	0 to 15 percent boulders
+  Reaction: strongly acid to neutral
+
+Bw horizon(s)
+  Hue: 10YR
+  Value: 5 to 7 dry, 3 or 4 moist
+  Chroma: 3 or 4, dry or moist
+  Texture: loamy sand, loamy coarse sand, coarse sand
+  Clay content: 1 to 10 percent
+  Rock fragments: 15 to 80 percent
+	15 to 45 percent gravel
+	0 to 35 percent cobbles
+	0 to 35 percent stones
+	0 to 35 percent boulders
+  Reaction: strongly to slightly acid
+
+C horizon(s)
+  Hue: 10YR, 2.5Y
+  Value: 5 to 8 dry, 3 to 5 moist
+  Chroma: 2 to 4, dry or moist
+  Texture: loamy sand, sand, coarse sand, loamy coarse sand
+  Clay content: 0 to 10 percent
+  Rock fragments: 15 to 85 percent
+	15 to 60 percent gravel
+	0 to 35 percent cobbles
+	0 to 35 percent stones
+	0 to 35 percent boulders
+  Pararock fragments: 0 to 15 percent
+  Reaction: strongly to slightly acid
+
+COMPETING SERIES: There are no other series in this family at this time.
+
+GEOGRAPHIC SETTING: The Lackey soils are on linear backslopes of mountain slopes, and moraines, colluvial aprons, and talus slopes on glacial-valley walls and glacial-valley floors. Slopes range from 2 to 75 percent. These soils formed in colluvium and till over residuum weathered from granite and granodiorite. Elevation is 1715 to 3235 meters. The climate is Mediterranean with warm, dry summers and cool, moist winters. The mean annual precipitation is 400 to 1410 mm and the mean annual air temperature is 2 to 9 degrees C. The frost-free season is 60 to 145 days.
+
+GEOGRAPHICALLY ASSOCIATED SOILS: These are the Dorst and Kanawyer soils. The Dorst soils are on convex structural benches of mountain slopes and are less than 50 cm to a lithic contact. The Kanawyer soils are on linear to convex moraines and have a densic contact between 50 and 100 cm.
+
+DRAINAGE AND PERMEABILITY: Somewhat excessively drained, high to very high saturated hydraulic conductivity.
+
+USE AND VEGETATION: This soil is used for recreation, wildlife habitat, and watershed. Vegetation is red fir, white fir, Jeffrey pine, lodgepole pine, western white pine, greenleaf manzanita, and chinquapin.
+
+DISTRIBUTION AND EXTENT: Sierra Nevada Mountains of California; MLRA 22A. These soils are of limited extent.
+
+SOIL SURVEY REGIONAL OFFICE (SSRO) RESPONSIBLE: Davis, California
+
+SERIES PROPOSED: Fresno County, California in Sequoia and Kings Canyon National Parks. The name is coined.
+
+REMARKS: 
+  Particle Size Control Section for this pedon: 32 to 107 cm
+  Diagnostic horizons and features recognized in this pedon are: 
+     Ochric Epipedon            0 to 18 cm
+
+ADDITIONAL DATA: 
+  NASIS User Pedon ID: 2014CA7925076
+
+Soil classified using the 12th Edition of the Keys to Soil Taxonomy.
+
+National Cooperative Soil Survey
+U.S.A.
