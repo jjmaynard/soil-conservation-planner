@@ -1,121 +1,187 @@
-typescript next.js starter kit for leaflet-react
-===============
+# Soil Conservation Planner
 
-An extensible [next.js](https://nextjs.org/) starter kit archived with the [leaflet-react](https://react-leaflet.js.org/) map plugin. Template visually enhanced by [tailwind](https://tailwindcss.com/) and [lucide icons](https://lucide.dev/). ✨
-Setup with [typescript](https://www.typescriptlang.org/) 👐.
+**Interactive Soil Interpretation Platform**
 
-Packed with useful components and hooks for using the map and create UI elements for next(.js) mapping projects.
+A web-based application for visualizing and analyzing soil properties, SSURGO data, and cropland history using interactive maps and comprehensive data dashboards.
 
-### Table of Contents
-1. [Features](#features)
-2. [Getting started](#getting-started)
-    1. [Breaking Changes](#breaking-changes)
-    2. [Clone & Deploy with Github and Vercel](#clone-deploy)
-    3. [Manual install](#manual-install)
-3. [Start up](#start-up)
-4. [Coming up (probably)](#coming-up)
-6. [Remove / change linting rules](#disable-lint)
-7. [WebGL?](#web-gl)
-7. [No typescript?](#no-ts)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-14.1.3-black)
+![React](https://img.shields.io/badge/React-18.2.0-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue)
 
-### <a id="features"></a> 🎇 Features
+## Features
 
-- 🏇 mighty next.js 14 leaflet-react setup
-- 😏 typescript + strict lint setup
-- 🔗 next.js ready route nav module
-- 🌤 modular demo content
-- 🐛 custom marker icons
-- 📄 custom marker popups
-- 📚 marker categories
-- 🫧 marker cluster by category with matching icon+color and notification bubble with marker count
-- ⚓️ custom hooks for getting marker data and map context (thx [Flo301](https://github.com/Flo301))
-- 🏡 custom ui components (locate me, center on markers)
+### Interactive Mapping
+- **Leaflet-based interactive maps** with multiple soil property layers
+- **Real-time soil data visualization** from ISRIC SoilGrids
+- **SSURGO data integration** with detailed soil survey information
+- **Cropland Data Layer (CDL)** overlays from USDA NASS CropScape
 
-### <a id="getting-started"></a> 🏎 Getting Started
+### Soil Property Analysis
+- Multiple soil properties at various depths (0-200cm):
+  - Organic Carbon
+  - Soil pH
+  - Bulk Density
+  - Clay Content
+- Dynamic property panel with detailed horizon information
+- Soil texture and classification visualization
 
-#### <a id="breaking-changes"></a> 💣 Breaking Changes introduced > v0.1.1
+### Cropland History Analysis
+- **16 years of crop rotation data** (2008-2023) from USDA NASS CDL
+- **Crop type classification** (annual, perennial, permanent, pasture, forest)
+- **Confidence estimates** based on NASS accuracy assessments
+- **Transition validation** to detect unlikely crop patterns
+- **Interactive visualizations**:
+  - Horizontal bar charts showing crop distribution
+  - Rotation flow diagrams
+  - Recent years timeline with confidence indicators
 
-In Version v0.1.2, I changed the path aliases to be more consistent with the ES standards from `@alias` to `#alias`. If pulling the template from v0.1.1 you have to change the import paths in your components and pages.
+### Comprehensive Dashboard
+- Full-screen soil property dashboard with multiple chart types:
+  - Radar charts for property comparison
+  - Pie charts for component composition
+  - Line charts for horizon trends
+  - Bar charts for crop distribution
+- Integrated cropland history section with statistics and visualizations
+- Export-ready data presentations
 
-```diff
-- import { SomeComponent } from '@components/useMap'
-+ import { SomeComponent } from '#components/useMap'
-```
+## Technology Stack
 
-#### <a id="clone-deploy"></a> ⛴ Clone & Deploy with Github and Vercel
+- **Framework**: Next.js 14 with TypeScript
+- **Mapping**: Leaflet, React Leaflet
+- **Charts**: Recharts
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Data Sources**:
+  - ISRIC SoilGrids API
+  - USDA NRCS Soil Data Access (SSURGO)
+  - USDA NASS CropScape (Cropland Data Layer)
 
-Create new Github repo with vercel and deploy it within minutes. Could not be easier as hitting some buttons. Shipping of private repos is possible.
+## Getting Started
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Frichard-unterberg%2Fnext-leaflet-starter-typescript)
+### Prerequisites
 
-Later: Check out your repo locally and run ```npm install``` or ```yarn``` in root
+- Node.js 18.x or later
+- npm or yarn
 
-Follow Instructions for [Starting Up](#start-up)
+### Installation
 
-#### <a id="manual-install"></a> ⚙️ Manual install
-
+1. Clone the repository:
 ```bash
-git clone https://github.com/richard-unterberg/next-leaflet-starter-typescript
-# then
-npm install
-# or
-yarn
+git clone https://github.com/jjmaynard/soil-conservation-planner.git
+cd soil-conservation-planner
 ```
 
-### <a id="start-up"></a> 🏍️ Start up
+2. Install dependencies:
+```bash
+npm install
+```
 
-According the official [Next.js Docs](https://nextjs.org/docs/getting-started):
+3. Create a `.env.local` file for environment variables (if needed):
+```bash
+# Add any necessary API keys or configuration
+```
 
-Run the development server:
-
+4. Run the development server:
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-Building with type checking and linting
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Building for Production
 
 ```bash
 npm run build
-# or
-yarn build
+npm start
 ```
 
-Start build locally
+## Project Structure
 
-```bash
-npm run start
-# or
-yarn start
+```
+soil-conservation-planner/
+├── src/
+│   ├── components/
+│   │   ├── layout/          # Header and layout components
+│   │   ├── map/             # Map-related components (CroplandLegend, LayerControl)
+│   │   └── ui/              # UI components (PropertyPanel, SoilDashboard)
+│   ├── pages/
+│   │   ├── api/             # API routes (CDL proxy, soil data)
+│   │   └── index.tsx        # Main application page
+│   ├── types/               # TypeScript type definitions
+│   ├── utils/               # Utility functions
+│   │   ├── cdlQuery.ts      # CDL API integration
+│   │   ├── cdlCropTypes.ts  # Crop classification and validation
+│   │   └── soilColors.ts    # Color mapping utilities
+│   └── hooks/               # Custom React hooks
+├── public/                  # Static assets
+└── package.json
 ```
 
-### <a id="coming-up"></a> 📊 Upcoming (probably)
+## Key Components
 
-+ redesign zoom in / zoom out
-+ atom components for map ui
-+ fix error when setting new coordinates in hot reload "Map container is already initialized."
-+ breakpoint hook synced with tailwind breakpoint which is usable in js
-+ multiple map instances per page
-  + not possible atm since we read the map instance directly from window object 🤫
-+ add axios for fetching data
-  + move simulated "endpoint" (Places) to public folder and convert to JSON
+### Coordinate Transformation
+The application includes a complete implementation of the Albers Equal Area Conic projection (EPSG:5070) for querying the CropScape API, as it requires coordinates in this specific projection system rather than standard WGS84.
 
-- **Feel free to contribute!** 🤗
+### Crop Type Classification
+Over 150 crop types are classified into 8 categories with accuracy estimates based on NASS validation studies:
+- Annual crops
+- Perennial crops
+- Permanent crops (orchards, vineyards)
+- Pasture and hay
+- Forest
+- Developed land
+- Water
+- Other land uses
 
-### <a id="disable-lint"></a> 🤯 How to remove those  linting rules?
+### Transition Validation
+The system detects unlikely crop transitions to flag potential data quality issues, such as:
+- Single-year permanent crops
+- Impossible crop type transitions
+- Unexpected land use changes
 
-You can adjust the settings mainly in ```eslint.json``` and ```tsconfig.json```.
+## API Integration
 
-I've been using them a lot on my dayjob and I can't be anymore without them. 🥲
+### USDA NASS CropScape
+- **Endpoint**: `/api/cdl-value`
+- **Purpose**: CORS proxy with coordinate transformation
+- **Features**: 
+  - WGS84 to Albers projection conversion
+  - 24-hour caching for annual data
+  - Graceful handling of no-data responses
 
-### <a id="web-gl"></a> 👽 Web GL based mapping project
+### ISRIC SoilGrids
+- Tile-based soil property layers
+- Multiple depth intervals
+- Real-time data fetching
 
-Leafleft, graphic-based tile rendering or rasterized zoom levels are not smooth enough and you are in for crazy fast WebGL mapping? Here's my [maplibre next.js ts starter kit](https://github.com/richard-unterberg/maplibre-nextjs-ts-starter)
+### USDA NRCS Soil Data Access
+- SSURGO polygon data
+- Detailed component and horizon information
+- Soil interpretations and ratings
 
-### <a id="no-ts"></a> 📝 Don't wanna use typscript at all?
+## License
 
-See this nice javascript implementation - This repo is heavily inspired by this one:
-https://github.com/colbyfayock/next-leaflet-starter
+This project is licensed under the MIT License.
 
-Happy coding! ✌️👽
+## Acknowledgments
+
+This project is based on the [Next.js Leaflet Starter TypeScript](https://github.com/richard-unterberg/next-leaflet-starter-typescript) template by [Richard Unterberg](https://github.com/richard-unterberg).
+
+### Data Sources
+- **Soil Data**: [ISRIC SoilGrids](https://soilgrids.org/)
+- **Soil Surveys**: [USDA NRCS Soil Data Access](https://sdmdataaccess.nrcs.usda.gov/)
+- **Cropland Data**: [USDA NASS CropScape](https://nassgeodata.gmu.edu/CropScape/)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Author
+
+**Jonathan Maynard**
+- GitHub: [@jjmaynard](https://github.com/jjmaynard)
+
+## Support
+
+For questions or issues, please open an issue on the [GitHub repository](https://github.com/jjmaynard/soil-conservation-planner/issues).
