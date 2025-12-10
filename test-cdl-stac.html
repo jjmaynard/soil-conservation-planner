@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CDL STAC API</title>
+</head>
+<body>
+    <h1>Testing CDL STAC API</h1>
+    <button onclick="testSTAC()">Test STAC Search</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function testSTAC() {
+            const output = document.getElementById('output');
+            output.textContent = 'Checking available CDL years...\n';
+
+            try {
+                // Get collection temporal extent
+                output.textContent += '\n1. Getting collection metadata...\n';
+                const collectionUrl = 'https://planetarycomputer.microsoft.com/api/stac/v1/collections/usda-cdl';
+                const collResponse = await fetch(collectionUrl);
+                const collection = await collResponse.json();
+                
+                output.textContent += `Collection: ${collection.title}\n`;
+                output.textContent += `Description: ${collection.description}\n`;
+                output.textContent += `Temporal Extent: ${JSON.stringify(collection.extent?.temporal?.interval)}\n\n`;
+                
+                // Search for different years
+                const years = [2023, 2022, 2021, 2020];
+                output.textContent += '2. Checking available years:\n';
+                
+                for (const year of years) {
+                    const searchUrl = 'https://planetarycomputer.microsoft.com/api/stac/v1/search';
+                    const searchResponse = await fetch(searchUrl, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            collections: ['usda-cdl'],
+                            datetime: `${year}-01-01T00:00:00Z/${year}-12-31T23:59:59Z`,
+                            limit: 1
+                        })
+                    });
+                    const searchData = await searchResponse.json();
+                    const count = searchData.features?.length || 0;
+                    output.textContent += `  ${year}: ${count > 0 ? '✅ Available' : '❌ Not found'}\n`;
+                    
+                    if (count > 0 && year >= 2022) {
+                        output.textContent += `    Sample item: ${searchData.features[0].id}\n`;
+                    }
+                }
+                
+                // Get any recent cropland item to see the pattern
+                output.textContent += '\n3. Getting recent cropland items...\n';
+                const itemsUrl = 'https://planetarycomputer.microsoft.com/api/stac/v1/collections/usda-cdl/items?limit=10';
+                const itemsResponse = await fetch(itemsUrl);
+                const itemsData = await itemsResponse.json();
+                
+                // Extract unique years
+                const yearsFound = new Set();
+                itemsData.features?.forEach(f => {
+                    const startDate = f.properties.start_datetime;
+                    if (startDate) {
+                        const year = startDate.substring(0, 4);
+                        yearsFound.add(year);
+                    }
+                });
+                
+                output.textContent += `Years in recent items: ${Array.from(yearsFound).sort().join(', ')}\n\n`;
+                
+                // Try to construct working tile URL with most recent year
+                const mostRecentYear = Math.max(...Array.from(yearsFound).map(y => parseInt(y)));
+                output.textContent += `\n=== Using most recent year: ${mostRecentYear} ===\n\n`;
+                
+                // Test mosaic endpoint
+                const mosaicUrl = `https://planetarycomputer.microsoft.com/api/data/v1/mosaic/tiles/WebMercatorQuad/8/42/92@1x.png?collection=usda-cdl&assets=cropland&nodata=0&resampling=nearest`;
+                output.textContent += `Testing mosaic URL:\n${mosaicUrl}\n\n`;
+                
+                try {
+                    const testResponse = await fetch(mosaicUrl);
+                    output.textContent += `Mosaic endpoint status: ${testResponse.status} ${testResponse.statusText}\n`;
+                    if (testResponse.ok) {
+                        output.textContent += '✅ Mosaic endpoint works!\n\n';
+                        output.textContent += `Use this URL in your app:\n`;
+                        output.textContent += `https://planetarycomputer.microsoft.com/api/data/v1/mosaic/tiles/WebMercatorQuad/{z}/{x}/{y}@1x.png?collection=usda-cdl&assets=cropland&nodata=0&resampling=nearest`;
+                    }
+                } catch (e) {
+                    output.textContent += `Mosaic test error: ${e.message}\n`;
+                }
+
+            } catch (error) {
+                output.textContent += '\nError: ' + error.message;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

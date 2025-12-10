@@ -1,0 +1,121 @@
+/* Custom styles for Soil Survey Map */
+
+.soil-map {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+.soil-popup {
+  padding: 0.5rem;
+}
+
+.soil-popup h3 {
+  margin: 0 0 0.5rem 0;
+  color: #166534;
+}
+
+.soil-popup p {
+  margin: 0.25rem 0;
+}
+
+/* Leaflet popup customization for soil data */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+  max-width: 300px;
+}
+
+/* Custom marker colors for soil orders */
+.soil-marker-alfisols {
+  filter: hue-rotate(20deg);
+}
+
+.soil-marker-andisols {
+  filter: hue-rotate(120deg);
+}
+
+/* Layer control custom styling */
+.layer-control-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Depth selector styling */
+.depth-indicator {
+  transition: all 0.3s ease;
+}
+
+.depth-indicator:hover {
+  transform: scaleY(1.1);
+}
+
+/* Property panel animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.property-panel {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .layer-control,
+  .depth-selector {
+    max-width: 90vw;
+  }
+
+  .property-panel {
+    max-width: 100vw;
+    height: 60vh;
+    bottom: 0;
+    top: auto;
+    right: 0;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+/* Loading states */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+/* Texture triangle visualization */
+.texture-bar {
+  display: flex;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.texture-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.texture-segment:hover {
+  filter: brightness(1.1);
+}

@@ -1,0 +1,26 @@
+{
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_SOIL_API_URL": "@soil-api-url",
+      "NEXT_PUBLIC_USDA_WMS_URL": "https://sdmdataaccess.nrcs.usda.gov/Spatial/SDMWGS84Geographic.wms"
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, stale-while-revalidate=86400"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/map",
+      "destination": "/",
+      "permanent": false
+    }
+  ]
+}
