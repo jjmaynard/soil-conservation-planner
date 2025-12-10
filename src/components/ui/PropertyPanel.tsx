@@ -21,6 +21,8 @@ import {
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
+import { useOSDData } from '#src/hooks/useOSDData'
+import OSDPanel from '#src/components/ui/OSDPanel'
 import {
   Bar,
   BarChart,
@@ -341,6 +343,18 @@ function getTextureClassColor(textureClass: string): string {
     Unknown: '#d1d5db',
   }
   return colorMap[textureClass] || '#d1d5db'
+}
+
+// Component to display OSD data for a single soil component
+function ComponentOSDSection({ componentName }: { componentName: string }) {
+  const { osdData, isLoading, error } = useOSDData(componentName, true)
+
+  return (
+    <div className="border-gray-200 mt-4 border-t pt-4">
+      <h4 className="text-gray-900 mb-3 text-xs font-bold">Official Series Description</h4>
+      <OSDPanel osdData={osdData} isLoading={isLoading} />
+    </div>
+  )
 }
 
 interface PropertyPanelProps {
@@ -1320,6 +1334,9 @@ export default function PropertyPanel({
                       <InterpretationsDisplay interpretations={comp.interpretations} />
                     </div>
                   )}
+
+                  {/* Official Series Description Section */}
+                  <ComponentOSDSection componentName={comp.compname} />
                 </div>
               </details>
             ))}

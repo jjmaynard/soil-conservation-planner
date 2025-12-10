@@ -1,8 +1,8 @@
 // React hook for fetching and managing OSD data
 
 import { useState, useEffect } from 'react'
-import type { FormattedOSDData } from '@/types/osd'
-import { getFormattedOSDData } from '@/utils/osdApi'
+import type { FormattedOSDData } from '#src/types/osd'
+import { getFormattedOSDData } from '#src/utils/osdApi'
 
 interface UseOSDDataResult {
   osdData: FormattedOSDData | null

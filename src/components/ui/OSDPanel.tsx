@@ -14,7 +14,7 @@ import {
   Mountain,
   Leaf,
 } from 'lucide-react'
-import type { FormattedOSDData } from '@/types/osd'
+import type { FormattedOSDData } from '#src/types/osd'
 
 interface OSDPanelProps {
   osdData: FormattedOSDData | null

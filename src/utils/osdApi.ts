@@ -1,7 +1,7 @@
 // UC Davis Soil Series API client and data processor
 // API Documentation: https://casoilresource.lawr.ucdavis.edu/
 
-import type { OSDResponse, FormattedOSDData, OSDClimateData } from '@/types/osd'
+import type { OSDResponse, FormattedOSDData, OSDClimateData } from '#src/types/osd'
 
 const OSD_API_BASE = 'https://casoilresource.lawr.ucdavis.edu/api/soil-series.php'
 
