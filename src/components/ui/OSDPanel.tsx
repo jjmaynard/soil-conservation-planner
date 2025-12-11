@@ -360,7 +360,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
   const [profileProperty, setProfileProperty] = useState<'texture' | 'clay' | 'om' | 'ph' | 'awc' | 'ksat'>('texture')
   const [sectionStates, setSectionStates] = useState({
     description: true,
-    profile: false,
+    profile: true,
     classification: false,
     properties: false,
     interpretations: false,

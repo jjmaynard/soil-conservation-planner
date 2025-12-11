@@ -77,22 +77,35 @@ export default function LayerControl({
 
   return (
     <div
-      className={`absolute top-4 left-4 z-[1000] max-w-sm rounded-lg bg-white/95 shadow-lg backdrop-blur-sm ${className}`}
+      className="absolute top-4 left-4 max-w-sm"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+        borderRadius: '8px',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        zIndex: 1000
+      }}
     >
       {/* Header */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="hover:bg-gray-50 flex w-full items-center justify-between border-b p-3 transition-colors"
+        className="flex w-full items-center justify-between transition-colors"
+        style={{
+          padding: '12px',
+          borderBottom: '1px solid #e5e7eb',
+          backgroundColor: 'transparent'
+        }}
+        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f9fafb'}
+        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
       >
         <div className="flex items-center gap-2">
-          <Layers className="text-green-700 h-5 w-5" />
-          <h3 className="text-gray-900 font-semibold">Data Layers</h3>
+          <Layers className="h-5 w-5" style={{ color: '#15803d' }} />
+          <h3 className="font-semibold" style={{ color: '#111827' }}>Data Layers</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-gray-600 text-sm">
-            {visibleCount}/{layers.length}
-          </span>
           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </div>
       </button>
@@ -101,51 +114,21 @@ export default function LayerControl({
       {isExpanded && (
         <div className="max-h-96 overflow-y-auto p-3">
           <div className="space-y-4">
-            {/* Cropland Data Layer Section */}
-            {layers.find(l => l.id === 'cdl') && (
-              <div className="border-gray-200 rounded-lg border">
-                <button
-                  onClick={() => toggleSection('land-use')}
-                  className="hover:bg-gray-50 flex w-full items-center justify-between px-3 py-2 transition-colors"
-                >
-                  <h4 className="text-blue-600 text-sm font-medium">Land-Use Data</h4>
-                  {expandedSections.has('land-use') ? (
-                    <ChevronUp className="text-gray-500 h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="text-gray-500 h-4 w-4" />
-                  )}
-                </button>
-                {expandedSections.has('land-use') && (
-                  <div className="space-y-2 px-3 pb-2">
-                    {layers
-                      .filter(l => l.id === 'cdl')
-                      .map(layer => (
-                        <LayerItem
-                          key={layer.id}
-                          layer={layer}
-                          onToggle={onLayerToggle}
-                          onOpacityChange={onOpacityChange}
-                          cdlYear={cdlYear}
-                          onCdlYearChange={onCdlYearChange}
-                        />
-                      ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Survey Data Layers */}
+            {/* Soil Data - Moved to top */}
             {layers.filter(l => (l.type === 'vector' || l.type === 'wms') && l.id !== 'cdl').length > 0 && (
-              <div className="border-gray-200 rounded-lg border">
+              <div className="rounded-lg" style={{ border: '1px solid #e5e7eb' }}>
                 <button
                   onClick={() => toggleSection('soil-data')}
-                  className="hover:bg-gray-50 flex w-full items-center justify-between px-3 py-2 transition-colors"
+                  className="flex w-full items-center justify-between transition-colors"
+                  style={{ padding: '8px 12px', backgroundColor: 'transparent' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <h4 className="text-blue-600 text-sm font-medium">Soil Data</h4>
+                  <h4 className="text-sm font-medium" style={{ color: '#2563eb' }}>Soil Data</h4>
                   {expandedSections.has('soil-data') ? (
-                    <ChevronUp className="text-gray-500 h-4 w-4" />
+                    <ChevronUp className="h-4 w-4" style={{ color: '#6b7280' }} />
                   ) : (
-                    <ChevronDown className="text-gray-500 h-4 w-4" />
+                    <ChevronDown className="h-4 w-4" style={{ color: '#6b7280' }} />
                   )}
                 </button>
                 {expandedSections.has('soil-data') && (
@@ -165,87 +148,37 @@ export default function LayerControl({
               </div>
             )}
 
-            {/* Soil Property Layers */}
-            {layers.filter(l => l.type === 'raster').length > 0 && (
-              <div className="border-gray-200 rounded-lg border">
+            {/* Cropland Data Layer Section */}
+            {layers.find(l => l.id === 'cdl') && (
+              <div className="rounded-lg" style={{ border: '1px solid #e5e7eb' }}>
                 <button
-                  onClick={() => toggleSection('soil-properties')}
-                  className="hover:bg-gray-50 flex w-full items-center justify-between px-3 py-2 transition-colors"
+                  onClick={() => toggleSection('land-use')}
+                  className="flex w-full items-center justify-between transition-colors"
+                  style={{ padding: '8px 12px', backgroundColor: 'transparent' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <h4 className="text-blue-600 text-sm font-medium">Soil Properties</h4>
-                  {expandedSections.has('soil-properties') ? (
-                    <ChevronUp className="text-gray-500 h-4 w-4" />
+                  <h4 className="text-sm font-medium" style={{ color: '#2563eb' }}>Land-Use Data</h4>
+                  {expandedSections.has('land-use') ? (
+                    <ChevronUp className="h-4 w-4" style={{ color: '#6b7280' }} />
                   ) : (
-                    <ChevronDown className="text-gray-500 h-4 w-4" />
+                    <ChevronDown className="h-4 w-4" style={{ color: '#6b7280' }} />
                   )}
                 </button>
-                {expandedSections.has('soil-properties') && (
+                {expandedSections.has('land-use') && (
                   <div className="space-y-2 px-3 pb-2">
                     {layers
-                      .filter(l => l.type === 'raster')
+                      .filter(l => l.id === 'cdl')
                       .map(layer => (
                         <LayerItem
                           key={layer.id}
                           layer={layer}
                           onToggle={onLayerToggle}
                           onOpacityChange={onOpacityChange}
+                          cdlYear={cdlYear}
+                          onCdlYearChange={onCdlYearChange}
                         />
                       ))}
-
-                    {/* Depth Selector - only visible when soil property layers are active */}
-                    {hasSoilPropertyLayerActive && (
-                      <div className="border-gray-200 mt-3 border-t pt-3">
-                        <div className="mb-3 flex items-center gap-2">
-                          <LayersIcon className="text-green-700 h-4 w-4" />
-                          <h5 className="text-gray-900 text-sm font-medium">Soil Depth</h5>
-                        </div>
-
-                        {/* Depth Navigation */}
-                        <div className="mb-2 flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={handlePrevious}
-                            disabled={!canGoUp}
-                            className="bg-green-100 hover:bg-green-200 rounded p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-                            title="Shallower depth"
-                          >
-                            <ChevronUp className="text-green-800 h-4 w-4" />
-                          </button>
-
-                          <div className="flex-1 text-center">
-                            <div className="text-gray-900 text-sm font-semibold">
-                              {DEPTH_LABELS[selectedDepth]}
-                            </div>
-                            <div className="text-gray-500 text-xs">
-                              Layer {currentDepthIndex + 1} of {AVAILABLE_DEPTHS.length}
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={handleNext}
-                            disabled={!canGoDown}
-                            className="bg-green-100 hover:bg-green-200 rounded p-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-                            title="Deeper depth"
-                          >
-                            <ChevronDown className="text-green-800 h-4 w-4" />
-                          </button>
-                        </div>
-
-                        {/* Depth Selector Dropdown */}
-                        <select
-                          value={selectedDepth}
-                          onChange={e => onDepthChange(e.target.value as SoilDepth)}
-                          className="border-gray-300 focus:ring-green-600 w-full rounded-lg border px-3 py-2 text-sm focus:border-transparent focus:ring-2"
-                        >
-                          {AVAILABLE_DEPTHS.map(depth => (
-                            <option key={depth} value={depth}>
-                              {DEPTH_LABELS[depth]}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>

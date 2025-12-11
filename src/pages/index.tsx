@@ -4,11 +4,13 @@
 
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type L from 'leaflet'
 
 import Header from '#components/layout/Header'
 import CroplandLegend from '#components/Map/CroplandLegend'
 import LayerControl from '#components/Map/LayerControl'
+import MapSearch from '#components/Map/MapSearch'
 import LoadingSpinner from '#components/ui/LoadingSpinner'
 import PropertyPanel from '#components/ui/PropertyPanel'
 import { useDepthSelection } from '#src/hooks/useDepthSelection'
@@ -30,9 +32,10 @@ export default function Home() {
   const [selectedProfile, setSelectedProfile] = useState<SoilProfile | null>(null)
   const [ssurgoData, setSSURGOData] = useState<SSURGOData | null>(null)
   const [cdlHistory, setCdlHistory] = useState<CDLYearData[] | null>(null)
-  const [activeLayers, setActiveLayers] = useState<string[]>([])
+  const [activeLayers, setActiveLayers] = useState<string[]>(['ssurgo-mapunits'])
   const [cdlYear, setCdlYear] = useState<number>(2023)
   const [layerOpacities, setLayerOpacities] = useState<Record<string, number>>({})
+  const mapRef = useRef<L.Map | null>(null)
 
   // Define available soil layers
   const soilLayers: SoilLayer[] = [
@@ -41,7 +44,7 @@ export default function Home() {
       name: 'SSURGO Map Units',
       type: 'wms',
       url: process.env.NEXT_PUBLIC_NRCS_WMS_URL || 'https://sdmdataaccess.nrcs.usda.gov/Spatial/SDM.wms',
-      visible: false,
+      visible: true,
       opacity: layerOpacities['ssurgo-mapunits'] ?? 0.6,
     },
     {
@@ -127,6 +130,18 @@ export default function Home() {
     }))
   }, [])
 
+  const handleMapReady = useCallback((map: L.Map) => {
+    mapRef.current = map
+  }, [])
+
+  const handleLocationSearch = useCallback((lat: number, lng: number, zoom?: number) => {
+    if (mapRef.current) {
+      mapRef.current.flyTo([lat, lng], zoom || 12, {
+        duration: 1.5,
+      })
+    }
+  }, [])
+
   // Force CDL layer refresh when year changes
   useEffect(() => {
     if (activeLayers.includes('cdl')) {
@@ -152,14 +167,20 @@ export default function Home() {
         <Header />
 
         <div className="relative flex-1">
+          {/* Map Search Navigation - Positioned at top center */}
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[2000]">
+            <MapSearch onLocationSelect={handleLocationSearch} />
+          </div>
+
           <SoilMap
-            initialCenter={[44.5, -123.5]} // Oregon coordinates - change to your study area
-            initialZoom={8}
+            initialCenter={[39.8283, -98.5795]} // Center of continental US
+            initialZoom={5}
             selectedDepth={selectedDepth}
             activeLayers={activeLayers}
             soilLayers={soilLayers}
             onSoilClick={handleSoilClick}
             onSSURGOClick={handleSSURGOClick}
+            onMapReady={handleMapReady}
           />
 
           <LayerControl

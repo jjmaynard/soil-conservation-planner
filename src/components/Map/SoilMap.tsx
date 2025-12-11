@@ -32,6 +32,7 @@ interface SoilMapProps {
     muacres: string
     coordinates: [number, number]
   }) => void
+  onMapReady?: (map: L.Map) => void
   className?: string
 }
 
@@ -43,6 +44,7 @@ export default function SoilMap({
   soilLayers,
   onSoilClick,
   onSSURGOClick,
+  onMapReady,
   className = '',
 }: SoilMapProps) {
   console.log('SoilMap component rendering...')
@@ -91,6 +93,11 @@ export default function SoilMap({
     console.log('Map created:', map)
     mapRef.current = map
     console.log('Map stored in ref')
+    
+    // Notify parent that map is ready
+    if (onMapReady) {
+      onMapReady(map)
+    }
 
     // Add zoom control to bottom right
     L.control

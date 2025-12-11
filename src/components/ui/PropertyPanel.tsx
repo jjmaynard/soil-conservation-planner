@@ -35,7 +35,7 @@ import {
   Line,
   LineChart,
   Pie,
-  PieChart as RechartsPie,
+  PieChart as RechartsPieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -715,7 +715,7 @@ function ComponentDetailsSection({
   const { osdData, isLoading: osdLoading } = useOSDData(comp.compname, true)
   
   return (
-    <details key={idx} open={idx === 0} className="border-gray-300 group border-b">
+    <details key={idx} open={false} className="border-gray-300 group border-b">
       <summary className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer list-none px-6 py-4 transition-colors" style={{ backgroundColor: '#2563eb', color: '#ffffff' }}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -771,7 +771,7 @@ export default function PropertyPanel({
 }: PropertyPanelProps) {
   const [activeTab, setActiveTab] = useState<
     'profile' | 'ssurgo' | 'components' | 'horizons' | 'cropland'
-  >('ssurgo')
+  >('components')
   const [compositionView, setCompositionView] = useState<'bar' | 'pie'>('bar')
   const [chartKey, setChartKey] = useState(0)
   const [showSummaryModal, setShowSummaryModal] = useState(false)
@@ -826,109 +826,182 @@ export default function PropertyPanel({
     >
       {/* Enhanced Header with Gradient */}
       <div
-        className="border-b p-6"
+        className="border-b"
         style={{
           background: 'linear-gradient(to right, #fffbeb, #ffedd5)',
           borderBottomColor: '#fed7aa',
+          padding: '20px 24px 20px 24px',
         }}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="flex-1 min-w-0">
             {/* Main title */}
             {ssurgoData && (
-              <>
-                <h2 className="text-gray-900 text-lg font-bold leading-tight">
-                  {ssurgoData.musym} - {ssurgoData.muname}
-                </h2>
-                <div className="text-gray-600 mt-3 flex items-center space-x-4 text-sm">
+              <h2 className="text-gray-900 font-bold leading-tight" style={{ fontSize: '18px' }}>
+                {ssurgoData.musym} - {ssurgoData.muname}
+              </h2>
+            )}
+
+            {profile && !ssurgoData && (
+              <h2 className="text-gray-900 font-bold" style={{ fontSize: '18px' }}>
+                Soil Profile Data
+              </h2>
+            )}
+          </div>
+
+          {/* Close Button */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="hover:bg-white/50 rounded-full p-1 transition-colors flex-shrink-0"
+            style={{ marginTop: '-4px' }}
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" style={{ color: '#6b7280' }} />
+          </button>
+        </div>
+
+        {/* Metadata and Button Row */}
+        {ssurgoData && (
+          <div className="flex items-end justify-between">
+            {/* Left: Compact Metadata Stack */}
+            <div className="flex flex-col gap-1">
+              {/* Coordinates */}
+              <div className="flex items-center gap-2">
+                <MapPin className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
+                <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                  {formatCoordinates(
+                    ssurgoData.coordinates[0] || 0,
+                    ssurgoData.coordinates[1] || 0,
+                  )}
+                </span>
+              </div>
+              
+              {/* Map Unit Key and Acreage */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Database className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
                   <span
-                    className="rounded px-2 py-1 font-mono text-xs"
+                    className="rounded px-2 py-0.5 font-mono truncate"
                     style={{
                       backgroundColor: 'white',
                       border: '1px solid #fed7aa',
+                      fontSize: '11px',
+                      color: '#1f2937',
                     }}
                   >
                     {ssurgoData.mukey}
                   </span>
-                  {ssurgoData.muacres && (
-                    <span className="font-medium">{ssurgoData.muacres.toLocaleString()} acres</span>
-                  )}
-                  
-                  {/* Coordinates with icon */}
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-3 w-3" />
-                    <span className="text-xs">
-                      {formatCoordinates(
-                        ssurgoData.coordinates[0] || 0,
-                        ssurgoData.coordinates[1] || 0,
-                      )}
+                </div>
+                
+                {/* Acreage */}
+                {ssurgoData.muacres && (
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
+                    <span className="font-medium truncate" style={{ fontSize: '13px', color: '#374151' }}>
+                      {ssurgoData.muacres.toLocaleString()} acres
                     </span>
                   </div>
-
-                  {/* View Dashboard Button */}
-                  <button
-                    onClick={() => setShowFullDashboard(true)}
-                    onMouseEnter={() => setDashboardHover(true)}
-                    onMouseLeave={() => setDashboardHover(false)}
-                    className="rounded-md px-3 py-1 text-xs font-semibold transition-all shadow-sm ml-2"
-                    style={{
-                      backgroundColor: dashboardHover ? '#166534' : '#15803d',
-                      color: 'white',
-                    }}
-                    title="Open full dashboard view"
-                  >
-                    View Dashboard
-                  </button>
-                </div>
-              </>
-            )}
-
-            {profile && !ssurgoData && <h2 className="text-gray-900 text-lg font-bold">Soil Profile Data</h2>}
-
-            {/* Coordinates with icon - for profile only */}
-            {profile && !ssurgoData && (
-              <div className="text-gray-600 mt-2 flex items-center space-x-2 text-xs">
-                <MapPin className="h-3 w-3" />
-                <span>
-                  {formatCoordinates(
-                    profile?.coordinates[0] || 0,
-                    profile?.coordinates[1] || 0,
-                  )}
-                </span>
+                )}
               </div>
-            )}
-          </div>
+            </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 ml-4 text-xl transition-colors"
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
+            {/* Right: Compact Dashboard Button (bottom aligned) */}
+            <button
+              onClick={() => setShowFullDashboard(true)}
+              onMouseEnter={() => setDashboardHover(true)}
+              onMouseLeave={() => setDashboardHover(false)}
+              className="rounded-md px-3 py-1.5 font-semibold transition-all shadow-sm flex items-center gap-1.5 flex-shrink-0"
+              style={{
+                backgroundColor: dashboardHover ? '#166534' : '#15803d',
+                color: 'white',
+                fontSize: '12px',
+              }}
+              title="Open full dashboard view"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              View Dashboard
+            </button>
+          </div>
+        )}
+
+        {/* Profile coordinates */}
+        {profile && !ssurgoData && (
+          <div className="flex items-center gap-2">
+            <MapPin className="h-3.5 w-3.5 text-gray-500 flex-shrink-0" />
+            <span style={{ fontSize: '12px', color: '#6b7280' }}>
+              {formatCoordinates(
+                profile?.coordinates[0] || 0,
+                profile?.coordinates[1] || 0,
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
       <div className="border-gray-200 flex overflow-x-auto border-b" style={{ backgroundColor: '#f9fafb' }}>
         {ssurgoData && (
           <>
+            {ssurgoData.components && ssurgoData.components.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('components')}
+                  className="flex-1 whitespace-nowrap px-4 py-3 transition-all"
+                  style={
+                    activeTab === 'components'
+                      ? {
+                          backgroundColor: '#f0fdf4',
+                          color: '#15803d',
+                          borderBottom: '3px solid #15803d',
+                          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                        }
+                      : {
+                          backgroundColor: '#f9fafb',
+                          color: '#4b5563',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                        }
+                  }
+                  onMouseEnter={e => {
+                    if (activeTab !== 'components') {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6'
+                      e.currentTarget.style.color = '#111827'
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (activeTab !== 'components') {
+                      e.currentTarget.style.backgroundColor = '#f9fafb'
+                      e.currentTarget.style.color = '#4b5563'
+                    }
+                  }}
+                >
+                  Soil Components
+                </button>
+              </>
+            )}
             <button
               type="button"
               onClick={() => setActiveTab('ssurgo')}
-              className="flex-1 whitespace-nowrap px-4 py-3 text-sm font-medium transition-all"
+              className="flex-1 whitespace-nowrap px-4 py-3 transition-all"
               style={
                 activeTab === 'ssurgo'
                   ? {
-                      backgroundColor: 'white',
-                      color: '#b45309',
-                      borderBottom: '2px solid #d97706',
-                      boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+                      backgroundColor: '#f0fdf4',
+                      color: '#15803d',
+                      borderBottom: '3px solid #15803d',
+                      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
                     }
                   : {
                       backgroundColor: '#f9fafb',
                       color: '#4b5563',
+                      fontSize: '16px',
+                      fontWeight: 'bold',
                     }
               }
               onMouseEnter={e => {
@@ -950,51 +1023,23 @@ export default function PropertyPanel({
               <>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('components')}
-                  className="flex-1 whitespace-nowrap px-4 py-3 text-sm font-medium transition-all"
-                  style={
-                    activeTab === 'components'
-                      ? {
-                          backgroundColor: 'white',
-                          color: '#b45309',
-                          borderBottom: '2px solid #d97706',
-                          boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                        }
-                      : {
-                          backgroundColor: '#f9fafb',
-                          color: '#4b5563',
-                        }
-                  }
-                  onMouseEnter={e => {
-                    if (activeTab !== 'components') {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6'
-                      e.currentTarget.style.color = '#111827'
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (activeTab !== 'components') {
-                      e.currentTarget.style.backgroundColor = '#f9fafb'
-                      e.currentTarget.style.color = '#4b5563'
-                    }
-                  }}
-                >
-                  Components
-                </button>
-                <button
-                  type="button"
                   onClick={() => setActiveTab('cropland')}
-                  className="flex-1 whitespace-nowrap px-4 py-3 text-sm font-medium transition-all"
+                  className="flex-1 whitespace-nowrap px-4 py-3 transition-all"
                   style={
                     activeTab === 'cropland'
                       ? {
-                          backgroundColor: 'white',
-                          color: '#b45309',
-                          borderBottom: '2px solid #d97706',
-                          boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+                          backgroundColor: '#f0fdf4',
+                          color: '#15803d',
+                          borderBottom: '3px solid #15803d',
+                          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
                         }
                       : {
                           backgroundColor: '#f9fafb',
                           color: '#4b5563',
+                          fontSize: '16px',
+                          fontWeight: 'bold',
                         }
                   }
                   onMouseEnter={e => {
@@ -1024,17 +1069,22 @@ export default function PropertyPanel({
         {activeTab === 'ssurgo' && ssurgoData && (
           <div className="-mx-4 -mt-4">
             {/* Map Unit Composition */}
-            <details open className="border-gray-300 group border-b">
-              <summary className="bg-gray-100 hover:bg-gray-200 cursor-pointer list-none px-6 py-3">
-                <div className="flex items-center gap-2">
+            <details open className="group mb-4">
+              <summary className="cursor-pointer list-none rounded-lg px-6 py-3.5 transition-all"
+                style={{
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb'
+                }}>
+                <div className="flex items-center gap-3">
                   <svg
-                    className="text-black h-3 w-3 transition-transform group-open:rotate-90"
+                    className="h-4 w-4 transition-transform group-open:rotate-90"
                     fill="currentColor"
                     viewBox="0 0 20 20"
+                    style={{ color: '#15803d' }}
                   >
                     <path d="M6 6L14 10L6 14V6Z" />
                   </svg>
-                  <h3 className="text-gray-900 text-sm font-bold">Map Unit Composition</h3>
+                  <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#111827', letterSpacing: '-0.01em' }}>Map Unit Composition</h3>
                 </div>
               </summary>
               <div className="bg-white px-6 pb-4 pt-3">
@@ -1115,31 +1165,24 @@ export default function PropertyPanel({
                     ) : (
                       <div key={chartKey}>
                         {/* Pie Chart */}
-                        <div className="h-64 w-full" style={{ minHeight: '256px' }}>
-                          <ResponsiveContainer width="100%" height={256}>
-                            <RechartsPie>
-                              <Pie
-                                data={ssurgoData.components.map(comp => ({
+                        <div style={{ width: '100%', height: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <RechartsPieChart width={440} height={300}>
+                            <Pie
+                              data={ssurgoData.components.map((comp, idx) => {
+                                const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                                return {
                                   name: comp.compname,
-                                  value: comp.comppct_r || 0,
-                                }))}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                label={(entry: any) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
-                                outerRadius={80}
-                                dataKey="value"
-                              >
-                                {ssurgoData.components.map((comp, idx) => {
-                                  const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
-                                  const fillColor =
-                                    comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % 3) + 1]
-                                  return <Cell key={`cell-${idx}`} fill={fillColor} />
-                                })}
-                              </Pie>
-                              <Tooltip formatter={(value: any) => `${value}%`} />
-                            </RechartsPie>
-                          </ResponsiveContainer>
+                                  value: Number(comp.comppct_r) || 0,
+                                  fill: comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % 3) + 1],
+                                }
+                              })}
+                              dataKey="value"
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={130}
+                            />
+                            <Tooltip />
+                          </RechartsPieChart>
                         </div>
 
                         {/* Legend */}
@@ -1199,17 +1242,22 @@ export default function PropertyPanel({
             </details>
 
             {/* Map Unit Data */}
-            <details open className="border-gray-300 group border-b">
-              <summary className="bg-gray-100 hover:bg-gray-200 cursor-pointer list-none px-6 py-3">
-                <div className="flex items-center gap-2">
+            <details open className="group mb-4">
+              <summary className="cursor-pointer list-none rounded-lg px-6 py-3.5 transition-all"
+                style={{
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb'
+                }}>
+                <div className="flex items-center gap-3">
                   <svg
-                    className="text-black h-3 w-3 transition-transform group-open:rotate-90"
+                    className="h-4 w-4 transition-transform group-open:rotate-90"
                     fill="currentColor"
                     viewBox="0 0 20 20"
+                    style={{ color: '#15803d' }}
                   >
                     <path d="M6 6L14 10L6 14V6Z" />
                   </svg>
-                  <h3 className="text-gray-900 text-sm font-bold">Map Unit Data</h3>
+                  <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#111827', letterSpacing: '-0.01em' }}>Map Unit Data</h3>
                 </div>
               </summary>
               <div className="bg-white px-6 pb-4 pt-3">
@@ -1245,17 +1293,22 @@ export default function PropertyPanel({
             </details>
 
             {/* Survey Metadata */}
-            <details open className="border-gray-300 group border-b">
-              <summary className="bg-gray-100 hover:bg-gray-200 cursor-pointer list-none px-6 py-3">
-                <div className="flex items-center gap-2">
+            <details open className="group mb-4">
+              <summary className="cursor-pointer list-none rounded-lg px-6 py-3.5 transition-all"
+                style={{
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb'
+                }}>
+                <div className="flex items-center gap-3">
                   <svg
-                    className="text-black h-3 w-3 transition-transform group-open:rotate-90"
+                    className="h-4 w-4 transition-transform group-open:rotate-90"
                     fill="currentColor"
                     viewBox="0 0 20 20"
+                    style={{ color: '#15803d' }}
                   >
                     <path d="M6 6L14 10L6 14V6Z" />
                   </svg>
-                  <h3 className="text-gray-900 text-sm font-bold">Survey Metadata</h3>
+                  <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#111827', letterSpacing: '-0.01em' }}>Survey Metadata</h3>
                 </div>
               </summary>
               <div className="bg-white px-6 pb-4 pt-3">
@@ -1425,47 +1478,43 @@ export default function PropertyPanel({
                   </div>
                 </>
               ) : (
-                <>
+                <div>
                   {/* Pie Chart */}
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RechartsPie>
-                        <Pie
-                          data={ssurgoData.components.map((comp, idx) => {
-                            const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
-                            return {
-                              name: comp.compname,
-                              value: comp.comppct_r || 0,
-                              color: comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % 3) + 1],
-                            }
-                          })}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={(entry: any) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {ssurgoData.components.map((comp, idx) => {
-                            const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
-                            const fillColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % 3) + 1]
-                            return <Cell key={`cell-${idx}`} fill={fillColor} />
-                          })}
-                        </Pie>
-                        <Tooltip
-                          formatter={(value: any) => `${value}%`}
-                          contentStyle={{
-                            backgroundColor: '#ffffff',
-                            border: '1px solid #d1d5db',
-                            borderRadius: '6px',
-                            padding: '8px',
-                          }}
-                        />
-                      </RechartsPie>
-                    </ResponsiveContainer>
+                  <div style={{ width: '100%', height: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <RechartsPieChart width={440} height={300}>
+                      <Pie
+                        data={ssurgoData.components.map((comp, idx) => {
+                          const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                          return {
+                            name: comp.compname,
+                            value: Number(comp.comppct_r) || 0,
+                            fill: comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % 3) + 1],
+                          }
+                        })}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={130}
+                      />
+                      <Tooltip />
+                    </RechartsPieChart>
+                  </div>                  {/* Legend */}
+                  <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
+                    {ssurgoData.components.map((comp, idx) => {
+                      const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                      const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % 3) + 1]
+
+                      return (
+                        <div key={idx} className="flex items-center gap-1.5">
+                          <div className="h-3 w-3 rounded" style={{ backgroundColor: bgColor }} />
+                          <span className="text-gray-700">
+                            {comp.compname} <span className="font-semibold">{comp.comppct_r}%</span>
+                          </span>
+                        </div>
+                      )
+                    })}
                   </div>
-                </>
+                </div>
               )}
 
               {/* Compare Profiles Button */}

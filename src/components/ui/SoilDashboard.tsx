@@ -138,7 +138,7 @@ export default function SoilDashboard({ ssurgoData, cdlHistory, onClose }: SoilD
   const compositionData =
     ssurgoData.components?.map(comp => ({
       name: comp.compname,
-      value: comp.comppct_r || 0,
+      value: Number(comp.comppct_r) || 0,
       major: comp.majcompflag === 'Yes',
     })) || []
 
@@ -276,31 +276,28 @@ export default function SoilDashboard({ ssurgoData, cdlHistory, onClose }: SoilD
               <BarChart3 className="text-blue-600 h-5 w-5" />
               <span>Component Composition</span>
             </h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={compositionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}%`}
-                    outerRadius={80}
-                    dataKey="value"
-                  >
-                    {compositionData.map((entry, index) => {
-                      const colors = ['#10b981', '#3b82f6', '#f59e0b', '#a78bfa', '#ef4444']
-                      return (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.major ? colors[0] : colors[(index % 4) + 1]}
-                        />
-                      )
-                    })}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+            <div style={{ width: '100%', height: '280px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <PieChart width={380} height={280}>
+                <Pie
+                  data={compositionData}
+                  cx={190}
+                  cy={140}
+                  labelLine={false}
+                  outerRadius={120}
+                  dataKey="value"
+                >
+                  {compositionData.map((entry, index) => {
+                    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#a78bfa', '#ef4444']
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.major ? colors[0] : colors[(index % 4) + 1]}
+                      />
+                    )
+                  })}
+                </Pie>
+                <Tooltip />
+              </PieChart>
             </div>
             <div className="mt-4 space-y-2">
               {compositionData.map((comp, idx) => {
