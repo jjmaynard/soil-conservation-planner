@@ -341,8 +341,10 @@ function CharacteristicsTab({ osdData }: { osdData: OSDData }) {
           <div className="space-y-2">
             {osdData.remarks.diagnosticHorizons.map((horizon, idx) => (
               <div key={idx} className="text-sm bg-gray-50 p-2 rounded">
-                <div className="font-medium text-gray-700">{horizon.name}</div>
-                <div className="text-gray-600 text-xs mt-1">{horizon.description}</div>
+                <div className="font-medium text-gray-700">{typeof horizon === 'string' ? horizon : horizon.name}</div>
+                {typeof horizon === 'object' && horizon.description && (
+                  <div className="text-gray-600 text-xs mt-1">{horizon.description}</div>
+                )}
               </div>
             ))}
           </div>
