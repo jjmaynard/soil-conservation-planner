@@ -177,7 +177,7 @@ export default function MapSearch({ onLocationSelect, className = '' }: MapSearc
 
         {/* Help text */}
         <div className="px-3 py-2 border-t text-xs" style={{ color: '#6b7280', borderTopColor: '#e5e7eb' }}>
-          Examples: "San Francisco, CA" or "40.7128, -74.0060"
+          Examples: &ldquo;San Francisco, CA&rdquo; or &ldquo;40.7128, -74.0060&rdquo;
         </div>
       </div>
     </div>
