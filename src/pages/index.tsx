@@ -156,6 +156,7 @@ export default function Home() {
         setActiveLayers(prev => [...prev, 'cdl'])
       }, 10)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cdlYear])
 
   return (

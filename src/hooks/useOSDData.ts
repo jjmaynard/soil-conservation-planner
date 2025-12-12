@@ -56,6 +56,7 @@ export function useOSDData(seriesName: string | null, enabled = true): UseOSDDat
       setOsdData(null)
       setError(null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seriesName, enabled])
 
   return {

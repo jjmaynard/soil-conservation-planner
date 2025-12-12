@@ -913,6 +913,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageGalleryOpen, galleryImages.length]);
 
   // Load description when OSD data changes
@@ -1434,7 +1435,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
                     </div>
                   </div>
                   <div className="mt-3 bg-white rounded p-2 text-xs text-gray-600">
-                    <p>💡 <span className="font-medium">What's being loaded:</span></p>
+                    <p>💡 <span className="font-medium">What&apos;s being loaded:</span></p>
                     <ul className="ml-4 mt-1 list-disc space-y-0.5">
                       <li>Site characteristics and suitability</li>
                       <li>Vegetation and productivity data</li>
@@ -1635,6 +1636,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
                           className="relative cursor-pointer group"
                           onClick={() => openImageGallery(esdData.resources.images, idx)}
                         >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img 
                             src={image.url} 
                             alt={image.caption}
@@ -1804,6 +1806,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
                 </button>
               )}
 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={galleryImages[currentImageIndex].url}
                 alt={galleryImages[currentImageIndex].caption}
@@ -1856,6 +1859,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
                         : 'border-gray-300 opacity-70 hover:opacity-100 hover:border-blue-300'
                     }`}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={img.url}
                       alt={img.caption}

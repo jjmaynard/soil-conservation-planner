@@ -230,6 +230,7 @@ export function ESDDetailModal({ esdData, onClose }: ESDDetailModalProps) {
                           }}
                           className="relative group overflow-hidden rounded-lg border-2 border-gray-200 hover:border-blue-400 transition-all"
                         >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={`https://edit.jornada.nmsu.edu${img.path}`.replace('Image preview', '')}
                             alt={img.caption || 'Ecological site image'}
@@ -438,6 +439,7 @@ export function ESDDetailModal({ esdData, onClose }: ESDDetailModalProps) {
                 </button>
               )}
 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`https://edit.jornada.nmsu.edu${images[selectedImageIndex].path}`.replace('Image preview', '')}
                 alt={images[selectedImageIndex].caption}
