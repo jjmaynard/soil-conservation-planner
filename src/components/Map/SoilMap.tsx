@@ -392,8 +392,10 @@ async function querySSURGOMapUnit(map: L.Map, event: L.LeafletMouseEvent): Promi
     c.runoff,
     c.nirrcapcl,
     c.nirrcapscl,
+    c.nirrcapunit,
     c.irrcapcl,
     c.irrcapscl,
+    c.irrcapunit,
     c.drainagecl,
     c.hydricrating,
     c.taxtempcl,
@@ -522,14 +524,14 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC`
     // Parse comprehensive query results
     // Field mapping by index:
     // 0-5: Map Unit & Legend (mukey, musym, muname, muacres, areasymbol, areaname)
-    // 6-15: Component Basic (cokey, compname, comppct_r, majcompflag, slope_r, runoff, nirrcapcl, nirrcapscl, irrcapcl, irrcapscl)
-    // 16-19: Component Limitations (drainagecl, hydricrating, taxtempcl, frostact)
-    // 20-21: Ecological Site (ecoclassid, ecoclassname)
-    // 22-26: Taxonomy (taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp)
-    // 27-30: Monthly Data (pondfreqcl, ponddurcl, flodfreqcl, floddurcl)
-    // 31-33: Restrictions (reskind, resdept_r, reshard)
-    // 34: Water Table (wtdepannmin)
-    // 35-49: Horizon (chkey, hzname, hzdept_r, hzdepb_r, sandtotal_r, silttotal_r, claytotal_r, om_r, ph1to1h2o_r, awc_r, ksat_r, dbthirdbar_r, cec7_r, pi_r, lep_r, ec_r)
+    // 6-17: Component Basic (cokey, compname, comppct_r, majcompflag, slope_r, runoff, nirrcapcl, nirrcapscl, nirrcapunit, irrcapcl, irrcapscl, irrcapunit)
+    // 18-21: Component Limitations (drainagecl, hydricrating, taxtempcl, frostact)
+    // 22-23: Ecological Site (ecoclassid, ecoclassname)
+    // 24-28: Taxonomy (taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp)
+    // 29-32: Monthly Data (pondfreqcl, ponddurcl, flodfreqcl, floddurcl)
+    // 33-35: Restrictions (reskind, resdept_r, reshard)
+    // 36: Water Table (wtdepannmin)
+    // 37-51: Horizon (chkey, hzname, hzdept_r, hzdepb_r, sandtotal_r, silttotal_r, claytotal_r, om_r, ph1to1h2o_r, awc_r, ksat_r, dbthirdbar_r, cec7_r, pi_r, lep_r, ec_r)
     // 50-53: Interpretations (mrulename, ruledepth, interphrc, interphr)
 
     const componentsMap = new Map()
@@ -548,55 +550,57 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC`
           runoff: row[11],
           nirrcapcl: row[12],
           nirrcapscl: row[13],
-          irrcapcl: row[14],
-          irrcapscl: row[15],
-          drainagecl: row[16],
-          hydricrating: row[17],
-          taxtempcl: row[18],
-          frostact: row[19],
-          ecoclassid: row[20],
-          ecoclassname: row[21],
-          taxclname: row[22],
-          taxorder: row[23],
-          taxsuborder: row[24],
-          taxgrtgroup: row[25],
-          taxsubgrp: row[26],
-          pondfreqcl: row[27],
-          ponddurcl: row[28],
-          flodfreqcl: row[29],
-          floddurcl: row[30],
-          reskind: row[31],
-          resdept_r: row[32],
-          reshard: row[33],
-          wtdepannmin: row[34],
+          nirrcapunit: row[14],
+          irrcapcl: row[15],
+          irrcapscl: row[16],
+          irrcapunit: row[17],
+          drainagecl: row[18],
+          hydricrating: row[19],
+          taxtempcl: row[20],
+          frostact: row[21],
+          ecoclassid: row[22],
+          ecoclassname: row[23],
+          taxclname: row[24],
+          taxorder: row[25],
+          taxsuborder: row[26],
+          taxgrtgroup: row[27],
+          taxsubgrp: row[28],
+          pondfreqcl: row[29],
+          ponddurcl: row[30],
+          flodfreqcl: row[31],
+          floddurcl: row[32],
+          reskind: row[33],
+          resdept_r: row[34],
+          reshard: row[35],
+          wtdepannmin: row[36],
           horizons: [],
           interpretations: [], // Will be populated by separate query
         })
       }
 
       // Add horizon data if present
-      if (cokey && row[35]) {
+      if (cokey && row[37]) {
         // chkey exists
         const component = componentsMap.get(cokey)
         // Check if this horizon is already added (avoid duplicates)
-        if (!component.horizons.some((h: any) => h.chkey === row[35])) {
+        if (!component.horizons.some((h: any) => h.chkey === row[37])) {
           component.horizons.push({
-            chkey: row[35],
-            hzname: row[36],
-            hzdept_r: row[37],
-            hzdepb_r: row[38],
-            sandtotal_r: row[39],
-            silttotal_r: row[40],
-            claytotal_r: row[41],
-            om_r: row[42],
-            ph1to1h2o_r: row[43],
-            awc_r: row[44],
-            ksat_r: row[45],
-            dbthirdbar_r: row[46],
-            cec7_r: row[47],
-            pi_r: row[48],
-            lep_r: row[49],
-            ec_r: row[50],
+            chkey: row[37],
+            hzname: row[38],
+            hzdept_r: row[39],
+            hzdepb_r: row[40],
+            sandtotal_r: row[41],
+            silttotal_r: row[42],
+            claytotal_r: row[43],
+            om_r: row[44],
+            ph1to1h2o_r: row[45],
+            awc_r: row[46],
+            ksat_r: row[47],
+            dbthirdbar_r: row[48],
+            cec7_r: row[49],
+            pi_r: row[50],
+            lep_r: row[51],
+            ec_r: row[52],
           })
         }
       }

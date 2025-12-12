@@ -75,6 +75,16 @@ export interface SSURGOComponent {
   slope_r?: number
   slopelenusle_r?: number
   runoff?: string
+  // Land Capability Classification
+  nirrcapcl?: string
+  nirrcapscl?: string
+  nirrcapunit?: string
+  irrcapcl?: string
+  irrcapscl?: string
+  irrcapunit?: string
+  // Other limitations
+  drainagecl?: string
+  hydricrating?: string
   tfact?: number
   wei?: string
   weg?: string
@@ -91,9 +101,20 @@ export interface SSURGOComponent {
   taxreaction?: string
   taxtempcl?: string
   taxmoistscl?: string
+  frostact?: string
   // Ecological Site
   ecoclassid?: string
   ecoclassname?: string
+  // Hydrologic features
+  pondfreqcl?: string
+  ponddurcl?: string
+  flodfreqcl?: string
+  floddurcl?: string
+  wtdepannmin?: number
+  // Restrictions
+  reskind?: string
+  resdept_r?: number
+  reshard?: string
   // Parent Material
   pmorigin?: string
   pmkind?: string

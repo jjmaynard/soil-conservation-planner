@@ -47,8 +47,10 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
   // Extract land capability data
   const nirrcapcl = component.nirrcapcl || component.nirrcapclass
   const nirrcapscl = component.nirrcapscl || component.nirrcapsubclass
+  const nirrcapunit = component.nirrcapunit
   const irrcapcl = component.irrcapcl || component.irrcapclass
   const irrcapscl = component.irrcapscl || component.irrcapsubclass
+  const irrcapunit = component.irrcapunit
 
   const nonIrrigatedClass = (nirrcapcl?.toString().match(/\d/)?.[0] || null) as '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | null
   const nonIrrigatedSubclass = nirrcapscl || nirrcapcl?.toString().replace(/\d/g, '') || null
@@ -120,10 +122,13 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                 <div className="bg-white rounded-lg border border-gray-200 p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div
-                      className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+                      className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold"
                       style={{ backgroundColor: getCapabilityColor(nonIrrigatedClass) }}
                     >
-                      {nonIrrigatedClass}
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-3xl leading-none">{nonIrrigatedClass}</span>
+                        {nonIrrigatedSubclass && <span className="text-lg leading-none">{nonIrrigatedSubclass}</span>}
+                      </div>
                     </div>
                     <div className="flex-1">
                       <h5 className="font-semibold text-gray-900 mb-1">
@@ -133,6 +138,11 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                         {LAND_CAPABILITY_INTERPRETATIONS.classes[nonIrrigatedClass]?.name ||
                           `Class ${nonIrrigatedClass}`}
                       </p>
+                      {nirrcapunit && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          <strong>Unit:</strong> {nirrcapunit}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -208,10 +218,13 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                 <div className="bg-white rounded-lg border border-gray-200 p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div
-                      className="w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+                      className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold"
                       style={{ backgroundColor: getCapabilityColor(irrigatedClass) }}
                     >
-                      {irrigatedClass}
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-3xl leading-none">{irrigatedClass}</span>
+                        {irrigatedSubclass && <span className="text-lg leading-none">{irrigatedSubclass}</span>}
+                      </div>
                     </div>
                     <div className="flex-1">
                       <h5 className="font-semibold text-gray-900 mb-1">
@@ -221,6 +234,11 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                         {LAND_CAPABILITY_INTERPRETATIONS.classes[irrigatedClass]?.name ||
                           `Class ${irrigatedClass}`}
                       </p>
+                      {irrcapunit && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          <strong>Unit:</strong> {irrcapunit}
+                        </p>
+                      )}
                     </div>
                   </div>
 

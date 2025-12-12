@@ -363,6 +363,7 @@ interface OSDPanelProps {
     ecoclassname?: string
   }
   components?: any[]
+  componentColor?: string
 }
 
 interface CollapsibleSectionProps {
@@ -372,9 +373,10 @@ interface CollapsibleSectionProps {
   children: React.ReactNode
   isOpen?: boolean
   onToggle?: () => void
+  accent?: string
 }
 
-function CollapsibleSection({ title, icon, defaultOpen = false, children, isOpen: controlledIsOpen, onToggle }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, icon, defaultOpen = false, children, isOpen: controlledIsOpen, onToggle, accent }: CollapsibleSectionProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(defaultOpen)
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
   
@@ -391,9 +393,12 @@ function CollapsibleSection({ title, icon, defaultOpen = false, children, isOpen
       <button
         onClick={handleToggle}
         className="w-full flex items-center justify-between p-3 bg-gray-100 hover:bg-gray-200 transition-colors"
+        style={accent ? { borderLeft: `4px solid ${accent}` } : undefined}
       >
         <div className="flex items-center gap-2">
-          {icon}
+          <div style={accent ? { color: accent } : undefined}>
+            {icon}
+          </div>
           <span className="font-semibold text-gray-900">{title}</span>
         </div>
         {isOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
@@ -825,7 +830,7 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
   )
 }
 
-export default function OSDPanel({ osdData, isLoading, className = '', interpretations, ssurgoHorizons, componentEcoSite, components }: OSDPanelProps) {
+export default function OSDPanel({ osdData, isLoading, className = '', interpretations, ssurgoHorizons, componentEcoSite, components, componentColor }: OSDPanelProps) {
   const [allExpanded, setAllExpanded] = useState(false)
   const [description, setDescription] = useState<string | null>(null)
   const [descriptionLoading, setDescriptionLoading] = useState(false)
@@ -959,14 +964,17 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
   return (
     <div className={`bg-gray-100 rounded-lg shadow overflow-hidden ${className}`} style={{ backgroundColor: '#f3f4f6' }}>
       {/* Header */}
-      <div className="bg-blue-600 text-white p-4 rounded-t-lg" style={{ backgroundColor: '#2563eb', color: '#ffffff' }}>
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="text-white p-4 rounded-t-lg" style={{ backgroundColor: componentColor || '#2563eb', color: '#ffffff' }}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
             <p className="text-sm" style={{ color: '#ffffff', opacity: 0.9 }}>{osdData.classification.family}</p>
           </div>
           <button
             onClick={toggleAll}
-            className="px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 rounded text-sm font-medium transition-colors"
+            className="px-3 py-1.5 bg-white hover:bg-white rounded text-sm font-medium transition-colors shadow-sm whitespace-nowrap flex-shrink-0"
+            style={{ color: componentColor || '#2563eb', opacity: 0.95, minWidth: '110px' }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.95'}
           >
             {allExpanded ? 'Collapse All' : 'Expand All'}
           </button>
@@ -978,9 +986,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {/* Description Section - FIRST */}
         <CollapsibleSection 
           title="Description" 
-          icon={<FileText className="w-5 h-5 text-blue-600" />} 
+          icon={<FileText className="w-5 h-5" />} 
           isOpen={sectionStates.description}
           onToggle={() => toggleSection('description')}
+          accent={componentColor}
         >
           {descriptionLoading ? (
             <div className="flex items-center justify-center py-4">
@@ -1002,9 +1011,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {ssurgoHorizons && ssurgoHorizons.length > 0 && (
           <CollapsibleSection
             title="Soil Profile"
-            icon={<Layers className="w-5 h-5 text-amber-600" />}
+            icon={<Layers className="w-5 h-5" />}
             isOpen={sectionStates.profile}
             onToggle={() => toggleSection('profile')}
+            accent={componentColor}
           >
             <div className="space-y-3">
               {/* Property Selector */}
@@ -1248,9 +1258,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {/* Classification */}
         <CollapsibleSection 
           title="Taxonomic Classification" 
-          icon={<Layers className="w-5 h-5 text-blue-600" />} 
+          icon={<Layers className="w-5 h-5" />} 
           isOpen={sectionStates.classification}
           onToggle={() => toggleSection('classification')}
+          accent={componentColor}
         >
           <div className="space-y-1">
             <DataRow label="Order" value={osdData.classification.order} />
@@ -1273,9 +1284,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {/* Horizons */}
         <CollapsibleSection 
           title="OSD Horizon Descriptions" 
-          icon={<Layers className="w-5 h-5 text-orange-600" />} 
+          icon={<Layers className="w-5 h-5" />} 
           isOpen={sectionStates.horizons}
           onToggle={() => toggleSection('horizons')}
+          accent={componentColor}
         >
           <div className="space-y-3">
             {osdData.horizons.map((hz, idx) => (
@@ -1337,9 +1349,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {osdData.parentMaterial.length > 0 && (
           <CollapsibleSection 
             title="Parent Material" 
-            icon={<Mountain className="w-5 h-5 text-amber-600" />}
+            icon={<Mountain className="w-5 h-5" />}
             isOpen={sectionStates.parentMaterial}
             onToggle={() => toggleSection('parentMaterial')}
+            accent={componentColor}
           >
             <div className="space-y-2">
               {osdData.parentMaterial.map((pm, idx) => (
@@ -1355,9 +1368,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {/* Climate */}
         <CollapsibleSection 
           title="Climate Summary" 
-          icon={<Thermometer className="w-5 h-5 text-purple-600" />}
+          icon={<Thermometer className="w-5 h-5" />}
           isOpen={sectionStates.climate}
           onToggle={() => toggleSection('climate')}
+          accent={componentColor}
         >
           <div className="space-y-2">
             <div>
@@ -1411,9 +1425,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {componentEcoSite?.ecoclassid && (
           <CollapsibleSection 
             title="Ecological Site Description" 
-            icon={<Leaf className="w-5 h-5 text-green-600" />}
+            icon={<Leaf className="w-5 h-5" />}
             isOpen={sectionStates.ecological}
             onToggle={() => toggleSection('ecological')}
+            accent={componentColor}
           >
             {esdLoading && !esdData && (
               <div className="space-y-3">
@@ -1672,9 +1687,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {components && components.length > 0 && (
           <CollapsibleSection 
             title="Land Capability Classification (LCC)" 
-            icon={<Award className="w-5 h-5 text-amber-600" />}
+            icon={<Award className="w-5 h-5" />}
             isOpen={sectionStates.lcc}
             onToggle={() => toggleSection('lcc')}
+            accent={componentColor}
           >
             <LCCContent components={components} />
           </CollapsibleSection>
@@ -1684,9 +1700,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {interpretations && interpretations.length > 0 && (
           <CollapsibleSection 
             title="Soil Interpretations" 
-            icon={<FileText className="w-5 h-5 text-purple-600" />} 
+            icon={<FileText className="w-5 h-5" />} 
             isOpen={sectionStates.interpretations}
             onToggle={() => toggleSection('interpretations')}
+            accent={componentColor}
           >
             <InterpretationsContent interpretations={interpretations} />
           </CollapsibleSection>
@@ -1695,9 +1712,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {/* Properties */}
         <CollapsibleSection 
           title="Series Properties" 
-          icon={<Info className="w-5 h-5 text-green-600" />} 
+          icon={<Info className="w-5 h-5" />} 
           isOpen={sectionStates.properties}
           onToggle={() => toggleSection('properties')}
+          accent={componentColor}
         >
           <div className="space-y-1">
             <DataRow label="Drainage Class" value={osdData.properties.drainage} />
@@ -1717,9 +1735,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {/* Extent */}
         <CollapsibleSection 
           title="Geographic Extent" 
-          icon={<MapPin className="w-5 h-5 text-red-600" />}
+          icon={<MapPin className="w-5 h-5" />}
           isOpen={sectionStates.extent}
           onToggle={() => toggleSection('extent')}
+          accent={componentColor}
         >
           <div className="space-y-1">
             <DataRow label="Area" value={osdData.extent.acres.toLocaleString()} unit="acres" />
@@ -1743,9 +1762,10 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {osdData.associatedSoils.length > 0 && (
           <CollapsibleSection 
             title="Associated Soils" 
-            icon={<Info className="w-5 h-5 text-teal-600" />}
+            icon={<Info className="w-5 h-5" />}
             isOpen={sectionStates.associated}
             onToggle={() => toggleSection('associated')}
+            accent={componentColor}
           >
             <div className="flex flex-wrap gap-2">
               {osdData.associatedSoils.map((soil) => (

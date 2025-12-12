@@ -727,34 +727,46 @@ function ComponentDetailsSection({
 }) {
   const { osdData, isLoading: osdLoading } = useOSDData(comp.compname, true)
   
+  // Use the same color assignment logic as Map Unit Composition
+  const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+  const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1]
+  
   return (
-    <details key={idx} open={false} className="border-gray-300 group border-b">
-      <summary className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer list-none px-6 py-4 transition-colors" style={{ backgroundColor: '#2563eb', color: '#ffffff' }}>
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
+    <details key={idx} open={false} className="group">
+      <summary 
+        className="rounded-lg border-2 p-4 cursor-pointer list-none transition-all hover:shadow-md mb-2"
+        style={{ borderColor: bgColor, backgroundColor: `${bgColor}10` }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <svg
-              className="h-4 w-4 transition-transform group-open:rotate-90"
+              className="h-5 w-5 transition-transform group-open:rotate-90 flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
+              style={{ color: bgColor }}
             >
               <path d="M6 6L14 10L6 14V6Z" />
             </svg>
-            <h3 className="text-xl font-bold">{comp.compname}</h3>
-            {comp.majcompflag === 'Yes' && (
-              <span 
-                className="rounded-full px-2 py-0.5 text-xs font-medium"
-                style={{ backgroundColor: '#d97706', color: '#ffffff' }}
-              >
-                Major
-              </span>
-            )}
+            <div className="flex items-center justify-between flex-1 min-w-0 gap-3">
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold text-gray-900">{comp.compname}</h3>
+                {comp.majcompflag === 'Yes' && (
+                  <span 
+                    className="text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap"
+                    style={{ backgroundColor: '#d97706', color: 'white' }}
+                  >
+                    Major
+                  </span>
+                )}
+              </div>
+              <span className="text-base font-semibold text-gray-700 whitespace-nowrap">{comp.comppct_r}%</span>
+            </div>
           </div>
-          <span className="text-lg font-bold">{comp.comppct_r}%</span>
         </div>
       </summary>
-      <div className="bg-gray-50 pt-4">
+      <div className="bg-gray-50 pt-2">
         {/* OSD Panel Content - Direct Integration */}
-        <div className="px-2 pb-4">
+        <div className="pb-4">
           <OSDPanel 
             osdData={osdData} 
             isLoading={osdLoading} 
@@ -765,6 +777,7 @@ function ComponentDetailsSection({
               ecoclassname: comp.ecoclassname
             } : undefined}
             components={[comp]}
+            componentColor={bgColor}
           />
         </div>
       </div>
@@ -1435,9 +1448,9 @@ export default function PropertyPanel({
                       <button
                         onClick={() => setShowProfileComparison(true)}
                         className="px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
-                        style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2563eb'}
+                        style={{ backgroundColor: '#5a7241', color: '#ffffff' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#4a5f35'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#5a7241'}
                         title="Compare all component profiles side-by-side"
                       >
                         <svg
@@ -1854,9 +1867,9 @@ export default function PropertyPanel({
                 <button
                   onClick={() => setShowProfileComparison(true)}
                   className="px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"
-                  style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2563eb'}
+                  style={{ backgroundColor: '#5a7241', color: '#ffffff' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#4a5f35'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#5a7241'}
                   title="Compare all component profiles side-by-side"
                 >
                   <svg
