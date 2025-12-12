@@ -384,7 +384,7 @@ export class LCCFormatter {
               classNum >= 3 ? 'moderate' : 'slight';
             
             limitations.push({
-              type: 'soil',
+              type: 'soil_limitations',
               severity,
               description,
               value: restrictions || `${depth}cm depth`
@@ -397,7 +397,7 @@ export class LCCFormatter {
               classNum >= 3 ? 'moderate' : 'slight';
             
             limitations.push({
-              type: 'soil',
+              type: 'soil_limitations',
               severity,
               description: `Soil limitations such as depth, stones, low water capacity, or chemical problems`,
               value: `Class ${lccClass} soil limitation`
