@@ -43,6 +43,143 @@
   background-color: #f3f4f6;
 }
 
+/* Modern Basemap Layer Control Styling */
+.leaflet-control-layers {
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 12px !important;
+  overflow: visible !important;
+  background: white !important;
+  transition: all 0.3s ease;
+}
+
+/* Collapsed state - behind PropertyPanel */
+.leaflet-control-layers:not(.leaflet-control-layers-expanded) {
+  z-index: 1000 !important;
+}
+
+/* Expanded state - in front of PropertyPanel */
+.leaflet-control-layers-expanded {
+  z-index: 10001 !important;
+}
+
+/* Make sure the top-right control container allows z-index changes */
+.leaflet-top.leaflet-right {
+  z-index: auto !important;
+}
+
+/* Toggle button styling - white with blue icon */
+.leaflet-control-layers-toggle {
+  background-image: none !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  background: white !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid #e5e7eb !important;
+}
+
+.leaflet-control-layers:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-control-layers-toggle:hover {
+  background: #f9fafb !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Blue layers icon */
+.leaflet-control-layers-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%232b3d6c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M12 2L2 7l10 5 10-5-10-5z"/%3E%3Cpath d="M2 17l10 5 10-5"/%3E%3Cpath d="M2 12l10 5 10-5"/%3E%3C/svg%3E');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 16px !important;
+  border-radius: 12px !important;
+  background: white !important;
+  min-width: 200px;
+}
+
+.leaflet-control-layers-base {
+  margin-bottom: 0 !important;
+}
+
+.leaflet-control-layers-base label {
+  display: flex !important;
+  align-items: center;
+  padding: 10px 12px !important;
+  margin: 0 -12px 4px -12px !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.leaflet-control-layers-base label:hover {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+  transform: translateX(2px);
+}
+
+.leaflet-control-layers-base label:last-child {
+  margin-bottom: 0 !important;
+}
+
+.leaflet-control-layers input[type="radio"] {
+  margin-right: 10px !important;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.leaflet-control-layers-base label > span {
+  flex: 1;
+  user-select: none;
+}
+
+.leaflet-control-layers-separator {
+  height: 0;
+  border-top: 1px solid #e5e7eb !important;
+  margin: 8px -12px !important;
+}
+
+/* Add subtle animation when opening */
+@keyframes layerControlSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.leaflet-control-layers-expanded {
+  animation: layerControlSlideIn 0.2s ease-out;
+}
+
+/* Selected layer highlight */
+.leaflet-control-layers input[type="radio"]:checked + span {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
 /* Depth selector styling */
 .depth-indicator {
   transition: all 0.3s ease;

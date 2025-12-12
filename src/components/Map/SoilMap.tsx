@@ -33,9 +33,9 @@ interface SoilMapProps {
     coordinates: [number, number]
   }) => void
   onMapReady?: (map: L.Map) => void
+  onProcessingStart?: () => void
   className?: string
 }
-
 export default function SoilMap({
   initialCenter,
   initialZoom,
@@ -45,6 +45,7 @@ export default function SoilMap({
   onSoilClick,
   onSSURGOClick,
   onMapReady,
+  onProcessingStart,
   className = '',
 }: SoilMapProps) {
   console.log('SoilMap component rendering...')
@@ -117,10 +118,23 @@ export default function SoilMap({
 
     // Define base layers
     const baseLayers = {
-      OpenStreetMap: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }),
+      'Satellite Hybrid': L.layerGroup([
+        L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          {
+            attribution:
+              'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+            maxZoom: 19,
+          },
+        ),
+        L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+          {
+            attribution: 'Labels © Esri',
+            maxZoom: 19,
+          },
+        ),
+      ]),
       Satellite: L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
@@ -129,6 +143,10 @@ export default function SoilMap({
           maxZoom: 19,
         },
       ),
+      OpenStreetMap: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+      }),
       Terrain: L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
         {
@@ -146,12 +164,21 @@ export default function SoilMap({
       ),
     }
 
-    // Add default base layer
-    baseLayers.OpenStreetMap.addTo(map)
+    // Add default base layer (Satellite Hybrid)
+    baseLayers['Satellite Hybrid'].addTo(map)
 
-    // Add layer control for base layers
-    L.control.layers(baseLayers, {}, { position: 'topright' }).addTo(map)
-
+    // Add layer control for base layers with custom class
+    const layersControl = L.control.layers(baseLayers, {}, { 
+      position: 'topright',
+      collapsed: true,
+    }).addTo(map)
+    
+    // Add custom class to the control for styling
+    const controlContainer = layersControl.getContainer()
+    if (controlContainer) {
+      controlContainer.classList.add('modern-basemap-control')
+    }
+    
     console.log('About to add click handler to map...')
     // Add click handler for soil profile queries
     map.on('click', async (e: L.LeafletMouseEvent) => {
@@ -160,10 +187,24 @@ export default function SoilMap({
       console.log('Coordinates:', lat, lng)
       console.log('Active layers:', activeLayersRef.current)
 
+      // Trigger processing indicator
+      if (onProcessingStart) {
+        onProcessingStart()
+      }
+
+      // Zoom to level 15 and center on clicked point
+      // Zoom to level 15 and center on clicked point
+      map.setView([lat, lng], 15, {
+        animate: true,
+        duration: 0.5
+      })
+
       // Add or move marker
       if (clickMarkerRef.current) {
         console.log('Moving existing marker to:', lat, lng)
         clickMarkerRef.current.setLatLng([lat, lng])
+        // Ensure marker is brought to front
+        clickMarkerRef.current.setZIndexOffset(1000)
       } else {
         console.log('Creating new marker at:', lat, lng)
         clickMarkerRef.current = L.marker([lat, lng], {
@@ -175,6 +216,7 @@ export default function SoilMap({
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
           }),
+          zIndexOffset: 1000  // Ensure marker is always on top
         }).addTo(map)
         console.log('Marker created and added to map')
       }
@@ -333,32 +375,44 @@ async function querySSURGOMapUnit(map: L.Map, event: L.LeafletMouseEvent): Promi
     // Use NRCS SDA REST API - comprehensive query
     const sdaUrl = 'https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest'
 
-    // Comprehensive query for all soil data with interpretations
+    // Optimized query - removed cointerp join that was causing 14,000+ duplicate rows
+    // Interpretations should be queried separately if needed
     const comprehensiveQuery = `SELECT 
-    -- Map Unit Information
     m.mukey, 
     m.musym, 
     m.muname, 
     m.muacres,
     l.areasymbol,
     l.areaname,
-    
-    -- Component Information
     c.cokey,
     c.compname,
     c.comppct_r,
     c.majcompflag,
     c.slope_r,
     c.runoff,
-    
-    -- Taxonomic Classification
+    c.nirrcapcl,
+    c.nirrcapscl,
+    c.irrcapcl,
+    c.irrcapscl,
+    c.drainagecl,
+    c.hydricrating,
+    c.taxtempcl,
+    c.frostact,
+    cec.ecoclassid,
+    cec.ecoclassname,
     c.taxclname,
     c.taxorder,
     c.taxsuborder,
     c.taxgrtgroup,
     c.taxsubgrp,
-    
-    -- Representative Component Properties
+    cm.pondfreqcl,
+    cm.ponddurcl,
+    cm.flodfreqcl,
+    cm.floddurcl,
+    corestr.reskind,
+    corestr.resdept_r,
+    corestr.reshard,
+    muagg.wtdepannmin,
     ch.chkey,
     ch.hzname,
     ch.hzdept_r,
@@ -372,25 +426,31 @@ async function querySSURGOMapUnit(map: L.Map, event: L.LeafletMouseEvent): Promi
     ch.ksat_r,
     ch.dbthirdbar_r,
     ch.cec7_r,
-    
-    -- Interpretations
-    coi.rulename,
-    coi.ruledepth,
-    coi.interphrc,
-    coi.interphr
-    
-FROM mapunit AS m
-INNER JOIN mupolygon AS mp ON m.mukey = mp.mukey
-INNER JOIN legend AS l ON m.lkey = l.lkey
-INNER JOIN component AS c ON m.mukey = c.mukey
-LEFT JOIN chorizon AS ch ON c.cokey = ch.cokey
-LEFT JOIN cointerp AS coi ON c.cokey = coi.cokey
-
-WHERE mp.mupolygongeo.STIntersects(
-    geometry::STGeomFromText('POINT(${lng} ${lat})', 4326)
-) = 1
-
-ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
+    ch.pi_r,
+    ch.lep_r,
+    ch.ec_r
+FROM mapunit m
+INNER JOIN legend l ON m.lkey = l.lkey
+INNER JOIN component c ON m.mukey = c.mukey
+LEFT JOIN coecoclass cec ON c.cokey = cec.cokey
+LEFT JOIN (
+    SELECT
+        cokey,
+        MAX(pondfreqcl) AS pondfreqcl,
+        MAX(ponddurcl) AS ponddurcl,
+        MAX(flodfreqcl) AS flodfreqcl,
+        MAX(floddurcl) AS floddurcl
+    FROM comonth
+    GROUP BY cokey
+) AS cm ON c.cokey = cm.cokey
+LEFT JOIN corestrictions corestr ON c.cokey = corestr.cokey
+LEFT JOIN muaggatt muagg ON m.mukey = muagg.mukey
+LEFT JOIN chorizon ch ON c.cokey = ch.cokey
+WHERE m.mukey IN (
+    SELECT DISTINCT mukey FROM mupolygon
+    WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(${lng} ${lat})', 4326)) = 1
+)
+ORDER BY c.comppct_r DESC, ch.hzdept_r ASC`
 
     console.log('Querying comprehensive SSURGO data...')
     console.log('Query:', comprehensiveQuery)
@@ -462,10 +522,15 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
     // Parse comprehensive query results
     // Field mapping by index:
     // 0-5: Map Unit & Legend (mukey, musym, muname, muacres, areasymbol, areaname)
-    // 6-11: Component (cokey, compname, comppct_r, majcompflag, slope_r, runoff)
-    // 12-16: Taxonomy (taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp)
-    // 17-29: Horizon (chkey, hzname, hzdept_r, hzdepb_r, sandtotal_r, silttotal_r, claytotal_r, om_r, ph1to1h2o_r, awc_r, ksat_r, dbthirdbar_r, cec7_r)
-    // 30-33: Interpretations (rulename, ruledepth, interphrc, interphr)
+    // 6-15: Component Basic (cokey, compname, comppct_r, majcompflag, slope_r, runoff, nirrcapcl, nirrcapscl, irrcapcl, irrcapscl)
+    // 16-19: Component Limitations (drainagecl, hydricrating, taxtempcl, frostact)
+    // 20-21: Ecological Site (ecoclassid, ecoclassname)
+    // 22-26: Taxonomy (taxclname, taxorder, taxsuborder, taxgrtgroup, taxsubgrp)
+    // 27-30: Monthly Data (pondfreqcl, ponddurcl, flodfreqcl, floddurcl)
+    // 31-33: Restrictions (reskind, resdept_r, reshard)
+    // 34: Water Table (wtdepannmin)
+    // 35-49: Horizon (chkey, hzname, hzdept_r, hzdepb_r, sandtotal_r, silttotal_r, claytotal_r, om_r, ph1to1h2o_r, awc_r, ksat_r, dbthirdbar_r, cec7_r, pi_r, lep_r, ec_r)
+    // 50-53: Interpretations (mrulename, ruledepth, interphrc, interphr)
 
     const componentsMap = new Map()
 
@@ -481,59 +546,65 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
           majcompflag: row[9],
           slope_r: row[10],
           runoff: row[11],
-          taxclname: row[12],
-          taxorder: row[13],
-          taxsuborder: row[14],
-          taxgrtgroup: row[15],
-          taxsubgrp: row[16],
+          nirrcapcl: row[12],
+          nirrcapscl: row[13],
+          irrcapcl: row[14],
+          irrcapscl: row[15],
+          drainagecl: row[16],
+          hydricrating: row[17],
+          taxtempcl: row[18],
+          frostact: row[19],
+          ecoclassid: row[20],
+          ecoclassname: row[21],
+          taxclname: row[22],
+          taxorder: row[23],
+          taxsuborder: row[24],
+          taxgrtgroup: row[25],
+          taxsubgrp: row[26],
+          pondfreqcl: row[27],
+          ponddurcl: row[28],
+          flodfreqcl: row[29],
+          floddurcl: row[30],
+          reskind: row[31],
+          resdept_r: row[32],
+          reshard: row[33],
+          wtdepannmin: row[34],
           horizons: [],
-          interpretations: [],
+          interpretations: [], // Will be populated by separate query
         })
       }
 
       // Add horizon data if present
-      if (cokey && row[17]) {
+      if (cokey && row[35]) {
         // chkey exists
         const component = componentsMap.get(cokey)
         // Check if this horizon is already added (avoid duplicates)
-        if (!component.horizons.some((h: any) => h.chkey === row[17])) {
+        if (!component.horizons.some((h: any) => h.chkey === row[35])) {
           component.horizons.push({
-            chkey: row[17],
-            hzname: row[18],
-            hzdept_r: row[19],
-            hzdepb_r: row[20],
-            sandtotal_r: row[21],
-            silttotal_r: row[22],
-            claytotal_r: row[23],
-            om_r: row[24],
-            ph1to1h2o_r: row[25],
-            awc_r: row[26],
-            ksat_r: row[27],
-            dbthirdbar_r: row[28],
-            cec7_r: row[29],
+            chkey: row[35],
+            hzname: row[36],
+            hzdept_r: row[37],
+            hzdepb_r: row[38],
+            sandtotal_r: row[39],
+            silttotal_r: row[40],
+            claytotal_r: row[41],
+            om_r: row[42],
+            ph1to1h2o_r: row[43],
+            awc_r: row[44],
+            ksat_r: row[45],
+            dbthirdbar_r: row[46],
+            cec7_r: row[47],
+            pi_r: row[48],
+            lep_r: row[49],
+            ec_r: row[50],
           })
         }
       }
 
-      // Add interpretation data if present
-      if (cokey && row[30]) {
-        // rulename exists
-        const component = componentsMap.get(cokey)
-        // Check if this interpretation is already added (avoid duplicates)
-        const interpKey = `${row[30]}_${row[31]}` // rulename + ruledepth
-        if (!component.interpretations.some((i: any) => `${i.rulename}_${i.ruledepth}` === interpKey)) {
-          component.interpretations.push({
-            rulename: row[30],
-            ruledepth: row[31],
-            interphrc: row[32],
-            interphr: row[33],
-          })
-        }
-      }
     })
 
     const firstRow = data.Table[0]
-    return {
+    const mapunitData = {
       mukey: firstRow[0],
       musym: firstRow[1],
       muname: firstRow[2],
@@ -542,9 +613,102 @@ ORDER BY c.comppct_r DESC, ch.hzdept_r ASC, coi.rulename ASC`
       areaname: firstRow[5],
       components: Array.from(componentsMap.values()),
     }
+
+    // Fetch interpretations separately for all components
+    try {
+      const cokeys = Array.from(componentsMap.keys()).filter(k => k)
+      if (cokeys.length > 0) {
+        const interpretations = await querySSURGOInterpretations(cokeys)
+        
+        // Attach interpretations to their respective components
+        interpretations.forEach((interp: any) => {
+          const component = componentsMap.get(interp.cokey)
+          if (component) {
+            if (!component.interpretations) {
+              component.interpretations = []
+            }
+            component.interpretations.push({
+              name: interp.mrulename,
+              depth: interp.ruledepth,
+              rating: interp.interphr,
+              value: interp.interphrc ? parseFloat(interp.interphrc) : 0,
+            })
+          }
+        })
+      }
+    } catch (interpError) {
+      console.warn('Failed to fetch interpretations:', interpError)
+      // Continue without interpretations rather than failing entirely
+    }
+
+    return mapunitData
   } catch (error) {
     console.error('Error querying SSURGO:', error)
     return null
+  }
+}
+
+/**
+ * Query SSURGO component interpretations separately
+ * This avoids the Cartesian product issue while still getting interpretation data
+ */
+async function querySSURGOInterpretations(cokeys: string[]): Promise<any[]> {
+  try {
+    const sdaUrl = 'https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest'
+    
+    // Build IN clause for cokeys
+    const cokeyList = cokeys.map(k => `'${k}'`).join(',')
+    
+    const interpretationQuery = `SELECT 
+      coi.cokey,
+      coi.mrulename,
+      coi.ruledepth,
+      coi.interphrc,
+      coi.interphr
+    FROM cointerp coi
+    WHERE coi.cokey IN (${cokeyList})
+    ORDER BY coi.cokey, coi.seqnum`
+
+    const params = new URLSearchParams()
+    params.append('query', interpretationQuery)
+    params.append('format', 'JSON')
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
+
+    const response = await fetch(sdaUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      console.warn(`Interpretations query failed: ${response.status}`)
+      return []
+    }
+
+    const responseText = await response.text()
+    const data = JSON.parse(responseText)
+
+    if (!data || !data.Table || data.Table.length === 0) {
+      return []
+    }
+
+    // Parse interpretation results
+    return data.Table.map((row: any[]) => ({
+      cokey: row[0],
+      mrulename: row[1],
+      ruledepth: row[2],
+      interphrc: row[3],
+      interphr: row[4],
+    }))
+  } catch (error) {
+    console.error('Error querying interpretations:', error)
+    return []
   }
 }
 

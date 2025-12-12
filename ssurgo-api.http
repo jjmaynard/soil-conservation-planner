@@ -1,0 +1,72 @@
+###
+# SSURGO Soil Data Access API Test Queries
+# Use with REST Client extension for VS Code
+# API Documentation: https://sdmdataaccess.nrcs.usda.gov/
+###
+
+@baseUrl = https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest
+
+###
+# Test 1: Get basic map unit data by coordinates (Lincoln, NE area)
+# Expect: 20-50 rows (2-3 components × 10-20 horizons per component)
+POST {{baseUrl}}
+Content-Type: application/x-www-form-urlencoded
+
+query=SELECT m.mukey, m.musym, m.muname, m.muacres, l.areasymbol, l.areaname, c.cokey, c.compname, c.comppct_r, c.majcompflag, c.slope_r, c.runoff, c.nirrcapcl, c.nirrcapscl, c.irrcapcl, c.irrcapscl, c.drainagecl, c.hydricrating, c.taxtempcl, c.frostact, cec.ecoclassid, cec.ecoclassname, c.taxclname, c.taxorder, c.taxsuborder, c.taxgrtgroup, c.taxsubgrp, cm.pondfreqcl, cm.ponddurcl, cm.flodfreqcl, cm.floddurcl, corestr.reskind, corestr.resdept_r, corestr.reshard, muagg.wtdepannmin, ch.chkey, ch.hzname, ch.hzdept_r, ch.hzdepb_r, ch.sandtotal_r, ch.silttotal_r, ch.claytotal_r, ch.om_r, ch.ph1to1h2o_r, ch.awc_r, ch.ksat_r, ch.dbthirdbar_r, ch.cec7_r, ch.pi_r, ch.lep_r, ch.ec_r FROM mapunit m INNER JOIN legend l ON m.lkey = l.lkey INNER JOIN component c ON m.mukey = c.mukey LEFT JOIN coecoclass cec ON c.cokey = cec.cokey LEFT JOIN (SELECT cokey, MAX(pondfreqcl) AS pondfreqcl, MAX(ponddurcl) AS ponddurcl, MAX(flodfreqcl) AS flodfreqcl, MAX(floddurcl) AS floddurcl FROM comonth GROUP BY cokey) AS cm ON c.cokey = cm.cokey LEFT JOIN corestrictions corestr ON c.cokey = corestr.cokey LEFT JOIN muaggatt muagg ON m.mukey = muagg.mukey LEFT JOIN chorizon ch ON c.cokey = ch.cokey WHERE m.mukey IN (SELECT DISTINCT mukey FROM mupolygon WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(-96.7025 40.8136)', 4326)) = 1) ORDER BY c.comppct_r DESC, ch.hzdept_r ASC&format=JSON
+
+###
+# Test 2: Get map unit info only (no components or horizons)
+# Expect: 1-2 rows
+POST {{baseUrl}}
+Content-Type: application/x-www-form-urlencoded
+
+query=SELECT m.mukey, m.musym, m.muname, m.muacres, l.areasymbol, l.areaname FROM mapunit m INNER JOIN legend l ON m.lkey = l.lkey WHERE m.mukey IN (SELECT DISTINCT mukey FROM mupolygon WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(-96.7025 40.8136)', 4326)) = 1)&format=JSON
+
+###
+# Test 3: Get components only (no horizons)
+# Expect: 2-4 rows
+POST {{baseUrl}}
+Content-Type: application/x-www-form-urlencoded
+
+query=SELECT m.mukey, m.musym, m.muname, c.cokey, c.compname, c.comppct_r, c.majcompflag, c.slope_r, c.drainagecl, c.hydricrating, c.taxclname FROM mapunit m INNER JOIN component c ON m.mukey = c.mukey WHERE m.mukey IN (SELECT DISTINCT mukey FROM mupolygon WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(-96.7025 40.8136)', 4326)) = 1) ORDER BY c.comppct_r DESC&format=JSON
+
+###
+# Test 4: Get horizons for a specific component
+# Replace cokey with actual value from Test 3
+POST {{baseUrl}}
+Content-Type: application/x-www-form-urlencoded
+
+query=SELECT ch.chkey, ch.hzname, ch.hzdept_r, ch.hzdepb_r, ch.sandtotal_r, ch.silttotal_r, ch.claytotal_r, ch.om_r, ch.ph1to1h2o_r, ch.awc_r, ch.ksat_r, ch.dbthirdbar_r FROM chorizon ch WHERE ch.cokey = '24558949' ORDER BY ch.hzdept_r ASC&format=JSON
+
+###
+# Test 5: Count interpretations per component (diagnostic query)
+# Use this to understand how many interpretations exist
+POST {{baseUrl}}
+Content-Type: application/x-www-form-urlencoded
+
+query=SELECT c.cokey, c.compname, COUNT(coi.coiid) as interp_count FROM component c LEFT JOIN cointerp coi ON c.cokey = coi.cokey WHERE c.cokey IN (SELECT DISTINCT c.cokey FROM mapunit m INNER JOIN component c ON m.mukey = c.mukey WHERE m.mukey IN (SELECT DISTINCT mukey FROM mupolygon WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(-96.7025 40.8136)', 4326)) = 1)) GROUP BY c.cokey, c.compname&format=JSON
+
+###
+# Test 6: Get specific interpretations (filtered)
+# Example: Only AWM (Agricultural Waste Management) interpretations
+POST {{baseUrl}}
+Content-Type: application/x-www-form-urlencoded
+
+query=SELECT c.cokey, c.compname, coi.mrulename, coi.ruledepth, coi.interphrc, coi.interphr FROM component c LEFT JOIN cointerp coi ON c.cokey = coi.cokey WHERE c.cokey IN (SELECT DISTINCT c.cokey FROM mapunit m INNER JOIN component c ON m.mukey = c.mukey WHERE m.mukey IN (SELECT DISTINCT mukey FROM mupolygon WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(-96.7025 40.8136)', 4326)) = 1)) AND coi.mrulename LIKE 'AWM -%' ORDER BY c.comppct_r DESC&format=JSON
+
+###
+# Test 7: Alternative coordinates (Corn Belt - different location)
+POST {{baseUrl}}
+Content-Type: application/x-www-form-urlencoded
+
+query=SELECT m.mukey, m.musym, m.muname, c.compname, c.comppct_r, ch.hzname, ch.hzdept_r, ch.hzdepb_r FROM mapunit m INNER JOIN component c ON m.mukey = c.mukey LEFT JOIN chorizon ch ON c.cokey = ch.cokey WHERE m.mukey IN (SELECT DISTINCT mukey FROM mupolygon WHERE mupolygongeo.STIntersects(geometry::STGeomFromText('POINT(-93.6091 41.5868)', 4326)) = 1) ORDER BY c.comppct_r DESC, ch.hzdept_r ASC&format=JSON
+
+###
+# Notes:
+# - Lincoln, NE coordinates: -96.7025, 40.8136
+# - Des Moines, IA coordinates: -93.6091, 41.5868
+# - Expected row counts WITHOUT cointerp: 20-50 rows
+# - Expected row counts WITH cointerp: 10,000-20,000 rows (500x duplication!)
+# - format=JSON returns JSON arrays
+# - format=JSON+COLUMNNAME returns JSON with column names
+# - format=XML also available

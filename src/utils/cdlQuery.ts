@@ -223,7 +223,7 @@ export async function queryCDLPoint(lat: number, lng: number, year: number): Pro
       color: '#cccccc',
     }
 
-    const cropType = CROP_TYPE_MAP[cropCode] || 'other'
+    const cropType = CROP_TYPE_MAP[cropCode] || 'non-cropland'
 
     // If no confidence from API, use estimated accuracy based on crop type
     // CropScape GetCDLValue doesn't return per-pixel confidence, so we use

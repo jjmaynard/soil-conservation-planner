@@ -143,7 +143,7 @@ export default function SoilDashboard({ ssurgoData, cdlHistory, onClose }: SoilD
     })) || []
 
   return (
-    <div className="fixed inset-0 z-[2000] overflow-auto" style={{ backgroundColor: '#f1f5f9' }}>
+    <div className="fixed inset-0 overflow-auto" style={{ backgroundColor: '#f1f5f9', zIndex: 10000 }}>
       {/* Header */}
       <div
         className="sticky top-0 z-10 shadow-lg"

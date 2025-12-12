@@ -1,6 +1,7 @@
 // Official Series Description (OSD) Display Panel Component
 
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Info,
   Layers,
@@ -14,9 +15,67 @@ import {
   Mountain,
   Leaf,
   FileText,
+  Lightbulb,
+  AlertTriangle,
+  CheckCircle,
+  X,
 } from 'lucide-react'
 import type { FormattedOSDData } from '#src/types/osd'
 import { getDescriptionText } from '#src/utils/osdDescriptionLoader'
+import { useEcologicalSite } from '#src/hooks/useEcologicalSite'
+import { LCCFormatter } from '#src/lib/lcc-formatter'
+import type { FormattedLCCData } from '#src/types/lcc'
+import ESDDetailModal from '#src/components/ui/ESDDetailModal'
+
+// Simple Munsell to RGB approximation
+// This is a basic approximation - full conversion requires lookup tables
+function munsellToRGB(munsell: string): string | null {
+  try {
+    // Parse Munsell notation like "10YR 5/3"
+    const match = munsell.match(/(\d+\.?\d*)?([A-Z]+)\s+(\d+\.?\d*)\/(\d+\.?\d*)/)
+    if (!match) return null
+    
+    const hue = match[2] // e.g., "YR", "Y", "R"
+    const value = parseFloat(match[3]) // Lightness (0-10)
+    const chroma = parseFloat(match[4]) // Color intensity (0-8+)
+    
+    // Base hue colors (approximations)
+    const hueColors: Record<string, [number, number, number]> = {
+      'R': [255, 0, 0],
+      'YR': [255, 140, 0],
+      'Y': [255, 255, 0],
+      'GY': [173, 255, 47],
+      'G': [0, 255, 0],
+      'BG': [0, 255, 255],
+      'B': [0, 0, 255],
+      'PB': [75, 0, 130],
+      'P': [128, 0, 128],
+      'RP': [255, 0, 128],
+      'N': [128, 128, 128], // Neutral
+    }
+    
+    const baseColor = hueColors[hue] || [128, 128, 128]
+    
+    // Adjust for value (lightness) - scale towards white or black
+    const lightnessFactor = value / 10
+    const adjustedForValue = baseColor.map(c => 
+      lightnessFactor > 0.5 
+        ? c + (255 - c) * (lightnessFactor - 0.5) * 2
+        : c * lightnessFactor * 2
+    )
+    
+    // Adjust for chroma (saturation) - scale towards gray
+    const chromaFactor = Math.min(chroma / 8, 1)
+    const gray = 128 * lightnessFactor * 2
+    const finalColor = adjustedForValue.map(c =>
+      gray + (c - gray) * chromaFactor
+    )
+    
+    return `rgb(${Math.round(finalColor[0])}, ${Math.round(finalColor[1])}, ${Math.round(finalColor[2])})`
+  } catch (e) {
+    return null
+  }
+}
 
 // Soil Property Ranges for Classification
 const soilPropertyRanges: Record<
@@ -299,6 +358,11 @@ interface OSDPanelProps {
   className?: string
   interpretations?: any[]
   ssurgoHorizons?: any[]
+  componentEcoSite?: {
+    ecoclassid?: string
+    ecoclassname?: string
+  }
+  components?: any[]
 }
 
 interface CollapsibleSectionProps {
@@ -339,8 +403,20 @@ function CollapsibleSection({ title, icon, defaultOpen = false, children, isOpen
   )
 }
 
-function DataRow({ label, value, unit }: { label: string; value: string | number | null; unit?: string }) {
+function DataRow({ label, value, unit, block = false }: { label: string; value: string | number | null; unit?: string; block?: boolean }) {
   if (value === null || value === undefined) return null
+
+  if (block) {
+    return (
+      <div className="py-1 flex">
+        <span className="text-sm text-gray-600 flex-shrink-0">{label}:</span>
+        <span className="text-sm font-medium text-gray-900 ml-8 flex-1">
+          {value}
+          {unit && <span className="text-gray-500 ml-1">{unit}</span>}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="flex justify-between py-1">
@@ -353,11 +429,412 @@ function DataRow({ label, value, unit }: { label: string; value: string | number
   )
 }
 
-export default function OSDPanel({ osdData, isLoading, className = '', interpretations, ssurgoHorizons }: OSDPanelProps) {
+// Component to display Land Capability Classification
+const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
+  // Format the LCC data
+  const lccData: FormattedLCCData | null = components ? LCCFormatter.formatLCCData(components) : null
+  
+  // Determine what data is available
+  const hasIrrigated = !!lccData?.dominant_lcc.irrigated
+  const hasNonirrigated = !!lccData?.dominant_lcc.nonirrigated
+  
+  // Default to showing whichever is available (prefer non-irrigated)
+  // MUST call useState at top level, before any conditional returns
+  const [showIrrigated, setShowIrrigated] = useState(hasNonirrigated ? false : true)
+  
+  if (!lccData) {
+    return (
+      <div className="text-sm text-gray-600 p-4 bg-gray-50 rounded">
+        <p>No Land Capability Classification data available for this soil.</p>
+      </div>
+    )
+  }
+  
+  // If neither is available, show message
+  if (!hasIrrigated && !hasNonirrigated) {
+    return (
+      <div className="text-sm text-gray-600 p-4 bg-gray-50 rounded">
+        <p>No Land Capability Classification data available for this soil.</p>
+      </div>
+    )
+  }
+  
+  const currentLCC = showIrrigated ? lccData.dominant_lcc.irrigated : lccData.dominant_lcc.nonirrigated
+
+  // Get description for current class
+  const description = showIrrigated 
+    ? lccData.irrigated_description 
+    : lccData.nonirrigated_description
+
+  // Get subclass modifiers (only if currentLCC exists)
+  const subclassModifiers = currentLCC?.subclass 
+    ? LCCFormatter.getSubclassDescriptions(currentLCC.subclass, currentLCC.class)
+    : []
+
+  // Get the appropriate limitations and management for the current view
+  const currentLimitations = showIrrigated ? lccData.irrigated_limitations : lccData.nonirrigated_limitations
+  const currentManagement = showIrrigated ? lccData.irrigated_management : lccData.nonirrigated_management
+
+  // Color mapping for LCC classes - using hex colors for inline styles
+  const getClassColors = (lccClass: string): { bg: string; text: string; border: string } => {
+    const colorMap: Record<string, { bg: string; text: string; border: string }> = {
+      'I': { bg: '#dcfce7', text: '#166534', border: '#86efac' },      // green
+      'II': { bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },     // lighter green
+      'III': { bg: '#fef9c3', text: '#854d0e', border: '#fde047' },    // yellow
+      'IV': { bg: '#fefce8', text: '#a16207', border: '#fef08a' },     // lighter yellow
+      'V': { bg: '#ffedd5', text: '#9a3412', border: '#fed7aa' },      // orange
+      'VI': { bg: '#fff7ed', text: '#c2410c', border: '#fdba74' },     // lighter orange
+      'VII': { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },    // red
+      'VIII': { bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },   // lighter red
+    };
+    return colorMap[lccClass] || { bg: '#f3f4f6', text: '#1f2937', border: '#d1d5db' };
+  };
+
+  const getSeverityColor = (severity: string): { bg: string; text: string } => {
+    const severityMap: Record<string, { bg: string; text: string }> = {
+      'slight': { bg: '#dcfce7', text: '#166534' },
+      'moderate': { bg: '#fef9c3', text: '#854d0e' },
+      'severe': { bg: '#ffedd5', text: '#9a3412' },
+      'very_severe': { bg: '#fee2e2', text: '#991b1b' },
+    };
+    return severityMap[severity] || { bg: '#f3f4f6', text: '#1f2937' };
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Toggle between irrigated/non-irrigated - only show if both are available */}
+      {hasIrrigated && hasNonirrigated && (
+        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+          <span className="text-sm font-medium text-gray-700">View:</span>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setShowIrrigated(false)}
+              className="px-3 py-1 text-sm rounded transition-colors"
+              style={{
+                backgroundColor: !showIrrigated ? '#2563eb' : '#ffffff',
+                color: !showIrrigated ? '#ffffff' : '#374151',
+                border: '1px solid #d1d5db'
+              }}
+              onMouseEnter={(e) => {
+                if (showIrrigated) e.currentTarget.style.backgroundColor = '#f3f4f6'
+              }}
+              onMouseLeave={(e) => {
+                if (showIrrigated) e.currentTarget.style.backgroundColor = '#ffffff'
+              }}
+            >
+              Dryland
+            </button>
+            <button
+              onClick={() => setShowIrrigated(true)}
+              className="px-3 py-1 text-sm rounded transition-colors"
+              style={{
+                backgroundColor: showIrrigated ? '#2563eb' : '#ffffff',
+                color: showIrrigated ? '#ffffff' : '#374151',
+                border: '1px solid #d1d5db'
+              }}
+              onMouseEnter={(e) => {
+                if (!showIrrigated) e.currentTarget.style.backgroundColor = '#f3f4f6'
+              }}
+              onMouseLeave={(e) => {
+                if (!showIrrigated) e.currentTarget.style.backgroundColor = '#ffffff'
+              }}
+            >
+              Irrigated
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Show single type indicator if only one is available */}
+      {(hasIrrigated && !hasNonirrigated) && (
+        <div className="text-sm text-gray-600 p-2 bg-blue-50 rounded border border-blue-200">
+          <p className="font-medium">Irrigated conditions only</p>
+        </div>
+      )}
+      {(!hasIrrigated && hasNonirrigated) && (
+        <div className="text-sm text-gray-600 p-2 bg-green-50 rounded border border-green-200">
+          <p className="font-medium">Dryland (non-irrigated) conditions only</p>
+        </div>
+      )}
+
+      {/* Combined Class Description, Limitations, and Management Recommendations */}
+      {currentLCC && (
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div className="flex items-start gap-3 mb-3">
+          <div 
+            className="px-4 py-2 rounded-lg border-2 font-bold text-2xl"
+            style={{
+              backgroundColor: getClassColors(currentLCC.class).bg,
+              color: getClassColors(currentLCC.class).text,
+              borderColor: getClassColors(currentLCC.class).border
+            }}
+          >
+            {currentLCC.class}{currentLCC.subclass}
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-bold text-gray-800 mb-1">
+              Class {currentLCC.class} {showIrrigated ? '(Irrigated)' : '(Dryland)'}
+            </h4>
+            {description && (
+              <p className="text-sm font-semibold text-gray-700">
+                {description.summary.replace(' with irrigation', '').replace(' without irrigation', '')}
+              </p>
+            )}
+          </div>
+        </div>
+        
+        {description && (
+          <div className="space-y-3 text-sm mb-4">
+            <p className="text-gray-700 leading-relaxed">
+              {description.description}
+              {currentLCC && currentLCC.subclass && subclassModifiers.length > 0 && (
+                <> {subclassModifiers.map((mod: any) => mod.description).join(' ')}</>
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Soil Limitations Section */}
+        {currentLimitations && currentLimitations.length > 0 && (
+          <>
+            <div className="border-t border-gray-200 pt-4 mb-4">
+              <h5 className="text-sm font-bold text-gray-800 mb-3">Limitation Details</h5>
+              
+              {/* Visual Severity Bars */}
+              <div className="space-y-3">
+                {(() => {
+                  // Group limitations by type
+                  const limitationsByType = currentLimitations.reduce((acc: any, lim) => {
+                    if (!acc[lim.type]) acc[lim.type] = [];
+                    acc[lim.type].push(lim);
+                    return acc;
+                  }, {});
+
+                  // Severity to numeric value for visualization
+                  const severityValue = (severity: string) => {
+                    switch(severity) {
+                      case 'slight': return 25;
+                      case 'moderate': return 50;
+                      case 'severe': return 75;
+                      case 'very_severe': return 100;
+                      default: return 0;
+                    }
+                  };
+
+                  // Get bar color based on severity
+                  const getBarColor = (severity: string) => {
+                    switch(severity) {
+                      case 'slight': return '#22c55e';
+                      case 'moderate': return '#eab308';
+                      case 'severe': return '#f97316';
+                      case 'very_severe': return '#ef4444';
+                      default: return '#9ca3af';
+                    }
+                  };
+
+                  return Object.entries(limitationsByType).map(([type, lims]: [string, any]) => {
+                    const highestSeverityLim = lims.reduce((prev: any, curr: any) => 
+                      severityValue(curr.severity) > severityValue(prev.severity) ? curr : prev
+                    );
+                    const sevValue = severityValue(highestSeverityLim.severity);
+                    const sevColors = getSeverityColor(highestSeverityLim.severity);
+
+                    // Get subclass info for this type
+                    const typeCode = type === 'erosion' ? 'e' : type === 'wetness' ? 'w' : type === 'soil' ? 's' : type === 'climate' ? 'c' : '';
+                    const subclassInfo = subclassModifiers.find((m: any) => m.code === typeCode);
+
+                    return (
+                      <div key={type} className="p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-gray-700 text-sm">{typeCode}:</span>
+                            <span className="text-sm font-semibold text-gray-800 capitalize">
+                              {subclassInfo?.name || type.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                          <span 
+                            className="text-xs font-semibold px-2 py-0.5 rounded"
+                            style={{
+                              backgroundColor: sevColors.bg,
+                              color: sevColors.text
+                            }}
+                          >
+                            {highestSeverityLim.severity.replace('_', ' ')}
+                          </span>
+                        </div>
+                        
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden mb-2">
+                          <div 
+                            className="h-full rounded-full transition-all duration-300"
+                            style={{
+                              width: `${sevValue}%`,
+                              backgroundColor: getBarColor(highestSeverityLim.severity)
+                            }}
+                          />
+                        </div>
+                        
+                        <p className="text-xs text-gray-600 mb-1">{highestSeverityLim.description}</p>
+                        
+                        {highestSeverityLim.value !== undefined && (() => {
+                          // Determine property label based on type and value
+                          let propertyLabel = 'Value';
+                          
+                          if (type === 'erosion' && typeof highestSeverityLim.value === 'number') {
+                            propertyLabel = 'Slope';
+                          } else if (type === 'wetness') {
+                            const valueStr = String(highestSeverityLim.value).toLowerCase();
+                            if (valueStr.includes('flood')) {
+                              propertyLabel = 'Flooding Frequency';
+                            } else if (valueStr.includes('pond')) {
+                              propertyLabel = 'Ponding Frequency';
+                            } else if (valueStr.includes('drain')) {
+                              propertyLabel = 'Drainage Class';
+                            }
+                          } else if (type === 'soil') {
+                            const valueStr = String(highestSeverityLim.value);
+                            if (valueStr.includes('cm') || valueStr.includes('depth')) {
+                              propertyLabel = 'Restrictive Depth';
+                            } else {
+                              propertyLabel = 'Restriction Type';
+                            }
+                          } else if (type === 'climate') {
+                            const valueStr = String(highestSeverityLim.value).toLowerCase();
+                            if (valueStr.includes('frost')) {
+                              propertyLabel = 'Frost Action';
+                            } else if (valueStr.includes('temp')) {
+                              propertyLabel = 'Temperature Regime';
+                            }
+                          }
+                          
+                          return (
+                            <p className="text-xs text-gray-500">
+                              <span className="font-semibold">{propertyLabel}:</span> {typeof highestSeverityLim.value === 'number' 
+                                ? `${highestSeverityLim.value}${type === 'erosion' ? '%' : ''}`
+                                : highestSeverityLim.value
+                              }
+                            </p>
+                          );
+                        })()}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Management Recommendations Section */}
+        {currentManagement && (
+          <>
+            <div className="border-t border-gray-200 pt-4">
+              <h5 className="text-sm font-bold text-gray-800 mb-3">Management Recommendations</h5>
+              
+              {/* Combined management guidance from class and subclass */}
+              {description && (
+                <div className="mb-3">
+                  <p className="text-xs text-gray-700 leading-relaxed">
+                    {description.management}
+                    {currentLCC && currentLCC.subclass && subclassModifiers.length > 0 && (
+                      <> {subclassModifiers.map((mod: any) => mod.management).join(' ')}</>
+                    )}
+                  </p>
+                </div>
+              )}
+
+              {currentManagement.suitable_crops && currentManagement.suitable_crops.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Suitable Crops:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {currentManagement.suitable_crops.map((crop, idx) => (
+                      <span key={idx} className="inline-block bg-green-100 text-green-800 px-2 py-0.5 text-xs rounded">
+                        {crop}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentManagement.conservation_practices && currentManagement.conservation_practices.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Conservation Practices:</p>
+                  <ul className="text-xs text-gray-600 space-y-0.5 list-disc list-inside">
+                    {currentManagement.conservation_practices.map((practice, idx) => (
+                      <li key={idx}>{practice}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {currentManagement.key_considerations && currentManagement.key_considerations.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-700 mb-1">Key Considerations:</p>
+                  <ul className="text-xs text-gray-600 space-y-0.5 list-disc list-inside">
+                    {currentManagement.key_considerations.map((consideration, idx) => (
+                      <li key={idx}>{consideration}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+        </div>
+      )}
+
+      {/* Component breakdown */}
+      {lccData.components && lccData.components.length > 1 && (
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <h4 className="text-sm font-bold text-gray-800 mb-3">LCC by Component</h4>
+          <div className="space-y-2">
+            {lccData.components.map((comp, idx) => {
+              const compClass = showIrrigated ? comp.irrigated_class : comp.nonirrigated_class
+              const compSubclass = showIrrigated ? comp.irrigated_subclass : comp.nonirrigated_subclass
+              if (!compClass) return null
+              
+              // Parse class from numeric or Roman format
+              const parsedClass = LCCFormatter.parseLCCClass(compClass)
+              const displayText = parsedClass + (compSubclass || '')
+              
+              return (
+                <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-sm">
+                  <span 
+                    className="px-2 py-1 rounded font-bold"
+                    style={parsedClass ? {
+                      backgroundColor: getClassColors(parsedClass).bg,
+                      color: getClassColors(parsedClass).text,
+                      borderColor: getClassColors(parsedClass).border,
+                      borderWidth: '1px',
+                      borderStyle: 'solid'
+                    } : {
+                      backgroundColor: '#f3f4f6',
+                      color: '#1f2937'
+                    }}
+                  >
+                    {displayText}
+                  </span>
+                  <span className="text-gray-700">{comp.name}</span>
+                  <span className="text-gray-500 text-xs ml-auto">{comp.percent}%</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function OSDPanel({ osdData, isLoading, className = '', interpretations, ssurgoHorizons, componentEcoSite, components }: OSDPanelProps) {
   const [allExpanded, setAllExpanded] = useState(false)
   const [description, setDescription] = useState<string | null>(null)
   const [descriptionLoading, setDescriptionLoading] = useState(false)
   const [profileProperty, setProfileProperty] = useState<'texture' | 'clay' | 'om' | 'ph' | 'awc' | 'ksat'>('texture')
+  const [imageGalleryOpen, setImageGalleryOpen] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [galleryImages, setGalleryImages] = useState<Array<{url: string; caption: string}>>([])
+  const [showESDDetail, setShowESDDetail] = useState(false)
+  const [selectedESDData, setSelectedESDData] = useState<any>(null)
   const [sectionStates, setSectionStates] = useState({
     description: true,
     profile: true,
@@ -369,8 +846,12 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
     parentMaterial: false,
     climate: false,
     ecological: false,
+    lcc: true,  // Open LCC section by default
     associated: false,
   })
+
+  // Fetch ecological site data using the hook
+  const { data: esdData, loading: esdLoading, error: esdError } = useEcologicalSite(componentEcoSite?.ecoclassid)
 
   const toggleAll = () => {
     const newState = !allExpanded
@@ -386,6 +867,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
       parentMaterial: newState,
       climate: newState,
       ecological: newState,
+      lcc: newState,
       associated: newState,
     })
   }
@@ -396,6 +878,42 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
       [section]: !prev[section]
     }))
   }
+
+  const openImageGallery = (images: Array<{url: string; caption: string}>, startIndex: number) => {
+    setGalleryImages(images)
+    setCurrentImageIndex(startIndex)
+    setImageGalleryOpen(true)
+  }
+
+  const closeImageGallery = () => {
+    setImageGalleryOpen(false)
+  }
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length)
+  }
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)
+  }
+
+  // Keyboard navigation for image gallery
+  useEffect(() => {
+    if (!imageGalleryOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeImageGallery();
+      } else if (e.key === 'ArrowRight') {
+        nextImage();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [imageGalleryOpen, galleryImages.length]);
 
   // Load description when OSD data changes
   useEffect(() => {
@@ -772,15 +1290,25 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
                 {(hz.color.dry || hz.color.moist) && (
                   <div className="grid grid-cols-2 gap-2 mb-2 text-xs">
                     {hz.color.dry && (
-                      <div>
+                      <div className="flex items-center gap-2">
                         <span className="text-gray-500">Dry:</span>
-                        <span className="ml-1 font-mono">{hz.color.dry}</span>
+                        <div 
+                          className="w-6 h-6 rounded border border-gray-300 flex-shrink-0"
+                          style={{ backgroundColor: munsellToRGB(hz.color.dry) || '#e5e7eb' }}
+                          title={hz.color.dry}
+                        />
+                        <span className="font-mono">{hz.color.dry}</span>
                       </div>
                     )}
                     {hz.color.moist && (
-                      <div>
+                      <div className="flex items-center gap-2">
                         <span className="text-gray-500">Moist:</span>
-                        <span className="ml-1 font-mono">{hz.color.moist}</span>
+                        <div 
+                          className="w-6 h-6 rounded border border-gray-300 flex-shrink-0"
+                          style={{ backgroundColor: munsellToRGB(hz.color.moist) || '#e5e7eb' }}
+                          title={hz.color.moist}
+                        />
+                        <span className="font-mono">{hz.color.moist}</span>
                       </div>
                     )}
                   </div>
@@ -879,27 +1407,274 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         </CollapsibleSection>
 
         {/* Ecological Sites */}
-        {osdData.ecologicalSites.length > 0 && (
+        {componentEcoSite?.ecoclassid && (
           <CollapsibleSection 
-            title="Ecological Sites" 
+            title="Ecological Site Description" 
             icon={<Leaf className="w-5 h-5 text-green-600" />}
             isOpen={sectionStates.ecological}
             onToggle={() => toggleSection('ecological')}
           >
-            <div className="space-y-2">
-              {osdData.ecologicalSites.map((site, idx) => (
-                <div key={idx} className="border border-gray-200 rounded p-2 bg-gray-100">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-900">{site.ecoclassid}</span>
-                    <span className="text-xs text-gray-600">{(site.proportion * 100).toFixed(1)}%</span>
-                  </div>
-                  <div className="flex gap-4 text-xs text-gray-600 mt-1">
-                    <span>{site.area_ac.toLocaleString()} acres</span>
-                    <span>{site.n_components} components</span>
+            {esdLoading && !esdData && (
+              <div className="space-y-3">
+                <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+                  <p className="font-medium text-blue-900 mb-1">📍 Basic Ecological Site Information</p>
+                  <div className="text-blue-800 space-y-1">
+                    <div><span className="font-semibold">ID:</span> {componentEcoSite.ecoclassid}</div>
+                    {componentEcoSite.ecoclassname && (
+                      <div><span className="font-semibold">Name:</span> {componentEcoSite.ecoclassname}</div>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="bg-green-50 border border-green-200 rounded p-4">
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                    <div className="text-sm text-green-800">
+                      <p className="font-medium">Loading detailed ecological site description...</p>
+                      <p className="text-xs mt-1">This may take 1-2 minutes. Please be patient.</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 bg-white rounded p-2 text-xs text-gray-600">
+                    <p>💡 <span className="font-medium">What's being loaded:</span></p>
+                    <ul className="ml-4 mt-1 list-disc space-y-0.5">
+                      <li>Site characteristics and suitability</li>
+                      <li>Vegetation and productivity data</li>
+                      <li>Management recommendations</li>
+                      <li>Site images and resources</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {esdError && (
+              <div className="space-y-3">
+                <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+                  <p className="font-medium text-blue-900 mb-1">📍 Basic Ecological Site Information</p>
+                  <div className="text-blue-800 space-y-1">
+                    <div><span className="font-semibold">ID:</span> {componentEcoSite.ecoclassid}</div>
+                    {componentEcoSite.ecoclassname && (
+                      <div><span className="font-semibold">Name:</span> {componentEcoSite.ecoclassname}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm text-yellow-800">
+                  <p className="font-medium mb-1">ℹ️ Detailed Description Unavailable</p>
+                  <p className="text-xs">This ecological site does not have a published description in the USDA EDIT database. This may be because it is newly classified or pending documentation.</p>
+                </div>
+              </div>
+            )}
+            
+            {!esdLoading && !esdData && !esdError && (
+              <div className="border border-gray-200 rounded p-3 bg-gray-50">
+                <div className="text-sm font-semibold text-gray-900 mb-1">
+                  {componentEcoSite.ecoclassid}
+                </div>
+                {componentEcoSite.ecoclassname && (
+                  <div className="text-sm text-gray-700">
+                    {componentEcoSite.ecoclassname}
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {esdData && (
+              <div className="space-y-4">
+                {/* View Full Details Button */}
+                <button
+                  onClick={() => {
+                    setSelectedESDData(esdData.rawData)
+                    setShowESDDetail(true)
+                  }}
+                  style={{
+                    background: 'linear-gradient(to right, #5a7241, #6b8650)',
+                  }}
+                  className="w-full px-4 py-3 hover:brightness-90 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #4a5f35, #5a7241)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #5a7241, #6b8650)'}
+                >
+                  <FileText className="w-5 h-5" />
+                  View Full Ecological Site Details
+                </button>
+
+                {/* Basic Info */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 shadow-sm">
+                  <div className="mb-3">
+                    <h3 className="text-lg font-bold text-green-900 mb-1">
+                      {esdData.basicInfo.siteName}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-gray-600">
+                      <span className="font-mono bg-white px-2 py-0.5 rounded border border-gray-200">
+                        {componentEcoSite?.ecoclassid}
+                      </span>
+                      {esdData.basicInfo.location && esdData.basicInfo.location !== 'Location information not available' && (
+                        <>
+                          <span>•</span>
+                          <span>{esdData.basicInfo.location}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  {esdData.basicInfo.ecoclassConcept && (
+                    <div className="bg-white rounded-lg p-3 border border-green-100 shadow-sm">
+                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{esdData.basicInfo.ecoclassConcept}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Land Characteristics */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <h4 className="text-sm font-bold text-gray-800 flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+                    <Mountain className="w-4 h-4 text-blue-600" />
+                    Land Characteristics
+                  </h4>
+                  <div className="space-y-2.5">
+                    <DataRow label="Landforms" value={esdData.landCharacteristics.landforms} />
+                    <DataRow label="Soils" value={esdData.landCharacteristics.soils} block={true} />
+                    <DataRow label="Climate" value={esdData.landCharacteristics.climate} />
+                    <DataRow label="Elevation" value={esdData.landCharacteristics.elevation} />
+                    <DataRow label="Slopes" value={esdData.landCharacteristics.slopes} />
+                  </div>
+                </div>
+
+                {/* Productivity */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <h4 className="text-sm font-bold text-gray-800 flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+                    <Leaf className="w-4 h-4 text-green-600" />
+                    Productivity & Vegetation
+                  </h4>
+                  <div className="space-y-2.5 mb-3">
+                    <DataRow label="Dominant Vegetation" value={esdData.productivity.dominantVegetation} />
+                    {esdData.productivity.expectedYields && (
+                      <DataRow label="Expected Yields" value={esdData.productivity.expectedYields} />
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-100">
+                    <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                      <h5 className="text-xs font-semibold text-green-800 mb-2 flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5" />
+                        Best Uses
+                      </h5>
+                      <ul className="text-xs text-gray-700 space-y-1">
+                        {esdData.productivity.bestUses.map((use, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-green-600 mt-0.5">•</span>
+                            <span>{use}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="bg-red-50 rounded-lg p-3 border border-red-100">
+                      <h5 className="text-xs font-semibold text-red-800 mb-2 flex items-center gap-1">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        Limitations
+                      </h5>
+                      <ul className="text-xs text-gray-700 space-y-1">
+                        {esdData.productivity.limitations.map((limitation, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-red-600 mt-0.5">•</span>
+                            <span>{limitation}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Management */}
+                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <h4 className="text-sm font-bold text-gray-800 flex items-center gap-2 mb-3 pb-2 border-b border-gray-200">
+                    <Lightbulb className="w-4 h-4 text-amber-600" />
+                    Management Insights
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                      <h5 className="text-xs font-semibold text-blue-800 mb-2">Opportunities</h5>
+                      <ul className="text-xs text-gray-700 space-y-1">
+                        {esdData.management.opportunities.map((opp, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-blue-600 mt-0.5">•</span>
+                            <span>{opp}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
+                      <h5 className="text-xs font-semibold text-amber-800 mb-2">Challenges</h5>
+                      <ul className="text-xs text-gray-700 space-y-1">
+                        {esdData.management.challenges.map((challenge, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-amber-600 mt-0.5">•</span>
+                            <span>{challenge}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-3 border border-purple-100">
+                      <h5 className="text-xs font-semibold text-purple-800 mb-2">Considerations</h5>
+                      <ul className="text-xs text-gray-700 space-y-1">
+                        {esdData.management.considerations.map((consideration, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-purple-600 mt-0.5">•</span>
+                            <span>{consideration}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Images */}
+                {esdData.resources.images.length > 0 && (
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="text-sm font-bold text-gray-800 mb-3 pb-2 border-b border-gray-200">Site Images ({esdData.resources.images.length})</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {esdData.resources.images.slice(0, 4).map((image, idx) => (
+                        <div 
+                          key={idx} 
+                          className="relative cursor-pointer group"
+                          onClick={() => openImageGallery(esdData.resources.images, idx)}
+                        >
+                          <img 
+                            src={image.url} 
+                            alt={image.caption}
+                            className="w-full h-24 object-cover rounded border border-gray-200 group-hover:opacity-80 transition-opacity"
+                            onError={(e) => {
+                              console.error('Failed to load image:', image.url);
+                              (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage unavailable%3C/text%3E%3C/svg%3E';
+                            }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-30 rounded">
+                            <span className="text-white text-xs font-medium">Click to view</span>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1 truncate" title={image.caption}>{image.caption}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {esdData.resources.images.length > 4 && (
+                      <button
+                        onClick={() => openImageGallery(esdData.resources.images, 0)}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        View all {esdData.resources.images.length} images →
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </CollapsibleSection>
+        )}
+
+        {/* Land Capability Classification */}
+        {components && components.length > 0 && (
+          <CollapsibleSection 
+            title="Land Capability Classification (LCC)" 
+            icon={<Award className="w-5 h-5 text-amber-600" />}
+            isOpen={sectionStates.lcc}
+            onToggle={() => toggleSection('lcc')}
+          >
+            <LCCContent components={components} />
           </CollapsibleSection>
         )}
 
@@ -980,6 +1755,134 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
           </CollapsibleSection>
         )}
       </div>
+
+      {/* Image Gallery Modal */}
+      {imageGalleryOpen && galleryImages.length > 0 && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed inset-0 flex items-center justify-center p-8"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)', zIndex: 10000 }}
+          onClick={closeImageGallery}
+        >
+          <div 
+            className="relative bg-white rounded-xl shadow-2xl flex flex-col"
+            style={{ 
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              width: 'fit-content'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={closeImageGallery}
+              className="absolute -top-3 -right-3 bg-white text-gray-700 hover:text-gray-900 rounded-full p-2 z-10 transition-colors shadow-lg border border-gray-200"
+              aria-label="Close gallery"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Image container */}
+            <div 
+              className="relative flex items-center justify-center overflow-hidden rounded-t-xl"
+              style={{ 
+                maxHeight: 'calc(90vh - 140px)',
+                minHeight: '400px'
+              }}
+            >
+              {/* Previous button */}
+              {galleryImages.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevImage();
+                  }}
+                  className="absolute left-4 text-white hover:text-gray-300 rounded-full p-3 z-10 transition-colors"
+                  style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+                  aria-label="Previous image"
+                >
+                  <ChevronDown className="w-8 h-8 transform -rotate-90" />
+                </button>
+              )}
+
+              <img
+                src={galleryImages[currentImageIndex].url}
+                alt={galleryImages[currentImageIndex].caption}
+                className="max-w-full max-h-full object-contain"
+                style={{ maxHeight: 'calc(90vh - 140px)' }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage unavailable%3C/text%3E%3C/svg%3E';
+                }}
+              />
+
+              {/* Next button */}
+              {galleryImages.length > 1 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextImage();
+                  }}
+                  className="absolute right-4 text-white hover:text-gray-300 rounded-full p-3 z-10 transition-colors"
+                  style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+                  aria-label="Next image"
+                >
+                  <ChevronDown className="w-8 h-8 transform rotate-90" />
+                </button>
+              )}
+            </div>
+
+            {/* Caption and Counter */}
+            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200"
+              style={galleryImages.length > 1 ? { borderRadius: '0' } : { borderBottomLeftRadius: '0.75rem', borderBottomRightRadius: '0.75rem' }}
+            >
+              <p className="text-sm font-medium text-gray-800 text-center">{galleryImages[currentImageIndex].caption}</p>
+              <p className="text-xs text-gray-600 mt-1 text-center">
+                Image {currentImageIndex + 1} of {galleryImages.length}
+              </p>
+            </div>
+
+            {/* Thumbnail navigation */}
+            {galleryImages.length > 1 && (
+              <div className="bg-white border-t border-gray-200 px-4 py-3 flex gap-2 overflow-x-auto rounded-b-xl justify-center">
+                {galleryImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex(idx);
+                    }}
+                    className={`flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all ${
+                      idx === currentImageIndex
+                        ? 'border-blue-500 scale-105 shadow-md'
+                        : 'border-gray-300 opacity-70 hover:opacity-100 hover:border-blue-300'
+                    }`}
+                  >
+                    <img
+                      src={img.url}
+                      alt={img.caption}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64"%3E%3Crect fill="%23ddd" width="64" height="64"/%3E%3C/svg%3E';
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ESD Detail Modal */}
+      {showESDDetail && selectedESDData && (
+        <ESDDetailModal
+          esdData={selectedESDData}
+          onClose={() => {
+            setShowESDDetail(false)
+            setSelectedESDData(null)
+          }}
+        />
+      )}
     </div>
   )
 }

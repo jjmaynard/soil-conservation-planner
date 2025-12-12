@@ -91,6 +91,9 @@ export interface SSURGOComponent {
   taxreaction?: string
   taxtempcl?: string
   taxmoistscl?: string
+  // Ecological Site
+  ecoclassid?: string
+  ecoclassname?: string
   // Parent Material
   pmorigin?: string
   pmkind?: string

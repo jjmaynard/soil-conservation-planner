@@ -15,6 +15,7 @@ export default function MapSearch({ onLocationSelect, className = '' }: MapSearc
   const [isSearching, setIsSearching] = useState(false)
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
 
   // Close suggestions when clicking outside
@@ -22,6 +23,7 @@ export default function MapSearch({ onLocationSelect, className = '' }: MapSearc
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSuggestions(false)
+        setIsExpanded(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -94,15 +96,37 @@ export default function MapSearch({ onLocationSelect, className = '' }: MapSearc
 
   return (
     <div ref={searchRef} className={`relative ${className}`}>
-      <div
-        className="shadow-lg"
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(4px)',
-          borderRadius: '8px',
-          width: '320px',
-        }}
-      >
+      {/* Collapsed state - just search icon */}
+      {!isExpanded && (
+        <button
+          onClick={() => setIsExpanded(true)}
+          className="shadow-lg hover:shadow-xl transition-all"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(4px)',
+            borderRadius: '50%',
+            width: '48px',
+            height: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Search className="h-5 w-5 text-gray-600" />
+        </button>
+      )}
+
+      {/* Expanded state - full search bar */}
+      {isExpanded && (
+        <div
+          className="shadow-lg"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(4px)',
+            borderRadius: '8px',
+            width: '320px',
+          }}
+        >
         <div className="flex items-center gap-2 p-3">
           <Search className="h-5 w-5 text-gray-400 flex-shrink-0" />
           <input
@@ -177,9 +201,10 @@ export default function MapSearch({ onLocationSelect, className = '' }: MapSearc
 
         {/* Help text */}
         <div className="px-3 py-2 border-t text-xs" style={{ color: '#6b7280', borderTopColor: '#e5e7eb' }}>
-          Examples: &ldquo;San Francisco, CA&rdquo; or &ldquo;40.7128, -74.0060&rdquo;
+          Examples: &ldquo;Lincoln, NE&rdquo; or &ldquo;41.25, -95.95&rdquo;
         </div>
-      </div>
+        </div>
+      )}
     </div>
   )
 }

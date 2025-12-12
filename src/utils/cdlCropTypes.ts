@@ -6,10 +6,11 @@ export type CropType =
   | 'perennial'
   | 'permanent'
   | 'pasture'
+  | 'fallow'
   | 'forest'
   | 'developed'
   | 'water'
-  | 'other'
+  | 'non-cropland'
 
 /**
  * Estimated classification accuracy for crop types based on NASS CDL accuracy assessments
@@ -138,10 +139,10 @@ export const CROP_TYPE_MAP: Record<number, CropType> = {
   58: 'perennial', // Clover/Wildflowers
   59: 'pasture', // Sod/Grass Seed
   60: 'perennial', // Switchgrass
-  61: 'other', // Fallow/Idle Cropland
+  61: 'fallow', // Fallow/Idle Cropland
   63: 'forest', // Forest
-  64: 'other', // Shrubland
-  65: 'other', // Barren
+  64: 'non-cropland', // Shrubland
+  65: 'non-cropland', // Barren
   66: 'permanent', // Cherries (tree fruit, years to establish)
   67: 'permanent', // Peaches
   68: 'permanent', // Apples
@@ -153,23 +154,23 @@ export const CROP_TYPE_MAP: Record<number, CropType> = {
   75: 'permanent', // Almonds
   76: 'permanent', // Walnuts
   77: 'permanent', // Pears
-  81: 'other', // Clouds/No Data
+  81: 'non-cropland', // Clouds/No Data
   82: 'developed', // Developed
   83: 'water', // Water
   87: 'water', // Wetlands
-  88: 'other', // Nonag/Undefined
+  88: 'non-cropland', // Nonag/Undefined
   92: 'water', // Aquaculture
   111: 'water', // Open Water
-  112: 'other', // Perennial Ice/Snow
+  112: 'non-cropland', // Perennial Ice/Snow
   121: 'developed', // Developed/Open Space
   122: 'developed', // Developed/Low Intensity
   123: 'developed', // Developed/Med Intensity
   124: 'developed', // Developed/High Intensity
-  131: 'other', // Barren
+  131: 'non-cropland', // Barren
   141: 'forest', // Deciduous Forest
   142: 'forest', // Evergreen Forest
   143: 'forest', // Mixed Forest
-  152: 'other', // Shrubland
+  152: 'non-cropland', // Shrubland
   176: 'pasture', // Grassland/Pasture
   190: 'water', // Woody Wetlands
   195: 'water', // Herbaceous Wetlands

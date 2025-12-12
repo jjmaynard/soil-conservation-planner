@@ -2,11 +2,12 @@
 
 'use client'
 
-import { ChevronDown, ChevronRight, ChevronUp, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, ChevronUp, Layers, Map, X } from 'lucide-react'
 import { useState } from 'react'
 
 interface CroplandLegendProps {
   onClose?: () => void
+  topOffset?: number
   className?: string
 }
 
@@ -167,7 +168,7 @@ const CROP_GROUPS = [
   },
 ]
 
-export default function CroplandLegend({ onClose, className = '' }: CroplandLegendProps) {
+export default function CroplandLegend({ onClose, topOffset = 0, className = '' }: CroplandLegendProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
@@ -189,43 +190,78 @@ export default function CroplandLegend({ onClose, className = '' }: CroplandLege
     setExpandedGroups(new Set())
   }
 
+  // Calculate available height for legend content - matching PropertyPanel's bottom offset (0.5rem = 8px)
+  const maxContentHeight = `calc(100vh - ${topOffset + 156}px)`
+
   return (
     <div
-      className={`absolute top-[30rem] left-4 z-[400] max-w-xs rounded-lg bg-white/95 shadow-lg backdrop-blur-sm ${className}`}
+      className={`absolute left-4 max-w-xs ${className}`}
+      style={{
+        top: `${topOffset + 24}px`,
+        ...(isExpanded && { bottom: '0.5rem' }),
+        maxHeight: `calc(100vh - ${topOffset + 32}px)`,
+        overflowY: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        zIndex: 1000,
+        backgroundColor: 'rgba(255, 255, 255, 0.97)',
+        background: 'linear-gradient(to bottom right, rgba(255, 255, 255, 0.97), rgba(249, 250, 251, 0.97))',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        borderRadius: '12px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        border: '1px solid rgba(255, 255, 255, 0.8)',
+        minWidth: '280px'
+      }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b p-3">
-        <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="hover:bg-gray-50 -mx-3 -my-3 flex flex-1 items-center gap-2 rounded-t-lg px-3 py-3 transition-colors"
-        >
-          <div className="flex-1 text-left">
-            <h3 className="text-gray-900 text-sm font-semibold">Cropland Data Layer</h3>
-            <p className="text-gray-500 mt-0.5 text-xs">Land Cover Legend</p>
-          </div>
-          {isExpanded ? (
-            <ChevronUp className="text-gray-500 h-4 w-4" />
-          ) : (
-            <ChevronDown className="text-gray-500 h-4 w-4" />
-          )}
-        </button>
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="hover:bg-gray-100 ml-2 rounded p-1 transition-colors"
-            aria-label="Close legend"
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex w-full items-center justify-between transition-all duration-200"
+        style={{
+          padding: '10px 12px',
+          borderBottom: isExpanded ? '1px solid rgba(229, 231, 235, 0.6)' : 'none',
+          backgroundColor: 'transparent',
+          borderRadius: '12px 12px 0 0'
+        }}
+        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(249, 250, 251, 0.8)'}
+        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+      >
+        <div className="flex items-center gap-2">
+          <div 
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              borderRadius: '6px',
+              padding: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
+            }}
           >
-            <X className="text-gray-500 h-4 w-4" />
-          </button>
-        )}
-      </div>
+            <Map className="h-4 w-4" style={{ color: '#ffffff' }} />
+          </div>
+          <div className="text-left">
+            <h3 className="font-semibold text-sm" style={{ color: '#111827', marginBottom: '1px' }}>Land Cover Legend</h3>
+            {isExpanded && <p className="text-xs" style={{ color: '#6b7280' }}>Cropland Data Layer (CDL)</p>}
+          </div>
+        </div>
+        <div 
+          className="transition-transform duration-200"
+          style={{
+            transform: isExpanded ? 'rotate(0deg)' : 'rotate(180deg)',
+            color: '#6b7280'
+          }}
+        >
+          <ChevronUp className="h-5 w-5" />
+        </div>
+      </button>
 
       {/* Legend Items - only show when expanded */}
       {isExpanded && (
         <>
-          <div className="max-h-[70vh] overflow-y-auto p-3">
+          <div className="overflow-y-auto p-3 flex-1" style={{ minHeight: 0, paddingTop: '10px', paddingBottom: '10px' }}>
             {/* Expand/Collapse All Controls */}
             <div className="border-gray-200 mb-2 flex gap-2 border-b pb-2">
               <button
@@ -259,10 +295,6 @@ export default function CroplandLegend({ onClose, className = '' }: CroplandLege
                       ) : (
                         <ChevronRight className="text-gray-500 h-3.5 w-3.5 flex-shrink-0" />
                       )}
-                      <div
-                        className="border-gray-400 h-4 w-4 flex-shrink-0 rounded border"
-                        style={{ backgroundColor: group.color }}
-                      />
                       <span className="text-gray-700 flex-1 text-left text-xs font-semibold">
                         {group.name}
                       </span>
@@ -290,7 +322,7 @@ export default function CroplandLegend({ onClose, className = '' }: CroplandLege
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 text-gray-600 border-t p-3 text-xs">
+          <div className="bg-gray-50 text-gray-600 border-t p-3 text-xs flex-shrink-0">
             <p>
               Source:{' '}
               <a

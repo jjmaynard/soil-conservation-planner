@@ -14,9 +14,11 @@ export default function Header({ className = '' }: HeaderProps) {
     <header 
       className={`shadow-lg ${className}`} 
       style={{ 
-        background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%)',
+        background: 'linear-gradient(135deg, #1e2b4d 0%, #2b3d6c 50%, #3d5a8c 100%)',
         color: 'white',
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        position: 'relative',
+        zIndex: 1000,
       }}
     >
       <div className="w-full px-6 py-4">

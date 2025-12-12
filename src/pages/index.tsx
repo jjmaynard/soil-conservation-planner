@@ -35,6 +35,8 @@ export default function Home() {
   const [activeLayers, setActiveLayers] = useState<string[]>(['ssurgo-mapunits'])
   const [cdlYear, setCdlYear] = useState<number>(2023)
   const [layerOpacities, setLayerOpacities] = useState<Record<string, number>>({})
+  const [isProcessing, setIsProcessing] = useState<boolean>(false)
+  const [layerControlHeight, setLayerControlHeight] = useState<number>(0)
   const mapRef = useRef<L.Map | null>(null)
 
   // Define available soil layers
@@ -93,6 +95,7 @@ export default function Home() {
   const handleSoilClick = useCallback((profile: SoilProfile) => {
     setSelectedProfile(profile)
     setSSURGOData(null) // Clear SSURGO data when showing profile
+    setIsProcessing(false) // Clear processing state
   }, [])
 
   const handleSSURGOClick = useCallback(async (data: SSURGOData) => {
@@ -111,6 +114,8 @@ export default function Home() {
         setCdlHistory(null)
       }
     }
+    
+    setIsProcessing(false) // Clear processing state when data is ready
   }, [])
 
   const handleLayerToggle = useCallback((layerId: string) => {
@@ -181,6 +186,7 @@ export default function Home() {
             onSoilClick={handleSoilClick}
             onSSURGOClick={handleSSURGOClick}
             onMapReady={handleMapReady}
+            onProcessingStart={() => setIsProcessing(true)}
           />
 
           <LayerControl
@@ -191,10 +197,24 @@ export default function Home() {
             onDepthChange={changeDepth}
             cdlYear={cdlYear}
             onCdlYearChange={setCdlYear}
+            onHeightChange={setLayerControlHeight}
           />
 
           {/* CDL Legend - shown when CDL layer is active */}
-          {activeLayers.includes('cdl') && <CroplandLegend />}
+          {activeLayers.includes('cdl') && <CroplandLegend topOffset={layerControlHeight} />}
+
+          {/* Processing Indicator */}
+          {isProcessing && (
+            <div className="absolute right-4 top-24 z-[3000] bg-white rounded-lg shadow-2xl border border-gray-200 p-6 w-64">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Processing...</p>
+                  <p className="text-xs text-gray-600 mt-1">Loading soil data</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {(selectedProfile || ssurgoData) && (
             <PropertyPanel
