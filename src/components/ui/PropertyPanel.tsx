@@ -1625,7 +1625,7 @@ export default function PropertyPanel({
                               {dominantComp.compname || 'Unknown'} - {dominantComp.comppct_r || 0}%
                             </h4>
                             <p className="text-sm font-semibold text-gray-700">
-                              {classInfo.summary}
+                              {classInfo.name}
                             </p>
                           </div>
                         </div>
