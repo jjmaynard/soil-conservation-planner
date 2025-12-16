@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Hexagon shape as background -->
+  <polygon points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5" fill="#8B4513"/>
+  
+  <!-- Horizontal soil layers within hexagon -->
+  <polygon points="50,20 85,37.5 85,47.5 50,60 15,47.5 15,37.5" fill="#A0522D"/>
+  <polygon points="50,60 85,47.5 85,62.5 50,75 15,62.5 15,47.5" fill="#6B3410"/>
+  <polygon points="50,75 85,62.5 85,72.5 50,85 15,72.5 15,62.5" fill="#5A2D0C"/>
+  
+  <!-- Small rock shapes -->
+  <ellipse cx="35" cy="55" rx="4" ry="3" fill="#696969" opacity="0.8"/>
+  <ellipse cx="55" cy="50" rx="3" ry="4" fill="#808080" opacity="0.9"/>
+  <ellipse cx="45" cy="68" rx="5" ry="3" fill="#A9A9A9" opacity="0.7"/>
+  <ellipse cx="60" cy="65" rx="3" ry="3" fill="#696969" opacity="0.85"/>
+</svg>
