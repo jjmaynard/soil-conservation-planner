@@ -203,24 +203,34 @@ export default function SoilMap({
       if (clickMarkerRef.current) {
         console.log('Moving existing marker to:', lat, lng)
         clickMarkerRef.current.setLatLng([lat, lng])
-        // Ensure marker is brought to front
-        clickMarkerRef.current.setZIndexOffset(1000)
+        // Ensure marker is brought to front and visible
+        clickMarkerRef.current.setZIndexOffset(10000)
+        clickMarkerRef.current.setOpacity(1)
       } else {
         console.log('Creating new marker at:', lat, lng)
+        const markerIcon = L.icon({
+          iconUrl: '/leaflet/marker-icon.png',
+          iconRetinaUrl: '/leaflet/marker-icon-2x.png',
+          shadowUrl: '/leaflet/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41],
+          className: 'soil-click-marker'
+        })
+        
         clickMarkerRef.current = L.marker([lat, lng], {
-          icon: L.icon({
-            iconUrl: '/leaflet/marker-icon.png',
-            iconRetinaUrl: '/leaflet/marker-icon-2x.png',
-            shadowUrl: '/leaflet/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-          }),
-          zIndexOffset: 1000  // Ensure marker is always on top
+          icon: markerIcon,
+          zIndexOffset: 10000,  // Much higher to ensure it's always on top
+          opacity: 1,
+          riseOnHover: true
         }).addTo(map)
+        
         console.log('Marker created and added to map')
+        console.log('Marker element:', clickMarkerRef.current.getElement())
       }
       console.log('Marker on map:', clickMarkerRef.current ? 'yes' : 'no')
+      console.log('Marker pane:', clickMarkerRef.current?.getPane())
 
       try {
         // Check if SSURGO layer is active and query it

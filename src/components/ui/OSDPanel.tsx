@@ -19,6 +19,9 @@ import {
   AlertTriangle,
   CheckCircle,
   X,
+  Wheat,
+  TrendingUp,
+  Shield,
 } from 'lucide-react'
 import type { FormattedOSDData } from '#src/types/osd'
 import { getDescriptionText } from '#src/utils/osdDescriptionLoader'
@@ -26,6 +29,13 @@ import { useEcologicalSite } from '#src/hooks/useEcologicalSite'
 import { LCCFormatter } from '#src/lib/lcc-formatter'
 import type { FormattedLCCData } from '#src/types/lcc'
 import ESDDetailModal from '#src/components/ui/ESDDetailModal'
+import {
+  HYDROLOGIC_GROUP_INTERPRETATIONS,
+  DRAINAGE_CLASS_INTERPRETATIONS,
+  getHydrologyColor,
+  getDrainageColor,
+  type DrainageClassKey,
+} from '#src/utils/soilInterpretations'
 
 // Simple Munsell to RGB approximation
 // This is a basic approximation - full conversion requires lookup tables
@@ -199,149 +209,219 @@ function getTextureClassColor(textureClass: string): string {
   return colorMap[textureClass] || '#d1d5db'
 }
 
-// Helper function to group interpretations by category
-function groupInterpretations(interpretations: any[]) {
-  const groups: Record<string, any[]> = {
-    agricultural: [],
-    engineering: [],
-    environmental: [],
-    development: [],
-    other: [],
-  }
-
-  interpretations.forEach(interp => {
-    const name = (interp.rulename || '').toLowerCase()
-
-    if (
-      name.includes('agr') ||
-      name.includes('crop') ||
-      name.includes('farm') ||
-      name.includes('irrigation')
-    ) {
-      groups.agricultural.push(interp)
-    } else if (
-      name.includes('eng') ||
-      name.includes('construct') ||
-      name.includes('build') ||
-      name.includes('foundation')
-    ) {
-      groups.engineering.push(interp)
-    } else if (
-      name.includes('env') ||
-      name.includes('wildlife') ||
-      name.includes('habitat') ||
-      name.includes('wetland')
-    ) {
-      groups.environmental.push(interp)
-    } else if (
-      name.includes('dwel') ||
-      name.includes('septic') ||
-      name.includes('road') ||
-      name.includes('path')
-    ) {
-      groups.development.push(interp)
-    } else {
-      groups.other.push(interp)
-    }
+// Component to display Water Management and Agricultural Productivity for all components
+function InterpretationsContent({ components }: { components: any[] }) {
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    hydrology: false,
+    productivity: false,
   })
 
-  return groups
-}
-
-// Component to display interpretations
-function InterpretationsContent({ interpretations }: { interpretations: any[] }) {
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(null)
-  const groups = groupInterpretations(interpretations)
-
-  // Group metadata
-  const groupInfo: Record<string, { name: string; icon: string; color: string }> = {
-    agricultural: { name: 'Agricultural', icon: '🌾', color: '#059669' },
-    engineering: { name: 'Engineering', icon: '🏗️', color: '#7c3aed' },
-    environmental: { name: 'Environmental', icon: '🌿', color: '#10b981' },
-    development: { name: 'Development', icon: '🏘️', color: '#3b82f6' },
-    other: { name: 'Other', icon: '📋', color: '#6b7280' },
-  }
-
-  // Rating color function
-  const getRatingStyle = (rating: string) => {
-    const r = rating.toLowerCase()
-    if (r.includes('not') || r.includes('severe') || r.includes('very limited')) {
-      return { backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }
-    }
-    if (r.includes('slight') || r.includes('well') || r.includes('not limited')) {
-      return { backgroundColor: '#d1fae5', color: '#065f46', border: '1px solid #a7f3d0' }
-    }
-    return { backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] })) 
   }
 
   return (
-    <div className="space-y-2">
-      {Object.entries(groups).map(([key, groupInterps]) => {
-        if (groupInterps.length === 0) return null
-        const info = groupInfo[key]
-        const isExpanded = expandedGroup === key
+    <div className="space-y-4">
+      {components.map((component, idx) => {
+        const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+        const bgColor = component.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
+
+        // Extract hydrology data
+        const hydroGroup = (component.hydgrp || component.hydrologicgroup) as 'A' | 'B' | 'C' | 'D' | null
+        const drainageClass = (component.drainagecl || component.drainageclass) as DrainageClassKey | null
+        const hydricRating = component.hydricrating
+
+        // Extract productivity data
+        const cropIndex = component.cropprodindex
+        const rangeProduction = component.rsprod_r
+
+        const hasHydrologyData = hydroGroup || drainageClass || hydricRating
+        const hasProductivityData = cropIndex !== null || rangeProduction !== null
+
+        if (!hasHydrologyData && !hasProductivityData) return null
 
         return (
-          <div key={key} className="border-gray-200 rounded border">
-            <button
-              onClick={() => setExpandedGroup(isExpanded ? null : key)}
-              className="hover:bg-gray-100 flex w-full items-center justify-between px-3 py-2 transition-colors"
-              style={{ borderLeft: `3px solid ${info.color}` }}
-            >
-              <div className="flex items-center gap-2">
-                <span>{info.icon}</span>
-                <span className="text-gray-800 text-xs font-semibold">{info.name}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="bg-gray-100 rounded-full px-2 py-0.5 text-xs font-medium">
-                  {groupInterps.length}
-                </span>
-                <svg
-                  className="h-3 w-3 transition-transform"
-                  style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+          <div key={idx} className="space-y-3">
+            {/* Water Management & Hydrology */}
+            {hasHydrologyData && (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => toggleSection(`hydrology-${idx}`)}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  style={{ borderLeft: `4px solid ${bgColor}` }}
                 >
-                  <path d="M6 6L14 10L6 14V6Z" />
-                </svg>
-              </div>
-            </button>
+                  <div className="flex items-center gap-3">
+                    <Droplets className="h-5 w-5" style={{ color: bgColor }} />
+                    <h4 className="font-semibold text-gray-900">Water Management</h4>
+                  </div>
+                  <ChevronDown
+                    className={`h-5 w-5 text-gray-400 transition-transform ${
+                      expandedSections[`hydrology-${idx}`] ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
 
-            {isExpanded && (
-              <div className="space-y-1.5 px-3 pb-2">
-                {groupInterps.map((interp, idx) => (
-                  <div key={idx} className="bg-white rounded p-2 text-xs">
-                    <div className="text-gray-800 mb-1 font-medium">{interp.rulename}</div>
-                    {interp.interphrc && (
-                      <div className="mb-0.5 flex items-center gap-1">
-                        <span className="text-gray-600">Rating:</span>
-                        <span
-                          className="rounded px-1.5 py-0.5 font-medium"
-                          style={getRatingStyle(interp.interphrc)}
-                        >
-                          {interp.interphrc}
-                        </span>
+                {expandedSections[`hydrology-${idx}`] && (
+                  <div className="px-4 py-4 bg-gray-50 space-y-4">
+                    {/* Hydrologic Group */}
+                    {hydroGroup && HYDROLOGIC_GROUP_INTERPRETATIONS[hydroGroup] && (
+                      <div className="bg-white rounded-lg border border-gray-200 p-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div
+                            className="w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold"
+                            style={{ backgroundColor: getHydrologyColor(hydroGroup) }}
+                          >
+                            {hydroGroup}
+                          </div>
+                          <div className="flex-1">
+                            <h5 className="font-semibold text-gray-900">
+                              {HYDROLOGIC_GROUP_INTERPRETATIONS[hydroGroup].name}
+                            </h5>
+                            <p className="text-sm text-gray-600">Hydrologic Group</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-700">
+                            <strong>Description:</strong>{' '}
+                            {HYDROLOGIC_GROUP_INTERPRETATIONS[hydroGroup].description}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <strong>Implications:</strong>{' '}
+                            {HYDROLOGIC_GROUP_INTERPRETATIONS[hydroGroup].implications}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <strong>Management:</strong>{' '}
+                            {HYDROLOGIC_GROUP_INTERPRETATIONS[hydroGroup].management}
+                          </p>
+                        </div>
+
+                        <div className="mt-3 bg-blue-50 border border-blue-200 rounded p-3">
+                          <h6 className="font-semibold text-blue-900 mb-2">Recommendations</h6>
+                          <ul className="space-y-1">
+                            {HYDROLOGIC_GROUP_INTERPRETATIONS[hydroGroup].recommendations.map(
+                              (rec: string, recIdx: number) => (
+                                <li key={recIdx} className="text-sm text-blue-800 flex items-start gap-2">
+                                  <span className="text-blue-600 mt-0.5">•</span>
+                                  <span>{rec}</span>
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
                       </div>
                     )}
-                    {interp.ruledepth != null && (
-                      <div className="text-gray-500">Depth: {interp.ruledepth} cm</div>
+
+                    {/* Drainage Class */}
+                    {drainageClass && DRAINAGE_CLASS_INTERPRETATIONS[drainageClass] && (
+                      <div className="bg-white rounded-lg border border-gray-200 p-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div
+                            className="w-12 h-12 rounded-full flex items-center justify-center"
+                            style={{ backgroundColor: getDrainageColor(drainageClass) }}
+                          >
+                            <Droplets className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h5 className="font-semibold text-gray-900">
+                              {DRAINAGE_CLASS_INTERPRETATIONS[drainageClass].name}
+                            </h5>
+                            <p className="text-sm text-gray-600">Drainage Class</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-700">
+                            <strong>Description:</strong>{' '}
+                            {DRAINAGE_CLASS_INTERPRETATIONS[drainageClass].description}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <strong>Implications:</strong>{' '}
+                            {DRAINAGE_CLASS_INTERPRETATIONS[drainageClass].implications}
+                          </p>
+                          <p className="text-sm text-gray-700">
+                            <strong>Management:</strong>{' '}
+                            {DRAINAGE_CLASS_INTERPRETATIONS[drainageClass].management}
+                          </p>
+                        </div>
+                      </div>
                     )}
-                    {interp.interphr && (
-                      <div className="text-gray-600 mt-1 text-xs leading-tight">{interp.interphr}</div>
+
+                    {/* Hydric Soil Status */}
+                    {hydricRating && (
+                      <div
+                        className={`rounded-lg border p-4 ${
+                          hydricRating.toLowerCase().includes('yes')
+                            ? 'bg-blue-50 border-blue-200'
+                            : 'bg-gray-50 border-gray-200'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <Info className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <h6 className="font-semibold text-gray-900 mb-1">Hydric Soil Status</h6>
+                            <p className="text-sm text-gray-700">
+                              <strong>Rating:</strong> {hydricRating}
+                            </p>
+                            {hydricRating.toLowerCase().includes('yes') && (
+                              <p className="text-sm text-blue-700 mt-2">
+                                This soil meets the definition of a hydric soil and may be subject to wetland
+                                regulations. Consult with local NRCS office before planning land use changes.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
-                ))}
+                )}
+              </div>
+            )}
 
-                {/* Collapse button at bottom */}
+            {/* Agricultural Productivity */}
+            {hasProductivityData && (
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <button
-                  onClick={() => setExpandedGroup(null)}
-                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 mt-2 flex w-full items-center justify-center gap-1 rounded px-2 py-1.5 text-xs transition-colors"
+                  onClick={() => toggleSection(`productivity-${idx}`)}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  style={{ borderLeft: `4px solid ${bgColor}` }}
                 >
-                  <svg className="h-3 w-3 rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M6 6L14 10L6 14V6Z" />
-                  </svg>
-                  <span>Collapse</span>
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="h-5 w-5" style={{ color: bgColor }} />
+                    <h4 className="font-semibold text-gray-900">Agricultural Productivity</h4>
+                  </div>
+                  <ChevronDown
+                    className={`h-5 w-5 text-gray-400 transition-transform ${
+                      expandedSections[`productivity-${idx}`] ? 'rotate-180' : ''
+                    }`}
+                  />
                 </button>
+
+                {expandedSections[`productivity-${idx}`] && (
+                  <div className="px-4 py-4 bg-gray-50 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      {cropIndex !== null && cropIndex !== undefined && (
+                        <div className="bg-white rounded-lg border border-gray-200 p-4">
+                          <Leaf className="h-6 w-6 text-green-600 mb-2" />
+                          <div className="text-3xl font-bold text-gray-900 mb-1">{cropIndex}</div>
+                          <p className="text-sm font-semibold text-gray-700">Crop Productivity Index</p>
+                          <p className="text-xs text-gray-600 mt-1">Scale: 0-100 (higher is better)</p>
+                        </div>
+                      )}
+
+                      {rangeProduction !== null && rangeProduction !== undefined && (
+                        <div className="bg-white rounded-lg border border-gray-200 p-4">
+                          <Mountain className="h-6 w-6 text-amber-600 mb-2" />
+                          <div className="text-3xl font-bold text-gray-900 mb-1">
+                            {rangeProduction.toLocaleString()}
+                          </div>
+                          <p className="text-sm font-semibold text-gray-700">Range Production</p>
+                          <p className="text-xs text-gray-600 mt-1">lbs/acre/year</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -483,14 +563,14 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
   // Color mapping for LCC classes - using hex colors for inline styles
   const getClassColors = (lccClass: string): { bg: string; text: string; border: string } => {
     const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-      'I': { bg: '#dcfce7', text: '#166534', border: '#86efac' },      // green
-      'II': { bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },     // lighter green
-      'III': { bg: '#fef9c3', text: '#854d0e', border: '#fde047' },    // yellow
-      'IV': { bg: '#fefce8', text: '#a16207', border: '#fef08a' },     // lighter yellow
-      'V': { bg: '#ffedd5', text: '#9a3412', border: '#fed7aa' },      // orange
-      'VI': { bg: '#fff7ed', text: '#c2410c', border: '#fdba74' },     // lighter orange
-      'VII': { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },    // red
-      'VIII': { bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },   // lighter red
+      '1': { bg: '#dcfce7', text: '#166534', border: '#86efac' },      // green
+      '2': { bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },      // lighter green
+      '3': { bg: '#fef9c3', text: '#854d0e', border: '#fde047' },      // yellow
+      '4': { bg: '#fefce8', text: '#a16207', border: '#fef08a' },      // lighter yellow
+      '5': { bg: '#ffedd5', text: '#9a3412', border: '#fed7aa' },      // orange
+      '6': { bg: '#fff7ed', text: '#c2410c', border: '#fdba74' },      // lighter orange
+      '7': { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },      // red
+      '8': { bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },      // lighter red
     };
     return colorMap[lccClass] || { bg: '#f3f4f6', text: '#1f2937', border: '#d1d5db' };
   };
@@ -516,7 +596,7 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
               onClick={() => setShowIrrigated(false)}
               className="px-3 py-1 text-sm rounded transition-colors"
               style={{
-                backgroundColor: !showIrrigated ? '#2563eb' : '#ffffff',
+                backgroundColor: !showIrrigated ? '#2b3d6c' : '#ffffff',
                 color: !showIrrigated ? '#ffffff' : '#374151',
                 border: '1px solid #d1d5db'
               }}
@@ -533,7 +613,7 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
               onClick={() => setShowIrrigated(true)}
               className="px-3 py-1 text-sm rounded transition-colors"
               style={{
-                backgroundColor: showIrrigated ? '#2563eb' : '#ffffff',
+                backgroundColor: showIrrigated ? '#2b3d6c' : '#ffffff',
                 color: showIrrigated ? '#ffffff' : '#374151',
                 border: '1px solid #d1d5db'
               }}
@@ -582,7 +662,7 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
             </h4>
             {description && (
               <p className="text-sm font-semibold text-gray-700">
-                {description.summary.replace(' with irrigation', '').replace(' without irrigation', '')}
+                {description.summary}
               </p>
             )}
           </div>
@@ -592,9 +672,6 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
           <div className="space-y-3 text-sm mb-4">
             <p className="text-gray-700 leading-relaxed">
               {description.description}
-              {currentLCC && currentLCC.subclass && subclassModifiers.length > 0 && (
-                <> {subclassModifiers.map((mod: any) => mod.description).join(' ')}</>
-              )}
             </p>
           </div>
         )}
@@ -603,7 +680,51 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
         {currentLimitations && currentLimitations.length > 0 && (
           <>
             <div className="border-t border-gray-200 pt-4 mb-4">
-              <h5 className="text-sm font-bold text-gray-800 mb-3">Limitation Details</h5>
+              <div className="flex items-center gap-2 mb-3">
+                {(() => {
+                  // Get unique limitation types and their highest severity for icon display
+                  const limitationsByType = currentLimitations.reduce((acc: any, lim) => {
+                    if (!acc[lim.type]) acc[lim.type] = [];
+                    acc[lim.type].push(lim);
+                    return acc;
+                  }, {});
+
+                  const severityValue = (severity: string) => {
+                    switch(severity) {
+                      case 'slight': return 25;
+                      case 'moderate': return 50;
+                      case 'severe': return 75;
+                      case 'very_severe': return 100;
+                      default: return 0;
+                    }
+                  };
+
+                  const getIconColor = (severity: string) => {
+                    switch(severity) {
+                      case 'slight': return '#16a34a';
+                      case 'moderate': return '#ca8a04';
+                      case 'severe': return '#ea580c';
+                      case 'very_severe': return '#dc2626';
+                      default: return '#6b7280';
+                    }
+                  };
+
+                  return Object.entries(limitationsByType).map(([type, lims]: [string, any]) => {
+                    const highestSeverityLim = lims.reduce((prev: any, curr: any) => 
+                      severityValue(curr.severity) > severityValue(prev.severity) ? curr : prev
+                    );
+
+                    return (
+                      <AlertTriangle 
+                        key={type}
+                        className="h-5 w-5 flex-shrink-0" 
+                        style={{ color: getIconColor(highestSeverityLim.severity) }}
+                      />
+                    );
+                  });
+                })()}
+                <h5 className="text-sm font-bold text-gray-800">Limitation Details</h5>
+              </div>
               
               {/* Visual Severity Bars */}
               <div className="space-y-3">
@@ -637,6 +758,17 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
                     }
                   };
 
+                  // Get icon color based on severity
+                  const getIconColor = (severity: string) => {
+                    switch(severity) {
+                      case 'slight': return '#16a34a';      // green-600
+                      case 'moderate': return '#ca8a04';    // yellow-600
+                      case 'severe': return '#ea580c';      // orange-600
+                      case 'very_severe': return '#dc2626'; // red-600
+                      default: return '#6b7280';            // gray-500
+                    }
+                  };
+
                   return Object.entries(limitationsByType).map(([type, lims]: [string, any]) => {
                     const highestSeverityLim = lims.reduce((prev: any, curr: any) => 
                       severityValue(curr.severity) > severityValue(prev.severity) ? curr : prev
@@ -645,11 +777,15 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
                     const sevColors = getSeverityColor(highestSeverityLim.severity);
 
                     // Get subclass info for this type
-                    const typeCode = type === 'erosion' ? 'e' : type === 'wetness' ? 'w' : type === 'soil' ? 's' : type === 'climate' ? 'c' : '';
+                    const typeCode = type === 'erosion' ? 'e' 
+                      : type === 'wetness' ? 'w' 
+                      : type === 'soil' ? 's' 
+                      : type === 'climate' ? 'c' 
+                      : type.charAt(0).toLowerCase(); // fallback to first letter of type
                     const subclassInfo = subclassModifiers.find((m: any) => m.code === typeCode);
 
                     return (
-                      <div key={type} className="p-3 bg-gray-50 rounded-lg">
+                      <div key={type} className="p-3 bg-gray-50 rounded-lg border-l-4" style={{ borderLeftColor: getIconColor(highestSeverityLim.severity) }}>
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
                             <span className="font-mono font-bold text-gray-700 text-sm">{typeCode}:</span>
@@ -678,7 +814,7 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
                           />
                         </div>
                         
-                        <p className="text-xs text-gray-600 mb-1">{highestSeverityLim.description}</p>
+                        <p className="text-xs text-gray-600 mb-2">{highestSeverityLim.description}</p>
                         
                         {highestSeverityLim.value !== undefined && (() => {
                           // Determine property label based on type and value
@@ -797,29 +933,29 @@ const LCCContent: React.FC<{ components: any[] }> = ({ components }) => {
               const compSubclass = showIrrigated ? comp.irrigated_subclass : comp.nonirrigated_subclass
               if (!compClass) return null
               
-              // Parse class from numeric or Roman format
               const parsedClass = LCCFormatter.parseLCCClass(compClass)
               const displayText = parsedClass + (compSubclass || '')
               
               return (
-                <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-sm">
+                <div key={idx} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg">
                   <span 
-                    className="px-2 py-1 rounded font-bold"
+                    className="px-4 py-2 rounded-lg border-2 font-bold text-xl flex-shrink-0"
                     style={parsedClass ? {
                       backgroundColor: getClassColors(parsedClass).bg,
                       color: getClassColors(parsedClass).text,
-                      borderColor: getClassColors(parsedClass).border,
-                      borderWidth: '1px',
-                      borderStyle: 'solid'
+                      borderColor: getClassColors(parsedClass).border
                     } : {
                       backgroundColor: '#f3f4f6',
-                      color: '#1f2937'
+                      color: '#1f2937',
+                      borderColor: '#d1d5db'
                     }}
                   >
                     {displayText}
                   </span>
-                  <span className="text-gray-700">{comp.name}</span>
-                  <span className="text-gray-500 text-xs ml-auto">{comp.percent}%</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-semibold text-gray-900 text-sm">{comp.name}</span>
+                  </div>
+                  <span className="text-gray-500 font-medium text-sm flex-shrink-0">{comp.percent}%</span>
                 </div>
               )
             })}
@@ -851,7 +987,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
     parentMaterial: false,
     climate: false,
     ecological: false,
-    lcc: true,  // Open LCC section by default
+    lcc: false,
     associated: false,
   })
 
@@ -1687,7 +1823,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         {components && components.length > 0 && (
           <CollapsibleSection 
             title="Land Capability Classification (LCC)" 
-            icon={<Award className="w-5 h-5" />}
+            icon={<Wheat className="w-5 h-5" />}
             isOpen={sectionStates.lcc}
             onToggle={() => toggleSection('lcc')}
             accent={componentColor}
@@ -1697,7 +1833,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
         )}
 
         {/* Interpretations */}
-        {interpretations && interpretations.length > 0 && (
+        {components && components.length > 0 && (
           <CollapsibleSection 
             title="Soil Interpretations" 
             icon={<FileText className="w-5 h-5" />} 
@@ -1705,7 +1841,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
             onToggle={() => toggleSection('interpretations')}
             accent={componentColor}
           >
-            <InterpretationsContent interpretations={interpretations} />
+            <InterpretationsContent components={components} />
           </CollapsibleSection>
         )}
 

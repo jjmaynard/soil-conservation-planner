@@ -14,25 +14,9 @@ import type {
 
 export class LCCFormatter {
   /**
-   * Convert numeric class to Roman numeral
-   */
-  private static numericToRoman(num: number): LCCClass | null {
-    const romanMap: Record<number, LCCClass> = {
-      1: 'I',
-      2: 'II',
-      3: 'III',
-      4: 'IV',
-      5: 'V',
-      6: 'VI',
-      7: 'VII',
-      8: 'VIII'
-    };
-    return romanMap[num] || null;
-  }
-
-  /**
    * Parse LCC class from SSURGO rating string
    * Handles both numeric ("2e", "3") and Roman numeral ("IIe", "III") formats
+   * Returns numeric string ("1"-"8")
    */
   static parseLCCClass(rating_class: string | null | undefined): LCCClass | null {
     if (!rating_class) return null;
@@ -40,13 +24,20 @@ export class LCCFormatter {
     // Try numeric format first (e.g., "2", "2e", "3w")
     const numericMatch = rating_class.match(/^(\d)/);
     if (numericMatch) {
-      const num = parseInt(numericMatch[1]);
-      return this.numericToRoman(num);
+      return numericMatch[1] as LCCClass;
     }
     
-    // Try Roman numeral format (e.g., "II", "IIe", "IIIw")
+    // Convert Roman numeral format to numeric (e.g., "II" -> "2", "IIe" -> "2")
     const romanMatch = rating_class.match(/^([IV]{1,4})/);
-    return romanMatch ? romanMatch[1] as LCCClass : null;
+    if (romanMatch) {
+      const romanToNum: Record<string, LCCClass> = {
+        'I': '1', 'II': '2', 'III': '3', 'IV': '4',
+        'V': '5', 'VI': '6', 'VII': '7', 'VIII': '8'
+      };
+      return romanToNum[romanMatch[1]] || null;
+    }
+    
+    return null;
   }
 
   /**
@@ -77,49 +68,49 @@ export class LCCFormatter {
     const irrigationType = isIrrigated ? 'with irrigation' : 'without irrigation';
     
     const descriptions: Record<LCCClass, LCCDescription> = {
-      'I': {
+      '1': {
         summary: `Excellent cropland ${irrigationType}`,
         description: `This is prime agricultural land with few limitations. Suitable for all common crops with proper management. ${isIrrigated ? 'Irrigation enhances productivity and crop options.' : 'Well-suited for rainfed agriculture.'}`,
         management: 'Standard farming practices. Focus on maintaining soil health and preventing erosion.',
         crops: 'All common field crops, vegetables, orchards, and pasture.'
       },
-      'II': {
+      '2': {
         summary: `Good cropland ${irrigationType}`,
         description: `High-quality agricultural land with minor limitations that reduce crop choice or require special management.${isIrrigated ? ' Irrigation helps overcome moisture limitations.' : ''}`,
         management: 'Conservation practices recommended. May need terracing, drainage, or specific tillage practices.',
         crops: 'Most field crops and pasture. Some specialty crops may have limitations.'
       },
-      'III': {
+      '3': {
         summary: `Moderate cropland ${irrigationType}`,
         description: `Agricultural land with noticeable limitations that reduce crop choice and require careful management.${isIrrigated ? ' Irrigation significantly improves productivity.' : ''}`,
         management: 'Intensive conservation practices required. May need specialized equipment or modified farming systems.',
         crops: 'Limited crop rotation options. Best suited for hay, pasture, or specific adapted crops.'
       },
-      'IV': {
+      '4': {
         summary: `Limited cropland ${irrigationType}`,
         description: `Land with severe limitations that restrict crop choice to a few adapted species or require very careful management.${isIrrigated ? ' Irrigation may enable limited crop production.' : ''}`,
         management: 'Intensive conservation required. Consider alternative land uses if cropping is not profitable.',
         crops: 'Very limited crop options. Primarily hay, pasture, or specialty crops with specific adaptations.'
       },
-      'V': {
+      '5': {
         summary: `Non-cropland ${irrigationType}`,
         description: `Land not suitable for cultivation due to wetness, stones, or other factors, but suitable for grazing or forestry. ${isIrrigated ? 'Irrigation does not overcome fundamental limitations.' : 'Physical limitations prevent cultivation.'}`,
         management: 'Managed grazing, forestry, or wildlife habitat. Protect from overgrazing.',
         crops: 'Native pasture, improved pasture with limitations, or forestry.'
       },
-      'VI': {
+      '6': {
         summary: `Limited grazing land`,
         description: `Land with severe limitations that make it unsuitable for cultivation and limit its use for grazing or forestry. Steep slopes, shallow soils, or excessive wetness are common.`,
         management: 'Light grazing only. Focus on erosion control and vegetation maintenance.',
         crops: 'Native vegetation, wildlife habitat, limited grazing.'
       },
-      'VII': {
+      '7': {
         summary: `Very limited grazing land`,
         description: `Land with very severe limitations that make it unsuitable for cultivation and severely limit grazing use. Best for wildlife, watershed protection, or recreation.`,
         management: 'Minimal disturbance. Protect natural vegetation and prevent erosion.',
         crops: 'Wildlife habitat, watershed protection, recreation. Very limited grazing if any.'
       },
-      'VIII': {
+      '8': {
         summary: `Non-agricultural land`,
         description: `Land not suitable for agriculture, grazing, or commercial forestry due to extreme limitations. Best used for wildlife, watershed protection, recreation, or aesthetic purposes.`,
         management: 'Preserve in natural state. No agricultural use recommended.',
@@ -135,9 +126,9 @@ export class LCCFormatter {
    */
   static getSubclassDescriptions(subclass: string, lccClass?: LCCClass | null): Array<{ code: string; name: string; description: string; management: string }> {
     // Determine land use capability
-    const isCropland = lccClass && ['I', 'II', 'III', 'IV'].includes(lccClass);
-    const isGrazingLand = lccClass && ['V', 'VI'].includes(lccClass);
-    const isNonAgricultural = lccClass && ['VII', 'VIII'].includes(lccClass);
+    const isCropland = lccClass && ['1', '2', '3', '4'].includes(lccClass);
+    const isGrazingLand = lccClass && ['5', '6'].includes(lccClass);
+    const isNonAgricultural = lccClass && ['7', '8'].includes(lccClass);
 
     const subclassInfo: Record<string, { name: string; description: string; management: string }> = {
       'e': {

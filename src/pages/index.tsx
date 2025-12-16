@@ -1,4 +1,4 @@
-// SoilViz Pro - Main Application Page
+// Soil Conservation Explorer - Main Application Page
 
 'use client'
 
@@ -118,6 +118,14 @@ export default function Home() {
     setIsProcessing(false) // Clear processing state when data is ready
   }, [])
 
+  const handleProcessingStart = useCallback(() => {
+    setIsProcessing(true)
+    // Clear old data immediately when new point is clicked
+    setSelectedProfile(null)
+    setSSURGOData(null)
+    setCdlHistory(null)
+  }, [])
+
   const handleLayerToggle = useCallback((layerId: string) => {
     setActiveLayers(prev => (prev.includes(layerId) ? prev.filter(id => id !== layerId) : [...prev, layerId]))
   }, [])
@@ -162,7 +170,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>SoilViz Pro - Interactive Soil Survey Platform</title>
+        <title>Soil Conservation Explorer - Interactive Soil Survey Platform</title>
         <meta
           name="description"
           content="Professional web application for visualizing soil properties, classifications, and environmental factors across survey areas"
@@ -187,7 +195,7 @@ export default function Home() {
             onSoilClick={handleSoilClick}
             onSSURGOClick={handleSSURGOClick}
             onMapReady={handleMapReady}
-            onProcessingStart={() => setIsProcessing(true)}
+            onProcessingStart={handleProcessingStart}
           />
 
           <LayerControl

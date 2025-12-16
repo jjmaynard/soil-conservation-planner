@@ -37,8 +37,9 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
     conservation: false,
   })
 
-  const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
-  const bgColor = component.majcompflag === 'Yes' ? colors[0] : colors[((componentIndex - 1) % 3) + 1]
+  const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+  // Major component always gets green, others cycle through remaining colors
+  const bgColor = component.majcompflag === 'Yes' ? colors[0] : colors[(componentIndex % (colors.length - 1)) + 1]
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }))
@@ -140,7 +141,7 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                       </p>
                       {nirrcapunit && (
                         <p className="text-xs text-gray-500 mt-1">
-                          <strong>Unit:</strong> {nirrcapunit}
+                          <strong>Capability Unit:</strong> {nirrcapunit}
                         </p>
                       )}
                     </div>
@@ -236,7 +237,7 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                       </p>
                       {irrcapunit && (
                         <p className="text-xs text-gray-500 mt-1">
-                          <strong>Unit:</strong> {irrcapunit}
+                          <strong>Capability Unit:</strong> {irrcapunit}
                         </p>
                       )}
                     </div>

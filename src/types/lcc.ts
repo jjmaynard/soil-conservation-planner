@@ -1,7 +1,7 @@
 // Land Capability Classification (LCC) Types
 // Based on SSURGO LCC interpretation framework
 
-export type LCCClass = 'I' | 'II' | 'III' | 'IV' | 'V' | 'VI' | 'VII' | 'VIII';
+export type LCCClass = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8';
 
 export type LCCSubclassModifier = 'e' | 'w' | 's' | 'c';
 

@@ -49,7 +49,7 @@ export default function Header({ className = '' }: HeaderProps) {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Soil Conservation Planner
+                Soil Conservation Explorer
               </h1>
               <p 
                 className="font-medium" 

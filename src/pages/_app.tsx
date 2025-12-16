@@ -20,9 +20,9 @@ const App = ({ Component, pageProps }: AppProps) => (
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta
         name="description"
-        content="SoilViz Pro - Interactive Soil Survey Platform for NRCS soil scientists"
+        content="Soil Conservation Explorer - Interactive Soil Survey Platform for NRCS soil scientists"
       />
-      <title>SoilViz Pro - Soil Survey Interactive Mapping</title>
+      <title>Soil Conservation Explorer - Soil Survey Interactive Mapping</title>
     </Head>
     <main className={`${catamaran.variable} font-sans text-base`}>
       <Component {...pageProps} />

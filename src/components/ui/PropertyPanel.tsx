@@ -27,6 +27,8 @@ import {
   TrendingUp,
   Waves,
   X,
+  AlertTriangle,
+  CheckCircle,
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useEffect, useState, useRef } from 'react'
@@ -58,6 +60,7 @@ import type { SoilProfile, SSURGOData } from '#src/types/soil'
 import type { CDLYearData } from '#src/utils/cdlQuery'
 import { formatCoordinates } from '#src/utils/geoUtils'
 import { getSoilOrderColor, getTextureColor } from '#src/utils/soilColors'
+import { LAND_CAPABILITY_INTERPRETATIONS } from '#src/utils/soilInterpretations'
 
 // Dynamically import the full-screen dashboard
 const SoilDashboard = dynamic(() => import('./SoilDashboard'), { ssr: false })
@@ -719,21 +722,29 @@ function ProfileComparisonModal({
 function ComponentDetailsSection({ 
   comp, 
   idx,
-  allComponents
+  allComponents,
+  isExpanded,
+  onToggle
 }: { 
   comp: any
   idx: number 
   allComponents: any[]
+  isExpanded: boolean
+  onToggle: () => void
 }) {
   const { osdData, isLoading: osdLoading } = useOSDData(comp.compname, true)
   
   // Use the same color assignment logic as Map Unit Composition
-  const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
-  const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1]
+  const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+  const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
   
   return (
-    <details key={idx} open={false} className="group">
-      <summary 
+    <details key={idx} open={isExpanded} className="group">
+      <summary
+        onClick={(e) => {
+          e.preventDefault()
+          onToggle()
+        }} 
         className="rounded-lg border-2 p-4 cursor-pointer list-none transition-all hover:shadow-md mb-2"
         style={{ borderColor: bgColor, backgroundColor: `${bgColor}10` }}
       >
@@ -814,6 +825,7 @@ export default function PropertyPanel({
   const [showExpandedCDLChart, setShowExpandedCDLChart] = useState(false)
   const [showProfileComparison, setShowProfileComparison] = useState(false)
   const [showIrrigatedLCC, setShowIrrigatedLCC] = useState(false)
+  const [expandedComponents, setExpandedComponents] = useState<Set<number>>(new Set())
   
   // Draggable state
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -828,6 +840,19 @@ export default function PropertyPanel({
       setTimeout(() => setChartKey(prev => prev + 1), 100)
     }
   }, [compositionView])
+
+  // Toggle component expansion state
+  const toggleComponentExpansion = (idx: number) => {
+    setExpandedComponents(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(idx)) {
+        newSet.delete(idx)
+      } else {
+        newSet.add(idx)
+      }
+      return newSet
+    })
+  }
 
   // Helper function for property status classification
   const getPropertyStatus = (value: number, ideal: [number, number]): { status: string; color: string } => {
@@ -954,14 +979,14 @@ export default function PropertyPanel({
   // Helper function for LCC class colors
   const getLCCClassColors = (lccClass: string): { bg: string; text: string; border: string } => {
     const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-      'I': { bg: '#dcfce7', text: '#166534', border: '#86efac' },
-      'II': { bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
-      'III': { bg: '#fef9c3', text: '#854d0e', border: '#fde047' },
-      'IV': { bg: '#fefce8', text: '#a16207', border: '#fef08a' },
-      'V': { bg: '#ffedd5', text: '#9a3412', border: '#fed7aa' },
-      'VI': { bg: '#fff7ed', text: '#c2410c', border: '#fdba74' },
-      'VII': { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
-      'VIII': { bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
+      '1': { bg: '#dcfce7', text: '#166534', border: '#86efac' },
+      '2': { bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' },
+      '3': { bg: '#fef9c3', text: '#854d0e', border: '#fde047' },
+      '4': { bg: '#fefce8', text: '#a16207', border: '#fef08a' },
+      '5': { bg: '#ffedd5', text: '#9a3412', border: '#fed7aa' },
+      '6': { bg: '#fff7ed', text: '#c2410c', border: '#fdba74' },
+      '7': { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
+      '8': { bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
     };
     return colorMap[lccClass] || { bg: '#f3f4f6', text: '#1f2937', border: '#d1d5db' };
   }
@@ -1360,9 +1385,9 @@ export default function PropertyPanel({
                             {ssurgoData.components
                               .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                               .map((comp, idx) => {
-                                const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                                const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                                 // Assign major component to first color, then cycle through remaining colors
-                                const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1]
+                                const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
 
                                 return (
                                   <div
@@ -1384,9 +1409,9 @@ export default function PropertyPanel({
                           {ssurgoData.components
                             .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                             .map((comp, idx) => {
-                              const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                              const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                               // Assign major component to first color, then cycle through remaining colors
-                              const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1]
+                              const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
 
                               return (
                                 <div key={idx} className="flex items-center gap-1.5">
@@ -1406,12 +1431,12 @@ export default function PropertyPanel({
                           <RechartsPieChart width={440} height={300}>
                             <Pie
                               data={ssurgoData.components.map((comp, idx) => {
-                                const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                                const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                                 return {
                                   name: comp.compname,
                                   value: Number(comp.comppct_r) || 0,
                                   // Assign major component to first color, then cycle through remaining colors
-                                  fill: comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1],
+                                  fill: comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1],
                                 }
                               })}
                               dataKey="value"
@@ -1426,9 +1451,9 @@ export default function PropertyPanel({
                         {/* Legend */}
                         <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
                           {ssurgoData.components.map((comp, idx) => {
-                            const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                            const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                             // Assign major component to first color, then cycle through remaining colors
-                            const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1]
+                            const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
 
                             return (
                               <div key={idx} className="flex items-center gap-1.5">
@@ -1480,13 +1505,51 @@ export default function PropertyPanel({
               </div>
             </details>
 
-            {/* Land Capability Classification by Component */}
+            {/* Land Capability Classification - Combined */}
             {ssurgoData.components && ssurgoData.components.length > 0 && (() => {
               const lccData = LCCFormatter.formatLCCData(ssurgoData.components);
               
               if (!lccData || !lccData.components || lccData.components.length === 0) {
                 return null;
               }
+              
+              const dominantComp = ssurgoData.components.find((c: any) => c.majcompflag === 'Yes') || ssurgoData.components[0];
+              const nirrcapcl = dominantComp.nirrcapcl || dominantComp.nirrcapclass;
+              const nirrcapscl = dominantComp.nirrcapscl || dominantComp.nirrcapsubclass;
+              const irrcapcl = dominantComp.irrcapcl || dominantComp.irrcapclass;
+              const irrcapscl = dominantComp.irrcapscl || dominantComp.irrcapsubclass;
+              
+              const nonIrrigatedClass = nirrcapcl?.toString().replace(/[a-z]/gi, '') || null;
+              const nonIrrigatedSubclass = nirrcapscl || nirrcapcl?.toString().replace(/\d/g, '') || null;
+              const irrigatedClass = irrcapcl?.toString().replace(/[a-z]/gi, '') || null;
+              const irrigatedSubclass = irrcapscl || irrcapcl?.toString().replace(/\d/g, '') || null;
+              
+              const displayClass = showIrrigatedLCC ? irrigatedClass : nonIrrigatedClass;
+              const displaySubclass = showIrrigatedLCC ? irrigatedSubclass : nonIrrigatedSubclass;
+              
+              const classInfo = displayClass && LAND_CAPABILITY_INTERPRETATIONS.classes[displayClass];
+              
+              // Determine severity color based on class number
+              const getSeverityFromClass = (classNum: string): 'slight' | 'moderate' | 'severe' | 'very_severe' => {
+                const num = parseInt(classNum);
+                if (num >= 7) return 'very_severe';
+                if (num >= 5) return 'severe';
+                if (num >= 3) return 'moderate';
+                return 'slight';
+              };
+
+              const getSeverityColors = (severity: string) => {
+                const colorMap: Record<string, { bg: string; text: string; icon: string }> = {
+                  'slight': { bg: '#dcfce7', text: '#166534', icon: '#16a34a' },
+                  'moderate': { bg: '#fef9c3', text: '#854d0e', icon: '#ca8a04' },
+                  'severe': { bg: '#ffedd5', text: '#9a3412', icon: '#ea580c' },
+                  'very_severe': { bg: '#fee2e2', text: '#991b1b', icon: '#dc2626' },
+                };
+                return colorMap[severity] || { bg: '#f3f4f6', text: '#1f2937', icon: '#6b7280' };
+              };
+
+              const currentSeverity = displayClass ? getSeverityFromClass(displayClass) : 'slight';
+              const severityColors = getSeverityColors(currentSeverity);
               
               return (
                 <details open className="group mb-4">
@@ -1519,7 +1582,7 @@ export default function PropertyPanel({
                             onClick={() => setShowIrrigatedLCC(false)}
                             className="px-3 py-1 text-sm rounded transition-colors"
                             style={{
-                              backgroundColor: !showIrrigatedLCC ? '#2563eb' : '#ffffff',
+                              backgroundColor: !showIrrigatedLCC ? '#2b3d6c' : '#ffffff',
                               color: !showIrrigatedLCC ? '#ffffff' : '#374151',
                               border: '1px solid #d1d5db'
                             }}
@@ -1530,7 +1593,7 @@ export default function PropertyPanel({
                             onClick={() => setShowIrrigatedLCC(true)}
                             className="px-3 py-1 text-sm rounded transition-colors"
                             style={{
-                              backgroundColor: showIrrigatedLCC ? '#2563eb' : '#ffffff',
+                              backgroundColor: showIrrigatedLCC ? '#2b3d6c' : '#ffffff',
                               color: showIrrigatedLCC ? '#ffffff' : '#374151',
                               border: '1px solid #d1d5db'
                             }}
@@ -1540,43 +1603,177 @@ export default function PropertyPanel({
                         </div>
                       </div>
                     )}
+                    <h4 className="text-sm font-bold text-gray-800 mb-2">Dominant Land Capability Class</h4>
+                    {/* Dominant Component Class Description with Badge */}
+                    {displayClass && classInfo && (
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div 
+                            className="px-4 py-2 rounded-lg border-2 font-bold text-2xl"
+                            style={{
+                              backgroundColor: severityColors.bg,
+                              color: severityColors.text,
+                              borderColor: severityColors.icon
+                            }}
+                          >
+                            {displayClass}{displaySubclass || ''}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-bold text-gray-800 mb-1">
+                              {dominantComp.compname || 'Unknown'} - {dominantComp.comppct_r || 0}%
+                            </h4>
+                            <p className="text-sm font-semibold text-gray-700">
+                              {classInfo.summary}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3 text-sm">
+                          <p className="text-gray-700 leading-relaxed">
+                            {classInfo.description}
+                          </p>
+                        </div>
+
+                        {/* Subclass limitations */}
+                        {displaySubclass && (
+                          <div className="border-t border-gray-200 pt-3 mt-3">
+                            <h5 className="text-sm font-bold text-gray-800 mb-3">Limitation Details</h5>
+                            <div className="space-y-2">
+                              {displaySubclass.split('').map((subChar: string) => {
+                                const subKey = subChar as 'e' | 'w' | 's' | 'c';
+                                const subInfo = LAND_CAPABILITY_INTERPRETATIONS.subclasses[subKey];
+                                if (!subInfo) return null;
+
+                                return (
+                                  <div
+                                    key={subChar}
+                                    className="rounded p-3"
+                                    style={{
+                                      backgroundColor: severityColors.bg,
+                                      border: `1px solid ${severityColors.icon}`
+                                    }}
+                                  >
+                                    <div className="flex items-start gap-2">
+                                      <AlertTriangle 
+                                        className="h-5 w-5 flex-shrink-0 mt-0.5" 
+                                        style={{ color: severityColors.icon }}
+                                      />
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span 
+                                            className="font-mono font-bold"
+                                            style={{ color: severityColors.text }}
+                                          >
+                                            {subChar}:
+                                          </span>
+                                          <span 
+                                            className="font-semibold"
+                                            style={{ color: severityColors.text }}
+                                          >
+                                            {subInfo.name}
+                                          </span>
+                                        </div>
+                                        <p 
+                                          className="text-sm mb-2"
+                                          style={{ color: severityColors.text }}
+                                        >
+                                          {subInfo.description}
+                                        </p>
+                                        <p 
+                                          className="text-sm"
+                                          style={{ color: severityColors.text }}
+                                        >
+                                          <strong>Management:</strong> {subInfo.management}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Recommended Practices */}
+                        {classInfo.recommendations && (
+                          <div className="border-t border-gray-200 pt-3 mt-3">
+                            <div className="bg-green-50 border border-green-200 rounded p-3">
+                              <h6 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4" />
+                                Recommended Practices
+                              </h6>
+                              <ul className="space-y-1">
+                                {classInfo.recommendations.map((rec: string, idx: number) => (
+                                  <li key={idx} className="text-sm text-green-800 flex items-start gap-2">
+                                    <span className="text-green-600 mt-0.5">•</span>
+                                    <span>{rec}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     
                     {/* Component LCC List */}
-                    <div className="space-y-2">
-                      {lccData.components.map((comp, idx) => {
+                    {lccData.components.length > 1 && (() => {
+                      // Count components with and without LCC data
+                      const componentsWithLCC = lccData.components.filter((comp) => {
                         const compClass = showIrrigatedLCC ? comp.irrigated_class : comp.nonirrigated_class;
-                        const compSubclass = showIrrigatedLCC ? comp.irrigated_subclass : comp.nonirrigated_subclass;
-                        
-                        if (!compClass) return null;
-                        
-                        const parsedClass = LCCFormatter.parseLCCClass(compClass);
-                        const displayText = parsedClass + (compSubclass || '');
-                        
-                        return (
-                          <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg text-sm">
-                            <span 
-                              className="px-3 py-1.5 rounded font-bold text-base"
-                              style={parsedClass ? {
-                                backgroundColor: getLCCClassColors(parsedClass).bg,
-                                color: getLCCClassColors(parsedClass).text,
-                                borderColor: getLCCClassColors(parsedClass).border,
-                                borderWidth: '2px',
-                                borderStyle: 'solid'
-                              } : {
-                                backgroundColor: '#f3f4f6',
-                                color: '#1f2937'
-                              }}
-                            >
-                              {displayText}
-                            </span>
-                            <div className="flex-1">
-                              <span className="font-semibold text-gray-900">{comp.name}</span>
+                        return compClass !== null && compClass !== undefined;
+                      });
+                      const totalComponents = ssurgoData.components.length;
+                      const hasMissingLCC = componentsWithLCC.length < totalComponents;
+
+                      return (
+                        <>
+                          <h4 className="text-sm font-bold text-gray-800 mb-2">LCC by Component</h4>
+                          {hasMissingLCC && (
+                            <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                              <p>
+                                <strong>Note:</strong> LCC information is missing for some components. 
+                                Showing {componentsWithLCC.length} of {totalComponents} components.
+                              </p>
                             </div>
-                            <span className="text-gray-500 font-medium">{comp.percent}%</span>
+                          )}
+                          <div className="space-y-2">
+                            {lccData.components.map((comp, idx) => {
+                              const compClass = showIrrigatedLCC ? comp.irrigated_class : comp.nonirrigated_class;
+                              const compSubclass = showIrrigatedLCC ? comp.irrigated_subclass : comp.nonirrigated_subclass;
+                              
+                              if (!compClass) return null;
+                              
+                              const parsedClass = LCCFormatter.parseLCCClass(compClass);
+                              const displayText = parsedClass + (compSubclass || '');
+                              
+                              return (
+                                <div key={idx} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg">
+                                  <span 
+                                    className="px-4 py-2 rounded-lg border-2 font-bold text-xl flex-shrink-0"
+                                    style={parsedClass ? {
+                                      backgroundColor: getLCCClassColors(parsedClass).bg,
+                                      color: getLCCClassColors(parsedClass).text,
+                                      borderColor: getLCCClassColors(parsedClass).border
+                                    } : {
+                                      backgroundColor: '#f3f4f6',
+                                      color: '#1f2937',
+                                      borderColor: '#d1d5db'
+                                    }}
+                                  >
+                                    {displayText}
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <span className="font-semibold text-gray-900 text-sm">{comp.name}</span>
+                                  </div>
+                                  <span className="text-gray-500 font-medium text-sm flex-shrink-0">{comp.percent}%</span>
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
-                    </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </details>
               );
@@ -1781,9 +1978,9 @@ export default function PropertyPanel({
                       {ssurgoData.components
                         .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                         .map((comp, idx) => {
-                          const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                          const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                           // Assign major component to first color, then cycle through remaining colors
-                          const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1]
+                          const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
 
                           return (
                             <div
@@ -1805,9 +2002,9 @@ export default function PropertyPanel({
                     {ssurgoData.components
                       .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                       .map((comp, idx) => {
-                        const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                        const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                         // Assign major component to first color, then cycle through remaining colors
-                        const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1]
+                        const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
 
                         return (
                           <div key={idx} className="flex items-center gap-1.5">
@@ -1827,12 +2024,12 @@ export default function PropertyPanel({
                     <RechartsPieChart width={440} height={300}>
                       <Pie
                         data={ssurgoData.components.map((comp, idx) => {
-                          const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                          const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                           return {
                             name: comp.compname,
                             value: Number(comp.comppct_r) || 0,
                             // Assign major component to first color, then cycle through remaining colors
-                            fill: comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1],
+                            fill: comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1],
                           }
                         })}
                         dataKey="value"
@@ -1845,9 +2042,9 @@ export default function PropertyPanel({
                   </div>                  {/* Legend */}
                   <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
                     {ssurgoData.components.map((comp, idx) => {
-                      const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa']
+                      const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                       // Assign major component to first color, then cycle through remaining colors
-                      const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % 3) + 1]
+                      const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
 
                       return (
                         <div key={idx} className="flex items-center gap-1.5">
@@ -1893,7 +2090,14 @@ export default function PropertyPanel({
 
             {/* Component Details */}
             {ssurgoData.components && ssurgoData.components.map((comp, idx) => (
-              <ComponentDetailsSection key={idx} comp={comp} idx={idx} allComponents={ssurgoData.components!} />
+              <ComponentDetailsSection 
+                key={idx} 
+                comp={comp} 
+                idx={idx} 
+                allComponents={ssurgoData.components!}
+                isExpanded={expandedComponents.has(idx)}
+                onToggle={() => toggleComponentExpansion(idx)}
+              />
             ))}
           </div>
         )}

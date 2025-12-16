@@ -2,6 +2,13 @@
  custom styles for leaflet
 */
 
+/* Ensure click marker is always visible and on top */
+.soil-click-marker {
+  z-index: 10000 !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
 .leaflet-marker-icon.leaflet-div-icon {
   background: none;
   border: none !important;
