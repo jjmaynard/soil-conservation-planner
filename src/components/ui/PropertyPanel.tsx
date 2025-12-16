@@ -35,7 +35,6 @@ import { useEffect, useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useOSDData } from '#src/hooks/useOSDData'
 import OSDPanel from '#src/components/ui/OSDPanel'
-import SoilInterpretationsComponent from '#src/components/ui/SoilInterpretationsComponent'
 import { getDescriptionText } from '#src/utils/osdDescriptionLoader'
 import { LCCFormatter } from '#src/lib/lcc-formatter'
 import {
@@ -64,158 +63,6 @@ import { LAND_CAPABILITY_INTERPRETATIONS } from '#src/utils/soilInterpretations'
 
 // Dynamically import the full-screen dashboard
 const SoilDashboard = dynamic(() => import('./SoilDashboard'), { ssr: false })
-
-// Helper function to group interpretations by category
-function groupInterpretations(interpretations: any[]) {
-  const groups: Record<string, any[]> = {
-    agricultural: [],
-    engineering: [],
-    environmental: [],
-    development: [],
-    other: [],
-  }
-
-  interpretations.forEach(interp => {
-    const name = (interp.rulename || '').toLowerCase()
-
-    if (
-      name.includes('agr') ||
-      name.includes('crop') ||
-      name.includes('farm') ||
-      name.includes('irrigation')
-    ) {
-      groups.agricultural.push(interp)
-    } else if (
-      name.includes('eng') ||
-      name.includes('construct') ||
-      name.includes('build') ||
-      name.includes('foundation')
-    ) {
-      groups.engineering.push(interp)
-    } else if (
-      name.includes('env') ||
-      name.includes('wildlife') ||
-      name.includes('habitat') ||
-      name.includes('wetland')
-    ) {
-      groups.environmental.push(interp)
-    } else if (
-      name.includes('dwel') ||
-      name.includes('septic') ||
-      name.includes('road') ||
-      name.includes('path')
-    ) {
-      groups.development.push(interp)
-    } else {
-      groups.other.push(interp)
-    }
-  })
-
-  return groups
-}
-
-// Helper component for displaying grouped interpretations
-const InterpretationsDisplay = ({ interpretations }: { interpretations: any[] }) => {
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(null)
-  const groups = groupInterpretations(interpretations)
-
-  // Group metadata
-  const groupInfo: Record<string, { name: string; icon: string; color: string }> = {
-    agricultural: { name: 'Agricultural', icon: '🌾', color: '#059669' },
-    engineering: { name: 'Engineering', icon: '🏗️', color: '#7c3aed' },
-    environmental: { name: 'Environmental', icon: '🌿', color: '#10b981' },
-    development: { name: 'Development', icon: '🏘️', color: '#3b82f6' },
-    other: { name: 'Other', icon: '📋', color: '#6b7280' },
-  }
-
-  // Rating color function
-  const getRatingStyle = (rating: string) => {
-    const r = rating.toLowerCase()
-    if (r.includes('not') || r.includes('severe') || r.includes('very limited')) {
-      return { backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' }
-    }
-    if (r.includes('slight') || r.includes('well') || r.includes('not limited')) {
-      return { backgroundColor: '#d1fae5', color: '#065f46', border: '1px solid #a7f3d0' }
-    }
-    return { backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }
-  }
-
-  return (
-    <div className="space-y-2">
-      {Object.entries(groups).map(([key, groupInterps]) => {
-        if (groupInterps.length === 0) return null
-        const info = groupInfo[key]
-        const isExpanded = expandedGroup === key
-
-        return (
-          <div key={key} className="border-gray-200 rounded border">
-            <button
-              onClick={() => setExpandedGroup(isExpanded ? null : key)}
-              className="hover:bg-gray-50 flex w-full items-center justify-between px-3 py-2 transition-colors"
-              style={{ borderLeft: `3px solid ${info.color}` }}
-            >
-              <div className="flex items-center gap-2">
-                <span>{info.icon}</span>
-                <span className="text-gray-800 text-xs font-semibold">{info.name}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="bg-gray-100 rounded-full px-2 py-0.5 text-xs font-medium">
-                  {groupInterps.length}
-                </span>
-                <svg
-                  className="h-3 w-3 transition-transform"
-                  style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M6 6L14 10L6 14V6Z" />
-                </svg>
-              </div>
-            </button>
-
-            {isExpanded && (
-              <div className="space-y-1.5 px-3 pb-2">
-                {groupInterps.map((interp, idx) => (
-                  <div key={idx} className="bg-gray-50 rounded p-2 text-xs">
-                    <div className="text-gray-800 mb-1 font-medium">{interp.rulename}</div>
-                    {interp.interphrc && (
-                      <div className="mb-0.5 flex items-center gap-1">
-                        <span className="text-gray-600">Rating:</span>
-                        <span
-                          className="rounded px-1.5 py-0.5 font-medium"
-                          style={getRatingStyle(interp.interphrc)}
-                        >
-                          {interp.interphrc}
-                        </span>
-                      </div>
-                    )}
-                    {interp.ruledepth != null && (
-                      <div className="text-gray-500">Depth: {interp.ruledepth} cm</div>
-                    )}
-                    {interp.interphr && (
-                      <div className="text-gray-600 mt-1 text-xs leading-tight">{interp.interphr}</div>
-                    )}
-                  </div>
-                ))}
-
-                {/* Collapse button at bottom */}
-                <button
-                  onClick={() => setExpandedGroup(null)}
-                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 mt-2 flex w-full items-center justify-center gap-1 rounded px-2 py-1.5 text-xs transition-colors"
-                >
-                  <svg className="h-3 w-3 rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M6 6L14 10L6 14V6Z" />
-                  </svg>
-                  <span>Collapse</span>
-                </button>
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 // Soil Property Ranges for Classification
 const soilPropertyRanges: Record<
@@ -660,7 +507,8 @@ function ProfileComparisonModal({
               })}
               </div>
             )
-          })()}          {/* Legend */}
+          })()}
+          {/* Legend */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="text-gray-600 text-sm">
               {compareProperty === 'texture' ? (
@@ -736,7 +584,7 @@ function ComponentDetailsSection({
   
   // Use the same color assignment logic as Map Unit Composition
   const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
-  const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
+  const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
   
   return (
     <details key={idx} open={isExpanded} className="group">
@@ -744,34 +592,32 @@ function ComponentDetailsSection({
         onClick={(e) => {
           e.preventDefault()
           onToggle()
-        }} 
+        }}
         className="rounded-lg border-2 p-4 cursor-pointer list-none transition-all hover:shadow-md mb-2"
-        style={{ borderColor: bgColor, backgroundColor: `${bgColor}10` }}
+        style={{ borderColor: bgColor, backgroundColor: `${bgColor}15` }}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <svg
-              className="h-5 w-5 transition-transform group-open:rotate-90 flex-shrink-0"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              style={{ color: bgColor }}
-            >
-              <path d="M6 6L14 10L6 14V6Z" />
-            </svg>
-            <div className="flex items-center justify-between flex-1 min-w-0 gap-3">
-              <div className="flex items-center gap-2">
-                <h3 className="text-xl font-bold text-gray-900">{comp.compname}</h3>
-                {comp.majcompflag === 'Yes' && (
-                  <span 
-                    className="text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap"
-                    style={{ backgroundColor: '#d97706', color: 'white' }}
-                  >
-                    Major
-                  </span>
-                )}
-              </div>
-              <span className="text-base font-semibold text-gray-700 whitespace-nowrap">{comp.comppct_r}%</span>
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <svg
+            className="h-5 w-5 transition-transform group-open:rotate-90 flex-shrink-0"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            style={{ color: bgColor }}
+          >
+            <path d="M6 6L14 10L6 14V6Z" />
+          </svg>
+          <div className="flex items-center justify-between flex-1 min-w-0 gap-3">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-bold text-gray-900">{comp.compname}</h3>
+              {comp.majcompflag === 'Yes' && (
+                <span 
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap"
+                  style={{ backgroundColor: '#d97706', color: 'white' }}
+                >
+                  Major
+                </span>
+              )}
             </div>
+            <span className="text-base font-semibold text-gray-700 whitespace-nowrap">{comp.comppct_r}%</span>
           </div>
         </div>
       </summary>
@@ -812,7 +658,7 @@ export default function PropertyPanel({
   className = '',
 }: PropertyPanelProps) {
   const [activeTab, setActiveTab] = useState<
-    'profile' | 'ssurgo' | 'components' | 'horizons' | 'cropland' | 'interpretations'
+    'profile' | 'ssurgo' | 'components' | 'horizons' | 'cropland'
   >('components')
   const [compositionView, setCompositionView] = useState<'bar' | 'pie'>('bar')
   const [chartKey, setChartKey] = useState(0)
@@ -1281,42 +1127,6 @@ export default function PropertyPanel({
                 >
                   Cropland History
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('interpretations')}
-                  className="flex-shrink-0 whitespace-nowrap px-4 py-3 transition-all"
-                  style={
-                    activeTab === 'interpretations'
-                      ? {
-                          backgroundColor: '#f0fdf4',
-                          color: '#15803d',
-                          borderBottom: '3px solid #15803d',
-                          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-                          fontSize: '16px',
-                          fontWeight: 'bold',
-                        }
-                      : {
-                          backgroundColor: '#f9fafb',
-                          color: '#4b5563',
-                          fontSize: '16px',
-                          fontWeight: 'bold',
-                        }
-                  }
-                  onMouseEnter={e => {
-                    if (activeTab !== 'interpretations') {
-                      e.currentTarget.style.backgroundColor = '#f3f4f6'
-                      e.currentTarget.style.color = '#111827'
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (activeTab !== 'interpretations') {
-                      e.currentTarget.style.backgroundColor = '#f9fafb'
-                      e.currentTarget.style.color = '#4b5563'
-                    }
-                  }}
-                >
-                  Interpretations
-                </button>
               </>
             )}
           </>
@@ -1387,7 +1197,7 @@ export default function PropertyPanel({
                               .map((comp, idx) => {
                                 const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                                 // Assign major component to first color, then cycle through remaining colors
-                                const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
+                                const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
 
                                 return (
                                   <div
@@ -1411,7 +1221,7 @@ export default function PropertyPanel({
                             .map((comp, idx) => {
                               const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                               // Assign major component to first color, then cycle through remaining colors
-                              const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
+                              const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
 
                               return (
                                 <div key={idx} className="flex items-center gap-1.5">
@@ -1436,7 +1246,7 @@ export default function PropertyPanel({
                                   name: comp.compname,
                                   value: Number(comp.comppct_r) || 0,
                                   // Assign major component to first color, then cycle through remaining colors
-                                  fill: comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1],
+                                  fill: comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1],
                                 }
                               })}
                               dataKey="value"
@@ -1453,7 +1263,7 @@ export default function PropertyPanel({
                           {ssurgoData.components.map((comp, idx) => {
                             const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                             // Assign major component to first color, then cycle through remaining colors
-                            const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
+                            const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
 
                             return (
                               <div key={idx} className="flex items-center gap-1.5">
@@ -1982,7 +1792,7 @@ export default function PropertyPanel({
                         .map((comp, idx) => {
                           const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                           // Assign major component to first color, then cycle through remaining colors
-                          const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
+                          const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
 
                           return (
                             <div
@@ -2006,7 +1816,7 @@ export default function PropertyPanel({
                       .map((comp, idx) => {
                         const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                         // Assign major component to first color, then cycle through remaining colors
-                        const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
+                        const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
 
                         return (
                           <div key={idx} className="flex items-center gap-1.5">
@@ -2031,7 +1841,7 @@ export default function PropertyPanel({
                             name: comp.compname,
                             value: Number(comp.comppct_r) || 0,
                             // Assign major component to first color, then cycle through remaining colors
-                            fill: comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1],
+                            fill: comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1],
                           }
                         })}
                         dataKey="value"
@@ -2046,7 +1856,7 @@ export default function PropertyPanel({
                     {ssurgoData.components.map((comp, idx) => {
                       const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
                       // Assign major component to first color, then cycle through remaining colors
-                      const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
+                      const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
 
                       return (
                         <div key={idx} className="flex items-center gap-1.5">
@@ -2685,32 +2495,7 @@ export default function PropertyPanel({
           </div>
         )}
 
-        {/* Interpretations Tab - Farmer-Friendly Display */}
-        {activeTab === 'interpretations' && ssurgoData && ssurgoData.components && (
-          <div className="space-y-6">
-            {ssurgoData.components.map((comp: any, compIdx: number) => (
-              <SoilInterpretationsComponent
-                key={compIdx}
-                component={comp}
-                componentIndex={compIdx}
-              />
-            ))}
-          </div>
-        )}
 
-        {activeTab === 'interpretations' && (!ssurgoData || !ssurgoData.components || ssurgoData.components.length === 0) && (
-          <div className="flex flex-col items-center justify-center space-y-4 py-12">
-            <div className="bg-gray-100 flex h-16 w-16 items-center justify-center rounded-full">
-              <Database className="text-gray-400 h-8 w-8" />
-            </div>
-            <div className="space-y-2 text-center">
-              <h3 className="text-gray-900 text-lg font-semibold">No Interpretation Data</h3>
-              <p className="text-gray-600 max-w-xs text-sm">
-                Click on the map to query soil interpretations for that location
-              </p>
-            </div>
-          </div>
-        )}
       </div>
       {/* Summary Modal Popup */}
       {showSummaryModal && ssurgoData && (
