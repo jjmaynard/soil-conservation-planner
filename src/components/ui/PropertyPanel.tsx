@@ -1514,10 +1514,10 @@ export default function PropertyPanel({
               }
               
               const dominantComp = ssurgoData.components.find((c: any) => c.majcompflag === 'Yes') || ssurgoData.components[0];
-              const nirrcapcl = dominantComp.nirrcapcl || dominantComp.nirrcapclass;
-              const nirrcapscl = dominantComp.nirrcapscl || dominantComp.nirrcapsubclass;
-              const irrcapcl = dominantComp.irrcapcl || dominantComp.irrcapclass;
-              const irrcapscl = dominantComp.irrcapscl || dominantComp.irrcapsubclass;
+              const nirrcapcl = dominantComp.nirrcapcl;
+              const nirrcapscl = dominantComp.nirrcapscl;
+              const irrcapcl = dominantComp.irrcapcl;
+              const irrcapscl = dominantComp.irrcapscl;
               
               const nonIrrigatedClass = nirrcapcl?.toString().replace(/[a-z]/gi, '') || null;
               const nonIrrigatedSubclass = nirrcapscl || nirrcapcl?.toString().replace(/\d/g, '') || null;
