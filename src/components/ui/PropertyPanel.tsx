@@ -584,7 +584,7 @@ function ComponentDetailsSection({
   
   // Use the same color assignment logic as Map Unit Composition
   const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
-  const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
+  const bgColor = colors[idx % colors.length]
   
   return (
     <details key={idx} open={isExpanded} className="group">
@@ -833,8 +833,8 @@ export default function PropertyPanel({
       '6': { bg: '#fff7ed', text: '#c2410c', border: '#fdba74' },
       '7': { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
       '8': { bg: '#fef2f2', text: '#b91c1c', border: '#fecaca' },
-    };
-    return colorMap[lccClass] || { bg: '#f3f4f6', text: '#1f2937', border: '#d1d5db' };
+    }
+    return colorMap[lccClass] || { bg: '#f3f4f6', text: '#1f2937', border: '#d1d5db' }
   }
 
   const [hoveredTabs, setHoveredTabs] = useState<Record<string, boolean>>({
@@ -1196,8 +1196,7 @@ export default function PropertyPanel({
                               .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                               .map((comp, idx) => {
                                 const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
-                                // Assign major component to first color, then cycle through remaining colors
-                                const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
+                                const bgColor = colors[idx % colors.length]
 
                                 return (
                                   <div
@@ -1220,8 +1219,7 @@ export default function PropertyPanel({
                             .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                             .map((comp, idx) => {
                               const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
-                              // Assign major component to first color, then cycle through remaining colors
-                              const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
+                              const bgColor = colors[idx % colors.length]
 
                               return (
                                 <div key={idx} className="flex items-center gap-1.5">
@@ -1245,8 +1243,7 @@ export default function PropertyPanel({
                                 return {
                                   name: comp.compname,
                                   value: Number(comp.comppct_r) || 0,
-                                  // Assign major component to first color, then cycle through remaining colors
-                                  fill: comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1],
+                                  fill: colors[idx % colors.length],
                                 }
                               })}
                               dataKey="value"
@@ -1262,8 +1259,7 @@ export default function PropertyPanel({
                         <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
                           {ssurgoData.components.map((comp, idx) => {
                             const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
-                            // Assign major component to first color, then cycle through remaining colors
-                            const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
+                            const bgColor = colors[idx % colors.length]
 
                             return (
                               <div key={idx} className="flex items-center gap-1.5">
@@ -1791,8 +1787,7 @@ export default function PropertyPanel({
                         .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                         .map((comp, idx) => {
                           const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
-                          // Assign major component to first color, then cycle through remaining colors
-                          const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
+                          const bgColor = colors[idx % colors.length]
 
                           return (
                             <div
@@ -1815,8 +1810,7 @@ export default function PropertyPanel({
                       .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                       .map((comp, idx) => {
                         const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
-                        // Assign major component to first color, then cycle through remaining colors
-                        const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
+                        const bgColor = colors[idx % colors.length]
 
                         return (
                           <div key={idx} className="flex items-center gap-1.5">
@@ -1840,8 +1834,7 @@ export default function PropertyPanel({
                           return {
                             name: comp.compname,
                             value: Number(comp.comppct_r) || 0,
-                            // Assign major component to first color, then cycle through remaining colors
-                            fill: comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1],
+                            fill: colors[idx % colors.length],
                           }
                         })}
                         dataKey="value"
@@ -1855,8 +1848,7 @@ export default function PropertyPanel({
                   <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
                     {ssurgoData.components.map((comp, idx) => {
                       const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
-                      // Assign major component to first color, then cycle through remaining colors
-                      const bgColor = comp.majcompflag === 'Yes' ? colors[0] : colors[((idx - 1) % (colors.length - 1)) + 1]
+                      const bgColor = colors[idx % colors.length]
 
                       return (
                         <div key={idx} className="flex items-center gap-1.5">
