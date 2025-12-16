@@ -1527,7 +1527,9 @@ export default function PropertyPanel({
               const displayClass = showIrrigatedLCC ? irrigatedClass : nonIrrigatedClass;
               const displaySubclass = showIrrigatedLCC ? irrigatedSubclass : nonIrrigatedSubclass;
               
-              const classInfo = displayClass && LAND_CAPABILITY_INTERPRETATIONS.classes[displayClass];
+              const classInfo = displayClass && displayClass in LAND_CAPABILITY_INTERPRETATIONS.classes 
+                ? LAND_CAPABILITY_INTERPRETATIONS.classes[displayClass as '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8']
+                : null;
               
               // Determine severity color based on class number
               const getSeverityFromClass = (classNum: string): 'slight' | 'moderate' | 'severe' | 'very_severe' => {
