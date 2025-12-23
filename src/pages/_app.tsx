@@ -6,6 +6,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 
 import '#components/Map/leaflet-custom.css'
+import '#src/styles/color-system.css'
 import '#src/globals.css'
 import '#src/styles/soil-map.css'
 

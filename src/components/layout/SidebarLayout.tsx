@@ -132,7 +132,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen" style={{ backgroundColor: '#F8F4ED' }}>
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
@@ -153,11 +153,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         overflow-y-auto
       `}
         style={{
-          background: 'linear-gradient(to bottom, #14532d, #166534, #15803d, #166534, #14532d)',
+          background: 'linear-gradient(to bottom, #355433, #426740, #4F7A4D, #426740, #355433)',
         }}
       >
         {/* Sidebar Header */}
-        <div className="flex-shrink-0 border-b border-green-700">
+        <div className="flex-shrink-0" style={{ borderBottom: '1px solid #5C8D5A' }}>
           <div className="h-20 flex items-center justify-between px-4">
             {sidebarOpen ? (
               <>
@@ -167,14 +167,17 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                   </div>
                   <div className="flex flex-col">
                     <span className="font-bold text-sm leading-tight">Soil Conservation Explorer</span>
-                    <span className="text-xs text-green-200 leading-tight">
+                    <span className="text-xs leading-tight" style={{ color: '#C7D9C6' }}>
                       USDA-NRCS
                     </span>
                   </div>
                 </Link>
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="p-2 rounded-lg hover:bg-green-700 transition-colors hidden lg:block"
+                  className="p-2 rounded-lg transition-colors hidden lg:block"
+                  style={{ hover: { backgroundColor: '#4F7A4D' } }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4F7A4D'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   aria-label="Collapse sidebar"
                   title="Collapse sidebar"
                 >
@@ -197,7 +200,9 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                 </Link>
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="p-1.5 rounded-lg hover:bg-green-700 transition-colors hidden lg:block"
+                  className="p-1.5 rounded-lg transition-colors hidden lg:block"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4F7A4D'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   aria-label="Expand sidebar"
                   title="Expand sidebar"
                 >
@@ -223,7 +228,10 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
               {sidebarOpen ? (
                 <button
                   onClick={() => toggleSection(section.title)}
-                  className="w-full px-4 mb-2 flex items-center justify-between text-xs font-semibold text-green-300 uppercase tracking-wider hover:text-green-100 transition-colors"
+                  className="w-full px-4 mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-colors"
+                  style={{ color: '#A7C2A5' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#E2EBE1'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#A7C2A5'}
                 >
                   <span>{section.title}</span>
                   {expandedSections.has(section.title) ? (
@@ -233,7 +241,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                   )}
                 </button>
               ) : (
-                <div className="h-2 border-t border-green-700 mx-2 mb-2" />
+                <div className="h-2 mx-2 mb-2" style={{ borderTop: '1px solid #5C8D5A' }} />
               )}
 
               {/* Section Items */}
@@ -248,15 +256,24 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                       <li key={item.path}>
                         <Link
                           href={item.path}
-                          className={`
-                            flex items-center px-3 py-2.5 rounded-lg
-                            transition-all duration-200
-                            ${
-                              isActive
-                                ? 'bg-green-700 text-white shadow-md'
-                                : 'text-green-100 hover:bg-green-800 hover:text-white'
+                          className="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200"
+                          style={{
+                            backgroundColor: isActive ? '#4F7A4D' : 'transparent',
+                            color: isActive ? 'white' : '#E2EBE1',
+                            boxShadow: isActive ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive) {
+                              e.currentTarget.style.backgroundColor = '#426740'
+                              e.currentTarget.style.color = 'white'
                             }
-                          `}
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive) {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                              e.currentTarget.style.color = '#E2EBE1'
+                            }
+                          }}
                           title={!sidebarOpen ? item.label : undefined}
                         >
                           <div className="flex-shrink-0 w-6 flex justify-center">
@@ -266,7 +283,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                           {sidebarOpen && (
                             <div className="ml-3 flex-1 min-w-0">
                               <div className="font-medium text-sm">{item.label}</div>
-                              <div className="text-xs text-green-200 truncate">
+                              <div className="text-xs truncate" style={{ color: '#C7D9C6' }}>
                                 {item.description}
                               </div>
                             </div>
@@ -288,14 +305,14 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="flex-shrink-0 border-t border-green-700 p-4">
+        <div className="flex-shrink-0 p-4" style={{ borderTop: '1px solid #5C8D5A' }}>
           {/* Back to Dashboard */}
           <Link
             href="/"
-            className={`
-              flex items-center ${sidebarOpen ? 'space-x-3 px-3' : 'justify-center'} 
-              py-2 rounded-lg hover:bg-green-700 transition-colors
-            `}
+            className={`flex items-center ${sidebarOpen ? 'space-x-3 px-3' : 'justify-center'} py-2 rounded-lg transition-colors`}
+            style={{ color: 'white' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4F7A4D'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             title={!sidebarOpen ? 'Back to Dashboard' : undefined}
           >
             <Home className="w-5 h-5" />
@@ -307,17 +324,20 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
-        <header className="lg:hidden h-16 bg-white border-b flex items-center justify-between px-4 flex-shrink-0">
+        <header className="lg:hidden h-16 flex items-center justify-between px-4 flex-shrink-0" style={{ backgroundColor: 'white', borderBottom: '1px solid #D8DBDB' }}>
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg hover:bg-gray-100"
+            className="p-2 rounded-lg"
+            style={{ backgroundColor: 'transparent' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F8F4ED'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             aria-label="Open menu"
           >
             <Menu className="w-6 h-6" />
           </button>
 
           <Link href="/" className="flex items-center space-x-2">
-            <div className="rounded-lg p-1.5" style={{ backgroundColor: '#16a34a' }}>
+            <div className="rounded-lg p-1.5" style={{ backgroundColor: '#5C8D5A' }}>
               <Sprout className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-sm">Soil Conservation Explorer</span>

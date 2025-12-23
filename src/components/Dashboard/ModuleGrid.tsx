@@ -29,7 +29,7 @@ export default function ModuleGrid() {
       description:
         'Access SSURGO soil survey data. View detailed soil properties, classifications, and map units.',
       icon: Map,
-      gradient: { from: '#3b82f6', to: '#2563eb' }, // blue-500 to blue-600
+      gradient: { from: '#4A7C9E', to: '#3F6A87' },
       path: '/soil-map',
       features: ['SSURGO integration', 'Interactive maps', 'Data queries'],
       stats: { label: 'Map Units', value: '100K+' },
@@ -40,7 +40,7 @@ export default function ModuleGrid() {
       description:
         'Analyze agricultural fields. Assess crop suitability, erosion risk, and conservation needs.',
       icon: Globe,
-      gradient: { from: '#6366f1', to: '#4f46e5' }, // indigo-500 to indigo-600
+      gradient: { from: '#7BA4B5', to: '#6A8F9E' },
       path: '/field-analysis',
       features: ['Erosion assessment', 'Suitability ratings', 'Management zones'],
       stats: { label: 'Fields Available', value: '8M+' },
@@ -51,7 +51,7 @@ export default function ModuleGrid() {
       description:
         'Create conservation plans using NRCS practice standards. Address resource concerns.',
       icon: Sprout,
-      gradient: { from: '#22c55e', to: '#16a34a' }, // green-500 to green-600
+      gradient: { from: '#5C8D5A', to: '#4F7A4D' },
       path: '/conservation',
       features: ['Practice standards', 'Resource concerns', 'Plan builder'],
       stats: { label: 'Practices', value: '170+' },
@@ -62,7 +62,7 @@ export default function ModuleGrid() {
       description:
         'Calculate soil erosion using RUSLE2. Evaluate conservation practice effectiveness.',
       icon: Mountain,
-      gradient: { from: '#f97316', to: '#ea580c' }, // orange-500 to orange-600
+      gradient: { from: '#B8794F', to: '#A06843' },
       path: '/tools/rusle2',
       features: ['RUSLE2', 'Practice effects', 'Calculations'],
       stats: { label: 'Assessments', value: '12K+' },
@@ -72,7 +72,7 @@ export default function ModuleGrid() {
       title: 'Soil Health',
       description: 'Assess soil health indicators. Track improvements over time.',
       icon: Wheat,
-      gradient: { from: '#14b8a6', to: '#0d9488' }, // teal-500 to teal-600
+      gradient: { from: '#6B7F39', to: '#5C6F32' },
       path: '/soil-health',
       features: ['Health indicators', 'Assessments', 'Tracking'],
       stats: { label: 'Assessments', value: '3,400+' },
@@ -83,7 +83,7 @@ export default function ModuleGrid() {
       description:
         'Evaluate land capability classification, crop suitability ratings, and use limitations.',
       icon: BarChart3,
-      gradient: { from: '#a855f7', to: '#9333ea' }, // purple-500 to purple-600
+      gradient: { from: '#8B7AA8', to: '#7A6B92' },
       path: '/suitability',
       features: ['LCC ratings', 'Crop suitability', 'Yield predictions'],
       stats: { label: 'Interpretations', value: '50+' },
@@ -93,7 +93,7 @@ export default function ModuleGrid() {
       title: 'Reports',
       description: 'Generate conservation plans and documentation.',
       icon: FileText,
-      gradient: { from: '#4b5563', to: '#374151' }, // gray-600 to gray-700
+      gradient: { from: '#5C6C6C', to: '#4D5B5B' },
       path: '/reports',
       features: ['Conservation plans', 'Export options', 'Templates'],
       stats: { label: 'Generated', value: '8,900+' },
@@ -103,7 +103,7 @@ export default function ModuleGrid() {
       title: 'Technical Tools',
       description: 'Access nutrient calculators and other technical assessment tools.',
       icon: FlaskConical,
-      gradient: { from: '#06b6d4', to: '#0891b2' }, // cyan-500 to cyan-600
+      gradient: { from: '#87A096', to: '#748B81' },
       path: '/tools',
       features: ['Nutrient calc', 'SCI calculator', 'Analysis tools'],
       stats: { label: 'Calculations', value: '5,200+' },
@@ -113,10 +113,10 @@ export default function ModuleGrid() {
   return (
     <section className="container mx-auto px-4 py-12 md:py-16">
       <div className="mb-10">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+        <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: '#3E4A4A' }}>
           Planning & Assessment Tools
         </h2>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg" style={{ color: '#5C6C6C' }}>
           Comprehensive suite of conservation planning and soil assessment tools
         </p>
       </div>
@@ -136,7 +136,8 @@ function ModuleCard({ module }: { module: Module }) {
   return (
     <Link
       href={module.path}
-      className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col"
+      className="group rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col"
+      style={{ backgroundColor: '#FEFDFB' }}
     >
       {/* Color header with icon */}
       <div
@@ -162,14 +163,15 @@ function ModuleCard({ module }: { module: Module }) {
 
       {/* Content */}
       <div className="p-6 flex-1 flex flex-col">
-        <p className="text-gray-600 mb-4 text-sm leading-relaxed flex-1">{module.description}</p>
+        <p className="mb-4 text-sm leading-relaxed flex-1" style={{ color: '#5C6C6C' }}>{module.description}</p>
 
         {/* Features list */}
         <ul className="space-y-1 mb-4">
           {module.features.map((feature, idx) => (
-            <li key={idx} className="flex items-center text-xs text-gray-700">
+            <li key={idx} className="flex items-center text-xs" style={{ color: '#3E4A4A' }}>
               <svg
-                className="w-3 h-3 mr-2 text-green-500 flex-shrink-0"
+                className="w-3 h-3 mr-2 flex-shrink-0"
+                style={{ color: '#5C8D5A' }}
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -185,10 +187,10 @@ function ModuleCard({ module }: { module: Module }) {
         </ul>
 
         {/* Stats */}
-        <div className="pt-3 border-t border-gray-200">
+        <div className="pt-3" style={{ borderTop: '1px solid #D8DBDB' }}>
           <div className="flex justify-between items-center text-xs">
-            <span className="text-gray-500">{module.stats.label}</span>
-            <span className="font-bold text-base">{module.stats.value}</span>
+            <span style={{ color: '#6B7D7D' }}>{module.stats.label}</span>
+            <span className="font-bold text-base" style={{ color: '#3E4A4A' }}>{module.stats.value}</span>
           </div>
         </div>
       </div>

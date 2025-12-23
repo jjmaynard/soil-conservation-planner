@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Sprout, Map, MapPin, FileCheck, Mountain } from 'lucide-react'
 
 export default function NationalHero() {
@@ -6,7 +7,7 @@ export default function NationalHero() {
     <section
       className="relative text-white overflow-hidden"
       style={{
-        background: 'linear-gradient(to bottom right, #166534, #15803d, #1e3a8a)',
+        background: 'linear-gradient(to bottom right, #426740, #3F6A87, #294559)',
       }}
     >
       {/* Background Pattern */}
@@ -33,9 +34,16 @@ export default function NationalHero() {
       <div className="relative container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-4xl">
           {/* USDA NRCS Badge */}
-          <div className="inline-flex items-center bg-white bg-opacity-20 rounded-full px-4 py-2 mb-6">
+          <div className="inline-flex items-center gap-2 bg-white bg-opacity-20 rounded-full px-4 py-2 mb-6">
+            <Image
+              src="/data/usda-logo-white.png"
+              alt="USDA Logo"
+              width={32}
+              height={32}
+              className="object-contain"
+            />
             <span className="text-sm font-semibold">
-              USDA Natural Resources Conservation Service
+              Natural Resources Conservation Service
             </span>
           </div>
 
@@ -45,7 +53,7 @@ export default function NationalHero() {
           </h1>
 
           {/* Subheading */}
-          <p className="text-xl md:text-2xl text-green-100 mb-8 leading-relaxed">
+          <p className="text-xl md:text-2xl mb-8 leading-relaxed" style={{ color: '#E2EBE1' }}>
             Comprehensive conservation planning and soil assessment tools for agricultural lands
             across the United States
           </p>
@@ -57,7 +65,7 @@ export default function NationalHero() {
               className="inline-flex items-center justify-center px-8 py-4 rounded-lg font-semibold text-lg hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               style={{
                 backgroundColor: '#ffffff',
-                color: '#166534',
+                color: '#355433',
               }}
             >
               <Sprout className="mr-2 w-5 h-5" />
@@ -74,7 +82,7 @@ export default function NationalHero() {
           </div>
 
           {/* Feature Highlights */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-green-100">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4" style={{ color: '#E2EBE1' }}>
             <div className="flex flex-col items-center text-center">
               <div className="bg-white bg-opacity-10 rounded-full p-3 mb-2 backdrop-blur-sm">
                 <MapPin className="w-6 h-6" />
@@ -108,7 +116,7 @@ export default function NationalHero() {
         <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-            fill="#F9FAFB"
+            fill="#F8F4ED"
           />
         </svg>
       </div>

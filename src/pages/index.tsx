@@ -19,7 +19,7 @@ export default function Dashboard() {
         />
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen" style={{ backgroundColor: '#F8F4ED' }}>
         {/* National Hero Section */}
         <NationalHero />
 
@@ -71,22 +71,25 @@ function StatCard({
   label: string
   color: string
 }) {
-  const colorClasses = {
-    green: 'bg-green-50 text-green-600',
-    blue: 'bg-blue-50 text-blue-600',
-    teal: 'bg-teal-50 text-teal-600',
-    orange: 'bg-orange-50 text-orange-600',
+  const colorStyles = {
+    green: { bg: '#E2EBE1', text: '#5C8D5A' },
+    blue: { bg: '#DCE9F1', text: '#3F6A87' },
+    teal: { bg: '#E2ECF1', text: '#6A8F9E' },
+    orange: { bg: '#F3EAE2', text: '#A06843' },
   }
 
+  const colors = colorStyles[color as keyof typeof colorStyles]
+
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200">
+    <div className="rounded-xl shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200" style={{ backgroundColor: '#FEFDFB' }}>
       <div
-        className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${colorClasses[color as keyof typeof colorClasses]} mb-3`}
+        className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-3"
+        style={{ backgroundColor: colors.bg, color: colors.text }}
       >
         <IconComponent className="w-6 h-6" />
       </div>
-      <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{value}</div>
-      <div className="text-sm text-gray-600">{label}</div>
+      <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#3E4A4A' }}>{value}</div>
+      <div className="text-sm" style={{ color: '#5C6C6C' }}>{label}</div>
     </div>
   )
 }
