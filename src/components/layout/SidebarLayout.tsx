@@ -175,7 +175,6 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                 <button
                   onClick={() => setSidebarOpen(false)}
                   className="p-2 rounded-lg transition-colors hidden lg:block"
-                  style={{ hover: { backgroundColor: '#4F7A4D' } }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4F7A4D'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   aria-label="Collapse sidebar"
