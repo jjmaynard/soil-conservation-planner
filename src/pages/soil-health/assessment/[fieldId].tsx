@@ -213,31 +213,6 @@ export default function SoilHealthAssessmentPage() {
     })
   }
 
-  const updateContextField = (field: keyof SoilContext, value: any) => {
-    if (!assessment) return
-    setAssessment({
-      ...assessment,
-      soilContext: {
-        ...assessment.soilContext,
-        [field]: value
-      }
-    })
-  }
-
-  const updateManagementHistory = (field: string, value: any) => {
-    if (!assessment) return
-    setAssessment({
-      ...assessment,
-      soilContext: {
-        ...assessment.soilContext,
-        managementHistory: {
-          ...(assessment.soilContext.managementHistory || {}),
-          [field]: value
-        }
-      }
-    })
-  }
-
   const updateIndicator = (indicatorId: string, result: 'meets' | 'does_not_meet' | 'unable_to_assess', notes?: string) => {
     if (!assessment) return
     
