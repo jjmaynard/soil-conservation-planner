@@ -1,4 +1,4 @@
-import { X, Info, Clock, Target, ListChecks, Wrench, Leaf, Layers, Droplets, Hammer, Puzzle, Building2, Wind, Sprout, Bug, CircleDot, Palette, CloudRain, Tractor, Wheat, MessageCircle } from 'lucide-react'
+import { X, Info, Clock, Target, ListChecks, Wrench, Leaf, Layers, Droplets, Hammer, Puzzle, Building2, Wind, Sprout, Bug, CircleDot, Palette, CloudRain, Wheat, MessageCircle } from 'lucide-react'
 import { SoilHealthIndicator } from '#src/types/soilHealth'
 import { TIMING_DESCRIPTIONS, TIMING_ICONS, CONSERVATION_PRACTICES } from '#src/data/soilHealthIndicators'
 
@@ -17,7 +17,6 @@ const INDICATOR_ICONS: Record<string, any> = {
   Palette,
   Clock,
   CloudRain,
-  Tractor,
   Wheat,
   MessageCircle
 };
