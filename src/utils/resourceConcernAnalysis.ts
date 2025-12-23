@@ -34,7 +34,7 @@ export function analyzeResourceConcerns(indicators: AssessedIndicator[]): Resour
   const concerns: ResourceConcern[] = [];
   
   // Convert to map for easier lookup
-  const indicatorMap = new Map(indicators.map(i => [i.indicatorId, i]));
+  const indicatorMap = new Map(indicators.map(i => [i.id, i]));
   
   // 1. Compaction Analysis
   // Decision rule: Platy structure present OR 2+ failed indicators
@@ -48,7 +48,7 @@ export function analyzeResourceConcerns(indicators: AssessedIndicator[]): Resour
   
   const compactionFailed = compactionIndicators.filter(id => {
     const indicator = indicatorMap.get(id);
-    return indicator?.result === 'does_not_meet';
+    return indicator?.meets_criteria === false;
   });
   
   // Check for platy structure in notes
@@ -84,7 +84,7 @@ export function analyzeResourceConcerns(indicators: AssessedIndicator[]): Resour
   
   const somFailed = somIndicators.filter(id => {
     const indicator = indicatorMap.get(id);
-    return indicator?.result === 'does_not_meet';
+    return indicator?.meets_criteria === false;
   });
   
   if (somFailed.length >= 3) {
@@ -116,10 +116,10 @@ export function analyzeResourceConcerns(indicators: AssessedIndicator[]): Resour
   
   const aggregateFailed = aggregateIndicators.filter(id => {
     const indicator = indicatorMap.get(id);
-    return indicator?.result === 'does_not_meet';
+    return indicator?.meets_criteria === false;
   });
   
-  const aggregateInstability = indicatorMap.get('water_stable_aggregates')?.result === 'does_not_meet';
+  const aggregateInstability = indicatorMap.get('water_stable_aggregates')?.meets_criteria === false;
   
   if (aggregateInstability || aggregateFailed.length >= 2) {
     const severity = aggregateFailed.length >= 4 ? 'severe' : aggregateFailed.length >= 2 ? 'moderate' : 'minor';
@@ -150,13 +150,13 @@ export function analyzeResourceConcerns(indicators: AssessedIndicator[]): Resour
   
   const habitatFailed = habitatIndicators.filter(id => {
     const indicator = indicatorMap.get(id);
-    return indicator?.result === 'does_not_meet';
+    return indicator?.meets_criteria === false;
   });
   
   if (habitatFailed.length >= 2) {
     const severity = habitatFailed.length >= 4 ? 'severe' : habitatFailed.length >= 2 ? 'moderate' : 'minor';
     concerns.push({
-      type: 'soil_organism_habitat_loss',
+      type: 'soil_organism_habitat',
       severity,
       indicators_failed: habitatFailed.map(id => 
         soilHealthIndicators.find(i => i.id === id)?.name || id
@@ -211,8 +211,8 @@ function getSoilOrganismHabitatDescription(severity: string, failedIndicators: s
 }
 
 export function calculateOverallSoilHealthScore(indicators: AssessedIndicator[]): number {
-  const assessedIndicators = indicators.filter(i => i.result !== 'unable_to_assess');
-  const passedIndicators = assessedIndicators.filter(i => i.result === 'meets');
+  const assessedIndicators = indicators.filter(i => i.meets_criteria !== null);
+  const passedIndicators = assessedIndicators.filter(i => i.meets_criteria === true);
   
   if (assessedIndicators.length === 0) {
     return 0;
@@ -220,3 +220,4 @@ export function calculateOverallSoilHealthScore(indicators: AssessedIndicator[])
   
   return Math.round((passedIndicators.length / assessedIndicators.length) * 100);
 }
+
