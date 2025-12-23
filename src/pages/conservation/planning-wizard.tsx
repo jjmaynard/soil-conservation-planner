@@ -12,8 +12,8 @@ type Step = {
 const steps: Step[] = [
   {
     id: 1,
-    title: 'Client Information',
-    description: 'Enter client and property details',
+    title: 'Project Information',
+    description: 'Enter property details',
     icon: User,
   },
   {
@@ -52,8 +52,7 @@ export default function PlanningWizard() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
-    clientName: '',
-    clientContact: '',
+    projectName: '',
     propertyAddress: '',
     totalAcres: '',
     selectedFields: [],
@@ -254,7 +253,7 @@ function StepContent({
 }) {
   switch (step) {
     case 1:
-      return <ClientInformation formData={formData} setFormData={setFormData} />
+      return <ProjectInformation formData={formData} setFormData={setFormData} />
     case 2:
       return <FieldSelection formData={formData} setFormData={setFormData} />
     case 3:
@@ -270,8 +269,8 @@ function StepContent({
   }
 }
 
-// Step 1: Client Information
-function ClientInformation({ formData, setFormData }: any) {
+// Step 1: Project Information
+function ProjectInformation({ formData, setFormData }: any) {
   return (
     <div>
       <div
@@ -280,36 +279,23 @@ function ClientInformation({ formData, setFormData }: any) {
           background: 'linear-gradient(to right, #3b82f6, #2563eb)',
         }}
       >
-        <h2 className="text-2xl font-bold text-white mb-1">Client Information</h2>
+        <h2 className="text-2xl font-bold text-white mb-1">Project Information</h2>
         <p className="text-blue-100">
-          Enter the basic information about the client and property
+          Enter the basic information about the conservation project
         </p>
       </div>
 
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Client Name *
+            Project Name *
           </label>
           <input
             type="text"
-            value={formData.clientName}
-            onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+            value={formData.projectName}
+            onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="John Doe"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Contact Information *
-          </label>
-          <input
-            type="text"
-            value={formData.clientContact}
-            onChange={(e) => setFormData({ ...formData, clientContact: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="email@example.com or (555) 123-4567"
+            placeholder="Farm Conservation Plan 2025"
           />
         </div>
 
@@ -681,8 +667,8 @@ function ReviewDownload({ formData }: any) {
           <h3 className="font-semibold text-gray-900 mb-4">Plan Summary</h3>
           <div className="space-y-3">
             <div>
-              <span className="text-sm font-medium text-gray-500">Client:</span>
-              <p className="text-gray-900">{formData.clientName || 'Not provided'}</p>
+              <span className="text-sm font-medium text-gray-500">Project:</span>
+              <p className="text-gray-900">{formData.projectName || 'Not provided'}</p>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-500">Property:</span>
