@@ -24,6 +24,6 @@
       "#root/*": ["./*"],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "Property_Panel_Guide/**/*.json"],
   "exclude": ["node_modules"]
 }
