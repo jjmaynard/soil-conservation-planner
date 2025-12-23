@@ -554,7 +554,7 @@ export default function SoilHealthAssessmentPage() {
                           </label>
                           <textarea
                             value={status.notes}
-                            onChange={(e) => updateIndicator(indicator.id, status.meets_criteria, e.target.value)}
+                            onChange={(e) => updateIndicator(indicator.id, status.meets_criteria === true ? 'meets' : status.meets_criteria === false ? 'does_not_meet' : 'unable_to_assess', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             rows={2}
                             placeholder="Add any observations or notes..."
@@ -702,7 +702,7 @@ export default function SoilHealthAssessmentPage() {
                           </label>
                           <textarea
                             value={status.notes}
-                            onChange={(e) => updateIndicator(indicator.id, status.meets_criteria, e.target.value)}
+                            onChange={(e) => updateIndicator(indicator.id, status.meets_criteria === true ? 'meets' : status.meets_criteria === false ? 'does_not_meet' : 'unable_to_assess', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             rows={2}
                             placeholder="Add any observations or notes..."
@@ -743,7 +743,8 @@ export default function SoilHealthAssessmentPage() {
                 <p className="text-green-100 text-sm mt-1">Overall soil health score, resource concerns, and practice recommendations</p>
               </div>
 
-              {/* Overall Score */}
+              {/* Overall Score removed - overallScore property doesn't exist in SoilHealthAssessment type */}
+              {/*
               <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-semibold text-gray-900">Overall Soil Health Score</h3>
@@ -761,6 +762,7 @@ export default function SoilHealthAssessmentPage() {
                   />
                 </div>
               </div>
+              */}
 
               {/* Resource Concerns */}
               {assessment.resourceConcerns.length > 0 && (
@@ -807,7 +809,8 @@ export default function SoilHealthAssessmentPage() {
                 </div>
               )}
 
-              {/* Practice Recommendations */}
+              {/* Practice Recommendations removed - practiceRecommendations property doesn't exist in SoilHealthAssessment type */}
+              {/*
               {assessment.practiceRecommendations.length > 0 && (
                 <div className="border border-gray-200 rounded-lg p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Conservation Practice Recommendations</h3>
@@ -849,6 +852,7 @@ export default function SoilHealthAssessmentPage() {
                   </div>
                 </div>
               )}
+              */}
 
               <div className="flex gap-4">
                 <button
@@ -883,4 +887,5 @@ export default function SoilHealthAssessmentPage() {
     </>
   )
 }
+
 
