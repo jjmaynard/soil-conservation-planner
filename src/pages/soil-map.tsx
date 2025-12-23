@@ -96,9 +96,13 @@ export default function SoilMapPage() {
   ]
 
   const handleSoilClick = useCallback((profile: SoilProfile) => {
+    console.log('[SoilMap] handleSoilClick - coordinates:', profile.coordinates);
     if (isSelectMode && profile.coordinates) {
       // In select mode, capture the location
-      setSelectedLocation({ lat: profile.coordinates[0], lng: profile.coordinates[1] })
+      // coordinates array is [lat, lng]
+      const location = { lat: profile.coordinates[0], lng: profile.coordinates[1] };
+      console.log('[SoilMap] Setting selectedLocation:', location);
+      setSelectedLocation(location)
     } else {
       setSelectedProfile(profile)
       setSSURGOData(null)
@@ -108,7 +112,8 @@ export default function SoilMapPage() {
 
   const handleSSURGOClick = useCallback(async (data: SSURGOData) => {
     if (isSelectMode && data.coordinates) {
-      // In select mode, capture the location
+      // In select mode, capture the location  
+      // coordinates array is [lat, lng]
       setSelectedLocation({ lat: data.coordinates[0], lng: data.coordinates[1] })
       return
     }

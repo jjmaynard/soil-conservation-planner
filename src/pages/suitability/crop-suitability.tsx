@@ -48,8 +48,10 @@ export default function CropSuitabilityPage() {
     if (router.query.lat && router.query.lng) {
       const latitude = parseFloat(router.query.lat as string);
       const longitude = parseFloat(router.query.lng as string);
+      console.log('[CropSuitability] Received coordinates from URL:', { latitude, longitude });
       if (!isNaN(latitude) && !isNaN(longitude)) {
         setLocation({ latitude, longitude });
+        console.log('[CropSuitability] Location set:', { latitude, longitude });
         // Clean up URL params
         router.replace('/suitability/crop-suitability', undefined, { shallow: true });
       }
