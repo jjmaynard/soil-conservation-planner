@@ -232,9 +232,9 @@ function ComponentOSDDescription({ componentName }: { componentName: string }) {
   if (!descriptionText || loading) return null
 
   return (
-    <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4 rounded-r">
-      <h4 className="text-xs font-bold text-blue-900 mb-2">Soil Description</h4>
-      <p className="text-xs text-blue-800 leading-relaxed whitespace-pre-line">{descriptionText}</p>
+    <div className="p-3 mb-4 rounded-r" style={{ backgroundColor: '#eff6ff', borderLeft: '4px solid #60a5fa' }}>
+      <h4 className="text-xs font-bold mb-2" style={{ color: '#1e3a8a' }}>Soil Description</h4>
+      <p className="text-xs leading-relaxed whitespace-pre-line" style={{ color: '#1e40af' }}>{descriptionText}</p>
     </div>
   )
 }
@@ -708,14 +708,14 @@ export default function PropertyPanel({
 
     if (value >= min && value <= max) {
       if (Math.abs(value - midpoint) < range * 0.2) {
-        return { status: 'excellent', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' }
+        return { status: 'excellent', styles: { color: '#059669', backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' } }
       }
-      return { status: 'good', color: 'text-blue-600 bg-blue-50 border-blue-200' }
+      return { status: 'good', styles: { color: '#2563eb', backgroundColor: '#eff6ff', borderColor: '#bfdbfe' } }
     }
     if (Math.abs(value - midpoint) < range * 0.8) {
-      return { status: 'fair', color: 'text-amber-600 bg-amber-50 border-amber-200' }
+      return { status: 'fair', styles: { color: '#d97706', backgroundColor: '#fffbeb', borderColor: '#fde68a' } }
     }
-    return { status: 'poor', color: 'text-red-600 bg-red-50 border-red-200' }
+    return { status: 'poor', styles: { color: '#dc2626', backgroundColor: '#fef2f2', borderColor: '#fecaca' } }
   }
 
   // Expand/Maximize handler
@@ -916,7 +916,11 @@ export default function PropertyPanel({
               title={isExpanded ? 'Restore size' : 'Expand to full screen'}
               aria-label={isExpanded ? 'Restore size' : 'Expand to full screen'}
             >
-              <Maximize2 className="h-4 w-4" style={{ color: '#6b7280' }} />
+              {isExpanded ? (
+                <Minimize2 className="h-4 w-4" style={{ color: '#6b7280' }} />
+              ) : (
+                <Maximize2 className="h-4 w-4" style={{ color: '#6b7280' }} />
+              )}
             </button>
             
             {/* Close Button */}
@@ -1505,15 +1509,15 @@ export default function PropertyPanel({
                         {/* Recommended Practices */}
                         {classInfo.recommendations && (
                           <div className="border-t border-gray-200 pt-3 mt-3">
-                            <div className="bg-green-50 border border-green-200 rounded p-3">
-                              <h6 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                            <div className="rounded p-3" style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+              <h6 className="font-semibold mb-2 flex items-center gap-2" style={{ color: '#14532d' }}>
                                 <CheckCircle className="h-4 w-4" />
                                 Recommended Practices
                               </h6>
                               <ul className="space-y-1">
                                 {classInfo.recommendations.map((rec: string, idx: number) => (
-                                  <li key={idx} className="text-sm text-green-800 flex items-start gap-2">
-                                    <span className="text-green-600 mt-0.5">•</span>
+                                  <li key={idx} className="text-sm flex items-start gap-2" style={{ color: '#166534' }}>
+                                    <span className="mt-0.5" style={{ color: '#16a34a' }}>•</span>
                                     <span>{rec}</span>
                                   </li>
                                 ))}
@@ -1538,7 +1542,7 @@ export default function PropertyPanel({
                         <>
                           <h4 className="text-sm font-bold text-gray-800 mb-2">LCC by Component</h4>
                           {hasMissingLCC && (
-                            <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                            <div className="mb-2 p-2 rounded text-xs" style={{ backgroundColor: '#fef3c7', border: '1px solid #fde68a', color: '#92400e' }}>
                               <p>
                                 <strong>Note:</strong> LCC information is missing for some components. 
                                 Showing {componentsWithLCC.length} of {totalComponents} components.
@@ -2251,25 +2255,25 @@ export default function PropertyPanel({
                         {/* Crop type icon */}
                         {yearData.cropType && (
                           <span
-                            className={`rounded px-1.5 py-0.5 font-bold flex items-center ${
-                              yearData.cropType === 'annual'
-                                ? 'bg-blue-100 text-blue-800'
-                                : yearData.cropType === 'perennial'
-                                ? 'bg-purple-100 text-purple-800'
-                                : yearData.cropType === 'permanent'
-                                ? 'bg-red-100 text-red-800'
-                                : yearData.cropType === 'pasture'
-                                ? 'bg-green-100 text-green-800'
-                                : yearData.cropType === 'fallow'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : yearData.cropType === 'forest'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : yearData.cropType === 'developed'
-                                ? 'bg-orange-100 text-orange-800'
-                                : yearData.cropType === 'water'
-                                ? 'bg-cyan-100 text-cyan-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}
+                            className="rounded px-1.5 py-0.5 font-bold flex items-center"
+                            style={{
+                              backgroundColor: yearData.cropType === 'annual' ? '#dbeafe' :
+                                             yearData.cropType === 'perennial' ? '#f3e8ff' :
+                                             yearData.cropType === 'permanent' ? '#fee2e2' :
+                                             yearData.cropType === 'pasture' ? '#dcfce7' :
+                                             yearData.cropType === 'fallow' ? '#fef3c7' :
+                                             yearData.cropType === 'forest' ? '#d1fae5' :
+                                             yearData.cropType === 'developed' ? '#ffedd5' :
+                                             yearData.cropType === 'water' ? '#cffafe' : '#f3f4f6',
+                              color: yearData.cropType === 'annual' ? '#1e40af' :
+                                    yearData.cropType === 'perennial' ? '#6b21a8' :
+                                    yearData.cropType === 'permanent' ? '#991b1b' :
+                                    yearData.cropType === 'pasture' ? '#166534' :
+                                    yearData.cropType === 'fallow' ? '#92400e' :
+                                    yearData.cropType === 'forest' ? '#065f46' :
+                                    yearData.cropType === 'developed' ? '#9a3412' :
+                                    yearData.cropType === 'water' ? '#155e75' : '#1f2937'
+                            }}
                             title={`Crop type: ${yearData.cropType}`}
                           >
                             {yearData.cropType === 'annual' ? (
@@ -2308,13 +2312,13 @@ export default function PropertyPanel({
                             </span>
                             {yearData.confidence && (
                               <span
-                                className={`rounded px-1 py-0.5 text-[10px] ${
-                                  yearData.confidence >= 80
-                                    ? 'bg-green-100 text-green-800'
-                                    : yearData.confidence >= 50
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}
+                                className="rounded px-1 py-0.5 text-[10px]"
+                                style={{
+                                  backgroundColor: yearData.confidence >= 80 ? '#dcfce7' :
+                                                 yearData.confidence >= 50 ? '#fef3c7' : '#fee2e2',
+                                  color: yearData.confidence >= 80 ? '#166534' :
+                                        yearData.confidence >= 50 ? '#92400e' : '#991b1b'
+                                }}
                               >
                                 {yearData.confidence}%
                               </span>
@@ -2336,43 +2340,43 @@ export default function PropertyPanel({
               <div className="border-gray-200 mt-3 border-t pt-3">
                 <div className="flex flex-wrap gap-2 text-[10px]">
                   <div className="flex items-center space-x-1">
-                    <span className="bg-blue-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                    <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#dbeafe' }}>
                       <Calendar size={14} style={{ color: '#1e40af' }} />
                     </span>
                     <span className="text-gray-600">Annual</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <span className="bg-purple-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                    <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#f3e8ff' }}>
                       <Repeat size={14} style={{ color: '#6b21a8' }} />
                     </span>
                     <span className="text-gray-600">Perennial</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <span className="bg-red-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                    <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#fee2e2' }}>
                       <TreeDeciduous size={14} style={{ color: '#991b1b' }} />
                     </span>
                     <span className="text-gray-600">Permanent</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <span className="bg-green-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                    <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#dcfce7' }}>
                       <Clover size={14} style={{ color: '#166534' }} />
                     </span>
                     <span className="text-gray-600">Pasture</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <span className="bg-yellow-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                    <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#fef3c7' }}>
                       <MinusCircle size={14} style={{ color: '#a16207' }} />
                     </span>
                     <span className="text-gray-600">Fallow</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <span className="bg-emerald-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                    <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#d1fae5' }}>
                       <TreeDeciduous size={14} style={{ color: '#065f46' }} />
                     </span>
                     <span className="text-gray-600">Forest</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <span className="bg-orange-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                    <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#ffedd5' }}>
                       <Building2 size={14} style={{ color: '#c2410c' }} />
                     </span>
                     <span className="text-gray-600">Developed</span>
@@ -2443,9 +2447,9 @@ export default function PropertyPanel({
             </div>
 
             {/* Rotation Pattern Analysis */}
-            <div className="bg-blue-50 border-blue-200 rounded-lg border p-4">
-              <h4 className="text-blue-900 mb-2 text-sm font-semibold">Rotation Pattern</h4>
-              <div className="text-blue-800 space-y-1 text-sm">
+            <div className="rounded-lg p-4" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
+              <h4 className="mb-2 text-sm font-semibold" style={{ color: '#1e3a8a' }}>Rotation Pattern</h4>
+              <div className="space-y-1 text-sm" style={{ color: '#1e40af' }}>
                 {(() => {
                   const crops = cdlHistory.map(d => d.cropName)
                   const uniqueCrops = [...new Set(crops)]
@@ -2612,7 +2616,7 @@ export default function PropertyPanel({
                           if (cropType === 'annual') {
                             return (
                               <div key="annual" className="flex items-center space-x-1">
-                                <span className="bg-blue-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                                <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#dbeafe' }}>
                                   <Calendar size={14} style={{ color: '#1e40af' }} />
                                 </span>
                                 <span className="text-gray-600">Annual</span>
@@ -2621,7 +2625,7 @@ export default function PropertyPanel({
                           } else if (cropType === 'perennial') {
                             return (
                               <div key="perennial" className="flex items-center space-x-1">
-                                <span className="bg-purple-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                                <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#f3e8ff' }}>
                                   <Repeat size={14} style={{ color: '#6b21a8' }} />
                                 </span>
                                 <span className="text-gray-600">Perennial</span>
@@ -2630,7 +2634,7 @@ export default function PropertyPanel({
                           } else if (cropType === 'permanent') {
                             return (
                               <div key="permanent" className="flex items-center space-x-1">
-                                <span className="bg-red-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                                <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#fee2e2' }}>
                                   <TreeDeciduous size={14} style={{ color: '#991b1b' }} />
                                 </span>
                                 <span className="text-gray-600">Permanent</span>
@@ -2639,7 +2643,7 @@ export default function PropertyPanel({
                           } else if (cropType === 'pasture') {
                             return (
                               <div key="pasture" className="flex items-center space-x-1">
-                                <span className="bg-green-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                                <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#dcfce7' }}>
                                   <Clover size={14} style={{ color: '#166534' }} />
                                 </span>
                                 <span className="text-gray-600">Pasture</span>
@@ -2648,7 +2652,7 @@ export default function PropertyPanel({
                           } else if (cropType === 'fallow') {
                             return (
                               <div key="fallow" className="flex items-center space-x-1">
-                                <span className="bg-yellow-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                                <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#fef3c7' }}>
                                   <MinusCircle size={14} style={{ color: '#a16207' }} />
                                 </span>
                                 <span className="text-gray-600">Fallow</span>
@@ -2657,7 +2661,7 @@ export default function PropertyPanel({
                           } else if (cropType === 'forest') {
                             return (
                               <div key="forest" className="flex items-center space-x-1">
-                                <span className="bg-emerald-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                                <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#d1fae5' }}>
                                   <TreeDeciduous size={14} style={{ color: '#065f46' }} />
                                 </span>
                                 <span className="text-gray-600">Forest</span>
@@ -2666,7 +2670,7 @@ export default function PropertyPanel({
                           } else if (cropType === 'developed') {
                             return (
                               <div key="developed" className="flex items-center space-x-1">
-                                <span className="bg-orange-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                                <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#ffedd5' }}>
                                   <Building2 size={14} style={{ color: '#c2410c' }} />
                                 </span>
                                 <span className="text-gray-600">Developed</span>
@@ -2675,7 +2679,7 @@ export default function PropertyPanel({
                           } else if (cropType === 'water') {
                             return (
                               <div key="water" className="flex items-center space-x-1">
-                                <span className="bg-cyan-100 rounded px-1.5 py-0.5 font-bold flex items-center">
+                                <span className="rounded px-1.5 py-0.5 font-bold flex items-center" style={{ backgroundColor: '#cffafe' }}>
                                   <Waves size={14} style={{ color: '#155e75' }} />
                                 </span>
                                 <span className="text-gray-600">Water</span>

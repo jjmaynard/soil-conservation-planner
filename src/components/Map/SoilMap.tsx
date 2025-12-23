@@ -34,6 +34,7 @@ interface SoilMapProps {
   }) => void
   onMapReady?: (map: L.Map) => void
   onProcessingStart?: () => void
+  isSelectMode?: boolean
   className?: string
 }
 export default function SoilMap({
@@ -46,6 +47,7 @@ export default function SoilMap({
   onSSURGOClick,
   onMapReady,
   onProcessingStart,
+  isSelectMode = false,
   className = '',
 }: SoilMapProps) {
   console.log('SoilMap component rendering...')
@@ -187,8 +189,8 @@ export default function SoilMap({
       console.log('Coordinates:', lat, lng)
       console.log('Active layers:', activeLayersRef.current)
 
-      // Trigger processing indicator
-      if (onProcessingStart) {
+      // Trigger processing indicator (skip in selection mode)
+      if (onProcessingStart && !isSelectMode) {
         onProcessingStart()
       }
 
@@ -231,6 +233,43 @@ export default function SoilMap({
       }
       console.log('Marker on map:', clickMarkerRef.current ? 'yes' : 'no')
       console.log('Marker pane:', clickMarkerRef.current?.getPane())
+
+      // In selection mode, skip data loading and just notify callbacks
+      if (isSelectMode) {
+        console.log('Selection mode active - skipping data queries')
+        
+        // Notify callbacks with coordinates only
+        if (activeLayersRef.current.includes('ssurgo-mapunits') && onSSURGOClick) {
+          onSSURGOClick({
+            mukey: '',
+            musym: '',
+            muname: '',
+            muacres: '',
+            coordinates: [lat, lng],
+          })
+        } else {
+          // Create minimal profile for selection mode
+          onSoilClick({
+            latitude: lat,
+            longitude: lng,
+            soil_order: '',
+            map_unit: '',
+            coordinates: [lat, lng],
+            depth: selectedDepth,
+            properties: {
+              clay_content: 0,
+              sand_content: 0,
+              silt_content: 0,
+              organic_matter: 0,
+              ph: 0,
+              cec: 0,
+              bulk_density: 0,
+              available_water_capacity: 0,
+            },
+          })
+        }
+        return // Exit early - don't fetch any data
+      }
 
       try {
         // Check if SSURGO layer is active and query it
@@ -308,8 +347,44 @@ export default function SoilMap({
       }
     })
 
+    // Handle window resize and container size changes
+    const handleResize = () => {
+      if (mapRef.current) {
+        console.log('Window/container resized, invalidating map size')
+        // Use setTimeout to ensure DOM has updated
+        setTimeout(() => {
+          if (mapRef.current) {
+            mapRef.current.invalidateSize()
+          }
+        }, 100)
+      }
+    }
+
+    // Add window resize listener
+    window.addEventListener('resize', handleResize)
+
+    // Add ResizeObserver to watch for container size changes
+    let resizeObserver: ResizeObserver | null = null
+    if (containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize()
+      })
+      resizeObserver.observe(containerRef.current)
+    }
+
+    // Initial resize after map is ready
+    setTimeout(() => {
+      if (mapRef.current) {
+        mapRef.current.invalidateSize()
+      }
+    }, 250)
+
     // Cleanup function
     return () => {
+      window.removeEventListener('resize', handleResize)
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+      }
       if (mapRef.current) {
         mapRef.current.remove()
         mapRef.current = null

@@ -1,4 +1,4 @@
-import { Compass, Github, Home } from 'lucide-react'
+import { Compass, Github, Home, MapPin, Sprout, FileBarChart } from 'lucide-react'
 
 import { AppConfig, NavMenuVariant } from '#lib/AppConfig'
 
@@ -20,6 +20,9 @@ const NavMenu = ({ variant = NavMenuVariant.INTRO }: NavMenuProps) => {
   return (
     <ul className={`${listStyle}`}>
       <NavMenuItem href="/" label="Intro" icon={<Home size={navIconSize} />} />
+      <NavMenuItem href="/soil-map" label="Soil Map" icon={<MapPin size={navIconSize} />} />
+      <NavMenuItem href="/field-analysis" label="Field Analysis" icon={<FileBarChart size={navIconSize} />} />
+      <NavMenuItem href="/soil-health" label="Soil Health" icon={<Sprout size={navIconSize} />} />
       <NavMenuItem href="/map" label="Map Example" icon={<Compass size={navIconSize} />} />
       <NavMenuItem
         href="https://github.com/richard-unterberg/typescript-next-leaflet-starter"
