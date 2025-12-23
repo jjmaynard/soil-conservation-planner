@@ -271,7 +271,7 @@ export default function SoilHealthAssessmentPage() {
   const biologicalIndicators = getIndicatorsByCategory('biological')
   
   const getIndicatorStatus = (indicatorId: string) => {
-    return assessment.indicators.find(i => i.indicatorId === indicatorId)
+    return assessment.indicators.find(i => i.id === indicatorId)
   }
 
   const assessorName = typeof assessment.assessor === 'string' ? assessment.assessor : assessment.assessor.name
