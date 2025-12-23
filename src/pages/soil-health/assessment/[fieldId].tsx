@@ -126,37 +126,25 @@ export default function SoilHealthAssessmentPage() {
           name: '',
           organization: ''
         },
-        soilContext: {
-          soilType: '',
-          landUse: '',
-          previousCrop: '',
-          recentWeather: '',
-          soilMoisture: 'field_capacity',
-          soilTemp: undefined,
-          managementHistory: {
-            cropRotation: '',
-            tillageSystem: '',
-            managementDuration: undefined,
-            coverageMonths: undefined,
-            grazingDetails: '',
-            coverCrops: '',
-            coverCropTermination: '',
-            pestManagement: '',
-            nutrientManagement: '',
-            irrigation: '',
-            ponding: '',
-            emergenceProblems: '',
-            waterManagement: '',
-            otherObservations: ''
-          }
+        weatherConditions: {
+          recentPrecipitation: '',
+          soilMoisture: 'moist',
+          temperature: undefined,
+          lastRainfall: ''
+        },
+        fieldConditions: {
+          cropStage: '',
+          tillageRecent: false,
+          trafficRecent: false,
+          notes: ''
         },
         indicators: [],
         photos: [],
         resourceConcerns: [],
-        practiceRecommendations: [],
-        overallScore: 0,
+        recommendations: [],
         status: 'draft',
-        notes: ''
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
       setAssessment(newAssessment)
     }
