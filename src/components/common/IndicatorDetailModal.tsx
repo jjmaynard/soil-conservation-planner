@@ -21,7 +21,8 @@ const INDICATOR_ICONS: Record<string, any> = {
   MessageCircle
 };
 
-function getIndicatorIcon(iconName: string) {
+function getIndicatorIcon(iconName?: string) {
+  if (!iconName) return null;
   const IconComponent = INDICATOR_ICONS[iconName];
   return IconComponent ? <IconComponent className="w-8 h-8" /> : null;
 }
