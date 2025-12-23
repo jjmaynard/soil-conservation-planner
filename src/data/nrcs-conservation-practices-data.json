@@ -1,0 +1,2111 @@
+{
+  "conservationPractices": [
+    {
+      "code": "472",
+      "name": "Access Control",
+      "unit": "Ac.",
+      "category": "Land Management",
+      "description": "Managing access to areas of land to achieve and maintain desired resource conditions.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/access-control-ac-472-conservation-practice-standard"
+    },
+    {
+      "code": "560",
+      "name": "Access Road",
+      "unit": "Ft.",
+      "category": "Infrastructure",
+      "description": "A travel way constructed to provide access to areas.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/access-road-ft-560-conservation-practice-standard"
+    },
+    {
+      "code": "309",
+      "name": "Agrichemical Handling Facility",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "A facility for storing, mixing, loading, and cleaning equipment for agrichemicals.",
+      "resourceConcerns": [
+        "petroleum-surface-water",
+        "petroleum-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/agrichemical-handling-facility-no-309-conservation-practice"
+    },
+    {
+      "code": "371",
+      "name": "Air Filtration and Scrubbing",
+      "unit": "No.",
+      "category": "Air Quality",
+      "description": "A device that removes particulates and other air contaminants.",
+      "resourceConcerns": [
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/air-filtration-and-scrubbing-no-371-conservation-practice"
+    },
+    {
+      "code": "311",
+      "name": "Alley Cropping",
+      "unit": "Ac.",
+      "category": "Agroforestry",
+      "description": "Planting trees and/or shrubs in single or multiple rows with agronomic or horticultural crops grown in the alleys between the rows.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality",
+        "Air Quality",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/alley-cropping-ac-311-conservation-practice-standard"
+    },
+    {
+      "code": "333",
+      "name": "Amending Soil Properties with Gypsum Products",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Application of gypsum products to improve soil structure and reduce erosion.",
+      "resourceConcerns": [
+        "Soil Health",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/amending-soil-properties-with-gypsum-products-ac-333-conservation"
+    },
+    {
+      "code": "591",
+      "name": "Amendments for Treatment of Agricultural Waste",
+      "unit": "au",
+      "category": "Waste Management",
+      "description": "Materials added to agricultural waste to improve nutrient content or handling characteristics.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Soil Health"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/amendments-for-treatment-of-agricultural-waste-au-591"
+    },
+    {
+      "code": "366",
+      "name": "Anaerobic Digester",
+      "unit": "No.",
+      "category": "Energy",
+      "description": "A waste treatment system that uses bacterial decomposition without oxygen to reduce volatile solids and produce biogas.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality",
+        "Energy"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/anaerobic-digester-no-366-conservation-practice-standard"
+    },
+    {
+      "code": "316",
+      "name": "Animal Mortality Facility",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A facility for the proper disposal of animal mortalities.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/animal-mortality-facility-no-316-conservation-practice-standard"
+    },
+    {
+      "code": "450",
+      "name": "Anionic Polyacrylamide (PAM) Application",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Application of PAM to reduce erosion and improve water infiltration.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/anionic-polyacrylamide-pam-application-ac-450-conservation"
+    },
+    {
+      "code": "397",
+      "name": "Aquaculture Ponds",
+      "unit": "Ac.",
+      "category": "Aquaculture",
+      "description": "Ponds designed and constructed for aquaculture production.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Economic"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/aquaculture-ponds-ac-397-conservation-practice-standard"
+    },
+    {
+      "code": "396",
+      "name": "Aquatic Organism Passage",
+      "unit": "Mi.",
+      "category": "Wildlife Habitat",
+      "description": "Providing passage for fish and other aquatic organisms past barriers.",
+      "resourceConcerns": [
+        "aquatic-habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/aquatic-organism-passage-mi-396-conservation-practice-standard"
+    },
+    {
+      "code": "400",
+      "name": "Bivalve Aquaculture Gear and Biofouling Control",
+      "unit": "Ac.",
+      "category": "Aquaculture",
+      "description": "Management of aquaculture gear to reduce biofouling and environmental impacts.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Economic"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/bivalve-aquaculture-gear-and-biofouling-control-ac-400"
+    },
+    {
+      "code": "314",
+      "name": "Brush Management",
+      "unit": "Ac.",
+      "category": "Grazing Management",
+      "description": "Managing unwanted woody plants to achieve desired resource objectives.",
+      "resourceConcerns": [
+        "plant-pest-pressure",
+        "wildfire-hazard"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/brush-management-ac-314-conservation-practice-standard"
+    },
+    {
+      "code": "584",
+      "name": "Channel Bed Stabilization",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "Stabilizing the bottom of a channel to prevent degradation.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/channel-bed-stabilization-ft-584-conservation-practice-standard"
+    },
+    {
+      "code": "326",
+      "name": "Clearing and Snagging",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "Removing obstructions from natural or constructed channels.",
+      "resourceConcerns": [
+        "Water Management",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/clearing-and-snagging-ft-326-conservation-practice-standard"
+    },
+    {
+      "code": "372",
+      "name": "Combustion System Improvement",
+      "unit": "No.",
+      "category": "Energy",
+      "description": "Modifications to combustion systems to improve efficiency and reduce emissions.",
+      "resourceConcerns": [
+        "ozone-precursor-emissions",
+        "reactive-nitrogen-emissions",
+        "energy-efficiency-equipment"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/combustion-system-improvement-no-372-conservation-practice"
+    },
+    {
+      "code": "317",
+      "name": "Composting Facility",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A facility for controlled decomposition of organic materials.",
+      "resourceConcerns": [
+        "pathogens-surface-water",
+        "pathogens-groundwater",
+        "objectionable-odors"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/composting-facility-no-317-conservation-practice-standard"
+    },
+    {
+      "code": "327",
+      "name": "Conservation Cover",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Establishing permanent vegetative cover to protect soil and water resources.",
+      "resourceConcerns": [
+        "wind-erosion",
+        "organic-matter-depletion",
+        "soil-organism-habitat",
+        "aggregate-instability",
+        "naturally-available-moisture",
+        "pesticides-surface-water",
+        "pesticides-groundwater",
+        "pathogens-groundwater",
+        "petroleum-groundwater",
+        "sediment-surface-water",
+        "greenhouse-gas-emissions",
+        "plant-productivity-health",
+        "plant-structure-composition",
+        "terrestrial-wildlife-habitat",
+        "inadequate-livestock-shelter",
+        "energy-efficiency-field-operations"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/conservation-cover-ac-327-conservation-practice-standard"
+    },
+    {
+      "code": "328",
+      "name": "Conservation Crop Rotation",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Growing crops in a planned sequence to improve soil health and productivity.",
+      "resourceConcerns": [
+        "compaction",
+        "organic-matter-depletion",
+        "soil-organism-habitat",
+        "aggregate-instability",
+        "greenhouse-gas-emissions",
+        "plant-productivity-health",
+        "plant-pest-pressure",
+        "energy-efficiency-field-operations"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/conservation-crop-rotation-ac-328-conservation-practice-standard"
+    },
+    {
+      "code": "656",
+      "name": "Constructed Wetland",
+      "unit": "Ac.",
+      "category": "Water Quality",
+      "description": "A shallow water ecosystem constructed to treat wastewater or runoff.",
+      "resourceConcerns": [
+        "nutrients-surface-water",
+        "aquatic-habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/constructed-wetland-ac-656-conservation-practice-standard"
+    },
+    {
+      "code": "332",
+      "name": "Contour Buffer Strips",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Narrow strips of permanent vegetation established across the slope.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/contour-buffer-strips-ac-332-conservation-practice-standard"
+    },
+    {
+      "code": "330",
+      "name": "Contour Farming",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Farming operations performed on or parallel to the contour.",
+      "resourceConcerns": [
+        "sheet-rill-erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/contour-farming-ac-330-conservation-practice-standard"
+    },
+    {
+      "code": "331",
+      "name": "Contour Orchard and Other Perennial Crops",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Establishing and maintaining perennial crops on or parallel to the contour.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/contour-orchard-and-other-perennial-crops-ac-331-conservation"
+    },
+    {
+      "code": "334",
+      "name": "Controlled Traffic Farming",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "A farming system where all machinery traffic is confined to specific travel lanes.",
+      "resourceConcerns": [
+        "compaction",
+        "energy-efficiency-field-operations"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/controlled-traffic-farming-ac-334-conservation-practice-standard"
+    },
+    {
+      "code": "340",
+      "name": "Cover Crop",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Crops planted primarily to provide soil protection and improvement between regular crop production periods.",
+      "resourceConcerns": [
+        "sheet-rill-erosion",
+        "wind-erosion",
+        "organic-matter-depletion",
+        "soil-organism-habitat",
+        "aggregate-instability",
+        "naturally-available-moisture",
+        "pesticides-groundwater",
+        "particulate-matter-emissions",
+        "greenhouse-gas-emissions"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/cover-crop-ac-340-conservation-practice-standard"
+    },
+    {
+      "code": "342",
+      "name": "Critical Area Planting",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Establishing permanent vegetation on critically eroding areas.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/critical-area-planting-ac-342-conservation-practice-standard"
+    },
+    {
+      "code": "352",
+      "name": "Controlling Existing Flowing Well",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "Installing devices to control flow from artesian wells.",
+      "resourceConcerns": [
+        "Water Management",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/programs-initiatives/csp-conservation-stewardship-program/controlling-existing-flowing-well-code"
+    },
+    {
+      "code": "588",
+      "name": "Cross Wind Ridges",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Ridges constructed perpendicular to prevailing wind direction to reduce wind erosion.",
+      "resourceConcerns": [
+        "wind-erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/cross-wind-ridges-ac-588-conservation-practice-standard"
+    },
+    {
+      "code": "589c",
+      "name": "Cross Wind Trap Strips",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Strips of vegetation perpendicular to prevailing wind to trap blowing soil.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/cross-wind-trap-strips-ac-589c-conservation-practice-standard"
+    },
+    {
+      "code": "402",
+      "name": "Dam",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A barrier built across a watercourse to impound water.",
+      "resourceConcerns": [
+        "ponding-flooding"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/dam-no-402-conservation-practice-standard"
+    },
+    {
+      "code": "348",
+      "name": "Dam, Diversion",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A barrier built across a stream to divert water for beneficial use.",
+      "resourceConcerns": [
+        "Water Management",
+        "Irrigation"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/dam-diversion-no-348-conservation-practice-standard"
+    },
+    {
+      "code": "324",
+      "name": "Deep Tillage",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Deep mechanical treatment to break up soil layers that restrict water movement or root penetration.",
+      "resourceConcerns": [
+        "Soil Health",
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/deep-tillage-ac-324-conservation-standard"
+    },
+    {
+      "code": "605",
+      "name": "Denitrifying Bioreactor",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "An edge-of-field practice that removes nitrate from subsurface drainage water.",
+      "resourceConcerns": [
+        "nutrients-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/denitrifying-bioreactor-no-605-conservation-practice-standard"
+    },
+    {
+      "code": "356",
+      "name": "Dike and Levee",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "An embankment constructed to contain, divert, or store water.",
+      "resourceConcerns": [
+        "Water Management",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/dike-and-levee-ft-356-conservation-standard"
+    },
+    {
+      "code": "362",
+      "name": "Diversion",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "A channel with a supporting ridge on the lower side constructed across a slope.",
+      "resourceConcerns": [
+        "ephemeral-gully-erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/diversion-ft-362-conservation-practice-standard"
+    },
+    {
+      "code": "554",
+      "name": "Drainage Water Management",
+      "unit": "Ac.",
+      "category": "Water Management",
+      "description": "Managing the volume and timing of drainage water removal from the soil profile.",
+      "resourceConcerns": [
+        "subsidence",
+        "seasonal-high-water-table",
+        "seeps",
+        "nutrients-groundwater",
+        "salts-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/drainage-water-management-ac-554-conservation-practice-standard"
+    },
+    {
+      "code": "432",
+      "name": "Dry Hydrant",
+      "unit": "No.",
+      "category": "Infrastructure",
+      "description": "A non-pressurized pipe system that provides a water source for fire suppression.",
+      "resourceConcerns": [
+        "Fire Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/dry-hydrant-no-432-conservation-practice-standard"
+    },
+    {
+      "code": "373",
+      "name": "Dust Control on Unpaved Roads and Surfaces",
+      "unit": "Sq. Ft.",
+      "category": "Air Quality",
+      "description": "Application of materials or techniques to reduce dust emissions from unpaved surfaces.",
+      "resourceConcerns": [
+        "particulate-matter-emissions"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/dust-control-on-unpaved-roads-and-surfaces-sq-ft-373-conservation"
+    },
+    {
+      "code": "375",
+      "name": "Dust Management for Pen Surfaces",
+      "unit": "Ac.",
+      "category": "Air Quality",
+      "description": "Managing dust in animal confinement areas through surface treatments or management.",
+      "resourceConcerns": [
+        "particulate-matter-emissions"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/dust-management-for-pen-surfaces-ac-375-conservation-practice"
+    },
+    {
+      "code": "647",
+      "name": "Early Successional Habitat Development/Management",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Creating and maintaining early successional plant communities for wildlife habitat.",
+      "resourceConcerns": [
+        "terrestrial-wildlife-habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/early-successional-habitat-developmentmanagement-ac-647"
+    },
+    {
+      "code": "368",
+      "name": "Emergency Animal Mortality Management",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "Temporary disposal of animal mortalities during emergency situations.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/emergency-animal-mortality-management-no-368-conservation"
+    },
+    {
+      "code": "374",
+      "name": "Energy Efficient Agricultural Operation",
+      "unit": "No.",
+      "category": "Energy",
+      "description": "Implementing energy-efficient technologies and practices in agricultural operations.",
+      "resourceConcerns": [
+        "ozone-precursor-emissions",
+        "reactive-nitrogen-emissions",
+        "energy-efficiency-equipment",
+        "energy-efficiency-field-operations"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/energy-efficient-agricultural-operation-no-374-conservation"
+    },
+    {
+      "code": "672",
+      "name": "Energy Efficient Building Envelope",
+      "unit": "No.",
+      "category": "Energy",
+      "description": "Improving building envelope efficiency to reduce energy consumption.",
+      "resourceConcerns": [
+        "energy-efficiency-equipment"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/energy-efficient-building-envelope-no-672-conservation-practice"
+    },
+    {
+      "code": "670",
+      "name": "Energy Efficient Lighting System",
+      "unit": "No.",
+      "category": "Energy",
+      "description": "Installing energy-efficient lighting systems to reduce energy consumption.",
+      "resourceConcerns": [
+        "energy-efficiency-equipment"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/energy-efficient-lighting-system-no-670-conservation-practice"
+    },
+    {
+      "code": "592",
+      "name": "Feed Management",
+      "unit": "Au.",
+      "category": "Grazing Management",
+      "description": "Managing feed resources to optimize nutrition and reduce environmental impacts.",
+      "resourceConcerns": [
+        "feed-forage-imbalance"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/feed-management-au-592-conservation-practice-standard"
+    },
+    {
+      "code": "382",
+      "name": "Fence",
+      "unit": "Ft.",
+      "category": "Grazing Management",
+      "description": "A constructed barrier to livestock or wildlife movement.",
+      "resourceConcerns": [
+        "inadequate-livestock-shelter"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/fence-ft-382-conservation-practice-standard"
+    },
+    {
+      "code": "386",
+      "name": "Field Border",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "A strip of permanent vegetation established around the perimeter or edge of a field.",
+      "resourceConcerns": [
+        "terrestrial-wildlife-habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/field-border-ac-386-conservation-practice-standard"
+    },
+    {
+      "code": "376",
+      "name": "Field Operations Emissions Reduction",
+      "unit": "Ac.",
+      "category": "Air Quality",
+      "description": "Modifying field operations to reduce greenhouse gas emissions.",
+      "resourceConcerns": [
+        "Air Quality",
+        "Energy"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/field-operations-emissions-reduction-ac-376-conservation-practice"
+    },
+    {
+      "code": "393",
+      "name": "Filter Strip",
+      "unit": "Ac.",
+      "category": "Water Quality",
+      "description": "A strip of vegetation for removing sediment and other pollutants from runoff.",
+      "resourceConcerns": [
+        "sheet-rill-erosion",
+        "nutrients-surface-water",
+        "pesticides-surface-water",
+        "pathogens-surface-water",
+        "salts-surface-water",
+        "petroleum-surface-water",
+        "sediment-surface-water"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/filter-strip-ac-393-conservation-practice-standard"
+    },
+    {
+      "code": "394",
+      "name": "Firebreak",
+      "unit": "Ft.",
+      "category": "Fire Management",
+      "description": "A strip of land cleared of flammable materials to stop or control fires.",
+      "resourceConcerns": [
+        "wildfire-hazard"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/firebreak-ft-394-conservation-practice-standard"
+    },
+    {
+      "code": "398",
+      "name": "Fish Raceway or Tank",
+      "unit": "Ft. and Ft3",
+      "category": "Aquaculture",
+      "description": "A structure for raising fish in flowing or static water systems.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Economic"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/fish-raceway-or-tank-ft-and-ft3-398-conservation-practice"
+    },
+    {
+      "code": "399",
+      "name": "Fishpond Management",
+      "unit": "Ac.",
+      "category": "Aquaculture",
+      "description": "Managing ponds to optimize fish production and maintain water quality.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Economic"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/fishpond-management-ac-399-conservation-practice-standard"
+    },
+    {
+      "code": "511",
+      "name": "Forage Harvest Management",
+      "unit": "Ac.",
+      "category": "Grazing Management",
+      "description": "Managing the harvest of forage crops to maintain or improve the resource base.",
+      "resourceConcerns": [
+        "feed-forage-imbalance"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/forage-harvest-management-ac-511-conservation-practice-standard"
+    },
+    {
+      "code": "379",
+      "name": "Forest Farming",
+      "unit": "Ac.",
+      "category": "Agroforestry",
+      "description": "The cultivation of high-value specialty crops under a forest canopy.",
+      "resourceConcerns": [
+        "Economic",
+        "Soil Health",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/forest-farming-ac-379-conservation-practice-standard"
+    },
+    {
+      "code": "666",
+      "name": "Forest Stand Improvement",
+      "unit": "Ac.",
+      "category": "Forestry",
+      "description": "Treatments to improve health, quality, and vigor of forest stands.",
+      "resourceConcerns": [
+        "plant-structure-composition"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/forest-stand-improvement-ac-666-conservation-practice-standard"
+    },
+    {
+      "code": "655",
+      "name": "Forest Trails and Landings",
+      "unit": "Ac.",
+      "category": "Forestry",
+      "description": "Planning, design, and construction of forest roads, trails, and log landings.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/forest-trails-and-landings-ac-655-conservation-practice-standard"
+    },
+    {
+      "code": "383",
+      "name": "Fuel Break",
+      "unit": "Ac.",
+      "category": "Fire Management",
+      "description": "A strategically located strip where flammable vegetation has been reduced or modified.",
+      "resourceConcerns": [
+        "drifted-snow",
+        "wildfire-hazard"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/fuel-break-ac-383-conservation-practice-standard"
+    },
+    {
+      "code": "410",
+      "name": "Grade Stabilization Structure",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A structure used to control grade and headcutting in natural or artificial channels.",
+      "resourceConcerns": [
+        "ephemeral-gully-erosion",
+        "classic-gully-erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/grade-stabilization-structure-no-410-conservation-practice"
+    },
+    {
+      "code": "412",
+      "name": "Grassed Waterway",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "A natural or constructed channel covered with suitable vegetation to convey runoff.",
+      "resourceConcerns": [
+        "sheet-rill-erosion",
+        "ephemeral-gully-erosion",
+        "classic-gully-erosion",
+        "sediment-surface-water"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/grassed-waterway-ac-412-conservation-practice-standard"
+    },
+    {
+      "code": "548",
+      "name": "Grazing Land Mechanical Treatment",
+      "unit": "Ac.",
+      "category": "Grazing Management",
+      "description": "Mechanical treatments to improve grazing land productivity and health.",
+      "resourceConcerns": [
+        "Soil Health",
+        "Plant Diversity",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/grazing-land-mechanical-treatment-ac-548-conservation-practice"
+    },
+    {
+      "code": "528A",
+      "name": "Grazing Management Plan",
+      "unit": "Ac.",
+      "category": "Grazing Management",
+      "description": "Managing livestock grazing to maintain or improve plant health and animal performance.",
+      "resourceConcerns": [
+        "feed-forage-imbalance"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/grazing-management-code-528-conservation-practice-standard"
+    },
+    {
+      "code": "355",
+      "name": "Groundwater Testing",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "Testing groundwater quality to monitor contamination or establish baseline conditions.",
+      "resourceConcerns": [
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/groundwater-testing-no-355-conservation-practice-standard"
+    },
+    {
+      "code": "561",
+      "name": "Heavy Use Area Protection",
+      "unit": "Sq. Ft.",
+      "category": "Grazing Management",
+      "description": "Establishing suitable surface materials on areas frequently trafficked by livestock.",
+      "resourceConcerns": [
+        "compaction"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/heavy-use-area-protection-sq-ft-561-conservation-practice"
+    },
+    {
+      "code": "422",
+      "name": "Hedgerow Planting",
+      "unit": "Ft.",
+      "category": "Wildlife Habitat",
+      "description": "Establishing a linear planting of trees, shrubs, and/or grasses.",
+      "resourceConcerns": [
+        "drifted-snow",
+        "elevated-water-temperature"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/hedgerow-planting-ft-422-conservation-practice-standard"
+    },
+    {
+      "code": "315",
+      "name": "Herbaceous Weed Treatment",
+      "unit": "Ac.",
+      "category": "Pest Management",
+      "description": "Treating herbaceous weeds and invasive plants to improve desired plant communities.",
+      "resourceConcerns": [
+        "plant-pest-pressure"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/herbaceous-weed-treatment-ac-315-conservation-practice-standard"
+    },
+    {
+      "code": "603",
+      "name": "Herbaceous Wind Barriers",
+      "unit": "Ft.",
+      "category": "Soil Erosion Control",
+      "description": "Strips of herbaceous vegetation established to reduce wind velocity and trap sediment.",
+      "resourceConcerns": [
+        "wind-erosion",
+        "particulate-matter-emissions"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/herbaceous-wind-barriers-ft-603-conservation-practice-standard"
+    },
+    {
+      "code": "325",
+      "name": "High Tunnel System",
+      "unit": "Sq.Ft.",
+      "category": "Horticulture",
+      "description": "An unheated structure covered with plastic to extend growing seasons.",
+      "resourceConcerns": [
+        "Economic",
+        "Energy",
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/high-tunnel-system-sqft-325-conservation-practice-standard"
+    },
+    {
+      "code": "423",
+      "name": "Hillside Ditch",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "A ditch constructed on or near the contour to intercept surface runoff.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/hillside-ditch-ft-423-conservation-practice-standard"
+    },
+    {
+      "code": "320",
+      "name": "Irrigation Canal or Lateral",
+      "unit": "Ft.",
+      "category": "Irrigation",
+      "description": "A permanent irrigation water conveyance channel.",
+      "resourceConcerns": [
+        "Water Management",
+        "Energy"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-canal-or-lateral-ft-320-conservation-practice-standard"
+    },
+    {
+      "code": "428",
+      "name": "Irrigation Ditch Lining",
+      "unit": "Ft.",
+      "category": "Irrigation",
+      "description": "Lining irrigation channels to reduce seepage losses and erosion.",
+      "resourceConcerns": [
+        "Water Management",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-ditch-lining-ft-428-conservation-practice-standard"
+    },
+    {
+      "code": "447",
+      "name": "Irrigation and Drainage Tailwater Recovery",
+      "unit": "No.",
+      "category": "Irrigation",
+      "description": "Collecting and reusing irrigation runoff and drainage water.",
+      "resourceConcerns": [
+        "salts-chemicals-concentration",
+        "surface-water-depletion",
+        "groundwater-depletion",
+        "salts-surface-water",
+        "salts-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-and-drainage-tailwater-recovery-no-447-conservation"
+    },
+    {
+      "code": "388",
+      "name": "Irrigation Field Ditch",
+      "unit": "Ft.",
+      "category": "Irrigation",
+      "description": "A ditch for conveying irrigation water within or adjacent to a field.",
+      "resourceConcerns": [
+        "Water Management",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-field-ditch-ft-388-conservation-practice-standard"
+    },
+    {
+      "code": "464",
+      "name": "Irrigation Land Leveling",
+      "unit": "Ac.",
+      "category": "Irrigation",
+      "description": "Shaping land surface to planned grades to improve irrigation efficiency.",
+      "resourceConcerns": [
+        "Water Management",
+        "Energy"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-land-leveling-ac-464-conservation-practice-standard"
+    },
+    {
+      "code": "430",
+      "name": "Irrigation Pipeline",
+      "unit": "Ft.",
+      "category": "Irrigation",
+      "description": "A pipeline for conveying irrigation water from source to application point.",
+      "resourceConcerns": [
+        "inefficient-irrigation"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-pipeline-ft-430-conservation-practice-standard"
+    },
+    {
+      "code": "436",
+      "name": "Irrigation Reservoir",
+      "unit": "Ac-Ft",
+      "category": "Irrigation",
+      "description": "A water impoundment made by excavation or embankment for storing irrigation water.",
+      "resourceConcerns": [
+        "surface-water-depletion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-reservoir-ac-ft-436-conservation-practice-standard"
+    },
+    {
+      "code": "441",
+      "name": "Irrigation System, Microirrigation",
+      "unit": "Ac.",
+      "category": "Irrigation",
+      "description": "An irrigation system that applies water through emitters as drops or tiny streams.",
+      "resourceConcerns": [
+        "inefficient-irrigation"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-system-microirrigation-ac-441-conservation-practice"
+    },
+    {
+      "code": "443",
+      "name": "Irrigation System, Surface and Subsurface",
+      "unit": "Ac.",
+      "category": "Irrigation",
+      "description": "A planned system where water is applied by flowing over the soil surface or through the soil profile.",
+      "resourceConcerns": [
+        "inefficient-irrigation"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-system-surface-and-subsurface-ac-443-conservation"
+    },
+    {
+      "code": "449",
+      "name": "Irrigation Water Management",
+      "unit": "Ac.",
+      "category": "Irrigation",
+      "description": "Managing irrigation applications based on site-specific conditions and crop requirements.",
+      "resourceConcerns": [
+        "salts-chemicals-concentration",
+        "surface-water-depletion",
+        "groundwater-depletion",
+        "inefficient-irrigation",
+        "salts-surface-water",
+        "salts-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/irrigation-water-management-ac-449-conservation-practice-standard"
+    },
+    {
+      "code": "460",
+      "name": "Land Clearing",
+      "unit": "Ac.",
+      "category": "Land Management",
+      "description": "Removing trees, brush, and other vegetation to prepare land for farming or other uses.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/land-clearing-ac-460-conservation-practice-standard"
+    },
+    {
+      "code": "543",
+      "name": "Land Reclamation, Abandoned Mined Land",
+      "unit": "Ac.",
+      "category": "Land Management",
+      "description": "Reclaiming abandoned or inadequately reclaimed mined land for beneficial use.",
+      "resourceConcerns": [
+        "Soil Health",
+        "Water Quality",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/land-reclamation-abandoned-mined-land-ac-543-conservation"
+    },
+    {
+      "code": "453",
+      "name": "Land Reclamation, Landslide Treatment",
+      "unit": "No. and Ac",
+      "category": "Land Management",
+      "description": "Stabilizing and treating landslide-affected areas.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/land-reclamation-landslide-treatment-no-and-ac-453-conservation"
+    },
+    {
+      "code": "468",
+      "name": "Lined Waterway or Outlet",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "A waterway with an erosion-resistant lining to safely convey runoff.",
+      "resourceConcerns": [
+        "classic-gully-erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/lined-waterway-or-outlet-ft-468-conservation-practice-standard"
+    },
+    {
+      "code": "516",
+      "name": "Livestock Pipeline",
+      "unit": "Ft.",
+      "category": "Grazing Management",
+      "description": "A pipeline for transporting water to livestock watering facilities.",
+      "resourceConcerns": [
+        "inadequate-livestock-water"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/livestock-pipeline-ft-516-conservation-practice-standard"
+    },
+    {
+      "code": "576",
+      "name": "Livestock Shelter Structure",
+      "unit": "No.",
+      "category": "Grazing Management",
+      "description": "A structure to provide livestock protection from weather elements.",
+      "resourceConcerns": [
+        "inadequate-livestock-shelter"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/livestock-shelter-structure-no-576-conservation-practice-standard"
+    },
+    {
+      "code": "457",
+      "name": "Mine Shaft and Adit Closing",
+      "unit": "No.",
+      "category": "Land Management",
+      "description": "Closing abandoned mine shafts and adits to eliminate safety hazards.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Safety"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/mine-shaft-and-adit-closing-no-457-conservation-practice-standard"
+    },
+    {
+      "code": "353",
+      "name": "Monitoring Well",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "A well installed to monitor groundwater levels or quality.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/monitoring-well-no-353-conservation-practice-standard"
+    },
+    {
+      "code": "484",
+      "name": "Mulching",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Applying organic or inorganic materials to the soil surface.",
+      "resourceConcerns": [
+        "organic-matter-depletion",
+        "soil-organism-habitat",
+        "aggregate-instability",
+        "naturally-available-moisture"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/mulching-ac-484-conservation-practice-standard"
+    },
+    {
+      "code": "590",
+      "name": "Nutrient Management",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Managing rate, source, placement, and timing of plant nutrients and soil amendments.",
+      "resourceConcerns": [
+        "nutrients-surface-water",
+        "nutrients-groundwater",
+        "pathogens-surface-water",
+        "pathogens-groundwater",
+        "objectionable-odors",
+        "reactive-nitrogen-emissions",
+        "plant-productivity-health"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/nutrient-management-ac-590-conservation-practice-standard"
+    },
+    {
+      "code": "500",
+      "name": "Obstruction Removal",
+      "unit": "Ac.",
+      "category": "Land Management",
+      "description": "Removing objects that interfere with farming operations or conservation practices.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/obstruction-removal-ac-500-conservation-practice-standard"
+    },
+    {
+      "code": "319",
+      "name": "On-Farm Secondary Containment Facility",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "A facility to contain spills or leaks from chemical storage areas.",
+      "resourceConcerns": [
+        "petroleum-surface-water",
+        "petroleum-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/on-farm-secondary-containment-facility-no-319-conservation"
+    },
+    {
+      "code": "582",
+      "name": "Open Channel",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "An open conduit for conveying water by gravity flow.",
+      "resourceConcerns": [
+        "Water Management",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/open-channel-ft-582-conservation-practice-standard"
+    },
+    {
+      "code": "512",
+      "name": "Pasture and Hay Planting",
+      "unit": "Ac.",
+      "category": "Grazing Management",
+      "description": "Establishing adapted forage species for livestock feed or soil improvement.",
+      "resourceConcerns": [
+        "plant-productivity-health",
+        "feed-forage-imbalance"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/pasture-and-hay-planting-ac-512-conservation-practice-standard"
+    },
+    {
+      "code": "595",
+      "name": "Pest Management Conservation System",
+      "unit": "Ac.",
+      "category": "Pest Management",
+      "description": "A systematic approach to managing pests using multiple tactics.",
+      "resourceConcerns": [
+        "pesticides-surface-water",
+        "pesticides-groundwater",
+        "ozone-precursor-emissions",
+        "objectionable-odors",
+        "plant-pest-pressure"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/pest-management-conservation-system-ac-595-conservation-practice"
+    },
+    {
+      "code": "378",
+      "name": "Pond",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A water impoundment made by excavation or embankment for specified purposes.",
+      "resourceConcerns": [
+        "ponding-flooding",
+        "surface-water-depletion",
+        "inadequate-livestock-water"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/pond-no-378-conservation-practice-standard"
+    },
+    {
+      "code": "624",
+      "name": "Phosphorous Removal System",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "A system designed to remove phosphorus from agricultural runoff or drainage water.",
+      "resourceConcerns": [
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/phosphorous-removal-system-code-624-conservation-practice"
+    },
+    {
+      "code": "520",
+      "name": "Pond Sealing or Lining-Compacted Soil",
+      "unit": "Ft2",
+      "category": "Water Management",
+      "description": "Sealing pond bottoms with compacted soil materials to reduce seepage.",
+      "resourceConcerns": [
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/pond-sealing-or-lining-compacted-soil-ft2-520-conservation"
+    },
+    {
+      "code": "522",
+      "name": "Pond Sealing or Lining-Concrete",
+      "unit": "Ft2",
+      "category": "Water Management",
+      "description": "Sealing pond bottoms with concrete to prevent seepage.",
+      "resourceConcerns": [
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/pond-sealing-or-lining-concrete-ft2-522-conservation-practice"
+    },
+    {
+      "code": "521",
+      "name": "Pond Sealing or Lining-Geomembrane or Geosynthetic Clay Liner",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "Sealing pond bottoms with flexible membrane liners to prevent seepage.",
+      "resourceConcerns": [
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/pond-sealing-or-lining-geomembrane-or-geosynthetic-clay-liner-no"
+    },
+    {
+      "code": "462",
+      "name": "Precision Land Forming and Smoothing",
+      "unit": "Ac.",
+      "category": "Irrigation",
+      "description": "Shaping the land surface to a planned grade using precision equipment.",
+      "resourceConcerns": [
+        "Water Management",
+        "Energy",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/precision-land-forming-and-smoothing-ac-462-conservation-practice"
+    },
+    {
+      "code": "338",
+      "name": "Prescribed Burning",
+      "unit": "Ac.",
+      "category": "Fire Management",
+      "description": "Application of fire to achieve management objectives.",
+      "resourceConcerns": [
+        "ozone-precursor-emissions",
+        "reactive-nitrogen-emissions",
+        "wildfire-hazard"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/prescribed-burning-ac-338-conservation-practice-standard"
+    },
+    {
+      "code": "528",
+      "name": "Prescribed Grazing",
+      "unit": "Ac.",
+      "category": "Grazing Management",
+      "description": "Managing livestock grazing according to a management plan.",
+      "resourceConcerns": [
+        "feed-forage-imbalance"
+      ],
+      "nrcsUrl": "/sites/default/files/2025-07/528-nhcp-cps-grazing-management-2025.pdf"
+    },
+    {
+      "code": "533",
+      "name": "Pumping Plant",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A facility that delivers water at a higher hydraulic head than the supply source.",
+      "resourceConcerns": [
+        "groundwater-depletion",
+        "inadequate-livestock-water",
+        "energy-efficiency-equipment"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/pumping-plant-no-533-conservation-practice-standard"
+    },
+    {
+      "code": "550",
+      "name": "Range Planting",
+      "unit": "Ac.",
+      "category": "Grazing Management",
+      "description": "Establishing adapted plants on rangeland to improve forage production.",
+      "resourceConcerns": [
+        "plant-productivity-health",
+        "plant-structure-composition",
+        "feed-forage-imbalance"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/range-planting-ac-550-conservation-practice-standard"
+    },
+    {
+      "code": "566",
+      "name": "Recreation Land Improvement and Protection",
+      "unit": "Ac.",
+      "category": "Land Management",
+      "description": "Improving and protecting areas used for outdoor recreation activities.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/recreation-land-improvement-and-protection-ac-566-conservation"
+    },
+    {
+      "code": "329",
+      "name": "Residue and Tillage Management, No-Till",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Managing crop residue and using no-till or strip-till methods.",
+      "resourceConcerns": [
+        "sheet-rill-erosion",
+        "compaction",
+        "organic-matter-depletion",
+        "soil-organism-habitat",
+        "aggregate-instability",
+        "naturally-available-moisture",
+        "greenhouse-gas-emissions",
+        "energy-efficiency-field-operations"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/residue-and-tillage-management-no-till-ac-329-conservation"
+    },
+    {
+      "code": "345",
+      "name": "Residue and Tillage Management, Reduced Till",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Managing crop residue and using reduced tillage methods.",
+      "resourceConcerns": [
+        "Soil Health",
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/residue-and-tillage-management-reduced-till-ac-345-conservation"
+    },
+    {
+      "code": "643",
+      "name": "Restoration of Rare or Declining Natural Communities",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Restoring and managing rare or declining natural plant communities.",
+      "resourceConcerns": [
+        "Wildlife Habitat",
+        "Plant Diversity"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/restoration-of-rare-or-declining-natural-communities-ac-643"
+    },
+    {
+      "code": "391",
+      "name": "Riparian Forest Buffer",
+      "unit": "Ac.",
+      "category": "Water Quality",
+      "description": "An area of trees and/or shrubs located adjacent to and upgradient from waterbodies.",
+      "resourceConcerns": [
+        "bank-erosion",
+        "nutrients-surface-water",
+        "pesticides-surface-water",
+        "pathogens-surface-water",
+        "sediment-surface-water",
+        "elevated-water-temperature",
+        "terrestrial-wildlife-habitat",
+        "aquatic-habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/riparian-forest-buffer-ac-391-conservation-practice-standard"
+    },
+    {
+      "code": "390",
+      "name": "Riparian Herbaceous Cover",
+      "unit": "Ac.",
+      "category": "Water Quality",
+      "description": "Establishing herbaceous cover adjacent to and upgradient from waterbodies.",
+      "resourceConcerns": [
+        "bank-erosion",
+        "sediment-surface-water",
+        "elevated-water-temperature",
+        "aquatic-habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/riparian-herbaceous-cover-ac-390-conservation-practice-standard"
+    },
+    {
+      "code": "654",
+      "name": "Road/Trail/Landing Closure and Treatment",
+      "unit": "Ft.",
+      "category": "Forestry",
+      "description": "Closing and treating roads, trails, and landings to restore natural conditions.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/roadtraillanding-closure-and-treatment-ft-654-conservation"
+    },
+    {
+      "code": "555",
+      "name": "Rock Wall Terrace",
+      "unit": "Ft.",
+      "category": "Soil Erosion Control",
+      "description": "A terrace constructed of stone or rock to reduce slope and control erosion.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/rock-wall-terrace-ft-555-conservation-practice-standard"
+    },
+    {
+      "code": "558",
+      "name": "Roof Runoff Structure",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A system for collecting and conveying runoff from rooftops.",
+      "resourceConcerns": [
+        "Water Management",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/roof-runoff-structure-no-558-conservation-practice-standard"
+    },
+    {
+      "code": "367",
+      "name": "Roofs and Covers",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A permanent structure placed over manure storage or treatment facilities.",
+      "resourceConcerns": [
+        "objectionable-odors"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/roofs-and-covers-no-367-conservation-practice-standard"
+    },
+    {
+      "code": "557",
+      "name": "Row Arrangement",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Orienting crop rows to reduce erosion and improve water infiltration.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/row-arrangement-ac-557-conservation-practice-standard"
+    },
+    {
+      "code": "610",
+      "name": "Saline and Sodic Soil Management",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Managing soils affected by excess salts or sodium.",
+      "resourceConcerns": [
+        "salts-chemicals-concentration",
+        "salts-surface-water",
+        "salts-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/saline-and-sodic-soil-management-ac-610-conservation-practice"
+    },
+    {
+      "code": "604",
+      "name": "Saturated Buffer",
+      "unit": "Ft.",
+      "category": "Water Quality",
+      "description": "Diverting tile drainage through a riparian buffer to remove nutrients.",
+      "resourceConcerns": [
+        "nutrients-surface-water",
+        "nutrients-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/saturated-buffer-ft-604-conservation-practice-standard"
+    },
+    {
+      "code": "350",
+      "name": "Sediment Basin",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "A temporary or permanent basin for collecting and retaining sediment.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/sediment-basin-no-350-conservation-standard-document"
+    },
+    {
+      "code": "646",
+      "name": "Seasonal Water Management for Wildlife",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Managing water levels to benefit wildlife habitat.",
+      "resourceConcerns": [
+        "Wildlife Habitat",
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/seasonal-water-management-for-wildlife-ac-646-conservation"
+    },
+    {
+      "code": "318",
+      "name": "Short Term Storage of Animal Waste and Byproducts",
+      "unit": "Cubic Yards",
+      "category": "Waste Management",
+      "description": "Temporary storage of animal waste before utilization or disposal.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/short-term-storage-of-animal-waste-and-byproducts-cubic-yards-318"
+    },
+    {
+      "code": "381",
+      "name": "Silvopasture",
+      "unit": "Ac.",
+      "category": "Agroforestry",
+      "description": "A practice that integrates trees, forage, and livestock on the same land.",
+      "resourceConcerns": [
+        "greenhouse-gas-emissions"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/silvopasture-ac-381-conservation-practice-standard"
+    },
+    {
+      "code": "527",
+      "name": "Sinkhole Treatment",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "Treating sinkholes to prevent contamination of groundwater.",
+      "resourceConcerns": [
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/sinkhole-treatment-no-527-conservation-practice-standard"
+    },
+    {
+      "code": "572",
+      "name": "Spoil Disposal",
+      "unit": "Ac.",
+      "category": "Land Management",
+      "description": "Disposing of spoil material from construction or mining operations.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/spoil-disposal-ac-572-conservation-practice-standard"
+    },
+    {
+      "code": "336",
+      "name": "Soil Carbon Amendment",
+      "unit": "Ac.",
+      "category": "Soil Health",
+      "description": "Adding organic materials to soil to improve carbon content and soil health.",
+      "resourceConcerns": [
+        "Soil Health",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/soil-carbon-amendment-ac-336-conservation-practice-standard"
+    },
+    {
+      "code": "574",
+      "name": "Spring Development",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "Developing a natural spring to provide a dependable water supply.",
+      "resourceConcerns": [
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/spring-development-no-574-conservation-practice-standard"
+    },
+    {
+      "code": "442",
+      "name": "Sprinkler System",
+      "unit": "Ac.",
+      "category": "Irrigation",
+      "description": "An irrigation system that applies water through sprinklers or spray nozzles.",
+      "resourceConcerns": [
+        "inefficient-irrigation"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/sprinkler-system-ac-442-conservation-practice-standard"
+    },
+    {
+      "code": "570",
+      "name": "Stormwater Runoff Control",
+      "unit": "Ac.",
+      "category": "Water Quality",
+      "description": "Managing stormwater runoff to reduce pollution and erosion.",
+      "resourceConcerns": [
+        "petroleum-surface-water"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/stormwater-runoff-control-ac-570-conservation-practice-standard"
+    },
+    {
+      "code": "578",
+      "name": "Stream Crossing",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "A stabilized area across a stream where people, livestock, or equipment can cross.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/stream-crossing-no-578-conservation-practice-standard"
+    },
+    {
+      "code": "395",
+      "name": "Stream Habitat Improvement and Management",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Improving and managing aquatic habitat in streams.",
+      "resourceConcerns": [
+        "bank-erosion",
+        "aquatic-habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/stream-habitat-improvement-and-management-ac-395-conservation"
+    },
+    {
+      "code": "580",
+      "name": "Streambank and Shoreline Protection",
+      "unit": "Ft.",
+      "category": "Water Quality",
+      "description": "Protecting streambanks and shorelines from erosion using vegetation or structures.",
+      "resourceConcerns": [
+        "classic-gully-erosion",
+        "bank-erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/streambank-and-shoreline-protection-ft-580-conservation-practice"
+    },
+    {
+      "code": "585",
+      "name": "Stripcropping",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Growing crops in systematic strips to reduce erosion.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/stripcropping-ac-585-conservation-practice-standard"
+    },
+    {
+      "code": "587",
+      "name": "Structure for Water Control",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A structure to convey or regulate water flow.",
+      "resourceConcerns": [
+        "subsidence",
+        "ponding-flooding",
+        "seasonal-high-water-table",
+        "seeps"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/structure-for-water-control-no-587-conservation-practice-standard"
+    },
+    {
+      "code": "649",
+      "name": "Structures for Wildlife",
+      "unit": "No.",
+      "category": "Wildlife Habitat",
+      "description": "Constructing or installing structures to benefit wildlife.",
+      "resourceConcerns": [
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/structures-for-wildlife-no-649-conservation-practice-standard"
+    },
+    {
+      "code": "606",
+      "name": "Subsurface Drain",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "A conduit installed below ground surface to remove excess water from soil.",
+      "resourceConcerns": [
+        "subsidence",
+        "salts-chemicals-concentration",
+        "ponding-flooding",
+        "seasonal-high-water-table",
+        "seeps"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/subsurface-drain-ft-606-conservation-practice-standard"
+    },
+    {
+      "code": "607",
+      "name": "Surface Drain, Field Ditch",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "A ditch for removing excess surface water from fields.",
+      "resourceConcerns": [
+        "Water Management",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/surface-drain-field-ditch-ft-607-conservation-practice-standard"
+    },
+    {
+      "code": "608",
+      "name": "Surface Drain, Main or Lateral",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "A main or lateral drain for collecting and conveying excess surface water.",
+      "resourceConcerns": [
+        "ponding-flooding",
+        "seasonal-high-water-table",
+        "seeps"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/surface-drain-main-or-lateral-ft-608-conservation-practice"
+    },
+    {
+      "code": "609",
+      "name": "Surface Roughening",
+      "unit": "Ac.",
+      "category": "Soil Erosion Control",
+      "description": "Creating a rough, cloddy, or ridged soil surface to reduce erosion.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/surface-roughening-ac-609-conservation-practice-standard"
+    },
+    {
+      "code": "600",
+      "name": "Terrace",
+      "unit": "Ft.",
+      "category": "Soil Erosion Control",
+      "description": "A ridge and channel constructed across a slope to intercept runoff.",
+      "resourceConcerns": [
+        "sheet-rill-erosion",
+        "ephemeral-gully-erosion",
+        "naturally-available-moisture"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/terrace-ft-600-conservation-practice-standard"
+    },
+    {
+      "code": "575",
+      "name": "Trails and Walkways",
+      "unit": "Ft.",
+      "category": "Land Management",
+      "description": "Developing trails and walkways for pedestrian access and recreation.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Wildlife Habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/trails-and-walkways-ft-575-conservation-practice-standard"
+    },
+    {
+      "code": "612",
+      "name": "Tree/Shrub Establishment",
+      "unit": "Ac.",
+      "category": "Forestry",
+      "description": "Establishing trees and/or shrubs for conservation purposes.",
+      "resourceConcerns": [
+        "elevated-water-temperature",
+        "plant-structure-composition",
+        "inadequate-livestock-shelter"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/treeshrub-establishment-ac-612-conservation-practice-standard"
+    },
+    {
+      "code": "660",
+      "name": "Tree/Shrub Pruning",
+      "unit": "Ac.",
+      "category": "Forestry",
+      "description": "Selective removal of tree/shrub branches to achieve management objectives.",
+      "resourceConcerns": [
+        "Wildlife Habitat",
+        "Plant Health"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/treeshrub-pruning-ac-660-conservation-practice-standard"
+    },
+    {
+      "code": "490",
+      "name": "Tree/Shrub Site Preparation",
+      "unit": "Ac.",
+      "category": "Forestry",
+      "description": "Preparing sites for tree and shrub establishment.",
+      "resourceConcerns": [
+        "Soil Health",
+        "Plant Establishment"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/treeshrub-site-preparation-ac-490-conservation-practice-standard"
+    },
+    {
+      "code": "620",
+      "name": "Underground Outlet",
+      "unit": "Ft.",
+      "category": "Water Management",
+      "description": "A conduit installed beneath the ground surface to convey surface water.",
+      "resourceConcerns": [
+        "Water Management",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/underground-outlet-ft-620-conservation-practice-standard"
+    },
+    {
+      "code": "645",
+      "name": "Upland Wildlife Habitat Management",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Managing upland areas to improve wildlife habitat.",
+      "resourceConcerns": [
+        "Wildlife Habitat",
+        "Plant Diversity"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/upland-wildlife-habitat-management-ac-645-conservation-practice"
+    },
+    {
+      "code": "635",
+      "name": "Vegetated Treatment Area",
+      "unit": "Ac.",
+      "category": "Water Quality",
+      "description": "An area of vegetation for treating runoff from agricultural operations.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/vegetated-treatment-area-ac-635-conservation-practice-standard"
+    },
+    {
+      "code": "601",
+      "name": "Vegetative Barrier",
+      "unit": "Ft.",
+      "category": "Soil Erosion Control",
+      "description": "A strip of permanent vegetation for slowing runoff and trapping sediment.",
+      "resourceConcerns": [
+        "Soil Erosion",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/vegetative-barrier-ft-601-conservation-practice-standard"
+    },
+    {
+      "code": "630",
+      "name": "Vertical Drain",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A drain installed vertically to remove excess groundwater.",
+      "resourceConcerns": [
+        "Water Management",
+        "Soil Health"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/vertical-drain-no-630-conservation-practice-standard"
+    },
+    {
+      "code": "360",
+      "name": "Waste Facility Closure",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "Closing waste storage or treatment facilities to prevent environmental contamination.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/waste-facility-closure-no-360-conservation-practice-standard"
+    },
+    {
+      "code": "633",
+      "name": "Waste Recycling",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A facility or system for processing waste into usable products.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/waste-recycling-no-633-conservation-practice-standard"
+    },
+    {
+      "code": "632",
+      "name": "Waste Separation Facility",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A facility for separating solid and liquid portions of waste.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/waste-separation-facility-no-632-conservation-practice-standard"
+    },
+    {
+      "code": "313",
+      "name": "Waste Storage Facility",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A facility for storing agricultural waste before utilization or disposal.",
+      "resourceConcerns": [
+        "pathogens-surface-water",
+        "pathogens-groundwater"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/waste-storage-facility-no-313-conservation-practice-standard"
+    },
+    {
+      "code": "634",
+      "name": "Waste Transfer",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A system for transferring waste from one location to another.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/waste-transfer-no-634-conservation-practice-standard"
+    },
+    {
+      "code": "629",
+      "name": "Waste Treatment",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "Treating agricultural waste to reduce pollution potential.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/waste-treatment-no-629-conservation-practice-standard"
+    },
+    {
+      "code": "359",
+      "name": "Waste Treatment Lagoon",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A shallow basin for biological treatment of agricultural waste.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Air Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/waste-treatment-lagoon-no-359-conservation-practice-standard"
+    },
+    {
+      "code": "627",
+      "name": "Wastewater Treatment, Milk House",
+      "unit": "No.",
+      "category": "Waste Management",
+      "description": "A system for treating wastewater from milk handling facilities.",
+      "resourceConcerns": [
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/wastewater-treatment-milk-house-no-627-conservation-practice"
+    },
+    {
+      "code": "638",
+      "name": "Water and Sediment Control Basin",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "A basin for collecting runoff and allowing sediment to settle out.",
+      "resourceConcerns": [
+        "Water Quality",
+        "Soil Erosion"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/water-and-sediment-control-basin-no-638-conservation-practice"
+    },
+    {
+      "code": "636",
+      "name": "Water Harvesting Catchment",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A system for collecting and storing precipitation for beneficial use.",
+      "resourceConcerns": [
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/water-harvesting-catchment-no-636-conservation-practice-standard"
+    },
+    {
+      "code": "642",
+      "name": "Water Well",
+      "unit": "No.",
+      "category": "Water Management",
+      "description": "A shaft or hole constructed to access groundwater.",
+      "resourceConcerns": [
+        "groundwater-depletion",
+        "inadequate-livestock-water"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/water-well-no-642-conservation-practice-standard"
+    },
+    {
+      "code": "614",
+      "name": "Watering Facility",
+      "unit": "No.",
+      "category": "Grazing Management",
+      "description": "A permanent or portable facility for providing water to livestock.",
+      "resourceConcerns": [
+        "inadequate-livestock-water"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/watering-facility-no-614-conservation-practice-standard"
+    },
+    {
+      "code": "640",
+      "name": "Waterspreading",
+      "unit": "Ac.",
+      "category": "Water Management",
+      "description": "Distributing surface water over an area to promote infiltration.",
+      "resourceConcerns": [
+        "Water Management",
+        "Soil Health"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/waterspreading-ac-640-conservation-practice-standard"
+    },
+    {
+      "code": "351",
+      "name": "Well Decommissioning",
+      "unit": "No.",
+      "category": "Water Quality",
+      "description": "Permanently closing a well to prevent contamination of groundwater.",
+      "resourceConcerns": [
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/well-decommissioning-no-351-conservation-practice-standard"
+    },
+    {
+      "code": "658",
+      "name": "Wetland Creation",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Creating wetlands where they did not previously exist.",
+      "resourceConcerns": [
+        "Wildlife Habitat",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/wetland-creation-ac-658-conservation-practice-standard"
+    },
+    {
+      "code": "659",
+      "name": "Wetland Enhancement",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Improving existing degraded wetland functions and values.",
+      "resourceConcerns": [
+        "Wildlife Habitat",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/wetland-enhancement-ac-659-conservation-practice-standard"
+    },
+    {
+      "code": "657",
+      "name": "Wetland Restoration",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Restoring wetlands to their original condition and function.",
+      "resourceConcerns": [
+        "Wildlife Habitat",
+        "Water Quality"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/wetland-restoration-ac-657-conservation-practice-standard"
+    },
+    {
+      "code": "644",
+      "name": "Wetland Wildlife Habitat Management",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Managing wetlands to improve wildlife habitat.",
+      "resourceConcerns": [
+        "Wildlife Habitat",
+        "Water Management"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/wetland-wildlife-habitat-management-ac-644-conservation-practice"
+    },
+    {
+      "code": "420",
+      "name": "Wildlife Habitat Planting",
+      "unit": "Ac.",
+      "category": "Wildlife Habitat",
+      "description": "Establishing vegetation specifically to improve wildlife habitat.",
+      "resourceConcerns": [
+        "plant-structure-composition",
+        "terrestrial-wildlife-habitat"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/wildlife-habitat-planting-ac-420-conservation-practice-standard"
+    },
+    {
+      "code": "380",
+      "name": "Windbreak/Shelterbelt Establishment and Renovation",
+      "unit": "Ft.",
+      "category": "Soil Erosion Control",
+      "description": "Establishing or renovating linear plantings of trees and shrubs to reduce wind velocity.",
+      "resourceConcerns": [
+        "wind-erosion",
+        "drifted-snow",
+        "particulate-matter-emissions"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/windbreakshelterbelt-establishment-and-renovation-ft-380"
+    },
+    {
+      "code": "384",
+      "name": "Woody Residue Treatment",
+      "unit": "Ac.",
+      "category": "Forestry",
+      "description": "Managing woody residues to reduce fire hazard and improve site conditions.",
+      "resourceConcerns": [
+        "wildfire-hazard"
+      ],
+      "nrcsUrl": "/resources/guides-and-instructions/woody-residue-treatment-ac-384-conservation-practice-standard"
+    }
+  ],
+  "categories": [
+    "Soil Erosion Control",
+    "Water Quality",
+    "Soil Health",
+    "Grazing Management",
+    "Wildlife Habitat",
+    "Water Management",
+    "Irrigation",
+    "Air Quality",
+    "Energy",
+    "Waste Management",
+    "Forestry",
+    "Agroforestry",
+    "Fire Management",
+    "Aquaculture",
+    "Infrastructure",
+    "Land Management",
+    "Pest Management",
+    "Horticulture"
+  ],
+  "resourceConcerns": [
+    "Soil Erosion",
+    "Water Quality",
+    "Soil Health",
+    "Wildlife Habitat",
+    "Air Quality",
+    "Water Management",
+    "Energy",
+    "Plant Diversity",
+    "Grazing Management",
+    "Animal Health",
+    "Fire Management",
+    "Economic",
+    "Plant Health",
+    "Safety",
+    "Irrigation",
+    "Plant Establishment"
+  ],
+  "totalPractices": 137
+}

@@ -43,8 +43,8 @@ import type {
   ResourceConcern,
   SoilCondition 
 } from '../types/conservationPractices'
-import nrcsPracticesData from '../../Property_Panel_Guide/Conservation/nrcs-conservation-practices-data.json'
-import resourceConcernsData from '../../Property_Panel_Guide/Conservation/nrcs-resource-concerns-data.json'
+import nrcsPracticesData from '../data/nrcs-conservation-practices-data.json'
+import resourceConcernsData from '../data/nrcs-resource-concerns-data.json'
 
 type ViewMode = 'database' | 'selector' | 'resources'
 

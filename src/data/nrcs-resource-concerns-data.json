@@ -1,0 +1,541 @@
+{
+  "resourceConcerns": [
+    {
+      "id": "sheet-rill-erosion",
+      "name": "Sheet and rill erosion",
+      "category": "Soil Resource Concerns",
+      "description": "Detachment and transport of soil particles caused by rainfall, melting snow, or irrigation.",
+      "objective": "Reduce sheet and rill erosion to tolerable limits.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Farmstead", "Associated Ag Land", "Other"],
+      "assessmentTools": ["NRCS water erosion technology", "IIRH", "RHEM", "PCS", "DIPH", "Client input/Planner observation"],
+      "relatedPractices": ["340", "329", "330", "412", "600", "393"]
+    },
+    {
+      "id": "wind-erosion",
+      "name": "Wind erosion", 
+      "category": "Soil Resource Concerns",
+      "description": "Detachment and transport of soil particles caused by wind.",
+      "objective": "Reduce wind erosion to tolerable limits.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Farmstead", "Associated Ag Land", "Other"],
+      "assessmentTools": ["NRCS wind erosion technology", "IIRH", "PCS", "Client input/Planner observation"],
+      "relatedPractices": ["380", "603", "340", "327", "588", "589"]
+    },
+    {
+      "id": "ephemeral-gully-erosion",
+      "name": "Ephemeral gully erosion",
+      "category": "Soil Resource Concerns", 
+      "description": "Soil erosion that results in small gullies in the same flow area that can be obscured by tillage or other soil distribution activities.",
+      "objective": "Control the formation of ephemeral gullies.",
+      "applicableLandUses": ["Crop", "Pasture", "Range"],
+      "assessmentTools": ["Client input/Planner observation"],
+      "relatedPractices": ["362", "410", "412", "600"]
+    },
+    {
+      "id": "classic-gully-erosion",
+      "name": "Classic gully erosion",
+      "category": "Soil Resource Concerns",
+      "description": "Gullies created by runoff that can enlarge a channel progressively by head cutting and/or lateral widening.",
+      "objective": "Stabilize an actively eroding gully.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Farmstead", "Associated Ag Land", "Other"],
+      "assessmentTools": ["IIRH", "PCS", "DIPH", "Client input/Planner observation"],
+      "relatedPractices": ["410", "412", "468", "580"]
+    },
+    {
+      "id": "bank-erosion",
+      "name": "Bank erosion from streams, shorelines, or water conveyance channels",
+      "category": "Soil Resource Concerns",
+      "description": "Erosion resulting from poor land management practices, storm events, wave action, rain, ice, wind, runoff, loss of vegetation, hydrologic dynamics, stream isolation from floodplains, and/or other disturbed/altered geomorphological processes.",
+      "objective": "Restore the stability of eroding banks.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["SVAP2", "PCS", "DIPH", "Client input/Planner observation"],
+      "relatedPractices": ["580", "391", "390", "395"]
+    },
+    {
+      "id": "subsidence",
+      "name": "Subsidence",
+      "category": "Soil Resource Concerns",
+      "description": "Loss of volume and depth of organic soils due to oxidation caused by above normal microbial activity resulting from excessive water drainage, soil disturbance, or extended drought.",
+      "objective": "Reduce potential for subsidence to occur and treat existing subsidence.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Farmstead", "Associated Ag Land"],
+      "assessmentTools": ["Client input/Planner observation"],
+      "relatedPractices": ["554", "606", "587"]
+    },
+    {
+      "id": "compaction",
+      "name": "Compaction",
+      "category": "Soil Resource Concerns",
+      "description": "Management-induced soil compaction at any level throughout the soil profile resulting in reduced plant productivity, biological activity, infiltration and aeration.",
+      "objective": "Reduce soil compaction.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Associated Ag Land", "Other"],
+      "assessmentTools": ["In-Field Soil Health Assessment", "IIRH", "PCS", "DIPH", "Penetrometer", "Client input/Planner observation"],
+      "relatedPractices": ["334", "329", "561", "328"]
+    },
+    {
+      "id": "organic-matter-depletion",
+      "name": "Organic matter depletion",
+      "category": "Soil Resource Concerns",
+      "description": "Management-induced depletion of any or all pools of soil organic matter resulting in limited soil function and processes that support plant productivity, biological activity and water and nutrient cycling.",
+      "objective": "Maintain, increase and/or improve soil organic matter.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Associated Ag Land"],
+      "assessmentTools": ["In-Field Soil Health Assessment", "IIRH", "PCS", "Soil tests", "Client input/Planner observation"],
+      "relatedPractices": ["340", "327", "328", "329", "484"]
+    },
+    {
+      "id": "salts-chemicals-concentration",
+      "name": "Concentration of salts or other chemicals",
+      "category": "Soil Resource Concerns",
+      "description": "Concentration of salts leading to salinity and/or sodicity reducing productivity or limiting desired use, or concentrations of other chemicals impacting productivity, populations of beneficial organisms or limiting desired use.",
+      "objective": "Reduce concentration of salts or other chemicals in the soil.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Soil and irrigation water tests", "Electrical Conductivity meters", "Client input/Planner observation"],
+      "relatedPractices": ["610", "449", "447", "606"]
+    },
+    {
+      "id": "soil-organism-habitat",
+      "name": "Soil organism habitat loss or degradation",
+      "category": "Soil Resource Concerns",
+      "description": "Quantity, quality, diversity or connectivity of food, cover, space, shelter and/or water is inadequate to meet requirements of beneficial soil organisms.",
+      "objective": "Improve habitat for beneficial soil organisms.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Associated Ag Land", "Other"],
+      "assessmentTools": ["In-Field Soil Health Assessment", "IIRH", "PCS", "DIPH", "Client input/Planner observation"],
+      "relatedPractices": ["340", "327", "328", "484", "329"]
+    },
+    {
+      "id": "aggregate-instability",
+      "name": "Aggregate instability",
+      "category": "Soil Resource Concerns",
+      "description": "Management-induced degradation of water stable soil aggregates resulting in destabilized soil carbon; surface crusting; reduced water infiltration, water holding capacity, and aeration; depressed resilience to extreme weather; increased ponding and flooding; increased soil erosion and plant stress; and reduced habitat and soil biological activity.",
+      "objective": "Improve aggregate stability.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Associated Ag Land"],
+      "assessmentTools": ["In-Field Soil Health Assessment", "IIRH", "PCS", "Water Soil Aggregate Lab Assessment", "Client input/Planner observation"],
+      "relatedPractices": ["340", "327", "328", "329", "484"]
+    },
+    {
+      "id": "ponding-flooding",
+      "name": "Ponding and flooding",
+      "category": "Water Resource Concerns",
+      "description": "Water covering the land surface, along with saturated conditions below the surface, degrades natural resources, or restricts capability of land to support its intended use.",
+      "objective": "Reduce the risk of natural resource degradation, or limitation to land use caused by flooding or ponding.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Client input/Planner observation", "Hydrology models"],
+      "relatedPractices": ["378", "402", "606", "608", "587"]
+    },
+    {
+      "id": "seasonal-high-water-table",
+      "name": "Seasonal high-water table",
+      "category": "Water Resource Concerns",
+      "description": "Groundwater or a perched water table causing saturated conditions near the surface degrades water resources or restricts capability of land to support its intended use.",
+      "objective": "Reduce the risk of natural resource degradation or limitation to land use caused by a seasonal high-water table.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Client input/Planner observation", "Hydrology models"],
+      "relatedPractices": ["606", "608", "554", "587"]
+    },
+    {
+      "id": "seeps",
+      "name": "Seeps",
+      "category": "Water Resource Concerns",
+      "description": "Sub-surface saturated flows that percolates slowly to the surface, degrades water resources, or restricts capability of land to support its intended use.",
+      "objective": "Reduce the risk of natural resource degradation, or limitation to land use caused by a seep.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Client input/Planner observation", "Hydrology models"],
+      "relatedPractices": ["606", "608", "554", "587"]
+    },
+    {
+      "id": "drifted-snow",
+      "name": "Drifted snow",
+      "category": "Water Resource Concerns",
+      "description": "Wind-blown snow accumulates around and over surface structures, which restricts access to humans or animals; or wind removes snow from desired location where it can be used to accumulate water.",
+      "objective": "Control where snow drifts accumulate.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Client input/Planner observation", "Drift simulation models"],
+      "relatedPractices": ["380", "383", "422"]
+    },
+    {
+      "id": "surface-water-depletion",
+      "name": "Surface water depletion",
+      "category": "Water Resource Concerns",
+      "description": "Water from collected precipitation runoff, ponds, lakes, surface watercourses and reservoirs is used at a rate that is detrimental to ecological functions or other identified uses and threatens sustained availability of surface water.",
+      "objective": "Reduce surface water depletion.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Client input/Planner observation", "State regulations"],
+      "relatedPractices": ["449", "447", "436", "378"]
+    },
+    {
+      "id": "groundwater-depletion",
+      "name": "Groundwater depletion",
+      "category": "Water Resource Concerns",
+      "description": "Underground water is used at a rate greater than aquifer recharge.",
+      "objective": "Reduce the risk of natural resource degradation, or limitation to land use caused by groundwater depletion.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Client input/Planner observation", "State regulations"],
+      "relatedPractices": ["449", "447", "533", "642"]
+    },
+    {
+      "id": "naturally-available-moisture",
+      "name": "Naturally available moisture use",
+      "category": "Water Resource Concerns",
+      "description": "Natural precipitation is not optimally managed to support desired land use goals or ecological processes.",
+      "objective": "Manage natural precipitation more efficiently.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Associated Ag Land"],
+      "assessmentTools": ["IIRH", "PCS", "Client input/Planner observation"],
+      "relatedPractices": ["340", "484", "329", "327", "600"]
+    },
+    {
+      "id": "inefficient-irrigation",
+      "name": "Inefficient irrigation water use",
+      "category": "Water Resource Concerns",
+      "description": "Irrigation water is not stored, delivered, scheduled and/or applied efficiently.",
+      "objective": "Manage irrigation water efficiently.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["FIRI", "State approved assessment tools"],
+      "relatedPractices": ["441", "442", "443", "449", "430"]
+    },
+    {
+      "id": "nutrients-surface-water",
+      "name": "Nutrients transported to surface water",
+      "category": "Water Resource Concerns",
+      "description": "Nutrients (organic and inorganic) stored, concentrated, or applied are transported to receiving surface waters in quantities that degrade water quality and limit its use for intended purposes.",
+      "objective": "Reduce transport of nutrients to surface water.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["CART", "CEAP", "P Index", "N leaching index", "PCS"],
+      "relatedPractices": ["590", "393", "391", "656", "604"]
+    },
+    {
+      "id": "nutrients-groundwater",
+      "name": "Nutrients transported to groundwater",
+      "category": "Water Resource Concerns",
+      "description": "Nutrients (organic and inorganic) stored, concentrated, or applied are transported to groundwaters in quantities that degrade water quality and limit its use for intended purposes.",
+      "objective": "Reduce transport of nutrients to groundwater.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["CART", "CEAP", "N leaching index", "Well contamination reports"],
+      "relatedPractices": ["590", "605", "604", "554"]
+    },
+    {
+      "id": "pesticides-surface-water",
+      "name": "Pesticides transported to surface water",
+      "category": "Water Resource Concerns",
+      "description": "Pesticides are lost from their application area and transported to surface water sources in quantities that degrade water quality and limit its use for intended purposes.",
+      "objective": "Reduce hazardous pesticide losses from application areas that can be transported to surface water sources.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["WIN-PST", "Pest management system evaluation"],
+      "relatedPractices": ["595", "393", "391", "327"]
+    },
+    {
+      "id": "pesticides-groundwater",
+      "name": "Pesticides transported to groundwater", 
+      "category": "Water Resource Concerns",
+      "description": "Pesticide loses from the application area are transported to groundwater sources in quantities that degrade water quality and limit its use for intended purposes.",
+      "objective": "Reduce hazardous pesticide losses from application areas that can be transported to groundwater sources.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["WIN-PST", "Pest management system evaluation"],
+      "relatedPractices": ["595", "327", "340"]
+    },
+    {
+      "id": "pathogens-surface-water",
+      "name": "Pathogens and chemicals from manure, bio-solids, or compost applications transported to surface water",
+      "category": "Water Resource Concerns",
+      "description": "Pathogens, pharmaceuticals, leachate and chemicals from manure, bio-solids or compost transported to receiving waters in quantities that degrade water quality and limit uses.",
+      "objective": "Reduce transport of pathogens, pharmaceuticals, leachate and polluting chemicals from manure, bio-solids, or compost to surface water.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Nutrient management evaluation", "Compost temperature records"],
+      "relatedPractices": ["590", "313", "317", "393", "391"]
+    },
+    {
+      "id": "pathogens-groundwater", 
+      "name": "Pathogens and chemicals from manure, bio-solids, or compost applications transported to groundwater",
+      "category": "Water Resource Concerns",
+      "description": "Pathogens, pharmaceuticals, leachate and chemicals from manure, biosolids or compost transported to groundwaters in quantities that degrade water quality and limit uses.",
+      "objective": "Reduce transport of pathogens, pharmaceuticals, leachate and polluting chemicals from manure, bio-solids, or compost to groundwater.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Nutrient management evaluation", "Compost temperature records"],
+      "relatedPractices": ["590", "313", "317", "327"]
+    },
+    {
+      "id": "salts-surface-water",
+      "name": "Salts transported to surface water",
+      "category": "Water Resource Concerns",
+      "description": "Irrigation or rainfall runoff transports salts to receiving surface waters in quantities that degrade water quality and limit use for intended purposes.",
+      "objective": "Limit transfer of salts from site to receiving surface waters.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Soil salinity tests", "Water quality tests"],
+      "relatedPractices": ["610", "449", "447", "393"]
+    },
+    {
+      "id": "salts-groundwater",
+      "name": "Salts transported to groundwater",
+      "category": "Water Resource Concerns", 
+      "description": "Irrigation or rainfall infiltration transport salts to groundwater in quantities that degrade aquifer water quality and limit intended uses.",
+      "objective": "Limit loss of salts from site to groundwater.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Soil salinity tests", "Water quality tests"],
+      "relatedPractices": ["610", "449", "447", "554"]
+    },
+    {
+      "id": "petroleum-surface-water",
+      "name": "Petroleum, heavy metals, and other pollutants transported to surface water",
+      "category": "Water Resource Concerns",
+      "description": "Petroleum, heavy metals, and other pollutants for on-farm use are lost from areas of concentration to receiving surface waters in quantities that degrade water quality and limits its use for intended purposes.",
+      "objective": "Reduce losses from facilities for handling, storing, or processing of petroleum, heavy metals, and other pollutants to surface water.",
+      "applicableLandUses": ["All land uses except water"],
+      "assessmentTools": ["Client input/Planner observation"],
+      "relatedPractices": ["309", "319", "570", "393"]
+    },
+    {
+      "id": "petroleum-groundwater",
+      "name": "Petroleum, heavy metals, and other pollutants transported to groundwater",
+      "category": "Water Resource Concerns",
+      "description": "Petroleum, heavy metals, and other pollutants for on-farm use are lost from areas of concentration to receiving groundwater in quantities that degrade water quality and limit its use for intended purposes.",
+      "objective": "Reduce losses from facilities for handling, storing, or processing of petroleum, heavy metals, and other pollutants to groundwater.",
+      "applicableLandUses": ["All land uses except water"],
+      "assessmentTools": ["Client input/Planner observation"],
+      "relatedPractices": ["309", "319", "327"]
+    },
+    {
+      "id": "sediment-surface-water",
+      "name": "Sediment transported to surface water",
+      "category": "Water Resource Concerns",
+      "description": "Offsite transport of sediment to surface water degrades water quality and limits use for intended purposes.",
+      "objective": "Limit sediment loss from site to surface waters.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["NRCS water erosion technology", "SVAP2", "IIRH", "PCS"],
+      "relatedPractices": ["393", "391", "390", "412", "327"]
+    },
+    {
+      "id": "elevated-water-temperature",
+      "name": "Elevated water temperature",
+      "category": "Water Resource Concerns",
+      "description": "Surface water temperatures exceed State/Federal standards in downstream receiving waters which limits its use for identified fish or as aquatic habitat.",
+      "objective": "Lower stream water temperature and/or prevent additional water temperature increases in downstream receiving waters.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["SVAP2"],
+      "relatedPractices": ["391", "390", "422", "612"]
+    },
+    {
+      "id": "particulate-matter-emissions",
+      "name": "Emissions of particulate matter (PM) and PM precursors",
+      "category": "Air Resource Concerns",
+      "description": "Direct emissions of particulate matter – dust and smoke – as well as the formation of fine particulate matter in the atmosphere from other agricultural emissions can cause multiple negative environmental impacts.",
+      "objective": "Emissions of PM and PM precursors from agricultural activities do not excessively contribute to negative impacts to human, plant, or animal health.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["NAQSAT", "Client input/Planner observation"],
+      "relatedPractices": ["380", "603", "340", "373", "375"]
+    },
+    {
+      "id": "greenhouse-gas-emissions",
+      "name": "Emissions of greenhouse gases (GHGs)",
+      "category": "Air Resource Concerns",
+      "description": "Emissions of methane, nitrous oxide, and carbon dioxide increase atmospheric concentrations of greenhouse gases.",
+      "objective": "Emissions of nitrous oxide from nitrogen fertilizer, methane and nitrous oxide from confinement-based animal production, and loss of carbon from soils and biomass do not excessively contribute to increased atmospheric concentrations of greenhouse gases.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Farmstead", "Associated Ag Land"],
+      "assessmentTools": ["COMET-Farm", "NAQSAT", "In-Field Soil Health Assessment", "IIRH", "PCS"],
+      "relatedPractices": ["340", "329", "328", "381", "327"]
+    },
+    {
+      "id": "ozone-precursor-emissions",
+      "name": "Emissions of ozone precursors",
+      "category": "Air Resource Concerns",
+      "description": "Emissions of ozone precursors – oxides of nitrogen and volatile organic compounds (VOCs) – result in formation of ground-level ozone, which can have negative impacts to human, plant, and animal health.",
+      "objective": "Emissions of ozone precursors from agricultural activities do not excessively contribute to negative impacts to human, plant, or animal health.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["NAQSAT", "Client input/Planner observation"],
+      "relatedPractices": ["374", "372", "338", "595"]
+    },
+    {
+      "id": "objectionable-odors",
+      "name": "Objectionable odors",
+      "category": "Air Resource Concerns",
+      "description": "Emissions of odorous compounds – volatile organic compounds (VOCs), ammonia, and odorous sulfur compounds – can cause nuisance conditions.",
+      "objective": "Emissions of volatile organic compounds, ammonia, and odorous sulfur compounds from agricultural activities do not excessively contribute to negative odor impacts.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["NAQSAT", "Client input/Planner observation"],
+      "relatedPractices": ["367", "590", "595", "317"]
+    },
+    {
+      "id": "reactive-nitrogen-emissions",
+      "name": "Emissions of airborne reactive nitrogen",
+      "category": "Air Resource Concerns",
+      "description": "Emissions of airborne reactive nitrogen – ammonia and oxides of nitrogen – can negatively impact atmospheric chemistry, cause unwanted fertilization via deposition in sensitive ecosystems, and degrade regional visibility.",
+      "objective": "Emissions of airborne reactive nitrogen from agricultural activities do not excessively contribute to negative atmospheric and/or ecosystem impacts.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["NAQSAT", "Client input/Planner observation"],
+      "relatedPractices": ["590", "374", "372", "338"]
+    },
+    {
+      "id": "plant-productivity-health",
+      "name": "Plant productivity and health",
+      "category": "Plant Resource Concerns",
+      "description": "Improper fertility, management or plants not adapted to site negatively impact plant productivity, vigor and/or quality.",
+      "objective": "Improve poor plant productivity and health.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["IIRH", "PCS", "DIPH", "Forest Inventory", "Yield data", "Client input/Planner observation"],
+      "relatedPractices": ["590", "512", "550", "328", "327"]
+    },
+    {
+      "id": "plant-structure-composition",
+      "name": "Plant structure and composition",
+      "category": "Plant Resource Concerns",
+      "description": "Plant communities have insufficient composition and structure to achieve ecological functions and management objectives. This resource concern includes degradation of wetland habitat, targeted ecosystems, or unique plant communities.",
+      "objective": "Improve plant structure and composition.",
+      "applicableLandUses": ["Forest", "Range", "Pasture"],
+      "assessmentTools": ["Forest Inventory", "IIRH", "PCS", "DIPH", "Rangeland Trend Worksheet"],
+      "relatedPractices": ["666", "612", "420", "550", "327"]
+    },
+    {
+      "id": "plant-pest-pressure",
+      "name": "Plant pest pressure",
+      "category": "Plant Resource Concerns",
+      "description": "Excessive pest damage to plants including that from undesired plants, diseases, animals, soil borne pathogens, and nematodes. This concern addresses invasive plant, animal and insect species.",
+      "objective": "Reduce plant pest pressure.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["IIRH", "PCS", "DIPH", "Client input/Planner observation"],
+      "relatedPractices": ["595", "315", "314", "328"]
+    },
+    {
+      "id": "wildfire-hazard",
+      "name": "Wildfire hazard from biomass accumulation",
+      "category": "Plant Resource Concerns",
+      "description": "The kinds and amounts of plant biomass create wildfire hazards that pose risks to human safety, structures, plants, animals, and air resources.",
+      "objective": "Reduce biomass accumulation and the risk of wildfire hazard.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["Client input/Planner observation", "Visual assessment protocols"],
+      "relatedPractices": ["338", "383", "384", "394", "314"]
+    },
+    {
+      "id": "terrestrial-wildlife-habitat",
+      "name": "Terrestrial habitat for wildlife and invertebrates",
+      "category": "Animal Resource Concerns",
+      "description": "Quantity, quality or connectivity of food, cover, space, and/or water is inadequate to meet requirements of identified terrestrial wildlife or invertebrate species.",
+      "objective": "Improve quantity and quality of habitat to meet requirements of identified terrestrial wildlife or invertebrate species.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["WHEG", "Specialist reports"],
+      "relatedPractices": ["420", "327", "386", "391", "647"]
+    },
+    {
+      "id": "aquatic-habitat",
+      "name": "Aquatic habitat for fish and other organisms",
+      "category": "Animal Resource Concerns",
+      "description": "Quantity, quality, or connectivity of water, food, cover and space, is inadequate to meet requirements of identified fish or other organisms.",
+      "objective": "Provide water that is sufficient in quality and extent to meet identified species or guild habitat requirements, remove barriers to enable aquatic species movement and improve associated riparian habitat.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["SVAP2", "Specialist reports"],
+      "relatedPractices": ["395", "396", "391", "390", "656"]
+    },
+    {
+      "id": "feed-forage-imbalance",
+      "name": "Feed and forage imbalance",
+      "category": "Animal Resource Concerns",
+      "description": "Feed and Forage quality and/or quantity is inadequate for nutritional needs and production goals of the kinds and classes of livestock.",
+      "objective": "Balance the quantity and quality of feed and forage to meet livestock needs and reduce negative impacts to other resources.",
+      "applicableLandUses": ["Crop (grazed)", "Forest (grazed)", "Range", "Pasture", "Farmstead"],
+      "assessmentTools": ["NRPH", "IIRH", "PCS", "DIPH", "Livestock-Forage/Feed Inventory"],
+      "relatedPractices": ["528", "512", "550", "592", "511"]
+    },
+    {
+      "id": "inadequate-livestock-shelter",
+      "name": "Inadequate livestock shelter",
+      "category": "Animal Resource Concerns",
+      "description": "Livestock lack adequate shelter from climatic conditions to meet basic needs.",
+      "objective": "Supply adequate shelter to meet grazing livestock needs.",
+      "applicableLandUses": ["Crop (grazed)", "Forest (grazed)", "Range", "Pasture", "Farmstead", "Associated Ag Land", "Other"],
+      "assessmentTools": ["NRPH", "Client input/Planner observation"],
+      "relatedPractices": ["576", "382", "327", "612"]
+    },
+    {
+      "id": "inadequate-livestock-water",
+      "name": "Inadequate livestock water quantity, quality and distribution",
+      "category": "Animal Resource Concerns",
+      "description": "Quantity or quality of drinking water are insufficient to meet basic needs for the kind and class of livestock and improper distribution negatively impacts other resources.",
+      "objective": "Supply adequate quantity and quality of water to meet basic livestock needs and assure proper distribution to reduce negative impacts to other resources.",
+      "applicableLandUses": ["Crop (grazed)", "Forest (grazed)", "Range", "Pasture", "Farmstead"],
+      "assessmentTools": ["NRPH", "Client input/Planner observation"],
+      "relatedPractices": ["614", "516", "533", "378", "642"]
+    },
+    {
+      "id": "energy-efficiency-equipment",
+      "name": "Energy efficiency of equipment and facilities",
+      "category": "Energy Resource Concerns",
+      "description": "Stationary equipment or facilities are using energy inefficiently. This includes energy use in and around buildings on the farmstead, other stationary equipment such as grain dryers or commodity storages as well as equipment in the field such as irrigation pumps, irrigation systems, and center pivots.",
+      "objective": "Improve energy efficiency of stationary equipment and facilities to reduce energy use.",
+      "applicableLandUses": ["All land uses"],
+      "assessmentTools": ["USDA Energy Audit", "NRCS Energy Estimator Tools", "Client input/Planner observation"],
+      "relatedPractices": ["374", "372", "670", "672", "533"]
+    },
+    {
+      "id": "energy-efficiency-field-operations",
+      "name": "Energy efficiency of field operations",
+      "category": "Energy Resource Concerns",
+      "description": "Mobile on-farm, field operations are using energy inefficiently. This includes use of tractors, trucks or other mobile equipment as well as changes in farming/ranching and forestry practices that reduce energy use such as making fewer trips across the field or implementing practices that result in less energy use.",
+      "objective": "Improve energy efficiency of farming, ranching, forestry practices and mobile field operations to reduce energy use.",
+      "applicableLandUses": ["Crop", "Forest", "Range", "Pasture", "Farmstead"],
+      "assessmentTools": ["USDA Energy Audit", "NRCS Energy Estimator Tools", "NRCS erosion prediction technologies", "Client input/Planner observation"],
+      "relatedPractices": ["374", "329", "334", "328", "327"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "soil",
+      "name": "Soil Resource Concerns", 
+      "description": "Resource concerns related to soil health, erosion, compaction, organic matter, and soil organism habitat",
+      "count": 11,
+      "icon": "🌱",
+      "color": "#8B6F47"
+    },
+    {
+      "id": "water",
+      "name": "Water Resource Concerns",
+      "description": "Resource concerns related to water quality, quantity, efficiency, and contamination",
+      "count": 19,
+      "icon": "💧",
+      "color": "#4A7C9E"
+    },
+    {
+      "id": "air",
+      "name": "Air Resource Concerns", 
+      "description": "Resource concerns related to air quality, emissions, and atmospheric impacts",
+      "count": 5,
+      "icon": "🌬️",
+      "color": "#7BA4B5"
+    },
+    {
+      "id": "plant",
+      "name": "Plant Resource Concerns",
+      "description": "Resource concerns related to plant health, productivity, structure, and pest management",
+      "count": 4,
+      "icon": "🌿",
+      "color": "#5C8D5A"
+    },
+    {
+      "id": "animal",
+      "name": "Animal Resource Concerns",
+      "description": "Resource concerns related to wildlife habitat, livestock needs, and animal welfare",
+      "count": 6,
+      "icon": "🐄",
+      "color": "#B8794F"
+    },
+    {
+      "id": "energy",
+      "name": "Energy Resource Concerns",
+      "description": "Resource concerns related to energy efficiency and conservation in agricultural operations",
+      "count": 2,
+      "icon": "⚡",
+      "color": "#D4A574"
+    }
+  ],
+  "assessmentTools": [
+    "IIRH - Interpreting Indicators of Rangeland Health",
+    "PCS - Pasture Condition Score",
+    "DIPH - Determining Indicators of Pasture Health", 
+    "SVAP2 - Stream Visual Assessment Protocol, Version 2",
+    "WHEG - Wildlife Habitat Evaluation Guide",
+    "NRPH - National Range and Pasture Handbook",
+    "RHEM - Rangeland Hydrology & Erosion Model",
+    "FIRI - Farm Irrigation Rating Index",
+    "WIN-PST - Windows Pesticide Screening Tool",
+    "CART - Conservation Assessment Ranking Tool",
+    "CEAP - Conservation Effects Assessment Project",
+    "NAQSAT - National Air Quality Site Assessment Tool",
+    "COMET-Farm - Carbon Management Evaluation Tool",
+    "In-Field Soil Health Assessment Worksheet"
+  ],
+  "totalConcerns": 47
+}
