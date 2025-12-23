@@ -216,17 +216,17 @@ export default function SoilHealthAssessmentPage() {
   const updateIndicator = (indicatorId: string, result: 'meets' | 'does_not_meet' | 'unable_to_assess', notes?: string) => {
     if (!assessment) return
     
-    const existingIndex = assessment.indicators.findIndex(i => i.indicatorId === indicatorId)
+    const existingIndex = assessment.indicators.findIndex(i => i.id === indicatorId)
     const indicator = soilHealthIndicators.find(i => i.id === indicatorId)
     
     if (!indicator) return
 
     const assessedIndicator: AssessedIndicator = {
-      indicatorId,
-      result,
+      ...indicator,
+      meets_criteria: result === 'meets' ? true : result === 'does_not_meet' ? false : null,
       notes: notes || '',
       photos: existingIndex >= 0 ? assessment.indicators[existingIndex].photos : [],
-      confidence: 'medium'
+      assessment_confidence: 'medium'
     }
 
     const newIndicators = [...assessment.indicators]
