@@ -700,7 +700,7 @@ function ReviewDownload({ formData }: any) {
           <div>
             <h4 className="font-semibold text-blue-900 mb-1">Ready to Download</h4>
             <p className="text-sm text-blue-700">
-              Your conservation plan is ready for review. Click "Download Plan" to save it for later reference when working with NRCS planners.
+              Your conservation plan is ready for review. Click &ldquo;Download Plan&rdquo; to save it for later reference when working with NRCS planners.
             </p>
           </div>
         </div>

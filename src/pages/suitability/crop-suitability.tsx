@@ -306,7 +306,7 @@ export default function CropSuitabilityPage() {
                   <div className="border-l-4 pl-4" style={{ borderColor: '#3b82f6' }}>
                     <div className="font-semibold" style={{ color: '#111827' }}>SQ2: Nutrient Retention Capacity</div>
                     <p className="text-sm" style={{ color: '#6b7280' }}>
-                      Assesses the soil's ability to retain and supply nutrients through cation exchange capacity and clay mineralogy.
+                      Assesses the soil&apos;s ability to retain and supply nutrients through cation exchange capacity and clay mineralogy.
                     </p>
                   </div>
                   <div className="border-l-4 pl-4" style={{ borderColor: '#8b5cf6' }}>
