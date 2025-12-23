@@ -153,7 +153,7 @@ function ModuleCard({ module }: { module: Module }) {
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-3">
             <div className="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
-              <IconComponent className="w-8 h-8" strokeWidth={2} />
+              <IconComponent className="w-8 h-8" />
             </div>
           </div>
           <h3 className="text-lg font-bold">{module.title}</h3>
