@@ -198,7 +198,7 @@ export default function CropSuitabilityPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <CheckCircle className="h-6 w-6" style={{ color: '#16a34a' }} />
                   <h2 className="text-xl font-bold" style={{ color: '#111827' }}>
-                    {result.crop_info.crop_name} - {getInputLevelName(result.crop_info.input_level)}
+                    {result.crop_info.crop_name} - {getInputLevelName(result.crop_info.input_level as InputLevel)}
                   </h2>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -228,7 +228,7 @@ export default function CropSuitabilityPage() {
               {/* SQI Gauges */}
               <div className="rounded-xl shadow-lg p-6" style={{ backgroundColor: 'white', border: '1px solid #dcfce7' }}>
                 <h2 className="text-xl font-bold mb-4" style={{ color: '#111827' }}>Soil Quality Indices</h2>
-                <SQIGauges indices={result.soil_quality_indices} inputLevel={result.crop_info.input_level} />
+                <SQIGauges indices={result.soil_quality_indices} inputLevel={result.crop_info.input_level as InputLevel} />
               </div>
 
               {/* Interpretations */}
@@ -236,7 +236,7 @@ export default function CropSuitabilityPage() {
                 <>
                   <InterpretationPanel 
                     interpretations={result.interpretations} 
-                    inputLevel={result.crop_info.input_level}
+                    inputLevel={result.crop_info.input_level as InputLevel}
                   />
                   <RecommendationsCard recommendations={result.interpretations.recommendations} />
                 </>
