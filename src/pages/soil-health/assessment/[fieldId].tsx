@@ -158,13 +158,13 @@ export default function SoilHealthAssessmentPage() {
     // Calculate analysis
     const concerns = analyzeResourceConcerns(assessment.indicators)
     const score = calculateOverallSoilHealthScore(assessment.indicators)
-    const recommendations = generatePracticeRecommendations(concerns, assessment.soilContext)
+    const recommendations = generatePracticeRecommendations(concerns)
 
     const updatedAssessment = {
       ...assessment,
       resourceConcerns: concerns,
-      overallScore: score,
-      practiceRecommendations: recommendations
+      recommendations: recommendations.map(r => r.practice_name),
+      updatedAt: new Date()
     }
 
     // Save to localStorage
