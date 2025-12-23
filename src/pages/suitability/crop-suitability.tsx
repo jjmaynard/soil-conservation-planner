@@ -54,7 +54,7 @@ export default function CropSuitabilityPage() {
         router.replace('/suitability/crop-suitability', undefined, { shallow: true });
       }
     }
-  }, [router.query]);
+  }, [router.query, router]);
   
   const { result, loading, error, calculate, reset } = useSuitabilityCalculation();
 

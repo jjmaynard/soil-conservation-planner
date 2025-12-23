@@ -701,7 +701,7 @@ export default function PropertyPanel({
   }
 
   // Helper function for property status classification
-  const getPropertyStatus = (value: number, ideal: [number, number]): { status: string; color: string } => {
+  const getPropertyStatus = (value: number, ideal: [number, number]): { status: string; styles: { color: string; backgroundColor: string; borderColor: string } } => {
     const [min, max] = ideal
     const midpoint = (min + max) / 2
     const range = max - min
