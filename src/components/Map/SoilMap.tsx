@@ -250,21 +250,21 @@ export default function SoilMap({
         } else {
           // Create minimal profile for selection mode
           onSoilClick({
-            latitude: lat,
-            longitude: lng,
-            soil_order: '',
-            map_unit: '',
+            id: `select-${lat}-${lng}`,
             coordinates: [lat, lng],
-            depth: selectedDepth,
+            survey_area: '',
+            map_unit: '',
+            soil_order: '',
             properties: {
-              clay_content: 0,
-              sand_content: 0,
-              silt_content: 0,
-              organic_matter: 0,
-              ph: 0,
-              cec: 0,
-              bulk_density: 0,
-              available_water_capacity: 0,
+              [selectedDepth]: {
+                organic_carbon: 0,
+                ph: 0,
+                bulk_density: 0,
+                texture_class: '',
+                clay_percent: 0,
+                sand_percent: 0,
+                silt_percent: 0,
+              },
             },
           })
         }
