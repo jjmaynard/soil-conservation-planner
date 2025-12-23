@@ -425,389 +425,7 @@ export default function SoilHealthAssessmentPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <MapPin className="w-4 h-4 inline mr-2" />
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.location || ''}
-                    onChange={(e) => updateContextField('location', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Field location or coordinates"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Field/CMU
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.fieldCMU || ''}
-                    onChange={(e) => updateContextField('fieldCMU', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Field or Conservation Management Unit ID"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tract Number
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.tractNumber || ''}
-                    onChange={(e) => updateContextField('tractNumber', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Tract number"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <User className="w-4 h-4 inline mr-2" />
-                    Client/Customer
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.clientCustomer || ''}
-                    onChange={(e) => updateContextField('clientCustomer', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Client or customer name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Plan
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.plan || ''}
-                    onChange={(e) => updateContextField('plan', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Conservation plan or contract number"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Soil Map Units
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.soilMapUnits || ''}
-                    onChange={(e) => updateContextField('soilMapUnits', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="SSURGO soil map unit symbols"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Surface Horizon Texture
-                  </label>
-                  <select
-                    value={assessment.soilContext.surfaceHorizonTexture || ''}
-                    onChange={(e) => updateContextField('surfaceHorizonTexture', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  >
-                    <option value="">Select texture</option>
-                    <option value="sand">Sand</option>
-                    <option value="loamy_sand">Loamy Sand</option>
-                    <option value="sandy_loam">Sandy Loam</option>
-                    <option value="loam">Loam</option>
-                    <option value="silt_loam">Silt Loam</option>
-                    <option value="silt">Silt</option>
-                    <option value="sandy_clay_loam">Sandy Clay Loam</option>
-                    <option value="clay_loam">Clay Loam</option>
-                    <option value="silty_clay_loam">Silty Clay Loam</option>
-                    <option value="sandy_clay">Sandy Clay</option>
-                    <option value="silty_clay">Silty Clay</option>
-                    <option value="clay">Clay</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Soil Type/Series
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.soilType}
-                    onChange={(e) => updateContextField('soilType', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="e.g., Drummer silty clay loam"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Field Name
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.landUse}
-                    onChange={(e) => updateContextField('landUse', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="e.g., North 40, Field 12"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Previous Crop
-                  </label>
-                  <input
-                    type="text"
-                    value={assessment.soilContext.previousCrop}
-                    onChange={(e) => updateContextField('previousCrop', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="e.g., Corn, Soybeans"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Droplets className="w-4 h-4 inline mr-2" />
-                    Soil Moisture Condition
-                  </label>
-                  <select
-                    value={assessment.soilContext.soilMoisture}
-                    onChange={(e) => updateContextField('soilMoisture', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  >
-                    <option value="dry">Dry</option>
-                    <option value="moist">Moist</option>
-                    <option value="field_capacity">Field Capacity (Ideal)</option>
-                    <option value="saturated">Saturated</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Thermometer className="w-4 h-4 inline mr-2" />
-                    Soil Temperature (°F)
-                  </label>
-                  <input
-                    type="number"
-                    value={assessment.soilContext.soilTemp || ''}
-                    onChange={(e) => updateContextField('soilTemp', parseFloat(e.target.value))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder="Optional"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Cloud className="w-4 h-4 inline mr-2" />
-                  Recent Weather Conditions
-                </label>
-                <textarea
-                  value={assessment.soilContext.recentWeather}
-                  onChange={(e) => updateContextField('recentWeather', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  rows={3}
-                  placeholder="Describe recent rainfall, temperature, etc."
-                />
-              </div>
-
-              {/* Management History Section */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Management History Interview</h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  Information gathered through producer interview about field management practices
-                </p>
-                
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      What is your crop rotation?
-                    </label>
-                    <textarea
-                      value={assessment.soilContext.managementHistory?.cropRotation || ''}
-                      onChange={(e) => updateManagementHistory('cropRotation', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      rows={2}
-                      placeholder="e.g., Corn-Soybean rotation, 3-year rotation with wheat"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      What is your tillage system?
-                    </label>
-                    <input
-                      type="text"
-                      value={assessment.soilContext.managementHistory?.tillageSystem || ''}
-                      onChange={(e) => updateManagementHistory('tillageSystem', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="e.g., No-till, Strip-till, Conventional"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      How long have you managed the field this way? (years)
-                    </label>
-                    <input
-                      type="number"
-                      value={assessment.soilContext.managementHistory?.managementDuration || ''}
-                      onChange={(e) => updateManagementHistory('managementDuration', parseInt(e.target.value))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="Number of years"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Number of months soil is covered by live plants or residue
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="12"
-                      value={assessment.soilContext.managementHistory?.coverageMonths || ''}
-                      onChange={(e) => updateManagementHistory('coverageMonths', parseInt(e.target.value))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="0-12 months"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Grazing details (if applicable)
-                    </label>
-                    <textarea
-                      value={assessment.soilContext.managementHistory?.grazingDetails || ''}
-                      onChange={(e) => updateManagementHistory('grazingDetails', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      rows={2}
-                      placeholder="Describe grazing practices, timing, intensity"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Do you use cover crops?
-                    </label>
-                    <textarea
-                      value={assessment.soilContext.managementHistory?.coverCrops || ''}
-                      onChange={(e) => updateManagementHistory('coverCrops', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      rows={2}
-                      placeholder="Species used, timing, management"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      How do you terminate cover crops?
-                    </label>
-                    <input
-                      type="text"
-                      value={assessment.soilContext.managementHistory?.coverCropTermination || ''}
-                      onChange={(e) => updateManagementHistory('coverCropTermination', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="e.g., Herbicide, Rolling/crimping, Winterkill"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Pest management approach
-                    </label>
-                    <input
-                      type="text"
-                      value={assessment.soilContext.managementHistory?.pestManagement || ''}
-                      onChange={(e) => updateManagementHistory('pestManagement', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="IPM, conventional, organic, etc."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nutrient management approach
-                    </label>
-                    <input
-                      type="text"
-                      value={assessment.soilContext.managementHistory?.nutrientManagement || ''}
-                      onChange={(e) => updateManagementHistory('nutrientManagement', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="e.g., Soil test based, manure, commercial fertilizer"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Irrigation practices (if applicable)
-                    </label>
-                    <input
-                      type="text"
-                      value={assessment.soilContext.managementHistory?.irrigation || ''}
-                      onChange={(e) => updateManagementHistory('irrigation', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="e.g., Pivot, drip, none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Have you observed ponding or standing water?
-                    </label>
-                    <input
-                      type="text"
-                      value={assessment.soilContext.managementHistory?.ponding || ''}
-                      onChange={(e) => updateManagementHistory('ponding', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="Yes/No, where, when"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Have you had crop emergence problems?
-                    </label>
-                    <input
-                      type="text"
-                      value={assessment.soilContext.managementHistory?.emergenceProblems || ''}
-                      onChange={(e) => updateManagementHistory('emergenceProblems', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="Yes/No, describe issues"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Water management concerns
-                    </label>
-                    <textarea
-                      value={assessment.soilContext.managementHistory?.waterManagement || ''}
-                      onChange={(e) => updateManagementHistory('waterManagement', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      rows={2}
-                      placeholder="Drainage issues, runoff, erosion, etc."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Other observations or concerns
-                    </label>
-                    <textarea
-                      value={assessment.soilContext.managementHistory?.otherObservations || ''}
-                      onChange={(e) => updateManagementHistory('otherObservations', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      rows={3}
-                      placeholder="Any additional information relevant to soil health"
-                    />
-                  </div>
-                </div>
-              </div>
+                {/* Soil Context and Management History fields removed - SoilHealthAssessment type doesn't include soilContext property */}
 
               <button
                 onClick={() => setCurrentStep('physical')}
@@ -837,8 +455,8 @@ export default function SoilHealthAssessmentPage() {
                       key={indicator.id} 
                       className="rounded-lg p-4 transition-all"
                       style={{
-                        backgroundColor: status?.result === 'meets' ? '#f0fdf4' : 
-                                       status?.result === 'does_not_meet' ? '#fef2f2' : 
+                        backgroundColor: status?.meets_criteria === true ? '#f0fdf4' : 
+                                       status?.meets_criteria === false ? '#fef2f2' : 
                                        '#ffffff',
                         border: isHighPriority ? '2px solid #fbbf24' : '1px solid #e5e7eb',
                         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
@@ -854,7 +472,7 @@ export default function SoilHealthAssessmentPage() {
                                 color: '#16a34a'
                               }}
                             >
-                              {getIndicatorIcon(indicator.icon)}
+                              {getIndicatorIcon(indicator.icon || '')}
                             </span>
                             {indicator.name}
                             {isHighPriority && (
@@ -896,9 +514,9 @@ export default function SoilHealthAssessmentPage() {
                           onClick={() => updateIndicator(indicator.id, 'meets')}
                           className="flex-1 px-4 py-2 rounded-lg transition-colors"
                           style={{
-                            backgroundColor: status?.result === 'meets' ? '#16a34a' : '#ffffff',
-                            color: status?.result === 'meets' ? '#ffffff' : '#374151',
-                            border: status?.result === 'meets' ? '1px solid #16a34a' : '1px solid #d1d5db'
+                            backgroundColor: status?.meets_criteria === true ? '#16a34a' : '#ffffff',
+                            color: status?.meets_criteria === true ? '#ffffff' : '#374151',
+                            border: status?.meets_criteria === true ? '1px solid #16a34a' : '1px solid #d1d5db'
                           }}
                         >
                           <CheckCircle2 className="w-4 h-4 inline mr-2" />
@@ -908,9 +526,9 @@ export default function SoilHealthAssessmentPage() {
                           onClick={() => updateIndicator(indicator.id, 'does_not_meet')}
                           className="flex-1 px-4 py-2 rounded-lg transition-colors"
                           style={{
-                            backgroundColor: status?.result === 'does_not_meet' ? '#dc2626' : '#ffffff',
-                            color: status?.result === 'does_not_meet' ? '#ffffff' : '#374151',
-                            border: status?.result === 'does_not_meet' ? '1px solid #dc2626' : '1px solid #d1d5db'
+                            backgroundColor: status?.meets_criteria === false ? '#dc2626' : '#ffffff',
+                            color: status?.meets_criteria === false ? '#ffffff' : '#374151',
+                            border: status?.meets_criteria === false ? '1px solid #dc2626' : '1px solid #d1d5db'
                           }}
                         >
                           <AlertCircle className="w-4 h-4 inline mr-2" />
@@ -920,9 +538,9 @@ export default function SoilHealthAssessmentPage() {
                           onClick={() => updateIndicator(indicator.id, 'unable_to_assess')}
                           className="flex-1 px-4 py-2 rounded-lg transition-colors"
                           style={{
-                            backgroundColor: status?.result === 'unable_to_assess' ? '#4b5563' : '#ffffff',
-                            color: status?.result === 'unable_to_assess' ? '#ffffff' : '#374151',
-                            border: status?.result === 'unable_to_assess' ? '1px solid #4b5563' : '1px solid #d1d5db'
+                            backgroundColor: status?.meets_criteria === null ? '#4b5563' : '#ffffff',
+                            color: status?.meets_criteria === null ? '#ffffff' : '#374151',
+                            border: status?.meets_criteria === null ? '1px solid #4b5563' : '1px solid #d1d5db'
                           }}
                         >
                           Unable to Assess
@@ -936,7 +554,7 @@ export default function SoilHealthAssessmentPage() {
                           </label>
                           <textarea
                             value={status.notes}
-                            onChange={(e) => updateIndicator(indicator.id, status.result, e.target.value)}
+                            onChange={(e) => updateIndicator(indicator.id, status.meets_criteria, e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             rows={2}
                             placeholder="Add any observations or notes..."
@@ -985,8 +603,8 @@ export default function SoilHealthAssessmentPage() {
                       key={indicator.id} 
                       className="rounded-lg p-4 transition-all"
                       style={{
-                        backgroundColor: status?.result === 'meets' ? '#f0fdf4' : 
-                                       status?.result === 'does_not_meet' ? '#fef2f2' : 
+                        backgroundColor: status?.meets_criteria === true ? '#f0fdf4' : 
+                                       status?.meets_criteria === false ? '#fef2f2' : 
                                        '#ffffff',
                         border: isHighPriority ? '2px solid #fbbf24' : '1px solid #e5e7eb',
                         boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
@@ -1002,7 +620,7 @@ export default function SoilHealthAssessmentPage() {
                                 color: '#7c3aed'
                               }}
                             >
-                              {getIndicatorIcon(indicator.icon)}
+                              {getIndicatorIcon(indicator.icon || '')}
                             </span>
                             {indicator.name}
                             {isHighPriority && (
@@ -1044,9 +662,9 @@ export default function SoilHealthAssessmentPage() {
                           onClick={() => updateIndicator(indicator.id, 'meets')}
                           className="flex-1 px-4 py-2 rounded-lg transition-colors"
                           style={{
-                            backgroundColor: status?.result === 'meets' ? '#16a34a' : '#ffffff',
-                            color: status?.result === 'meets' ? '#ffffff' : '#374151',
-                            border: status?.result === 'meets' ? '1px solid #16a34a' : '1px solid #d1d5db'
+                            backgroundColor: status?.meets_criteria === true ? '#16a34a' : '#ffffff',
+                            color: status?.meets_criteria === true ? '#ffffff' : '#374151',
+                            border: status?.meets_criteria === true ? '1px solid #16a34a' : '1px solid #d1d5db'
                           }}
                         >
                           <CheckCircle2 className="w-4 h-4 inline mr-2" />
@@ -1056,9 +674,9 @@ export default function SoilHealthAssessmentPage() {
                           onClick={() => updateIndicator(indicator.id, 'does_not_meet')}
                           className="flex-1 px-4 py-2 rounded-lg transition-colors"
                           style={{
-                            backgroundColor: status?.result === 'does_not_meet' ? '#dc2626' : '#ffffff',
-                            color: status?.result === 'does_not_meet' ? '#ffffff' : '#374151',
-                            border: status?.result === 'does_not_meet' ? '1px solid #dc2626' : '1px solid #d1d5db'
+                            backgroundColor: status?.meets_criteria === false ? '#dc2626' : '#ffffff',
+                            color: status?.meets_criteria === false ? '#ffffff' : '#374151',
+                            border: status?.meets_criteria === false ? '1px solid #dc2626' : '1px solid #d1d5db'
                           }}
                         >
                           <AlertCircle className="w-4 h-4 inline mr-2" />
@@ -1068,9 +686,9 @@ export default function SoilHealthAssessmentPage() {
                           onClick={() => updateIndicator(indicator.id, 'unable_to_assess')}
                           className="flex-1 px-4 py-2 rounded-lg transition-colors"
                           style={{
-                            backgroundColor: status?.result === 'unable_to_assess' ? '#4b5563' : '#ffffff',
-                            color: status?.result === 'unable_to_assess' ? '#ffffff' : '#374151',
-                            border: status?.result === 'unable_to_assess' ? '1px solid #4b5563' : '1px solid #d1d5db'
+                            backgroundColor: status?.meets_criteria === null ? '#4b5563' : '#ffffff',
+                            color: status?.meets_criteria === null ? '#ffffff' : '#374151',
+                            border: status?.meets_criteria === null ? '1px solid #4b5563' : '1px solid #d1d5db'
                           }}
                         >
                           Unable to Assess
@@ -1084,7 +702,7 @@ export default function SoilHealthAssessmentPage() {
                           </label>
                           <textarea
                             value={status.notes}
-                            onChange={(e) => updateIndicator(indicator.id, status.result, e.target.value)}
+                            onChange={(e) => updateIndicator(indicator.id, status.meets_criteria, e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             rows={2}
                             placeholder="Add any observations or notes..."
@@ -1265,3 +883,4 @@ export default function SoilHealthAssessmentPage() {
     </>
   )
 }
+
