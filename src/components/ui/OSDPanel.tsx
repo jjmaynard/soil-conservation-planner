@@ -223,7 +223,12 @@ function InterpretationsContent({ components }: { components: any[] }) {
   return (
     <div className="space-y-4">
       {components.map((component, idx) => {
-        const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+        const colors = [
+          'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+          'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+          'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+          'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+        ]
         const bgColor = component.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
 
         // Extract hydrology data

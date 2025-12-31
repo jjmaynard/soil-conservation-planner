@@ -582,8 +582,21 @@ function ComponentDetailsSection({
 }) {
   const { osdData, isLoading: osdLoading } = useOSDData(comp.compname, true)
   
-  // Use the same color assignment logic as Map Unit Composition
-  const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+  // Use the same color assignment logic as Map Unit Composition - 12 unique colors
+  const colors = [
+    'var(--color-forest-600)',   // Green
+    'var(--color-ocean-500)',    // Blue
+    'var(--color-amber-500)',    // Orange
+    'var(--color-lavender-600)', // Purple
+    'var(--color-copper-500)',   // Brown
+    'var(--color-sunset-500)',   // Red-orange
+    'var(--color-sky-500)',      // Light blue
+    'var(--color-moss-600)',     // Olive
+    'var(--color-clay-600)',     // Red
+    'var(--color-sage-600)',     // Gray-green
+    'var(--color-earth-500)',    // Tan
+    'var(--color-slate-600)'     // Gray-blue
+  ]
   const bgColor = colors[idx % colors.length]
   
   return (
@@ -1207,7 +1220,12 @@ export default function PropertyPanel({
                             {ssurgoData.components
                               .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                               .map((comp, idx) => {
-                                const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+                                const colors = [
+                                  'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+                                  'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+                                  'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+                                  'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+                                ]
                                 const bgColor = colors[idx % colors.length]
 
                                 return (
@@ -1230,7 +1248,12 @@ export default function PropertyPanel({
                           {ssurgoData.components
                             .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                             .map((comp, idx) => {
-                              const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+                              const colors = [
+                                'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+                                'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+                                'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+                                'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+                              ]
                               const bgColor = colors[idx % colors.length]
 
                               return (
@@ -1251,7 +1274,12 @@ export default function PropertyPanel({
                           <RechartsPieChart width={440} height={300}>
                             <Pie
                               data={ssurgoData.components.map((comp, idx) => {
-                                const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+                                const colors = [
+                                  'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+                                  'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+                                  'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+                                  'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+                                ]
                                 return {
                                   name: comp.compname,
                                   value: Number(comp.comppct_r) || 0,
@@ -1270,7 +1298,12 @@ export default function PropertyPanel({
                         {/* Legend */}
                         <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
                           {ssurgoData.components.map((comp, idx) => {
-                            const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+                            const colors = [
+                              'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+                              'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+                              'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+                              'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+                            ]
                             const bgColor = colors[idx % colors.length]
 
                             return (
@@ -1798,7 +1831,12 @@ export default function PropertyPanel({
                       {ssurgoData.components
                         .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                         .map((comp, idx) => {
-                          const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+                          const colors = [
+                            'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+                            'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+                            'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+                            'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+                          ]
                           const bgColor = colors[idx % colors.length]
 
                           return (
@@ -1821,7 +1859,12 @@ export default function PropertyPanel({
                     {ssurgoData.components
                       .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                       .map((comp, idx) => {
-                        const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+                        const colors = [
+                          'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+                          'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+                          'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+                          'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+                        ]
                         const bgColor = colors[idx % colors.length]
 
                         return (
@@ -1842,7 +1885,12 @@ export default function PropertyPanel({
                     <RechartsPieChart width={440} height={300}>
                       <Pie
                         data={ssurgoData.components.map((comp, idx) => {
-                          const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+                          const colors = [
+                            'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+                            'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+                            'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+                            'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+                          ]
                           return {
                             name: comp.compname,
                             value: Number(comp.comppct_r) || 0,
@@ -1859,7 +1907,12 @@ export default function PropertyPanel({
                   </div>                  {/* Legend */}
                   <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
                     {ssurgoData.components.map((comp, idx) => {
-                      const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
+                      const colors = [
+                        'var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)',
+                        'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)',
+                        'var(--color-sky-500)', 'var(--color-moss-600)', 'var(--color-clay-600)',
+                        'var(--color-sage-600)', 'var(--color-earth-500)', 'var(--color-slate-600)'
+                      ]
                       const bgColor = colors[idx % colors.length]
 
                       return (
