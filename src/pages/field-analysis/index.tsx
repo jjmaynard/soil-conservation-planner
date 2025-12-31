@@ -478,7 +478,7 @@ export default function FieldAnalysisLanding() {
             searchQuery={searchQuery}
             showCLULayer={showCLULayer}
             onFieldSelected={handleFieldSelected}
-            onMapReady={(controls) => setMapControls(controls)}
+            onMapReady={(controls: { panToLocation?: (lat: number, lng: number, zoom?: number) => void }) => setMapControls(controls)}
           />
         </div>
       </div>
