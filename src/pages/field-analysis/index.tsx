@@ -2,23 +2,24 @@
 
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { Search, Map as MapIcon, Edit3, Upload, ChevronRight, Zap, Eye, Pencil, FileUp, ArrowLeft } from 'lucide-react'
+import type { FieldMapRef } from '#components/FieldAnalysis/FieldMap'
 
 const FieldMap = dynamic(() => import('#components/FieldAnalysis/FieldMap'), {
   ssr: false,
   loading: () => (
     <div className="bg-gray-100 flex h-full w-full items-center justify-center">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 mx-auto mb-4" style={{ border: '3px solid #e5e7eb', borderTopColor: '#16a34a' }}></div>
+        <div className="animate-spin rounded-full h-12 w-12 mx-auto mb-4" style={{ border: '3px solid #e5e7eb', borderTopColor: 'var(--color-conservation)' }}></div>
         <p className="text-gray-600">Loading map...</p>
       </div>
     </div>
   ),
-})
+}) as any
 
 type SelectionMethod = 'search' | 'browse' | 'draw' | 'upload' | null
 
@@ -29,6 +30,10 @@ export default function FieldAnalysisLanding() {
   const [showCLULayer, setShowCLULayer] = useState(true)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isFromPlanningWizard, setIsFromPlanningWizard] = useState(false)
+  const [searchSuggestions, setSearchSuggestions] = useState<any[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const [mapControls, setMapControls] = useState<{ panToLocation?: (lat: number, lng: number, zoom?: number) => void }>({})
 
   // Check if we're coming from planning wizard
   useEffect(() => {
@@ -95,11 +100,94 @@ export default function FieldAnalysisLanding() {
     }
   }
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      // TODO: Implement geocoding search
-      console.log('Searching for:', searchQuery)
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return
+
+    setIsSearching(true)
+    setSearchSuggestions([])
+
+    try {
+      // Check if input is coordinates (lat,lng format)
+      const coordMatch = searchQuery.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/)
+      if (coordMatch) {
+        const lat = parseFloat(coordMatch[1])
+        const lng = parseFloat(coordMatch[2])
+        if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+          // Pan map to coordinates
+          if (mapControls.panToLocation) {
+            mapControls.panToLocation(lat, lng, 15)
+          }
+          setSearchQuery('')
+          setShowSuggestions(false)
+          setIsSearching(false)
+          return
+        }
+      }
+
+      // Use Nominatim (OpenStreetMap) geocoding service
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=us&limit=5`
+      )
+      
+      if (response.ok) {
+        const results = await response.json()
+        if (results.length > 0) {
+          setSearchSuggestions(results)
+          setShowSuggestions(true)
+        }
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error)
+    } finally {
+      setIsSearching(false)
     }
+  }
+
+  const handleSuggestionClick = (result: any) => {
+    const lat = parseFloat(result.lat)
+    const lng = parseFloat(result.lon)
+    
+    // Log the result to see what fields are available
+    console.log('Search result object:', result)
+    console.log('Type:', result.type, 'Class:', result.class, 'OSM Type:', result.osm_type)
+    
+    // Determine appropriate zoom level based on place type
+    let zoom = 15 // Default for addresses and specific locations
+    
+    // Check for state/boundary (administrative boundaries)
+    if (result.class === 'boundary' && result.type === 'administrative') {
+      // Use address rank to distinguish state vs county vs other
+      if (result.addresstype === 'state' || (result.address?.state && !result.address?.city)) {
+        zoom = 7 // State level
+      } else if (result.addresstype === 'county') {
+        zoom = 10 // County level
+      } else {
+        zoom = 12 // Other administrative
+      }
+    }
+    // Check for cities/towns
+    else if (result.class === 'place' && (result.type === 'city' || result.type === 'town' || result.type === 'village')) {
+      zoom = 13 // City/town level
+    }
+    // Check for neighborhoods, suburbs
+    else if (result.class === 'place' && (result.type === 'suburb' || result.type === 'neighbourhood')) {
+      zoom = 14 // Neighborhood level
+    }
+
+    console.log('Panning to location:', lat, lng, zoom)
+    console.log('Map controls available:', !!mapControls.panToLocation)
+    
+    // Pan map to location
+    if (mapControls.panToLocation) {
+      console.log('Calling panToLocation')
+      mapControls.panToLocation(lat, lng, zoom)
+    } else {
+      console.warn('Map controls not available yet')
+    }
+
+    setSearchQuery('')
+    setShowSuggestions(false)
+    setSearchSuggestions([])
   }
 
   return (
@@ -117,7 +205,7 @@ export default function FieldAnalysisLanding() {
         {isFromPlanningWizard && (
           <div 
             className="px-6 py-2 text-white flex items-center justify-between"
-            style={{ background: 'linear-gradient(to right, #3b82f6, #2563eb)' }}
+            style={{ background: 'linear-gradient(to right, var(--color-ocean-600), var(--color-ocean-700))' }}
           >
             <div className="flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" />
@@ -130,7 +218,7 @@ export default function FieldAnalysisLanding() {
                 sessionStorage.removeItem('returnToPlanningWizard')
                 router.push('/conservation/planning-wizard')
               }}
-              className="text-sm underline hover:text-blue-100"
+              className="text-sm underline hover:text-ocean-100"
             >
               Cancel & Return
             </button>
@@ -140,12 +228,12 @@ export default function FieldAnalysisLanding() {
         {/* Compact Header */}
         <div 
           className="px-6 py-3 text-white flex-shrink-0"
-          style={{ background: 'linear-gradient(to right, #16a34a, #15803d)' }}
+          style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
         >
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold">Field Analysis</h1>
-              <p className="text-xs" style={{ color: '#dcfce7' }}>
+              <p className="text-xs" style={{ color: 'var(--color-forest-100)' }}>
                 {isFromPlanningWizard 
                   ? 'Click on a field to add it to your conservation plan'
                   : 'Select a field using one of the methods below'
@@ -160,21 +248,21 @@ export default function FieldAnalysisLanding() {
           {/* Method Selector - Top Left */}
           <div 
             className="absolute top-4 left-4 z-[1000] rounded-lg shadow-2xl overflow-hidden"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e5e7eb', maxWidth: '320px' }}
+            style={{ backgroundColor: '#ffffff', border: '2px solid #d1d5db', maxWidth: '320px' }}
           >
             <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
               <h3 className="font-semibold text-gray-900 text-sm">Selection Method</h3>
             </div>
             
             {/* Method Tabs */}
-            <div className="grid grid-cols-4 border-b border-gray-200">
+            <div className="grid grid-cols-4 border-b border-gray-200" style={{ backgroundColor: '#ffffff' }}>
               <button
                 onClick={() => handleMethodSelect('search')}
                 className="px-3 py-2.5 text-xs font-medium transition-colors border-b-2"
                 style={{ 
-                  color: selectionMethod === 'search' ? '#16a34a' : '#6b7280',
-                  borderBottomColor: selectionMethod === 'search' ? '#16a34a' : 'transparent',
-                  backgroundColor: selectionMethod === 'search' ? '#f0fdf4' : 'transparent'
+                  color: selectionMethod === 'search' ? '#1f2937' : '#6b7280',
+                  borderBottomColor: selectionMethod === 'search' ? 'var(--color-conservation)' : 'transparent',
+                  backgroundColor: selectionMethod === 'search' ? '#ffffff' : '#f3f4f6'
                 }}
               >
                 <Search className="w-4 h-4 mx-auto mb-1" />
@@ -184,9 +272,9 @@ export default function FieldAnalysisLanding() {
                 onClick={() => handleMethodSelect('browse')}
                 className="px-3 py-2.5 text-xs font-medium transition-colors border-b-2"
                 style={{ 
-                  color: selectionMethod === 'browse' ? '#2563eb' : '#6b7280',
-                  borderBottomColor: selectionMethod === 'browse' ? '#2563eb' : 'transparent',
-                  backgroundColor: selectionMethod === 'browse' ? '#eff6ff' : 'transparent'
+                  color: selectionMethod === 'browse' ? '#1f2937' : '#6b7280',
+                  borderBottomColor: selectionMethod === 'browse' ? 'var(--color-conservation)' : 'transparent',
+                  backgroundColor: selectionMethod === 'browse' ? '#ffffff' : '#f3f4f6'
                 }}
               >
                 <MapIcon className="w-4 h-4 mx-auto mb-1" />
@@ -196,9 +284,9 @@ export default function FieldAnalysisLanding() {
                 onClick={() => handleMethodSelect('draw')}
                 className="px-3 py-2.5 text-xs font-medium transition-colors border-b-2"
                 style={{ 
-                  color: selectionMethod === 'draw' ? '#d97706' : '#6b7280',
-                  borderBottomColor: selectionMethod === 'draw' ? '#d97706' : 'transparent',
-                  backgroundColor: selectionMethod === 'draw' ? '#fef3c7' : 'transparent'
+                  color: selectionMethod === 'draw' ? '#1f2937' : '#6b7280',
+                  borderBottomColor: selectionMethod === 'draw' ? 'var(--color-conservation)' : 'transparent',
+                  backgroundColor: selectionMethod === 'draw' ? '#ffffff' : '#f3f4f6'
                 }}
               >
                 <Edit3 className="w-4 h-4 mx-auto mb-1" />
@@ -208,9 +296,9 @@ export default function FieldAnalysisLanding() {
                 onClick={() => handleMethodSelect('upload')}
                 className="px-3 py-2.5 text-xs font-medium transition-colors border-b-2"
                 style={{ 
-                  color: selectionMethod === 'upload' ? '#7c3aed' : '#6b7280',
-                  borderBottomColor: selectionMethod === 'upload' ? '#7c3aed' : 'transparent',
-                  backgroundColor: selectionMethod === 'upload' ? '#f3e8ff' : 'transparent'
+                  color: selectionMethod === 'upload' ? '#1f2937' : '#6b7280',
+                  borderBottomColor: selectionMethod === 'upload' ? 'var(--color-conservation)' : 'transparent',
+                  backgroundColor: selectionMethod === 'upload' ? '#ffffff' : '#f3f4f6'
                 }}
               >
                 <Upload className="w-4 h-4 mx-auto mb-1" />
@@ -222,27 +310,72 @@ export default function FieldAnalysisLanding() {
             <div className="p-4">
               {selectionMethod === 'search' && (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-600 mb-2">
-                    Enter CLU ID, tract number, or physical address
+                  <p className="text-sm font-medium text-gray-800 mb-2">
+                    Search by address, city, state, or coordinates
                   </p>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    placeholder="e.g., IA-169-123-001 or 123 Farm Rd"
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                      placeholder='e.g., "Lincoln, NE" or "41.25, -95.95"'
+                      className="w-full px-3 py-2.5 text-sm border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                      style={{ 
+                        backgroundColor: '#ffffff',
+                        color: '#111827',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                      }}
+                    />
+                    
+                    {/* Suggestions dropdown */}
+                    {showSuggestions && searchSuggestions.length > 0 && (
+                      <div 
+                        className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+                      >
+                        {searchSuggestions.map((result, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleSuggestionClick(result)}
+                            className="w-full text-left px-3 py-2.5 border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                          >
+                            <div className="flex items-start gap-2">
+                              <MapIcon className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm truncate text-gray-900">
+                                  {result.display_name.split(',')[0]}
+                                </div>
+                                <div className="text-xs truncate text-gray-600">
+                                  {result.display_name.split(',').slice(1).join(',').trim()}
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
                   <button
                     onClick={handleSearch}
-                    disabled={!searchQuery.trim()}
-                    className="w-full px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50"
-                    style={{ backgroundColor: '#16a34a' }}
+                    disabled={!searchQuery.trim() || isSearching}
+                    className="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-lg transition-all disabled:opacity-50 shadow-sm"
+                    style={{ backgroundColor: 'var(--color-conservation)' }}
+                    onMouseEnter={(e) => {
+                      if (searchQuery.trim() && !isSearching) {
+                        e.currentTarget.style.backgroundColor = 'var(--color-forest-700)'
+                        e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--color-conservation)'
+                      e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                    }}
                   >
-                    Search Location
+                    {isSearching ? 'Searching...' : 'Search Location'}
                   </button>
-                  <div className="flex items-center gap-1 text-xs" style={{ color: '#16a34a' }}>
-                    <Zap className="w-3 h-3" />
+                  <div className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--color-forest-700)' }}>
+                    <Zap className="w-4 h-4" />
                     <span>Fastest method</span>
                   </div>
                 </div>
@@ -263,12 +396,12 @@ export default function FieldAnalysisLanding() {
                     />
                     <span className="text-gray-700">Show CLU Boundaries</span>
                   </label>
-                  <div className="p-3 rounded-lg" style={{ backgroundColor: '#eff6ff' }}>
-                    <p className="text-xs" style={{ color: '#1e40af' }}>
+                  <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-ocean-50)' }}>
+                    <p className="text-xs" style={{ color: 'var(--color-ocean-800)' }}>
                       💡 Zoom in to see field boundaries. Click any field to analyze it.
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 text-xs" style={{ color: '#2563eb' }}>
+                  <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-ocean-700)' }}>
                     <Eye className="w-3 h-3" />
                     <span>Visual & Interactive</span>
                   </div>
@@ -280,17 +413,17 @@ export default function FieldAnalysisLanding() {
                   <p className="text-xs text-gray-600 mb-2">
                     Use drawing tools to create a custom field boundary
                   </p>
-                  <div className="p-3 rounded-lg" style={{ backgroundColor: '#fef3c7', border: '1px solid #fde68a' }}>
-                    <p className="text-xs mb-2" style={{ color: '#92400e' }}>
+                  <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-amber-50)', border: '1px solid var(--color-amber-200)' }}>
+                    <p className="text-xs mb-2" style={{ color: 'var(--color-amber-900)' }}>
                       <strong>Instructions:</strong>
                     </p>
-                    <ol className="text-xs space-y-1" style={{ color: '#92400e' }}>
+                    <ol className="text-xs space-y-1" style={{ color: 'var(--color-amber-900)' }}>
                       <li>1. Click polygon tool on map</li>
                       <li>2. Click points to draw boundary</li>
                       <li>3. Double-click to finish</li>
                     </ol>
                   </div>
-                  <div className="flex items-center gap-1 text-xs" style={{ color: '#d97706' }}>
+                  <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-amber-700)' }}>
                     <Pencil className="w-3 h-3" />
                     <span>Custom & Flexible</span>
                   </div>
@@ -311,7 +444,7 @@ export default function FieldAnalysisLanding() {
                       id="file-upload"
                     />
                     <label htmlFor="file-upload" className="cursor-pointer">
-                      <Upload className="w-8 h-8 mx-auto mb-2" style={{ color: '#7c3aed' }} />
+                      <Upload className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--color-lavender-700)' }} />
                       {uploadedFile ? (
                         <p className="text-xs font-medium text-gray-900">{uploadedFile.name}</p>
                       ) : (
@@ -325,12 +458,12 @@ export default function FieldAnalysisLanding() {
                   {uploadedFile && (
                     <button
                       className="w-full px-4 py-2 text-sm font-medium text-white rounded-lg"
-                      style={{ backgroundColor: '#7c3aed' }}
+                      style={{ backgroundColor: 'var(--color-lavender-700)' }}
                     >
                       Process File
                     </button>
                   )}
-                  <div className="flex items-center gap-1 text-xs" style={{ color: '#7c3aed' }}>
+                  <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-lavender-700)' }}>
                     <FileUp className="w-3 h-3" />
                     <span>Shapefile, KML, GeoJSON</span>
                   </div>
@@ -345,6 +478,7 @@ export default function FieldAnalysisLanding() {
             searchQuery={searchQuery}
             showCLULayer={showCLULayer}
             onFieldSelected={handleFieldSelected}
+            onMapReady={(controls) => setMapControls(controls)}
           />
         </div>
       </div>

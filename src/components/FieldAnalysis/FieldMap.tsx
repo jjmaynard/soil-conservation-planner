@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw/dist/leaflet.draw.css'
@@ -27,9 +27,14 @@ interface FieldMapProps {
   showCLULayer?: boolean
   onFieldSelected?: (field: any) => void
   onLayerToggle?: (layerId: string) => void
+  onMapReady?: (controls: { panToLocation: (lat: number, lng: number, zoom?: number) => void }) => void
 }
 
-export default function FieldMap({
+export interface FieldMapRef {
+  panToLocation: (lat: number, lng: number, zoom?: number) => void
+}
+
+const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   mode,
   searchQuery,
   fieldData,
@@ -38,7 +43,8 @@ export default function FieldMap({
   showCLULayer = false,
   onFieldSelected,
   onLayerToggle,
-}: FieldMapProps) {
+  onMapReady,
+}, ref) => {
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
@@ -48,6 +54,42 @@ export default function FieldMap({
   const [polygonArea, setPolygonArea] = useState<number>(0)
   const [validationError, setValidationError] = useState<string>('')
   const [mapInitialized, setMapInitialized] = useState(false)
+
+  // Expose methods to parent component via ref
+  useImperativeHandle(ref, () => ({
+    panToLocation: (lat: number, lng: number, zoom: number = 14) => {
+      console.log('panToLocation called with:', lat, lng, zoom)
+      console.log('mapRef.current exists:', !!mapRef.current)
+      
+      if (mapRef.current) {
+        console.log('Setting view on map')
+        mapRef.current.setView([lat, lng], zoom, { animate: true })
+        
+        // Add a temporary marker at the location
+        const marker = L.marker([lat, lng], {
+          icon: L.icon({
+            iconUrl: '/leaflet/marker-icon.png',
+            iconRetinaUrl: '/leaflet/marker-icon-2x.png',
+            shadowUrl: '/leaflet/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+          })
+        }).addTo(mapRef.current)
+        
+        console.log('Marker added')
+        
+        // Remove marker after 5 seconds
+        setTimeout(() => {
+          if (mapRef.current) {
+            mapRef.current.removeLayer(marker)
+            console.log('Marker removed')
+          }
+        }, 5000)
+      } else {
+        console.warn('Map not initialized yet')
+      }
+    }
+  }))
 
   // Initialize map once
   useEffect(() => {
@@ -118,13 +160,40 @@ export default function FieldMap({
     mapRef.current = map
     setMapInitialized(true)
 
+    // Expose map controls to parent component
+    if (onMapReady) {
+      onMapReady({
+        panToLocation: (lat: number, lng: number, zoom: number = 14) => {
+          console.log('panToLocation called with:', lat, lng, zoom)
+          map.setView([lat, lng], zoom, { animate: true })
+          
+          // Add a temporary marker at the location
+          const marker = L.marker([lat, lng], {
+            icon: L.icon({
+              iconUrl: '/leaflet/marker-icon.png',
+              iconRetinaUrl: '/leaflet/marker-icon-2x.png',
+              shadowUrl: '/leaflet/marker-shadow.png',
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+            })
+          }).addTo(map)
+          
+          // Remove marker after 5 seconds
+          setTimeout(() => {
+            map.removeLayer(marker)
+          }, 5000)
+        }
+      })
+    }
+
     // Cleanup
     return () => {
       map.remove()
       mapRef.current = null
       setMapInitialized(false)
     }
-  }, []) // Only run once on mount
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // onMapReady is intentionally not in deps - we only want to initialize once
 
   // Handle drawing controls based on mode
   useEffect(() => {
@@ -542,4 +611,8 @@ export default function FieldMap({
       )}
     </div>
   )
-}
+})
+
+FieldMap.displayName = 'FieldMap'
+
+export default FieldMap
