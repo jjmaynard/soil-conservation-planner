@@ -82,12 +82,12 @@ export default function CropSuitabilityPage() {
         <meta name="description" content="Evaluate soil quality and suitability for crop production using GAEZ methodology" />
       </Head>
 
-      <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, #f9fafb, #f0fdf4, #dcfce7)' }}>
+      <div className="min-h-screen" style={{ background: 'linear-gradient(to bottom right, var(--color-surface), var(--color-forest-50), var(--color-forest-100))' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div 
             className="text-white shadow-lg rounded-lg my-6 mb-8"
-            style={{ background: 'linear-gradient(to right, #16a34a, #15803d, #166534)' }}
+            style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700), var(--color-forest-800))' }}
           >
             <div className="px-6 py-6">
               <div className="flex items-center gap-3 mb-2">
@@ -106,7 +106,7 @@ export default function CropSuitabilityPage() {
                   </button>
                 </div>
               </div>
-              <p className="text-sm" style={{ color: '#dcfce7' }}>
+              <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
                 Evaluate soil quality and suitability for crop production with detailed soil quality indices
               </p>
             </div>
@@ -181,11 +181,11 @@ export default function CropSuitabilityPage() {
 
           {/* Error Display */}
           {error && (
-            <div className="border rounded-lg p-4 mb-8 flex items-start gap-3" style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca' }}>
-              <AlertCircle className="h-5 w-5 flex-shrink-0" style={{ color: '#dc2626' }} />
+            <div className="alert-error rounded-lg p-4 mb-8 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 flex-shrink-0" />
               <div>
-                <div className="font-semibold" style={{ color: '#991b1b' }}>Error</div>
-                <div className="text-sm mt-1" style={{ color: '#b91c1c' }}>{error}</div>
+                <div className="font-semibold">Error</div>
+                <div className="text-sm mt-1">{error}</div>
               </div>
             </div>
           )}

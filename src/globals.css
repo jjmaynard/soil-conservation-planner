@@ -2,9 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import custom color system */
+@import '../Property_Panel_Guide/web_colors/color-system.css';
+
 /* Set default body background to cream */
 body {
-  background-color: #F8F4ED;
+  background-color: var(--color-background);
 }
 
 /* FIXME: find a way to reset styles of leaflet in components */

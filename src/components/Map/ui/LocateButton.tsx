@@ -33,7 +33,7 @@ export const LocateButton = () => {
       <button
         type="button"
         style={{ zIndex: 400 }}
-        className="button absolute top-16 right-3 rounded bg-white p-2 text-dark shadow-md"
+        className="button absolute top-16 right-3 rounded bg-surface p-2 text-ocean-700 shadow-md hover:bg-ocean-50 transition-colors border border-border"
         onClick={() => handleClick()}
       >
         <LocateFixed size={AppConfig.ui.mapIconSize} />

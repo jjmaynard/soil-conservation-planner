@@ -174,16 +174,16 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                           return (
                             <div
                               key={subChar}
-                              className="bg-amber-50 border border-amber-200 rounded p-3 mb-3"
+                              className="alert-warning rounded p-3 mb-3"
                             >
                               <div className="flex items-start gap-2">
-                                <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                                 <div className="flex-1">
-                                  <h6 className="font-semibold text-amber-900 mb-1">
+                                  <h6 className="font-semibold mb-1">
                                     {subInfo.name}
                                   </h6>
-                                  <p className="text-sm text-amber-800 mb-2">{subInfo.description}</p>
-                                  <p className="text-sm text-amber-800">
+                                  <p className="text-sm mb-2">{subInfo.description}</p>
+                                  <p className="text-sm">
                                     <strong>Management:</strong> {subInfo.management}
                                   </p>
                                 </div>
@@ -193,8 +193,8 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                         })}
 
                       {/* Recommendations */}
-                      <div className="bg-green-50 border border-green-200 rounded p-3">
-                        <h6 className="font-semibold text-green-900 mb-2 flex items-center gap-2">
+                      <div className="alert-success rounded p-3">
+                        <h6 className="font-semibold mb-2 flex items-center gap-2">
                           <CheckCircle className="h-4 w-4" />
                           Recommended Practices
                         </h6>
@@ -202,8 +202,8 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                           {LAND_CAPABILITY_INTERPRETATIONS.classes[
                             nonIrrigatedClass
                           ].recommendations.map((rec: string, idx: number) => (
-                            <li key={idx} className="text-sm text-green-800 flex items-start gap-2">
-                              <span className="text-green-600 mt-0.5">•</span>
+                            <li key={idx} className="text-sm flex items-start gap-2">
+                              <span className="mt-0.5">•</span>
                               <span>{rec}</span>
                             </li>
                           ))}
@@ -249,8 +249,8 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                         <strong>Description:</strong>{' '}
                         {LAND_CAPABILITY_INTERPRETATIONS.classes[irrigatedClass].description}
                       </p>
-                      <p className="text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded p-2">
-                        <Droplets className="h-4 w-4 inline mr-1" />
+                      <p className="alert-info rounded p-2 text-sm flex items-center gap-1">
+                        <Droplets className="h-4 w-4" />
                         <strong>With Irrigation:</strong>{' '}
                         {LAND_CAPABILITY_INTERPRETATIONS.classes[irrigatedClass].farmingAdvice}
                       </p>
@@ -317,13 +317,13 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                     </p>
                   </div>
 
-                  <div className="mt-3 bg-blue-50 border border-blue-200 rounded p-3">
-                    <h6 className="font-semibold text-blue-900 mb-2">Recommendations</h6>
+                  <div className="mt-3 alert-info rounded p-3">
+                    <h6 className="font-semibold mb-2">Recommendations</h6>
                     <ul className="space-y-1">
                       {HYDROLOGIC_GROUP_INTERPRETATIONS[hydroGroup].recommendations.map(
                         (rec: string, idx: number) => (
-                          <li key={idx} className="text-sm text-blue-800 flex items-start gap-2">
-                            <span className="text-blue-600 mt-0.5">•</span>
+                          <li key={idx} className="text-sm flex items-start gap-2">
+                            <span className="mt-0.5">•</span>
                             <span>{rec}</span>
                           </li>
                         )
@@ -373,19 +373,19 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                 <div
                   className={`rounded-lg border p-4 ${
                     hydricRating.toLowerCase().includes('yes')
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-gray-50 border-gray-200'
+                      ? 'alert-info'
+                      : 'bg-surface border-border'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <Info className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                    <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
                     <div>
-                      <h6 className="font-semibold text-gray-900 mb-1">Hydric Soil Status</h6>
-                      <p className="text-sm text-gray-700">
+                      <h6 className="font-semibold mb-1">Hydric Soil Status</h6>
+                      <p className="text-sm">
                         <strong>Rating:</strong> {hydricRating}
                       </p>
                       {hydricRating.toLowerCase().includes('yes') && (
-                        <p className="text-sm text-blue-700 mt-2">
+                        <p className="text-sm mt-2">
                           This soil meets the definition of a hydric soil and may be subject to wetland
                           regulations. Consult with local NRCS office before planning land use changes.
                         </p>
@@ -492,12 +492,12 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
                 )}
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded p-3">
-                <h6 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+              <div className="alert-caution rounded p-3">
+                <h6 className="font-semibold mb-2 flex items-center gap-2">
                   <Info className="h-4 w-4" />
                   Conservation Priority
                 </h6>
-                <p className="text-sm text-amber-800">
+                <p className="text-sm">
                   {tFactor && tFactor > 3
                     ? 'This soil has a high tolerance for erosion but conservation practices are still recommended.'
                     : tFactor && tFactor <= 3
@@ -511,10 +511,10 @@ export function SoilInterpretationsComponent({ component, componentIndex }: Soil
       )}
 
       {/* Info Footer */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <div className="alert-info rounded-lg p-3">
         <div className="flex items-start gap-2">
-          <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-xs text-blue-800">
+          <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div className="text-xs">
             <p className="font-semibold mb-1">Data Source</p>
             <p>
               USDA-NRCS Soil Survey component interpretations. For detailed management recommendations

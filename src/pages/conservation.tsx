@@ -178,19 +178,19 @@ export default function ConservationPracticesModule() {
 
   const getCategoryColor = (category: string) => {
     const colorMap: Record<string, string> = {
-      'Soil Health': '#16a34a',
-      'Water Quality': '#3b82f6',
-      'Forestry': '#059669',
-      'Grazing Management': '#ca8a04',
-      'Soil Erosion Control': '#f97316',
-      'Water Management': '#06b6d4',
-      'Irrigation': '#6366f1',
-      'Agroforestry': '#16a34a',
-      'Infrastructure': '#64748b',
-      'Waste Management': '#6b7280',
-      'Horticulture': '#f43f5e',
+      'Soil Health': 'var(--color-forest-600)',
+      'Water Quality': 'var(--color-ocean-600)',
+      'Forestry': 'var(--color-forest-700)',
+      'Grazing Management': 'var(--color-amber-600)',
+      'Soil Erosion Control': 'var(--color-sunset-600)',
+      'Water Management': 'var(--color-sky-600)',
+      'Irrigation': 'var(--color-ocean-700)',
+      'Agroforestry': 'var(--color-forest-600)',
+      'Infrastructure': 'var(--color-slate-600)',
+      'Waste Management': 'var(--color-slate-700)',
+      'Horticulture': 'var(--color-copper-600)',
     }
-    return colorMap[category] || '#6b7280'
+    return colorMap[category] || 'var(--color-slate-700)'
   }
 
   return (
@@ -200,33 +200,33 @@ export default function ConservationPracticesModule() {
         <meta name="description" content="Comprehensive NRCS conservation practice standards, recommendations, and implementation guidance" />
       </Head>
 
-      <div className="min-h-screen" style={{ backgroundColor: '#f9fafb' }}>
+      <div className="min-h-screen bg-background">
         {/* Header */}
         <div 
           className="text-white shadow-lg"
-          style={{ background: 'linear-gradient(to right, #16a34a, #15803d, #166534)' }}
+          style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-conservation-dark), var(--color-forest-800))' }}
         >
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex items-center gap-3 mb-2">
               <Sprout className="h-8 w-8" />
               <h1 className="text-3xl font-bold">Conservation Practices</h1>
             </div>
-            <p className="text-sm" style={{ color: '#dcfce7' }}>
+            <p className="text-sm text-conservation-light">
               NRCS Practice Standards Database • {allNRCSPractices.length} practices available
             </p>
           </div>
         </div>
 
         {/* View Mode Tabs */}
-        <div className="bg-white border-b shadow-sm" style={{ borderColor: '#e5e7eb' }}>
+        <div className="bg-surface border-b shadow-sm border-border">
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex gap-2 overflow-x-auto">
               <button
                 onClick={() => setViewMode('database')}
                 className="px-6 py-4 font-medium text-sm whitespace-nowrap border-b-2 transition-colors"
                 style={{
-                  color: viewMode === 'database' ? '#16a34a' : '#6b7280',
-                  borderColor: viewMode === 'database' ? '#16a34a' : 'transparent'
+                  color: viewMode === 'database' ? 'var(--color-conservation)' : 'var(--color-text-secondary)',
+                  borderColor: viewMode === 'database' ? 'var(--color-conservation)' : 'transparent'
                 }}
               >
                 <div className="flex items-center gap-2">
@@ -238,8 +238,8 @@ export default function ConservationPracticesModule() {
                 onClick={() => setViewMode('selector')}
                 className="px-6 py-4 font-medium text-sm whitespace-nowrap border-b-2 transition-colors"
                 style={{
-                  color: viewMode === 'selector' ? '#16a34a' : '#6b7280',
-                  borderColor: viewMode === 'selector' ? '#16a34a' : 'transparent'
+                  color: viewMode === 'selector' ? 'var(--color-conservation)' : 'var(--color-text-secondary)',
+                  borderColor: viewMode === 'selector' ? 'var(--color-conservation)' : 'transparent'
                 }}
               >
                 <div className="flex items-center gap-2">
@@ -251,8 +251,8 @@ export default function ConservationPracticesModule() {
                 onClick={() => setViewMode('resources')}
                 className="px-6 py-4 font-medium text-sm whitespace-nowrap border-b-2 transition-colors"
                 style={{
-                  color: viewMode === 'resources' ? '#16a34a' : '#6b7280',
-                  borderColor: viewMode === 'resources' ? '#16a34a' : 'transparent'
+                  color: viewMode === 'resources' ? 'var(--color-conservation)' : 'var(--color-text-secondary)',
+                  borderColor: viewMode === 'resources' ? 'var(--color-conservation)' : 'transparent'
                 }}
               >
                 <div className="flex items-center gap-2">
@@ -270,29 +270,28 @@ export default function ConservationPracticesModule() {
           {viewMode === 'database' && (
             <div className="space-y-6">
               {/* Search and Filters */}
-              <div className="bg-white rounded-lg shadow-sm p-6 border" style={{ borderColor: '#e5e7eb' }}>
+              <div className="bg-surface rounded-lg shadow-sm p-6 border border-border">
                 <div className="flex flex-col gap-4">
                   {/* Search */}
                   <div className="w-full">
-                    <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
+                    <label className="block text-sm font-medium mb-2 text-text">
                       Search Practices
                     </label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" style={{ color: '#9ca3af' }} />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-text-muted" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search by name, code, or description..."
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg"
-                        style={{ borderColor: '#d1d5db' }}
+                        className="form-input w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-surface text-text focus:border-conservation"
                       />
                     </div>
                   </div>
 
                   {/* Category Browser */}
                   <div>
-                    <label className="block text-sm font-medium mb-3" style={{ color: '#374151' }}>
+                    <label className="block text-sm font-medium mb-3 text-text">
                       Filter by Category
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
@@ -301,29 +300,29 @@ export default function ConservationPracticesModule() {
                         onClick={() => setSelectedCategory('all')}
                         className="p-2.5 rounded-lg border-2 transition-all text-left"
                         style={{
-                          backgroundColor: selectedCategory === 'all' ? '#dcfce7' : '#ffffff',
-                          borderColor: selectedCategory === 'all' ? '#16a34a' : '#e5e7eb'
+                          backgroundColor: selectedCategory === 'all' ? 'var(--color-conservation-light)' : 'var(--color-surface)',
+                          borderColor: selectedCategory === 'all' ? 'var(--color-conservation)' : 'var(--color-border)'
                         }}
                         onMouseEnter={(e) => {
                           if (selectedCategory !== 'all') {
-                            e.currentTarget.style.borderColor = '#d1d5db'
-                            e.currentTarget.style.backgroundColor = '#f9fafb'
+                            e.currentTarget.style.borderColor = 'var(--color-border-dark)'
+                            e.currentTarget.style.backgroundColor = 'var(--color-background-alt)'
                           }
                         }}
                         onMouseLeave={(e) => {
                           if (selectedCategory !== 'all') {
-                            e.currentTarget.style.borderColor = '#e5e7eb'
-                            e.currentTarget.style.backgroundColor = '#ffffff'
+                            e.currentTarget.style.borderColor = 'var(--color-border)'
+                            e.currentTarget.style.backgroundColor = 'var(--color-surface)'
                           }
                         }}
                       >
                         <div className="flex items-center justify-between mb-1.5">
-                          <Layers className="h-4 w-4" style={{ color: '#16a34a' }} />
-                          <span className="text-sm font-bold" style={{ color: '#111827' }}>
+                          <Layers className="h-4 w-4 text-conservation" />
+                          <span className="text-sm font-bold text-text">
                             {allNRCSPractices.length}
                           </span>
                         </div>
-                        <div className="text-xs font-medium" style={{ color: '#374151' }}>
+                        <div className="text-xs font-medium text-text">
                           All Categories
                         </div>
                       </button>
@@ -340,19 +339,19 @@ export default function ConservationPracticesModule() {
                             onClick={() => setSelectedCategory(category)}
                             className="p-2.5 rounded-lg border-2 transition-all text-left"
                             style={{
-                              backgroundColor: isSelected ? '#dcfce7' : '#ffffff',
-                              borderColor: isSelected ? '#16a34a' : '#e5e7eb'
+                              backgroundColor: isSelected ? 'var(--color-conservation-light)' : 'var(--color-surface)',
+                              borderColor: isSelected ? 'var(--color-conservation)' : 'var(--color-border)'
                             }}
                             onMouseEnter={(e) => {
                               if (!isSelected) {
-                                e.currentTarget.style.borderColor = '#d1d5db'
-                                e.currentTarget.style.backgroundColor = '#f9fafb'
+                                e.currentTarget.style.borderColor = 'var(--color-border-dark)'
+                                e.currentTarget.style.backgroundColor = 'var(--color-background-alt)'
                               }
                             }}
                             onMouseLeave={(e) => {
                               if (!isSelected) {
-                                e.currentTarget.style.borderColor = '#e5e7eb'
-                                e.currentTarget.style.backgroundColor = '#ffffff'
+                                e.currentTarget.style.borderColor = 'var(--color-border)'
+                                e.currentTarget.style.backgroundColor = 'var(--color-surface)'
                               }
                             }}
                           >
@@ -363,11 +362,11 @@ export default function ConservationPracticesModule() {
                               >
                                 {getCategoryIcon(category, 'small')}
                               </div>
-                              <span className="text-sm font-bold" style={{ color: '#111827' }}>
+                              <span className="text-sm font-bold text-text">
                                 {practices.length}
                               </span>
                             </div>
-                            <div className="text-xs line-clamp-2" style={{ color: '#6b7280' }}>
+                            <div className="text-xs line-clamp-2 text-text-secondary">
                               {category}
                             </div>
                           </button>
@@ -377,9 +376,9 @@ export default function ConservationPracticesModule() {
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between text-sm" style={{ color: '#6b7280' }}>
+                <div className="mt-4 flex items-center justify-between text-sm text-text-secondary">
                   <span>
-                    <strong style={{ color: '#111827' }}>{filteredPractices.length}</strong> practices found
+                    <strong className="text-text">{filteredPractices.length}</strong> practices found
                     {selectedCategory !== 'all' && ` in ${selectedCategory}`}
                   </span>
                   {(searchQuery || selectedCategory !== 'all') && (
@@ -388,8 +387,7 @@ export default function ConservationPracticesModule() {
                         setSearchQuery('')
                         setSelectedCategory('all')
                       }}
-                      className="text-sm font-medium hover:underline"
-                      style={{ color: '#16a34a' }}
+                      className="text-sm font-medium hover:underline text-conservation"
                     >
                       Clear filters
                     </button>

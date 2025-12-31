@@ -70,62 +70,62 @@ const soilPropertyRanges: Record<
   Array<{ min: number; max: number; label: string; color: string }>
 > = {
   clay: [
-    { min: 0, max: 5, label: 'Very Low', color: '#fef3c7' },
-    { min: 5, max: 15, label: 'Low', color: '#fde68a' },
-    { min: 15, max: 25, label: 'Moderate', color: '#fcd34d' },
-    { min: 25, max: 35, label: 'Moderately High', color: '#f59e0b' },
-    { min: 35, max: 45, label: 'High', color: '#d97706' },
-    { min: 45, max: 55, label: 'Very High', color: '#b45309' },
-    { min: 55, max: 70, label: 'Extremely High', color: '#92400e' },
-    { min: 70, max: 100, label: 'Maximum', color: '#78350f' },
+    { min: 0, max: 5, label: 'Very Low', color: 'var(--color-amber-100)' },
+    { min: 5, max: 15, label: 'Low', color: 'var(--color-amber-200)' },
+    { min: 15, max: 25, label: 'Moderate', color: 'var(--color-amber-300)' },
+    { min: 25, max: 35, label: 'Moderately High', color: 'var(--color-amber-400)' },
+    { min: 35, max: 45, label: 'High', color: 'var(--color-amber-500)' },
+    { min: 45, max: 55, label: 'Very High', color: 'var(--color-amber-600)' },
+    { min: 55, max: 70, label: 'Extremely High', color: 'var(--color-amber-700)' },
+    { min: 70, max: 100, label: 'Maximum', color: 'var(--color-amber-800)' },
   ],
   om: [
-    { min: 0, max: 0.5, label: 'Very Low', color: '#fee2e2' },
-    { min: 0.5, max: 1, label: 'Low', color: '#fecaca' },
-    { min: 1, max: 2, label: 'Moderate', color: '#fca5a5' },
-    { min: 2, max: 4, label: 'Moderate-High', color: '#f87171' },
-    { min: 4, max: 6, label: 'High', color: '#ef4444' },
-    { min: 6, max: 10, label: 'Very High', color: '#dc2626' },
-    { min: 10, max: 20, label: 'Extremely High', color: '#b91c1c' },
-    { min: 20, max: 100, label: 'Organic', color: '#991b1b' },
+    { min: 0, max: 0.5, label: 'Very Low', color: 'var(--color-clay-100)' },
+    { min: 0.5, max: 1, label: 'Low', color: 'var(--color-clay-200)' },
+    { min: 1, max: 2, label: 'Moderate', color: 'var(--color-clay-300)' },
+    { min: 2, max: 4, label: 'Moderate-High', color: 'var(--color-clay-400)' },
+    { min: 4, max: 6, label: 'High', color: 'var(--color-clay-500)' },
+    { min: 6, max: 10, label: 'Very High', color: 'var(--color-clay-600)' },
+    { min: 10, max: 20, label: 'Extremely High', color: 'var(--color-clay-700)' },
+    { min: 20, max: 100, label: 'Organic', color: 'var(--color-clay-800)' },
   ],
   ph: [
-    { min: 3.0, max: 4.5, label: 'Extremely Acid', color: '#fee2e2' },
-    { min: 4.5, max: 5.0, label: 'Very Strongly Acid', color: '#fecaca' },
-    { min: 5.0, max: 5.5, label: 'Strongly Acid', color: '#fca5a5' },
-    { min: 5.5, max: 6.0, label: 'Moderately Acid', color: '#f87171' },
-    { min: 6.0, max: 6.5, label: 'Slightly Acid', color: '#fbbf24' },
-    { min: 6.5, max: 7.3, label: 'Neutral', color: '#10b981' },
-    { min: 7.3, max: 8.0, label: 'Slightly Alkaline', color: '#3b82f6' },
-    { min: 8.0, max: 8.5, label: 'Moderately Alkaline', color: '#6366f1' },
-    { min: 8.5, max: 10.5, label: 'Strongly Alkaline', color: '#8b5cf6' },
+    { min: 3.0, max: 4.5, label: 'Extremely Acid', color: 'var(--color-clay-600)' },
+    { min: 4.5, max: 5.0, label: 'Very Strongly Acid', color: 'var(--color-sunset-500)' },
+    { min: 5.0, max: 5.5, label: 'Strongly Acid', color: 'var(--color-sunset-400)' },
+    { min: 5.5, max: 6.0, label: 'Moderately Acid', color: 'var(--color-amber-500)' },
+    { min: 6.0, max: 6.5, label: 'Slightly Acid', color: 'var(--color-amber-400)' },
+    { min: 6.5, max: 7.3, label: 'Neutral', color: 'var(--color-forest-500)' },
+    { min: 7.3, max: 8.0, label: 'Slightly Alkaline', color: 'var(--color-ocean-400)' },
+    { min: 8.0, max: 8.5, label: 'Moderately Alkaline', color: 'var(--color-ocean-600)' },
+    { min: 8.5, max: 10.5, label: 'Strongly Alkaline', color: 'var(--color-lavender-600)' },
   ],
   awc: [
-    { min: 0.0, max: 0.05, label: 'Very Low', color: '#fee2e2' },
-    { min: 0.05, max: 0.1, label: 'Low', color: '#fecaca' },
-    { min: 0.1, max: 0.15, label: 'Moderately Low', color: '#bfdbfe' },
-    { min: 0.15, max: 0.2, label: 'Moderate', color: '#93c5fd' },
-    { min: 0.2, max: 0.25, label: 'Moderately High', color: '#60a5fa' },
-    { min: 0.25, max: 0.3, label: 'High', color: '#3b82f6' },
-    { min: 0.3, max: 0.4, label: 'Very High', color: '#2563eb' },
-    { min: 0.4, max: 0.6, label: 'Extremely High', color: '#1d4ed8' },
+    { min: 0.0, max: 0.05, label: 'Very Low', color: 'var(--color-clay-200)' },
+    { min: 0.05, max: 0.1, label: 'Low', color: 'var(--color-sunset-300)' },
+    { min: 0.1, max: 0.15, label: 'Moderately Low', color: 'var(--color-amber-400)' },
+    { min: 0.15, max: 0.2, label: 'Moderate', color: 'var(--color-sky-400)' },
+    { min: 0.2, max: 0.25, label: 'Moderately High', color: 'var(--color-ocean-500)' },
+    { min: 0.25, max: 0.3, label: 'High', color: 'var(--color-ocean-600)' },
+    { min: 0.3, max: 0.4, label: 'Very High', color: 'var(--color-ocean-700)' },
+    { min: 0.4, max: 0.6, label: 'Extremely High', color: 'var(--color-ocean-800)' },
   ],
   ksat: [
-    { min: 0.001, max: 0.1, label: 'Very Slow', color: '#1e1b4b' },
-    { min: 0.1, max: 1, label: 'Slow', color: '#312e81' },
-    { min: 1, max: 4, label: 'Moderately Slow', color: '#4c1d95' },
-    { min: 4, max: 14, label: 'Moderate', color: '#7c3aed' },
-    { min: 14, max: 40, label: 'Moderately Rapid', color: '#8b5cf6' },
-    { min: 40, max: 140, label: 'Rapid', color: '#a78bfa' },
-    { min: 140, max: 400, label: 'Very Rapid', color: '#c4b5fd' },
-    { min: 400, max: 2000, label: 'Extremely Rapid', color: '#e0e7ff' },
+    { min: 0.001, max: 0.1, label: 'Very Slow', color: 'var(--color-charcoal-900)' },
+    { min: 0.1, max: 1, label: 'Slow', color: 'var(--color-charcoal-800)' },
+    { min: 1, max: 4, label: 'Moderately Slow', color: 'var(--color-lavender-800)' },
+    { min: 4, max: 14, label: 'Moderate', color: 'var(--color-lavender-600)' },
+    { min: 14, max: 40, label: 'Moderately Rapid', color: 'var(--color-lavender-500)' },
+    { min: 40, max: 140, label: 'Rapid', color: 'var(--color-lavender-400)' },
+    { min: 140, max: 400, label: 'Very Rapid', color: 'var(--color-lavender-300)' },
+    { min: 400, max: 2000, label: 'Extremely Rapid', color: 'var(--color-lavender-100)' },
   ],
 }
 
 // Classify property value
 function classifyProperty(value: number, property: string): { color: string; label: string } {
   const ranges = soilPropertyRanges[property]
-  if (!ranges) return { color: '#d1d5db', label: 'Unknown' }
+  if (!ranges) return { color: 'var(--color-slate-300)', label: 'Unknown' }
 
   for (let i = 0; i < ranges.length - 1; i++) {
     if (value >= ranges[i].min && value < ranges[i].max) {
@@ -138,7 +138,7 @@ function classifyProperty(value: number, property: string): { color: string; lab
     return { color: lastRange.color, label: lastRange.label }
   }
 
-  return { color: '#d1d5db', label: 'Unknown' }
+  return { color: 'var(--color-slate-300)', label: 'Unknown' }
 }
 
 // USDA Texture Classification Function
@@ -191,21 +191,21 @@ function getTextureClass(sand: number, silt: number, clay: number): string {
 // Get color for texture class
 function getTextureClassColor(textureClass: string): string {
   const colorMap: Record<string, string> = {
-    Sand: '#f4e4c1',
-    'Loamy sand': '#e6d4a8',
-    'Sandy loam': '#d9c48f',
-    Loam: '#8b7355',
-    'Silt loam': '#a0826d',
-    Silt: '#c8b597',
-    'Sandy clay loam': '#9d7f5c',
-    'Clay loam': '#7a5c3f',
-    'Silty clay loam': '#8d6e4f',
-    'Sandy clay': '#6b4e3d',
-    'Silty clay': '#5c4033',
-    Clay: '#4a3728',
-    Unknown: '#d1d5db',
+    Sand: 'var(--color-sand-200)',
+    'Loamy sand': 'var(--color-sand-300)',
+    'Sandy loam': 'var(--color-sand-400)',
+    Loam: 'var(--color-sand-600)',
+    'Silt loam': 'var(--color-earth-400)',
+    Silt: 'var(--color-earth-500)',
+    'Sandy clay loam': 'var(--color-earth-600)',
+    'Clay loam': 'var(--color-clay-600)',
+    'Silty clay loam': 'var(--color-clay-500)',
+    'Sandy clay': 'var(--color-clay-700)',
+    'Silty clay': 'var(--color-clay-800)',
+    Clay: 'var(--color-clay-900)',
+    Unknown: 'var(--color-slate-300)',
   }
-  return colorMap[textureClass] || '#d1d5db'
+  return colorMap[textureClass] || 'var(--color-slate-300)'
 }
 
 // Component to display just the OSD text description at the top of each component
@@ -261,7 +261,7 @@ function ProfileComparisonModal({
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 flex items-center justify-between" style={{ backgroundColor: '#2563eb', color: '#ffffff' }}>
+        <div className="px-6 py-4 flex items-center justify-between" style={{ background: 'linear-gradient(to right, var(--color-ocean-600), var(--color-ocean-500))', color: '#ffffff' }}>
           <div>
             <h2 className="text-xl" style={{ fontWeight: 'bold', fontSize: '20px' }}>Component Profile Comparison</h2>
           </div>
@@ -323,9 +323,9 @@ function ProfileComparisonModal({
                   <div 
                     className="px-3 py-2 rounded-t-lg"
                     style={{ 
-                      backgroundColor: '#2563eb', 
+                      backgroundColor: 'var(--color-ocean-600)', 
                       color: '#ffffff',
-                      background: '#2563eb'
+                      background: 'var(--color-ocean-600)'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -516,18 +516,18 @@ function ProfileComparisonModal({
                   <div className="mb-2 font-semibold">USDA Texture Classes:</div>
                   <div className="grid grid-cols-3 gap-x-6 gap-y-2">
                     {[
-                      { color: '#f4e4c1', label: 'Sand' },
-                      { color: '#e6d4a8', label: 'Loamy sand' },
-                      { color: '#d9c48f', label: 'Sandy loam' },
-                      { color: '#8b7355', label: 'Loam' },
-                      { color: '#a0826d', label: 'Silt loam' },
-                      { color: '#c8b597', label: 'Silt' },
-                      { color: '#9d7f5c', label: 'Sandy clay loam' },
-                      { color: '#7a5c3f', label: 'Clay loam' },
-                      { color: '#8d6e4f', label: 'Silty clay loam' },
-                      { color: '#6b4e3d', label: 'Sandy clay' },
-                      { color: '#5c4033', label: 'Silty clay' },
-                      { color: '#4a3728', label: 'Clay' },
+                      { color: 'var(--color-sand-200)', label: 'Sand' },
+                      { color: 'var(--color-sand-300)', label: 'Loamy sand' },
+                      { color: 'var(--color-sand-400)', label: 'Sandy loam' },
+                      { color: 'var(--color-sand-600)', label: 'Loam' },
+                      { color: 'var(--color-earth-400)', label: 'Silt loam' },
+                      { color: 'var(--color-earth-500)', label: 'Silt' },
+                      { color: 'var(--color-earth-600)', label: 'Sandy clay loam' },
+                      { color: 'var(--color-clay-600)', label: 'Clay loam' },
+                      { color: 'var(--color-clay-500)', label: 'Silty clay loam' },
+                      { color: 'var(--color-clay-700)', label: 'Sandy clay' },
+                      { color: 'var(--color-clay-800)', label: 'Silty clay' },
+                      { color: 'var(--color-clay-900)', label: 'Clay' },
                     ].map((item, idx) => (
                       <div key={idx} className="flex items-center gap-2">
                         <div className="h-4 w-4 rounded" style={{ backgroundColor: item.color }} />
@@ -583,7 +583,7 @@ function ComponentDetailsSection({
   const { osdData, isLoading: osdLoading } = useOSDData(comp.compname, true)
   
   // Use the same color assignment logic as Map Unit Composition
-  const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+  const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
   const bgColor = colors[idx % colors.length]
   
   return (
@@ -593,9 +593,17 @@ function ComponentDetailsSection({
           e.preventDefault()
           onToggle()
         }}
-        className="rounded-lg border-2 p-4 cursor-pointer list-none transition-all hover:shadow-md mb-2"
-        style={{ borderColor: bgColor, backgroundColor: `${bgColor}15` }}
+        className="rounded-lg border-2 p-4 cursor-pointer list-none transition-all hover:shadow-md mb-2 relative overflow-hidden"
+        style={{ borderColor: bgColor }}
       >
+        {/* Background layer with opacity */}
+        <div 
+          className="absolute inset-0 -z-10"
+          style={{ 
+            backgroundColor: bgColor,
+            opacity: 0.08
+          }}
+        />
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <svg
             className="h-5 w-5 transition-transform group-open:rotate-90 flex-shrink-0"
@@ -1026,9 +1034,9 @@ export default function PropertyPanel({
                   style={
                     activeTab === 'components'
                       ? {
-                          backgroundColor: '#f0fdf4',
-                          color: '#15803d',
-                          borderBottom: '3px solid #15803d',
+                          backgroundColor: 'var(--color-forest-50)',
+                          color: 'var(--color-forest-800)',
+                          borderBottom: '3px solid var(--color-forest-600)',
                           boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
                           fontSize: '16px',
                           fontWeight: 'bold',
@@ -1064,9 +1072,9 @@ export default function PropertyPanel({
               style={
                 activeTab === 'ssurgo'
                   ? {
-                      backgroundColor: '#f0fdf4',
-                      color: '#15803d',
-                      borderBottom: '3px solid #15803d',
+                      backgroundColor: 'var(--color-forest-50)',
+                      color: 'var(--color-forest-800)',
+                      borderBottom: '3px solid var(--color-forest-600)',
                       boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
                       fontSize: '16px',
                       fontWeight: 'bold',
@@ -1102,9 +1110,9 @@ export default function PropertyPanel({
                   style={
                     activeTab === 'cropland'
                       ? {
-                          backgroundColor: '#f0fdf4',
-                          color: '#15803d',
-                          borderBottom: '3px solid #15803d',
+                          backgroundColor: 'var(--color-forest-50)',
+                          color: 'var(--color-forest-800)',
+                          borderBottom: '3px solid var(--color-forest-600)',
                           boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
                           fontSize: '16px',
                           fontWeight: 'bold',
@@ -1199,7 +1207,7 @@ export default function PropertyPanel({
                             {ssurgoData.components
                               .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                               .map((comp, idx) => {
-                                const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+                                const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
                                 const bgColor = colors[idx % colors.length]
 
                                 return (
@@ -1222,7 +1230,7 @@ export default function PropertyPanel({
                           {ssurgoData.components
                             .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                             .map((comp, idx) => {
-                              const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+                              const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
                               const bgColor = colors[idx % colors.length]
 
                               return (
@@ -1243,7 +1251,7 @@ export default function PropertyPanel({
                           <RechartsPieChart width={440} height={300}>
                             <Pie
                               data={ssurgoData.components.map((comp, idx) => {
-                                const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+                                const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
                                 return {
                                   name: comp.compname,
                                   value: Number(comp.comppct_r) || 0,
@@ -1262,7 +1270,7 @@ export default function PropertyPanel({
                         {/* Legend */}
                         <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
                           {ssurgoData.components.map((comp, idx) => {
-                            const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+                            const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
                             const bgColor = colors[idx % colors.length]
 
                             return (
@@ -1790,7 +1798,7 @@ export default function PropertyPanel({
                       {ssurgoData.components
                         .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                         .map((comp, idx) => {
-                          const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+                          const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
                           const bgColor = colors[idx % colors.length]
 
                           return (
@@ -1813,7 +1821,7 @@ export default function PropertyPanel({
                     {ssurgoData.components
                       .sort((a, b) => (b.comppct_r || 0) - (a.comppct_r || 0))
                       .map((comp, idx) => {
-                        const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+                        const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
                         const bgColor = colors[idx % colors.length]
 
                         return (
@@ -1834,7 +1842,7 @@ export default function PropertyPanel({
                     <RechartsPieChart width={440} height={300}>
                       <Pie
                         data={ssurgoData.components.map((comp, idx) => {
-                          const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+                          const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
                           return {
                             name: comp.compname,
                             value: Number(comp.comppct_r) || 0,
@@ -1851,7 +1859,7 @@ export default function PropertyPanel({
                   </div>                  {/* Legend */}
                   <div className="mt-3 flex flex-wrap justify-center gap-3 text-xs">
                     {ssurgoData.components.map((comp, idx) => {
-                      const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+                      const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
                       const bgColor = colors[idx % colors.length]
 
                       return (
@@ -2160,27 +2168,27 @@ export default function PropertyPanel({
                             <div className="mb-1 font-semibold">USDA Texture Classes:</div>
                             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                               <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded" style={{ backgroundColor: '#f4e4c1' }} />
+                                <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-sand-200)' }} />
                                 <span>Sand</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded" style={{ backgroundColor: '#8b7355' }} />
+                                <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-sand-600)' }} />
                                 <span>Loam</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded" style={{ backgroundColor: '#d9c48f' }} />
+                                <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-sand-400)' }} />
                                 <span>Sandy loam</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded" style={{ backgroundColor: '#7a5c3f' }} />
+                                <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-clay-600)' }} />
                                 <span>Clay loam</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded" style={{ backgroundColor: '#a0826d' }} />
+                                <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-earth-400)' }} />
                                 <span>Silt loam</span>
                               </div>
                               <div className="flex items-center gap-1.5">
-                                <div className="h-3 w-3 rounded" style={{ backgroundColor: '#4a3728' }} />
+                                <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-clay-900)' }} />
                                 <span>Clay</span>
                               </div>
                             </div>
@@ -2221,9 +2229,9 @@ export default function PropertyPanel({
         {/* Cropland History Tab */}
         {activeTab === 'cropland' && cdlHistory && cdlHistory.length > 0 && (
           <div className="space-y-4">
-            <div className="from-emerald-50 to-green-50 border-emerald-200 rounded-lg border bg-gradient-to-r p-4">
-              <h3 className="text-emerald-900 mb-2 text-lg font-bold">Cropland Data Layer History</h3>
-              <p className="text-emerald-700 text-sm">
+            <div className="rounded-lg border p-4" style={{ background: 'linear-gradient(to right, var(--color-forest-50), var(--color-moss-50))', borderColor: 'var(--color-forest-200)' }}>
+              <h3 className="mb-2 text-lg font-bold" style={{ color: 'var(--color-forest-900)' }}>Cropland Data Layer History</h3>
+              <p className="text-sm" style={{ color: 'var(--color-forest-700)' }}>
                 Showing {cdlHistory.length} years of crop rotation data from USDA NASS CropScape
               </p>
             </div>
@@ -2714,43 +2722,43 @@ export default function PropertyPanel({
                               <span
                                 className={`rounded px-1.5 py-1 text-xs font-bold ${
                                   yearData.cropType === 'annual'
-                                    ? 'bg-blue-100 text-blue-800'
+                                    ? 'bg-ocean-100 text-ocean-800'
                                     : yearData.cropType === 'perennial'
-                                    ? 'bg-purple-100 text-purple-800'
+                                    ? 'bg-lavender-100 text-lavender-800'
                                     : yearData.cropType === 'permanent'
-                                    ? 'bg-red-100 text-red-800'
+                                    ? 'bg-clay-100 text-clay-800'
                                     : yearData.cropType === 'pasture'
-                                    ? 'bg-green-100 text-green-800'
+                                    ? 'bg-forest-100 text-forest-800'
                                     : yearData.cropType === 'fallow'
-                                    ? 'bg-yellow-100 text-yellow-800'
+                                    ? 'bg-amber-100 text-amber-800'
                                     : yearData.cropType === 'forest'
-                                    ? 'bg-emerald-100 text-emerald-800'
+                                    ? 'bg-moss-100 text-moss-800'
                                     : yearData.cropType === 'developed'
-                                    ? 'bg-orange-100 text-orange-800'
+                                    ? 'bg-copper-100 text-copper-800'
                                     : yearData.cropType === 'water'
-                                    ? 'bg-cyan-100 text-cyan-800'
-                                    : 'bg-gray-100 text-gray-800'
+                                    ? 'bg-sky-100 text-sky-800'
+                                    : 'bg-slate-100 text-slate-800'
                                 }`}
                                 title={`Crop type: ${yearData.cropType}`}
                               >
                                 {yearData.cropType === 'annual' ? (
-                                  <Calendar size={14} style={{ color: '#1e40af' }} />
+                                  <Calendar size={14} style={{ color: 'var(--color-ocean-800)' }} />
                                 ) : yearData.cropType === 'perennial' ? (
-                                  <Repeat size={14} style={{ color: '#6b21a8' }} />
+                                  <Repeat size={14} style={{ color: 'var(--color-lavender-800)' }} />
                                 ) : yearData.cropType === 'permanent' ? (
-                                  <TreeDeciduous size={14} style={{ color: '#991b1b' }} />
+                                  <TreeDeciduous size={14} style={{ color: 'var(--color-clay-800)' }} />
                                 ) : yearData.cropType === 'pasture' ? (
-                                  <Clover size={14} style={{ color: '#166534' }} />
+                                  <Clover size={14} style={{ color: 'var(--color-forest-800)' }} />
                                 ) : yearData.cropType === 'fallow' ? (
-                                  <MinusCircle size={14} style={{ color: '#a16207' }} />
+                                  <MinusCircle size={14} style={{ color: 'var(--color-amber-800)' }} />
                                 ) : yearData.cropType === 'forest' ? (
-                                  <TreeDeciduous size={14} style={{ color: '#065f46' }} />
+                                  <TreeDeciduous size={14} style={{ color: 'var(--color-moss-800)' }} />
                                 ) : yearData.cropType === 'developed' ? (
-                                  <Building2 size={14} style={{ color: '#c2410c' }} />
+                                  <Building2 size={14} style={{ color: 'var(--color-copper-800)' }} />
                                 ) : yearData.cropType === 'water' ? (
-                                  <Waves size={14} style={{ color: '#155e75' }} />
+                                  <Waves size={14} style={{ color: 'var(--color-sky-800)' }} />
                                 ) : (
-                                  <HelpCircle size={14} style={{ color: '#374151' }} />
+                                  <HelpCircle size={14} style={{ color: 'var(--color-slate-800)' }} />
                                 )}
                               </span>
                             )}
@@ -2771,10 +2779,10 @@ export default function PropertyPanel({
                                   <span
                                     className={`rounded px-2 py-1 text-xs font-bold ${
                                       yearData.confidence >= 80
-                                        ? 'bg-green-200 text-green-900'
+                                        ? 'bg-forest-200 text-forest-900'
                                         : yearData.confidence >= 50
-                                        ? 'bg-yellow-200 text-yellow-900'
-                                        : 'bg-red-200 text-red-900'
+                                        ? 'bg-amber-200 text-amber-900'
+                                        : 'bg-clay-200 text-clay-900'
                                     }`}
                                   >
                                     {yearData.confidence}% confidence
@@ -2784,7 +2792,7 @@ export default function PropertyPanel({
                             </div>
                           </div>
                           {yearData.transitionWarning && (
-                            <div className="text-orange-600 bg-orange-50 ml-16 flex items-start space-x-2 rounded p-2 text-sm">
+                            <div className="alert-caution ml-16 flex items-start space-x-2 rounded p-2 text-sm">
                               <span className="text-lg">⚠</span>
                               <span>{yearData.transitionWarning}</span>
                             </div>

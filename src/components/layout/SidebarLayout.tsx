@@ -132,7 +132,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: '#F8F4ED' }}>
+    <div className="flex h-screen bg-background">
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
@@ -153,11 +153,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         overflow-y-auto
       `}
         style={{
-          background: 'linear-gradient(to bottom, #355433, #426740, #4F7A4D, #426740, #355433)',
+          background: 'linear-gradient(to bottom, var(--color-forest-800), var(--color-forest-700), var(--color-forest-600), var(--color-forest-700), var(--color-forest-800))',
         }}
       >
         {/* Sidebar Header */}
-        <div className="flex-shrink-0" style={{ borderBottom: '1px solid #5C8D5A' }}>
+        <div className="flex-shrink-0" style={{ borderBottom: '1px solid var(--color-forest-500)' }}>
           <div className="h-20 flex items-center justify-between px-4">
             {sidebarOpen ? (
               <>
@@ -167,7 +167,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                   </div>
                   <div className="flex flex-col">
                     <span className="font-bold text-sm leading-tight">Soil Conservation Explorer</span>
-                    <span className="text-xs leading-tight" style={{ color: '#C7D9C6' }}>
+                    <span className="text-xs leading-tight" style={{ color: 'var(--color-forest-200)' }}>
                       USDA-NRCS
                     </span>
                   </div>
@@ -175,7 +175,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                 <button
                   onClick={() => setSidebarOpen(false)}
                   className="p-2 rounded-lg transition-colors hidden lg:block"
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4F7A4D'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-forest-600)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   aria-label="Collapse sidebar"
                   title="Collapse sidebar"
@@ -200,7 +200,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                 <button
                   onClick={() => setSidebarOpen(true)}
                   className="p-1.5 rounded-lg transition-colors hidden lg:block"
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4F7A4D'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-forest-600)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   aria-label="Expand sidebar"
                   title="Expand sidebar"
@@ -228,9 +228,9 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                 <button
                   onClick={() => toggleSection(section.title)}
                   className="w-full px-4 mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-colors"
-                  style={{ color: '#A7C2A5' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#E2EBE1'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#A7C2A5'}
+                  style={{ color: 'var(--color-forest-300)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-forest-100)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-forest-300)'}
                 >
                   <span>{section.title}</span>
                   {expandedSections.has(section.title) ? (
@@ -240,7 +240,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                   )}
                 </button>
               ) : (
-                <div className="h-2 mx-2 mb-2" style={{ borderTop: '1px solid #5C8D5A' }} />
+                <div className="h-2 mx-2 mb-2" style={{ borderTop: '1px solid var(--color-forest-500)' }} />
               )}
 
               {/* Section Items */}
@@ -257,20 +257,20 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                           href={item.path}
                           className="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200"
                           style={{
-                            backgroundColor: isActive ? '#4F7A4D' : 'transparent',
-                            color: isActive ? 'white' : '#E2EBE1',
+                            backgroundColor: isActive ? 'var(--color-forest-600)' : 'transparent',
+                            color: isActive ? 'white' : 'var(--color-forest-100)',
                             boxShadow: isActive ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
                           }}
                           onMouseEnter={(e) => {
                             if (!isActive) {
-                              e.currentTarget.style.backgroundColor = '#426740'
+                              e.currentTarget.style.backgroundColor = 'var(--color-forest-700)'
                               e.currentTarget.style.color = 'white'
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (!isActive) {
                               e.currentTarget.style.backgroundColor = 'transparent'
-                              e.currentTarget.style.color = '#E2EBE1'
+                              e.currentTarget.style.color = 'var(--color-forest-100)'
                             }
                           }}
                           title={!sidebarOpen ? item.label : undefined}
@@ -282,7 +282,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                           {sidebarOpen && (
                             <div className="ml-3 flex-1 min-w-0">
                               <div className="font-medium text-sm">{item.label}</div>
-                              <div className="text-xs truncate" style={{ color: '#C7D9C6' }}>
+                              <div className="text-xs truncate" style={{ color: 'var(--color-forest-200)' }}>
                                 {item.description}
                               </div>
                             </div>
@@ -304,13 +304,13 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="flex-shrink-0 p-4" style={{ borderTop: '1px solid #5C8D5A' }}>
+        <div className="flex-shrink-0 p-4" style={{ borderTop: '1px solid var(--color-forest-500)' }}>
           {/* Back to Dashboard */}
           <Link
             href="/"
             className={`flex items-center ${sidebarOpen ? 'space-x-3 px-3' : 'justify-center'} py-2 rounded-lg transition-colors`}
             style={{ color: 'white' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4F7A4D'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-forest-600)'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             title={!sidebarOpen ? 'Back to Dashboard' : undefined}
           >
@@ -323,23 +323,23 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
-        <header className="lg:hidden h-16 flex items-center justify-between px-4 flex-shrink-0" style={{ backgroundColor: 'white', borderBottom: '1px solid #D8DBDB' }}>
+        <header className="lg:hidden h-16 flex items-center justify-between px-4 flex-shrink-0 bg-surface border-b border-border">
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg"
+            className="p-2 rounded-lg transition-colors"
             style={{ backgroundColor: 'transparent' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F8F4ED'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-background)'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             aria-label="Open menu"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-6 h-6 text-text" />
           </button>
 
           <Link href="/" className="flex items-center space-x-2">
-            <div className="rounded-lg p-1.5" style={{ backgroundColor: '#5C8D5A' }}>
+            <div className="rounded-lg p-1.5 bg-forest-500">
               <Sprout className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-sm">Soil Conservation Explorer</span>
+            <span className="font-bold text-sm text-text">Soil Conservation Explorer</span>
           </Link>
 
           <div className="w-10" /> {/* Spacer for centering */}

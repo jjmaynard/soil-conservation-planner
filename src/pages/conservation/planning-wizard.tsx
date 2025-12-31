@@ -107,7 +107,7 @@ export default function PlanningWizard() {
         <div 
           className="rounded-lg p-8 mb-8 text-white"
           style={{
-            background: 'linear-gradient(to right, #16a34a, #15803d, #166534)',
+            background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700), var(--color-forest-800))',
           }}
         >
           <div className="flex items-center mb-4">
@@ -118,7 +118,7 @@ export default function PlanningWizard() {
               <h1 className="text-3xl font-bold mb-1">
                 Conservation Planning Tool
               </h1>
-              <p className="text-green-100 text-lg">
+              <p style={{ color: 'var(--color-forest-100)' }} className="text-lg">
                 Step-by-step guide to create a comprehensive conservation plan
               </p>
             </div>
@@ -141,9 +141,9 @@ export default function PlanningWizard() {
                       className="relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200"
                       style={{
                         background: isCompleted
-                          ? 'linear-gradient(to right, #16a34a, #15803d)'
+                          ? 'linear-gradient(to right, var(--color-forest-600), var(--color-forest-700))'
                           : isActive
-                          ? 'linear-gradient(to right, #22c55e, #2563eb)'
+                          ? 'linear-gradient(to right, var(--color-forest-500), var(--color-ocean-600))'
                           : '#e5e7eb',
                         color: isCompleted || isActive ? '#ffffff' : '#9ca3af',
                       }}
@@ -177,7 +177,7 @@ export default function PlanningWizard() {
                       style={{
                         marginTop: '-2rem',
                         background: currentStep > step.id
-                          ? 'linear-gradient(to right, #16a34a, #15803d)'
+                          ? 'linear-gradient(to right, var(--color-forest-600), var(--color-forest-700))'
                           : '#e5e7eb',
                       }}
                     />
@@ -217,7 +217,7 @@ export default function PlanningWizard() {
               onClick={handleNext}
               className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg hover:scale-105"
               style={{
-                background: 'linear-gradient(to right, #16a34a, #15803d)',
+                background: 'linear-gradient(to right, var(--color-forest-600), var(--color-forest-700))',
               }}
             >
               Next
@@ -228,7 +228,7 @@ export default function PlanningWizard() {
               onClick={() => alert('Downloading plan...')}
               className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg hover:scale-105"
               style={{
-                background: 'linear-gradient(to right, #16a34a, #15803d)',
+                background: 'linear-gradient(to right, var(--color-forest-600), var(--color-forest-700))',
               }}
             >
               <CheckCircle2 className="w-5 h-5 mr-2" />
@@ -276,11 +276,11 @@ function ProjectInformation({ formData, setFormData }: any) {
       <div
         className="rounded-lg p-4 mb-6"
         style={{
-          background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+          background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))',
         }}
       >
         <h2 className="text-2xl font-bold text-white mb-1">Project Information</h2>
-        <p className="text-blue-100">
+        <p style={{ color: 'var(--color-forest-100)' }}>
           Enter the basic information about the conservation project
         </p>
       </div>
@@ -353,11 +353,11 @@ function FieldSelection({ formData, setFormData }: any) {
       <div
         className="rounded-lg p-4 mb-6"
         style={{
-          background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+          background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))',
         }}
       >
         <h2 className="text-2xl font-bold text-white mb-1">Field Selection</h2>
-        <p className="text-blue-100">
+        <p style={{ color: 'var(--color-forest-100)' }}>
           Select fields using the Field Analysis module
         </p>
       </div>
@@ -415,7 +415,7 @@ function FieldSelection({ formData, setFormData }: any) {
             onClick={openFieldAnalysis}
             className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg hover:scale-105"
             style={{
-              background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+              background: 'linear-gradient(to right, var(--color-ocean-600), var(--color-ocean-700))',
             }}
           >
             <ExternalLink className="w-5 h-5 mr-2" />
@@ -423,11 +423,11 @@ function FieldSelection({ formData, setFormData }: any) {
           </button>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-900">
+        <div className="mt-6 p-4 alert-info rounded-lg">
+          <p className="text-sm">
             <strong>Tip:</strong> In Field Analysis, you can:
           </p>
-          <ul className="text-sm text-blue-800 mt-2 space-y-1 ml-4 list-disc">
+          <ul className="text-sm mt-2 space-y-1 ml-4 list-disc">
             <li>Search for fields by address or CLU number</li>
             <li>Browse and select from CSB database</li>
             <li>Draw custom field boundaries</li>
@@ -454,11 +454,11 @@ function ResourceAssessment({ formData, setFormData }: any) {
       <div
         className="rounded-lg p-4 mb-6"
         style={{
-          background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+          background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))',
         }}
       >
         <h2 className="text-2xl font-bold text-white mb-1">Resource Assessment</h2>
-        <p className="text-blue-100">
+        <p style={{ color: 'var(--color-forest-100)' }}>
           Identify resource concerns present on the property
         </p>
       </div>
@@ -482,10 +482,10 @@ function ResourceAssessment({ formData, setFormData }: any) {
             <span
               className={`px-3 py-1 rounded-full text-xs font-semibold ${
                 concern.severity === 'High'
-                  ? 'bg-red-100 text-red-800'
+                  ? 'bg-clay-100 text-clay-800'
                   : concern.severity === 'Moderate'
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : 'bg-blue-100 text-blue-800'
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-ocean-100 text-ocean-800'
               }`}
             >
               {concern.severity} Priority
@@ -535,11 +535,11 @@ function PracticeSelection({ formData, setFormData }: any) {
       <div
         className="rounded-lg p-4 mb-6"
         style={{
-          background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+          background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))',
         }}
       >
         <h2 className="text-2xl font-bold text-white mb-1">Practice Selection</h2>
-        <p className="text-blue-100">
+        <p style={{ color: 'var(--color-forest-100)' }}>
           Select conservation practices to address resource concerns
         </p>
       </div>
@@ -583,11 +583,11 @@ function TimelineCosts({ formData, setFormData }: any) {
       <div
         className="rounded-lg p-4 mb-6"
         style={{
-          background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+          background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))',
         }}
       >
         <h2 className="text-2xl font-bold text-white mb-1">Timeline & Costs</h2>
-        <p className="text-blue-100">
+        <p style={{ color: 'var(--color-forest-100)' }}>
           Plan implementation schedule and budget
         </p>
       </div>
@@ -648,11 +648,11 @@ function ReviewDownload({ formData }: any) {
       <div
         className="rounded-lg p-4 mb-6"
         style={{
-          background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+          background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))',
         }}
       >
         <h2 className="text-2xl font-bold text-white mb-1">Review & Download</h2>
-        <p className="text-blue-100">
+        <p style={{ color: 'var(--color-forest-100)' }}>
           Review your conservation plan before downloading
         </p>
       </div>
@@ -681,11 +681,11 @@ function ReviewDownload({ formData }: any) {
           </div>
         </div>
 
-        <div className="flex items-start p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <FileText className="w-5 h-5 text-blue-600 mt-1 mr-3 flex-shrink-0" />
+        <div className="flex items-start p-4 alert-info rounded-lg">
+          <FileText className="w-5 h-5 mt-1 mr-3 flex-shrink-0" />
           <div>
-            <h4 className="font-semibold text-blue-900 mb-1">Ready to Download</h4>
-            <p className="text-sm text-blue-700">
+            <h4 className="font-semibold mb-1">Ready to Download</h4>
+            <p className="text-sm">
               Your conservation plan is ready for review. Click &ldquo;Download Plan&rdquo; to save it for later reference when working with NRCS planners.
             </p>
           </div>

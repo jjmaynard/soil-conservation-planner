@@ -51,12 +51,12 @@ export default function LocationInput({ location, onChange, onSelectFromMap }: L
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium" style={{ color: '#374151' }}>
+      <label className="block text-sm font-medium text-text">
         Location
       </label>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="latitude" className="block text-xs mb-1" style={{ color: '#6b7280' }}>
+          <label htmlFor="latitude" className="block text-xs mb-1 text-text-secondary">
             Latitude
           </label>
           <input
@@ -67,12 +67,11 @@ export default function LocationInput({ location, onChange, onSelectFromMap }: L
             onChange={(e) => setLat(e.target.value)}
             onBlur={handleUpdate}
             placeholder="41.2042"
-            className="w-full px-3 py-2 border rounded-md"
-            style={{ borderColor: '#d1d5db' }}
+            className="form-input w-full px-3 py-2 border border-border rounded-md bg-surface text-text focus:border-ocean-500"
           />
         </div>
         <div>
-          <label htmlFor="longitude" className="block text-xs mb-1" style={{ color: '#6b7280' }}>
+          <label htmlFor="longitude" className="block text-xs mb-1 text-text-secondary">
             Longitude
           </label>
           <input
@@ -83,8 +82,7 @@ export default function LocationInput({ location, onChange, onSelectFromMap }: L
             onChange={(e) => setLng(e.target.value)}
             onBlur={handleUpdate}
             placeholder="-101.6353"
-            className="w-full px-3 py-2 border rounded-md"
-            style={{ borderColor: '#d1d5db' }}
+            className="form-input w-full px-3 py-2 border border-border rounded-md bg-surface text-text focus:border-ocean-500"
           />
         </div>
       </div>
@@ -92,24 +90,18 @@ export default function LocationInput({ location, onChange, onSelectFromMap }: L
         <button
           type="button"
           onClick={handleGetCurrentLocation}
-          className="text-sm flex items-center gap-1 transition-colors"
-          style={{ color: '#3b82f6' }}
-          onMouseEnter={(e) => e.currentTarget.style.color = '#2563eb'}
-          onMouseLeave={(e) => e.currentTarget.style.color = '#3b82f6'}
+          className="text-sm flex items-center gap-1 transition-colors text-ocean-600 hover:text-ocean-700"
         >
           <MapPin className="h-4 w-4" />
           Use my current location
         </button>
         {onSelectFromMap && (
           <>
-            <span style={{ color: '#d1d5db' }}>|</span>
+            <span className="text-border">|</span>
             <button
               type="button"
               onClick={onSelectFromMap}
-              className="text-sm flex items-center gap-1 transition-colors"
-              style={{ color: '#10b981' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#059669'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#10b981'}
+              className="text-sm flex items-center gap-1 transition-colors text-forest-500 hover:text-forest-600"
             >
               <Map className="h-4 w-4" />
               Select from Soil Map Explorer

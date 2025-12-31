@@ -124,31 +124,30 @@ export default function LayerControl({
         <div className="flex items-center gap-2">
           <div 
             style={{
-              background: 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)',
+              background: 'linear-gradient(135deg, var(--color-forest-700) 0%, var(--color-forest-500) 100%)',
               borderRadius: '6px',
               padding: '6px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 4px rgba(21, 128, 61, 0.2)'
+              boxShadow: '0 2px 4px rgba(92, 141, 90, 0.2)'
             }}
           >
-            <LayersIcon className="h-4 w-4" style={{ color: '#ffffff' }} />
+            <LayersIcon className="h-4 w-4 text-white" />
           </div>
           <div className="text-left">
-            <h3 className="font-semibold text-sm" style={{ color: '#111827', marginBottom: '1px' }}>Data Layers</h3>
+            <h3 className="font-semibold text-sm text-text" style={{ marginBottom: '1px' }}>Data Layers</h3>
             {isExpanded && (
-              <p className="text-xs" style={{ color: '#6b7280' }}>
+              <p className="text-xs text-text-secondary">
                 {visibleCount} layer{visibleCount !== 1 ? 's' : ''} active
               </p>
             )}
           </div>
         </div>
         <div 
-          className="transition-transform duration-200"
+          className="transition-transform duration-200 text-text-muted"
           style={{
-            transform: isExpanded ? 'rotate(0deg)' : 'rotate(180deg)',
-            color: '#6b7280'
+            transform: isExpanded ? 'rotate(0deg)' : 'rotate(180deg)'
           }}
         >
           <ChevronUp className="h-5 w-5" />
@@ -186,16 +185,16 @@ export default function LayerControl({
                         width: '6px',
                         height: '6px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
-                        boxShadow: '0 0 4px rgba(37, 99, 235, 0.4)'
+                        background: 'linear-gradient(135deg, var(--color-ocean-600) 0%, var(--color-ocean-500) 100%)',
+                        boxShadow: '0 0 4px rgba(74, 124, 158, 0.4)'
                       }}
                     />
-                    <h4 className="text-sm font-semibold" style={{ color: '#1e40af' }}>Soil Data</h4>
+                    <h4 className="text-sm font-semibold text-ocean-700">Soil Data</h4>
                   </div>
                   {expandedSections.has('soil-data') ? (
-                    <ChevronUp className="h-4 w-4" style={{ color: '#6b7280' }} />
+                    <ChevronUp className="h-4 w-4 text-slate-500" />
                   ) : (
-                    <ChevronDown className="h-4 w-4" style={{ color: '#6b7280' }} />
+                    <ChevronDown className="h-4 w-4 text-slate-500" />
                   )}
                 </button>
                 {expandedSections.has('soil-data') && (
@@ -242,16 +241,16 @@ export default function LayerControl({
                         width: '6px',
                         height: '6px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
-                        boxShadow: '0 0 4px rgba(37, 99, 235, 0.4)'
+                        background: 'linear-gradient(135deg, var(--color-ocean-600) 0%, var(--color-ocean-500) 100%)',
+                        boxShadow: '0 0 4px rgba(74, 124, 158, 0.4)'
                       }}
                     />
-                    <h4 className="text-sm font-semibold" style={{ color: '#1e40af' }}>Land-Use Data</h4>
+                    <h4 className="text-sm font-semibold text-ocean-700">Land-Use Data</h4>
                   </div>
                   {expandedSections.has('land-use') ? (
-                    <ChevronUp className="h-4 w-4" style={{ color: '#6b7280' }} />
+                    <ChevronUp className="h-4 w-4 text-slate-500" />
                   ) : (
-                    <ChevronDown className="h-4 w-4" style={{ color: '#6b7280' }} />
+                    <ChevronDown className="h-4 w-4 text-slate-500" />
                   )}
                 </button>
                 {expandedSections.has('land-use') && (
@@ -309,13 +308,13 @@ const LayerItem = ({ layer, onToggle, onOpacityChange, cdlYear, onCdlYearChange 
           type="checkbox"
           checked={layer.visible}
           onChange={() => onToggle(layer.id)}
-          className="border-gray-300 text-green-700 focus:ring-green-600 rounded cursor-pointer"
+          className="border-border text-forest-600 focus:ring-forest-500 rounded cursor-pointer"
           style={{
             width: '16px',
             height: '16px'
           }}
         />
-        <span className="text-sm font-medium" style={{ color: '#374151' }}>
+        <span className="text-sm font-medium text-text">
           {layer.name}
         </span>
       </label>
@@ -324,14 +323,14 @@ const LayerItem = ({ layer, onToggle, onOpacityChange, cdlYear, onCdlYearChange 
         style={{
           padding: '4px',
           borderRadius: '6px',
-          backgroundColor: layer.visible ? 'rgba(21, 128, 61, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+          backgroundColor: layer.visible ? 'var(--color-forest-100)' : 'var(--color-slate-100)',
           transition: 'all 0.2s'
         }}
       >
         {layer.visible ? (
-          <Eye className="h-4 w-4" style={{ color: '#15803d' }} />
+          <Eye className="h-4 w-4 text-forest-600" />
         ) : (
-          <EyeOff className="h-4 w-4" style={{ color: '#9ca3af' }} />
+          <EyeOff className="h-4 w-4 text-slate-400" />
         )}
       </div>
     </div>
@@ -341,25 +340,13 @@ const LayerItem = ({ layer, onToggle, onOpacityChange, cdlYear, onCdlYearChange 
         {/* CDL Year Selector */}
         {layer.id === 'cdl' && cdlYear !== undefined && onCdlYearChange && (
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold" style={{ color: '#4b5563' }}>
+            <label className="block text-xs font-semibold text-text-secondary">
               Year
             </label>
             <select
               value={cdlYear}
               onChange={e => onCdlYearChange(Number(e.target.value))}
-              className="w-full rounded-lg border px-3 py-2 text-sm transition-all duration-200 focus:border-transparent focus:ring-2"
-              style={{
-                borderColor: '#d1d5db',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                color: '#374151'
-              }}
-              onFocus={e => {
-                e.currentTarget.style.backgroundColor = '#ffffff'
-                e.currentTarget.style.borderColor = '#15803d'
-              }}
-              onBlur={e => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
-              }}
+              className="form-input w-full rounded-lg border border-border px-3 py-2 text-sm transition-all duration-200 focus:border-ocean-500 bg-surface text-text"
             >
               {CDL_YEARS.map(year => (
                 <option key={year} value={year}>
@@ -374,15 +361,11 @@ const LayerItem = ({ layer, onToggle, onOpacityChange, cdlYear, onCdlYearChange 
         {layer.id !== 'ssurgo-mapunits' && (
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-semibold" style={{ color: '#4b5563' }}>
+              <label className="text-xs font-semibold text-text-secondary">
                 Opacity
               </label>
               <span 
-                className="text-xs font-semibold px-2 py-0.5 rounded-full" 
-                style={{ 
-                  color: '#15803d',
-                  backgroundColor: 'rgba(21, 128, 61, 0.1)'
-                }}
+                className="text-xs font-semibold px-2 py-0.5 rounded-full text-forest-700 bg-forest-100"
               >
                 {Math.round(layer.opacity * 100)}%
               </span>
@@ -396,7 +379,7 @@ const LayerItem = ({ layer, onToggle, onOpacityChange, cdlYear, onCdlYearChange 
               onChange={e => onOpacityChange(layer.id, parseFloat(e.target.value))}
               className="h-2 w-full cursor-pointer appearance-none rounded-lg transition-all duration-200"
               style={{
-                background: `linear-gradient(to right, #15803d 0%, #15803d ${layer.opacity * 100}%, #e5e7eb ${layer.opacity * 100}%, #e5e7eb 100%)`
+                background: `linear-gradient(to right, var(--color-forest-600) 0%, var(--color-forest-600) ${layer.opacity * 100}%, var(--color-border-light) ${layer.opacity * 100}%, var(--color-border-light) 100%)`
               }}
             />
           </div>

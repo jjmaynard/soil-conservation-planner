@@ -269,37 +269,37 @@ export type DrainageClassKey = keyof typeof DRAINAGE_CLASS_INTERPRETATIONS
 // Utility function to get class color
 export function getCapabilityColor(classNum: string): string {
   const colorMap: Record<string, string> = {
-    '1': '#10b981', // emerald-500
-    '2': '#22c55e', // green-500
-    '3': '#eab308', // yellow-500
-    '4': '#f97316', // orange-500
-    '5': '#ef4444', // red-500
-    '6': '#dc2626', // red-600
-    '7': '#b91c1c', // red-700
-    '8': '#6b7280', // gray-500
+    '1': 'var(--color-forest-500)',
+    '2': 'var(--color-forest-400)',
+    '3': 'var(--color-amber-500)',
+    '4': 'var(--color-sunset-500)',
+    '5': 'var(--color-clay-500)',
+    '6': 'var(--color-clay-600)',
+    '7': 'var(--color-clay-700)',
+    '8': 'var(--color-slate-500)',
   }
-  return colorMap[classNum] || '#9ca3af'
+  return colorMap[classNum] || 'var(--color-slate-400)'
 }
 
 // Utility function to get hydrology color
 export function getHydrologyColor(group: string): string {
   const colorMap: Record<string, string> = {
-    A: '#3b82f6', // blue-500
-    B: '#06b6d4', // cyan-500
-    C: '#eab308', // yellow-500
-    D: '#ef4444', // red-500
+    A: 'var(--color-ocean-500)',
+    B: 'var(--color-sky-500)',
+    C: 'var(--color-amber-500)',
+    D: 'var(--color-clay-500)',
   }
-  return colorMap[group] || '#9ca3af'
+  return colorMap[group] || 'var(--color-slate-400)'
 }
 
 // Utility function to get drainage color
 export function getDrainageColor(drainageClass: string): string {
   const normalized = drainageClass.toLowerCase()
-  if (normalized.includes('excessively')) return '#f97316' // orange
-  if (normalized.includes('well')) return '#22c55e' // green
-  if (normalized.includes('moderately')) return '#06b6d4' // cyan
+  if (normalized.includes('excessively')) return 'var(--color-sunset-500)'
+  if (normalized.includes('well')) return 'var(--color-forest-500)'
+  if (normalized.includes('moderately')) return 'var(--color-sky-500)'
   if (normalized.includes('somewhat poorly') || normalized.includes('poorly'))
-    return '#eab308' // yellow
-  if (normalized.includes('very poorly')) return '#ef4444' // red
-  return '#9ca3af' // gray
+    return 'var(--color-amber-500)'
+  if (normalized.includes('very poorly')) return 'var(--color-clay-500)'
+  return 'var(--color-slate-400)'
 }

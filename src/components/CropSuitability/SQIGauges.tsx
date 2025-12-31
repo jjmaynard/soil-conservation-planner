@@ -8,23 +8,23 @@ interface SQIGaugesProps {
 }
 
 const SQI_INFO = {
-  SQ1: { name: 'Nutrient Availability', color: '#10b981' },
-  SQ2: { name: 'Nutrient Retention', color: '#3b82f6' },
-  SQ3: { name: 'Rooting Conditions', color: '#8b5cf6' },
-  SQ4: { name: 'Oxygen Availability', color: '#06b6d4' },
-  SQ5: { name: 'Salinity/Sodicity', color: '#f59e0b' },
-  SQ6: { name: 'Lime/Gypsum', color: '#ec4899' },
-  SQ7: { name: 'Workability', color: '#6366f1' },
-  SR: { name: 'Overall Rating', color: '#ef4444' }
+  SQ1: { name: 'Nutrient Availability', color: 'var(--color-forest-500)' },
+  SQ2: { name: 'Nutrient Retention', color: 'var(--color-ocean-500)' },
+  SQ3: { name: 'Rooting Conditions', color: 'var(--color-lavender-500)' },
+  SQ4: { name: 'Oxygen Availability', color: 'var(--color-sky-500)' },
+  SQ5: { name: 'Salinity/Sodicity', color: 'var(--color-amber-500)' },
+  SQ6: { name: 'Lime/Gypsum', color: 'var(--color-copper-500)' },
+  SQ7: { name: 'Workability', color: 'var(--color-sage-500)' },
+  SR: { name: 'Overall Rating', color: 'var(--color-clay-500)' }
 };
 
 function getScoreColor(score: number): string {
   // Green (100%) to Red (0%) gradient
-  if (score >= 80) return '#10b981'; // Green
-  if (score >= 60) return '#84cc16'; // Lime
-  if (score >= 40) return '#f59e0b'; // Amber/Yellow
-  if (score >= 20) return '#f97316'; // Orange
-  return '#ef4444'; // Red
+  if (score >= 80) return 'var(--color-forest-500)';
+  if (score >= 60) return 'var(--color-moss-500)';
+  if (score >= 40) return 'var(--color-amber-500)';
+  if (score >= 20) return 'var(--color-sunset-500)';
+  return 'var(--color-clay-500)';
 }
 
 export default function SQIGauges({ indices, inputLevel }: SQIGaugesProps) {

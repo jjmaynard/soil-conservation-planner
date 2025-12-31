@@ -78,27 +78,27 @@ export default function Breadcrumbs() {
       className="px-4 md:px-6 py-2" 
       aria-label="Breadcrumb"
       style={{
-        background: 'linear-gradient(to right, #F2F6F2, #E2EBE1, #C7D9C6)',
-        borderBottom: '1px solid #D8DBDB',
+        background: 'linear-gradient(to right, var(--color-forest-50), var(--color-forest-100), var(--color-forest-200))',
+        borderBottom: '1px solid var(--color-border)',
       }}
     >
       <ol className="flex items-center space-x-2 text-sm">
         {breadcrumbs.map((crumb, index) => (
           <li key={crumb.path} className="flex items-center">
-            {index > 0 && <ChevronRight className="w-4 h-4 mx-2" style={{ color: '#6B7D7D' }} />}
+            {index > 0 && <ChevronRight className="w-4 h-4 mx-2 text-slate-500" />}
 
             {crumb.isLast ? (
-              <span className="font-semibold flex items-center" style={{ color: '#3E4A4A' }}>
+              <span className="font-semibold flex items-center text-slate-800">
                 {index === 0 && <Home className="w-4 h-4 mr-1" />}
                 {crumb.label}
               </span>
             ) : (
               <Link
                 href={crumb.path}
-                className="transition-colors flex items-center"
-                style={{ color: '#5C6C6C' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#5C8D5A'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#5C6C6C'}
+                className="transition-colors flex items-center text-slate-600 hover:text-forest-500"
+                style={{ color: 'var(--color-slate-600)' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-forest-500)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-slate-600)'}
               >
                 {index === 0 && <Home className="w-4 h-4 mr-1" />}
                 {crumb.label}

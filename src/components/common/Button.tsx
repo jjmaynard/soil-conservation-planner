@@ -47,8 +47,8 @@ const Button = ({
         type="button"
         onClick={onClick}
         className={`${
-          border ? 'border' : ''
-        } ${buttonClass} flex items-center justify-center gap-1 ${className}`}
+          border ? 'border border-border' : ''
+        } ${buttonClass} flex items-center justify-center gap-1 transition-colors hover:bg-ocean-50 text-text ${className}`}
         {...props}
       >
         {children}

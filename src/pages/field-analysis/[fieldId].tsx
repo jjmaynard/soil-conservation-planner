@@ -147,7 +147,7 @@ export default function FieldAnalysisDetail() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 mx-auto mb-4" style={{ border: '4px solid #e5e7eb', borderTopColor: '#16a34a' }}></div>
+          <div className="animate-spin rounded-full h-16 w-16 mx-auto mb-4" style={{ border: '4px solid #e5e7eb', borderTopColor: 'var(--color-forest-600)' }}></div>
           <p className="text-gray-600">Loading field analysis...</p>
         </div>
       </div>
@@ -165,7 +165,7 @@ export default function FieldAnalysisDetail() {
         {/* Header */}
         <div 
           className="p-4 text-white flex-shrink-0"
-          style={{ background: 'linear-gradient(to right, #16a34a, #15803d, #166534)' }}
+          style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700), var(--color-forest-800))' }}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -173,14 +173,14 @@ export default function FieldAnalysisDetail() {
                 href="/field-analysis"
                 className="transition-colors"
                 style={{ color: '#ffffff' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#d1fae5'}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-forest-100)'}
                 onMouseLeave={(e) => e.currentTarget.style.color = '#ffffff'}
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <div>
                 <h1 className="text-2xl font-bold">{fieldData.name}</h1>
-                <p className="text-sm" style={{ color: '#dcfce7' }}>
+                <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
                   {fieldData.area} acres • CLU: {fieldData.clu_id}
                 </p>
               </div>
@@ -189,8 +189,8 @@ export default function FieldAnalysisDetail() {
               <button
                 onClick={handleExportReport}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
-                style={{ backgroundColor: '#ffffff', color: '#15803d' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0fdf4'}
+                style={{ backgroundColor: '#ffffff', color: 'var(--color-forest-700)' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-forest-50)'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
               >
                 <Download className="w-4 h-4" />
@@ -217,7 +217,7 @@ export default function FieldAnalysisDetail() {
           <div className="w-full lg:w-96 bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0">
             <div className="p-4">
               <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Layers className="w-5 h-5" style={{ color: '#16a34a' }} />
+                <Layers className="w-5 h-5" style={{ color: 'var(--color-conservation)' }} />
                 Field Analysis
               </h2>
 
@@ -227,15 +227,15 @@ export default function FieldAnalysisDetail() {
                   onClick={() => toggleSection('soil')}
                   className="w-full flex items-center justify-between p-3 rounded-lg transition-colors"
                   style={{ 
-                    backgroundColor: expandedSections.has('soil') ? '#f0fdf4' : '#f9fafb',
-                    border: expandedSections.has('soil') ? '1px solid #bbf7d0' : '1px solid #e5e7eb'
+                    backgroundColor: expandedSections.has('soil') ? 'var(--color-forest-50)' : '#f9fafb',
+                    border: expandedSections.has('soil') ? '1px solid var(--color-forest-200)' : '1px solid #e5e7eb'
                   }}
                 >
-                  <h3 className="font-semibold" style={{ color: '#166534' }}>
+                  <h3 className="font-semibold" style={{ color: 'var(--color-forest-800)' }}>
                     Soil Composition
                   </h3>
                   {expandedSections.has('soil') ? (
-                    <ChevronDown className="w-5 h-5" style={{ color: '#16a34a' }} />
+                    <ChevronDown className="w-5 h-5" style={{ color: 'var(--color-forest-600)' }} />
                   ) : (
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   )}
@@ -256,15 +256,15 @@ export default function FieldAnalysisDetail() {
                   onClick={() => toggleSection('crops')}
                   className="w-full flex items-center justify-between p-3 rounded-lg transition-colors"
                   style={{ 
-                    backgroundColor: expandedSections.has('crops') ? '#eff6ff' : '#f9fafb',
-                    border: expandedSections.has('crops') ? '1px solid #bfdbfe' : '1px solid #e5e7eb'
+                    backgroundColor: expandedSections.has('crops') ? 'var(--color-ocean-50)' : '#f9fafb',
+                    border: expandedSections.has('crops') ? '1px solid var(--color-ocean-200)' : '1px solid #e5e7eb'
                   }}
                 >
-                  <h3 className="font-semibold" style={{ color: '#1e40af' }}>
+                  <h3 className="font-semibold" style={{ color: 'var(--color-ocean-800)' }}>
                     Crop History (5 Years)
                   </h3>
                   {expandedSections.has('crops') ? (
-                    <ChevronDown className="w-5 h-5" style={{ color: '#2563eb' }} />
+                    <ChevronDown className="w-5 h-5" style={{ color: 'var(--color-ocean-600)' }} />
                   ) : (
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   )}
@@ -282,15 +282,15 @@ export default function FieldAnalysisDetail() {
                   onClick={() => toggleSection('erosion')}
                   className="w-full flex items-center justify-between p-3 rounded-lg transition-colors"
                   style={{ 
-                    backgroundColor: expandedSections.has('erosion') ? '#fff7ed' : '#f9fafb',
-                    border: expandedSections.has('erosion') ? '1px solid #fed7aa' : '1px solid #e5e7eb'
+                    backgroundColor: expandedSections.has('erosion') ? 'var(--color-clay-50)' : '#f9fafb',
+                    border: expandedSections.has('erosion') ? '1px solid var(--color-clay-200)' : '1px solid #e5e7eb'
                   }}
                 >
-                  <h3 className="font-semibold" style={{ color: '#9a3412' }}>
+                  <h3 className="font-semibold" style={{ color: 'var(--color-clay-800)' }}>
                     Erosion Analysis
                   </h3>
                   {expandedSections.has('erosion') ? (
-                    <ChevronDown className="w-5 h-5" style={{ color: '#ea580c' }} />
+                    <ChevronDown className="w-5 h-5" style={{ color: 'var(--color-clay-600)' }} />
                   ) : (
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   )}
@@ -308,15 +308,15 @@ export default function FieldAnalysisDetail() {
                   onClick={() => toggleSection('drainage')}
                   className="w-full flex items-center justify-between p-3 rounded-lg transition-colors"
                   style={{ 
-                    backgroundColor: expandedSections.has('drainage') ? '#ecfeff' : '#f9fafb',
-                    border: expandedSections.has('drainage') ? '1px solid #a5f3fc' : '1px solid #e5e7eb'
+                    backgroundColor: expandedSections.has('drainage') ? 'var(--color-sky-50)' : '#f9fafb',
+                    border: expandedSections.has('drainage') ? '1px solid var(--color-sky-200)' : '1px solid #e5e7eb'
                   }}
                 >
-                  <h3 className="font-semibold" style={{ color: '#155e75' }}>
+                  <h3 className="font-semibold" style={{ color: 'var(--color-sky-800)' }}>
                     Drainage Assessment
                   </h3>
                   {expandedSections.has('drainage') ? (
-                    <ChevronDown className="w-5 h-5" style={{ color: '#0891b2' }} />
+                    <ChevronDown className="w-5 h-5" style={{ color: 'var(--color-sky-600)' }} />
                   ) : (
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   )}
@@ -360,15 +360,15 @@ export default function FieldAnalysisDetail() {
                   onClick={() => toggleSection('concerns')}
                   className="w-full flex items-center justify-between p-3 rounded-lg transition-colors"
                   style={{ 
-                    backgroundColor: expandedSections.has('concerns') ? '#fef2f2' : '#f9fafb',
-                    border: expandedSections.has('concerns') ? '1px solid #fecaca' : '1px solid #e5e7eb'
+                    backgroundColor: expandedSections.has('concerns') ? 'var(--color-assessment-light)' : '#f9fafb',
+                    border: expandedSections.has('concerns') ? '1px solid var(--color-amber-200)' : '1px solid #e5e7eb'
                   }}
                 >
-                  <h3 className="font-semibold" style={{ color: '#991b1b' }}>
+                  <h3 className="font-semibold" style={{ color: 'var(--color-assessment)' }}>
                     Resource Concerns
                   </h3>
                   {expandedSections.has('concerns') ? (
-                    <ChevronDown className="w-5 h-5" style={{ color: '#dc2626' }} />
+                    <ChevronDown className="w-5 h-5" style={{ color: 'var(--color-assessment)' }} />
                   ) : (
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   )}

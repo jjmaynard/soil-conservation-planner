@@ -5,7 +5,7 @@ import NavMenu from '../common/NavMenu'
 
 const MapTopBar = () => (
   <div
-    className="absolute left-0 top-0 flex h-20 w-full items-center bg-dark p-3 shadow"
+    className="absolute left-0 top-0 flex h-20 w-full items-center p-3 shadow bg-ocean-800"
     style={{ zIndex: 1000 }}
   >
     <div className="flex w-full justify-between">

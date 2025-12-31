@@ -230,7 +230,7 @@ export default function SoilDashboard({ ssurgoData, cdlHistory, onClose }: SoilD
           <div className="border-green-500 rounded-xl border-l-4 bg-white p-6 shadow-lg">
             <div className="mb-2 flex items-center justify-between">
               <Layers className="text-green-500 h-8 w-8" />
-              <span className="bg-green-100 text-green-700 rounded-full px-2 py-1 text-xs font-medium">
+              <span className="bg-forest-100 text-forest-700 rounded-full px-2 py-1 text-xs font-medium">
                 Active
               </span>
             </div>
@@ -259,7 +259,7 @@ export default function SoilDashboard({ ssurgoData, cdlHistory, onClose }: SoilD
           <div className="border-amber-500 rounded-xl border-l-4 bg-white p-6 shadow-lg">
             <div className="mb-2 flex items-center justify-between">
               <Gauge className="text-amber-500 h-8 w-8" />
-              <span className="bg-green-100 text-green-700 rounded-full px-2 py-1 text-xs font-medium">
+              <span className="bg-forest-100 text-forest-700 rounded-full px-2 py-1 text-xs font-medium">
                 92%
               </span>
             </div>
@@ -311,7 +311,7 @@ export default function SoilDashboard({ ssurgoData, cdlHistory, onClose }: SoilD
                       />
                       <span>{comp.name}</span>
                       {comp.major && (
-                        <span className="bg-green-100 text-green-700 rounded-full px-2 py-0.5 text-xs">
+                        <span className="bg-forest-100 text-forest-700 rounded-full px-2 py-0.5 text-xs">
                           Major
                         </span>
                       )}
@@ -634,14 +634,14 @@ export default function SoilDashboard({ ssurgoData, cdlHistory, onClose }: SoilD
                             <span
                               className={`rounded px-1.5 py-0.5 text-xs font-bold ${
                                 yearData.cropType === 'annual'
-                                  ? 'bg-blue-100 text-blue-800'
+                                  ? 'bg-ocean-100 text-ocean-800'
                                   : yearData.cropType === 'perennial'
-                                  ? 'bg-purple-100 text-purple-800'
+                                  ? 'bg-lavender-100 text-lavender-800'
                                   : yearData.cropType === 'permanent'
-                                  ? 'bg-red-100 text-red-800'
+                                  ? 'bg-clay-100 text-clay-800'
                                   : yearData.cropType === 'pasture'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-gray-100 text-gray-800'
+                                  ? 'bg-forest-100 text-forest-800'
+                                  : 'bg-slate-100 text-slate-800'
                               }`}
                             >
                               {yearData.cropType === 'annual'
@@ -666,10 +666,10 @@ export default function SoilDashboard({ ssurgoData, cdlHistory, onClose }: SoilD
                             <span
                               className={`rounded px-2 py-0.5 text-xs font-semibold ${
                                 yearData.confidence >= 80
-                                  ? 'bg-green-100 text-green-800'
+                                  ? 'bg-forest-100 text-forest-800'
                                   : yearData.confidence >= 50
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : 'bg-clay-100 text-clay-800'
                               }`}
                             >
                               {yearData.confidence}%

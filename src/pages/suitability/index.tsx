@@ -116,27 +116,27 @@ export default function LandSuitabilityDashboard() {
           {/* Header */}
           <div 
             className="text-white shadow-lg rounded-lg my-6 mb-8"
-            style={{ background: 'linear-gradient(to right, #16a34a, #15803d, #166534)' }}
+            style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700), var(--color-forest-800))' }}
           >
             <div className="px-6 py-6">
               <div className="flex items-center gap-3 mb-2">
                 <BarChart3 className="h-8 w-8" />
                 <h1 className="text-3xl font-bold">Land Suitability Assessment</h1>
               </div>
-              <p className="text-sm" style={{ color: '#dcfce7' }}>
+              <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
                 Evaluate soil suitability for various land uses including agriculture, construction, and recreation
               </p>
             </div>
           </div>
 
           {/* Info Card */}
-          <div className="rounded-lg border p-4 mb-8 flex items-start gap-3" style={{ backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }}>
-            <Info className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#16a34a' }} />
+          <div className="alert-success rounded-lg p-4 mb-8 flex items-start gap-3">
+            <Info className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <div>
-              <div className="font-semibold mb-1" style={{ color: '#166534' }}>
+              <div className="font-semibold mb-1">
                 What is Land Suitability?
               </div>
-              <p className="text-sm" style={{ color: '#15803d' }}>
+              <p className="text-sm">
                 Land suitability assessment evaluates how well soil properties and site conditions match the requirements for specific land uses. 
                 These assessments help landowners, developers, and planners make informed decisions about land management and development.
               </p>
@@ -160,7 +160,7 @@ export default function LandSuitabilityDashboard() {
                         borderColor: selectedModule === module.id ? '#3b82f6' : '#e5e7eb'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = '#3b82f6';
+                        e.currentTarget.style.borderColor = 'var(--color-ocean-500)';
                         e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
                       }}
                       onMouseLeave={(e) => {
@@ -194,7 +194,7 @@ export default function LandSuitabilityDashboard() {
                             )}
                           </div>
                         </div>
-                        <ArrowRight className="h-6 w-6 flex-shrink-0 ml-4" style={{ color: '#3b82f6' }} />
+                        <ArrowRight className="h-6 w-6 flex-shrink-0 ml-4" style={{ color: 'var(--color-ocean-500)' }} />
                       </div>
                     </div>
                   </Link>
@@ -223,7 +223,7 @@ export default function LandSuitabilityDashboard() {
                       }}
                     >
                       <div className="absolute top-4 right-4">
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
                           Coming Soon
                         </span>
                       </div>

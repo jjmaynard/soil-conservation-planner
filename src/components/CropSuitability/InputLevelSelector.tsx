@@ -28,7 +28,7 @@ interface InputLevelSelectorProps {
 export default function InputLevelSelector({ selectedLevel, onChange }: InputLevelSelectorProps) {
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium" style={{ color: '#374151' }}>
+      <label className="block text-sm font-medium text-text">
         Management/Input Level
       </label>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -37,14 +37,14 @@ export default function InputLevelSelector({ selectedLevel, onChange }: InputLev
             key={level.value}
             type="button"
             onClick={() => onChange(level.value)}
-            className="p-4 border-2 rounded-lg transition-all text-left"
-            style={{
-              borderColor: selectedLevel === level.value ? '#3b82f6' : '#e5e7eb',
-              backgroundColor: selectedLevel === level.value ? '#eff6ff' : 'white'
-            }}
+            className={`p-4 border-2 rounded-lg transition-all text-left ${
+              selectedLevel === level.value 
+                ? 'border-ocean-500 bg-ocean-50' 
+                : 'border-border bg-surface hover:border-ocean-300'
+            }`}
           >
-            <div className="font-semibold" style={{ color: '#111827' }}>{level.label}</div>
-            <div className="mt-1 text-xs" style={{ color: '#6b7280' }}>{level.description}</div>
+            <div className="font-semibold text-text">{level.label}</div>
+            <div className="mt-1 text-xs text-text-secondary">{level.description}</div>
           </button>
         ))}
       </div>

@@ -93,62 +93,62 @@ const soilPropertyRanges: Record<
   Array<{ min: number; max: number; label: string; color: string }>
 > = {
   clay: [
-    { min: 0, max: 5, label: 'Very Low', color: '#fef3c7' },
-    { min: 5, max: 15, label: 'Low', color: '#fde68a' },
-    { min: 15, max: 25, label: 'Moderate', color: '#fcd34d' },
-    { min: 25, max: 35, label: 'Moderately High', color: '#f59e0b' },
-    { min: 35, max: 45, label: 'High', color: '#d97706' },
-    { min: 45, max: 55, label: 'Very High', color: '#b45309' },
-    { min: 55, max: 70, label: 'Extremely High', color: '#92400e' },
-    { min: 70, max: 100, label: 'Maximum', color: '#78350f' },
+    { min: 0, max: 5, label: 'Very Low', color: 'var(--color-amber-100)' },
+    { min: 5, max: 15, label: 'Low', color: 'var(--color-amber-200)' },
+    { min: 15, max: 25, label: 'Moderate', color: 'var(--color-amber-300)' },
+    { min: 25, max: 35, label: 'Moderately High', color: 'var(--color-amber-400)' },
+    { min: 35, max: 45, label: 'High', color: 'var(--color-amber-500)' },
+    { min: 45, max: 55, label: 'Very High', color: 'var(--color-amber-600)' },
+    { min: 55, max: 70, label: 'Extremely High', color: 'var(--color-amber-700)' },
+    { min: 70, max: 100, label: 'Maximum', color: 'var(--color-amber-800)' },
   ],
   om: [
-    { min: 0, max: 0.5, label: 'Very Low', color: '#fee2e2' },
-    { min: 0.5, max: 1, label: 'Low', color: '#fecaca' },
-    { min: 1, max: 2, label: 'Moderate', color: '#fca5a5' },
-    { min: 2, max: 4, label: 'Moderate-High', color: '#f87171' },
-    { min: 4, max: 6, label: 'High', color: '#ef4444' },
-    { min: 6, max: 10, label: 'Very High', color: '#dc2626' },
-    { min: 10, max: 20, label: 'Extremely High', color: '#b91c1c' },
-    { min: 20, max: 100, label: 'Organic', color: '#991b1b' },
+    { min: 0, max: 0.5, label: 'Very Low', color: 'var(--color-clay-100)' },
+    { min: 0.5, max: 1, label: 'Low', color: 'var(--color-clay-200)' },
+    { min: 1, max: 2, label: 'Moderate', color: 'var(--color-clay-300)' },
+    { min: 2, max: 4, label: 'Moderate-High', color: 'var(--color-clay-400)' },
+    { min: 4, max: 6, label: 'High', color: 'var(--color-clay-500)' },
+    { min: 6, max: 10, label: 'Very High', color: 'var(--color-clay-600)' },
+    { min: 10, max: 20, label: 'Extremely High', color: 'var(--color-clay-700)' },
+    { min: 20, max: 100, label: 'Organic', color: 'var(--color-clay-800)' },
   ],
   ph: [
-    { min: 3.0, max: 4.5, label: 'Extremely Acid', color: '#fee2e2' },
-    { min: 4.5, max: 5.0, label: 'Very Strongly Acid', color: '#fecaca' },
-    { min: 5.0, max: 5.5, label: 'Strongly Acid', color: '#fca5a5' },
-    { min: 5.5, max: 6.0, label: 'Moderately Acid', color: '#f87171' },
-    { min: 6.0, max: 6.5, label: 'Slightly Acid', color: '#fbbf24' },
-    { min: 6.5, max: 7.3, label: 'Neutral', color: '#10b981' },
-    { min: 7.3, max: 8.0, label: 'Slightly Alkaline', color: '#3b82f6' },
-    { min: 8.0, max: 8.5, label: 'Moderately Alkaline', color: '#6366f1' },
-    { min: 8.5, max: 10.5, label: 'Strongly Alkaline', color: '#8b5cf6' },
+    { min: 3.0, max: 4.5, label: 'Extremely Acid', color: 'var(--color-clay-600)' },
+    { min: 4.5, max: 5.0, label: 'Very Strongly Acid', color: 'var(--color-sunset-500)' },
+    { min: 5.0, max: 5.5, label: 'Strongly Acid', color: 'var(--color-sunset-400)' },
+    { min: 5.5, max: 6.0, label: 'Moderately Acid', color: 'var(--color-amber-500)' },
+    { min: 6.0, max: 6.5, label: 'Slightly Acid', color: 'var(--color-amber-400)' },
+    { min: 6.5, max: 7.3, label: 'Neutral', color: 'var(--color-forest-500)' },
+    { min: 7.3, max: 8.0, label: 'Slightly Alkaline', color: 'var(--color-ocean-400)' },
+    { min: 8.0, max: 8.5, label: 'Moderately Alkaline', color: 'var(--color-ocean-600)' },
+    { min: 8.5, max: 10.5, label: 'Strongly Alkaline', color: 'var(--color-lavender-600)' },
   ],
   awc: [
-    { min: 0.0, max: 0.05, label: 'Very Low', color: '#fee2e2' },
-    { min: 0.05, max: 0.1, label: 'Low', color: '#fecaca' },
-    { min: 0.1, max: 0.15, label: 'Moderately Low', color: '#bfdbfe' },
-    { min: 0.15, max: 0.2, label: 'Moderate', color: '#93c5fd' },
-    { min: 0.2, max: 0.25, label: 'Moderately High', color: '#60a5fa' },
-    { min: 0.25, max: 0.3, label: 'High', color: '#3b82f6' },
-    { min: 0.3, max: 0.4, label: 'Very High', color: '#2563eb' },
-    { min: 0.4, max: 0.6, label: 'Extremely High', color: '#1d4ed8' },
+    { min: 0.0, max: 0.05, label: 'Very Low', color: 'var(--color-clay-200)' },
+    { min: 0.05, max: 0.1, label: 'Low', color: 'var(--color-sunset-300)' },
+    { min: 0.1, max: 0.15, label: 'Moderately Low', color: 'var(--color-amber-400)' },
+    { min: 0.15, max: 0.2, label: 'Moderate', color: 'var(--color-sky-400)' },
+    { min: 0.2, max: 0.25, label: 'Moderately High', color: 'var(--color-ocean-500)' },
+    { min: 0.25, max: 0.3, label: 'High', color: 'var(--color-ocean-600)' },
+    { min: 0.3, max: 0.4, label: 'Very High', color: 'var(--color-ocean-700)' },
+    { min: 0.4, max: 0.6, label: 'Extremely High', color: 'var(--color-ocean-800)' },
   ],
   ksat: [
-    { min: 0.001, max: 0.1, label: 'Very Slow', color: '#1e1b4b' },
-    { min: 0.1, max: 1, label: 'Slow', color: '#312e81' },
-    { min: 1, max: 4, label: 'Moderately Slow', color: '#4c1d95' },
-    { min: 4, max: 14, label: 'Moderate', color: '#7c3aed' },
-    { min: 14, max: 40, label: 'Moderately Rapid', color: '#8b5cf6' },
-    { min: 40, max: 140, label: 'Rapid', color: '#a78bfa' },
-    { min: 140, max: 400, label: 'Very Rapid', color: '#c4b5fd' },
-    { min: 400, max: 2000, label: 'Extremely Rapid', color: '#e0e7ff' },
+    { min: 0.001, max: 0.1, label: 'Very Slow', color: 'var(--color-charcoal-900)' },
+    { min: 0.1, max: 1, label: 'Slow', color: 'var(--color-charcoal-800)' },
+    { min: 1, max: 4, label: 'Moderately Slow', color: 'var(--color-lavender-800)' },
+    { min: 4, max: 14, label: 'Moderate', color: 'var(--color-lavender-600)' },
+    { min: 14, max: 40, label: 'Moderately Rapid', color: 'var(--color-lavender-500)' },
+    { min: 40, max: 140, label: 'Rapid', color: 'var(--color-lavender-400)' },
+    { min: 140, max: 400, label: 'Very Rapid', color: 'var(--color-lavender-300)' },
+    { min: 400, max: 2000, label: 'Extremely Rapid', color: 'var(--color-lavender-100)' },
   ],
 }
 
 // Classify property value
 function classifyProperty(value: number, property: string): { color: string; label: string } {
   const ranges = soilPropertyRanges[property]
-  if (!ranges) return { color: '#d1d5db', label: 'Unknown' }
+  if (!ranges) return { color: 'var(--color-slate-300)', label: 'Unknown' }
 
   for (let i = 0; i < ranges.length - 1; i++) {
     if (value >= ranges[i].min && value < ranges[i].max) {
@@ -161,7 +161,7 @@ function classifyProperty(value: number, property: string): { color: string; lab
     return { color: lastRange.color, label: lastRange.label }
   }
 
-  return { color: '#d1d5db', label: 'Unknown' }
+  return { color: 'var(--color-slate-300)', label: 'Unknown' }
 }
 
 // USDA Texture Classification Function
@@ -192,21 +192,21 @@ function getTextureClass(sand: number, silt: number, clay: number): string {
 // Get color for texture class
 function getTextureClassColor(textureClass: string): string {
   const colorMap: Record<string, string> = {
-    Sand: '#f4e4c1',
-    'Loamy sand': '#e6d4a8',
-    'Sandy loam': '#d9c48f',
-    Loam: '#8b7355',
-    'Silt loam': '#a0826d',
-    Silt: '#c8b597',
-    'Sandy clay loam': '#9d7f5c',
-    'Clay loam': '#7a5c3f',
-    'Silty clay loam': '#8d6e4f',
-    'Sandy clay': '#6b4e3d',
-    'Silty clay': '#5c4033',
-    Clay: '#4a3728',
-    Unknown: '#d1d5db',
+    Sand: 'var(--color-sand-200)',
+    'Loamy sand': 'var(--color-sand-300)',
+    'Sandy loam': 'var(--color-sand-400)',
+    Loam: 'var(--color-sand-600)',
+    'Silt loam': 'var(--color-earth-400)',
+    Silt: 'var(--color-earth-500)',
+    'Sandy clay loam': 'var(--color-earth-600)',
+    'Clay loam': 'var(--color-clay-600)',
+    'Silty clay loam': 'var(--color-clay-500)',
+    'Sandy clay': 'var(--color-clay-700)',
+    'Silty clay': 'var(--color-clay-800)',
+    Clay: 'var(--color-clay-900)',
+    Unknown: 'var(--color-slate-300)',
   }
-  return colorMap[textureClass] || '#d1d5db'
+  return colorMap[textureClass] || 'var(--color-slate-300)'
 }
 
 // Component to display Water Management and Agricultural Productivity for all components
@@ -223,7 +223,7 @@ function InterpretationsContent({ components }: { components: any[] }) {
   return (
     <div className="space-y-4">
       {components.map((component, idx) => {
-        const colors = ['#10b981', '#60a5fa', '#fbbf24', '#a78bfa', '#f472b6', '#fb923c']
+        const colors = ['var(--color-forest-600)', 'var(--color-ocean-500)', 'var(--color-amber-500)', 'var(--color-lavender-600)', 'var(--color-copper-500)', 'var(--color-sunset-500)']
         const bgColor = component.majcompflag === 'Yes' ? colors[0] : colors[(idx % (colors.length - 1)) + 1]
 
         // Extract hydrology data
@@ -472,8 +472,25 @@ function CollapsibleSection({ title, icon, defaultOpen = false, children, isOpen
     <div className="border-b border-gray-200 last:border-b-0">
       <button
         onClick={handleToggle}
-        className="w-full flex items-center justify-between p-3 bg-gray-100 hover:bg-gray-200 transition-colors"
-        style={accent ? { borderLeft: `4px solid ${accent}` } : undefined}
+        className="w-full flex items-center justify-between p-3 transition-colors"
+        style={accent ? { 
+          borderLeft: `4px solid ${accent}`,
+          backgroundColor: `${accent}15`,
+        } : { backgroundColor: '#f3f4f6' }}
+        onMouseEnter={(e) => {
+          if (accent) {
+            e.currentTarget.style.backgroundColor = `${accent}25`
+          } else {
+            e.currentTarget.style.backgroundColor = '#e5e7eb'
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (accent) {
+            e.currentTarget.style.backgroundColor = `${accent}15`
+          } else {
+            e.currentTarget.style.backgroundColor = '#f3f4f6'
+          }
+        }}
       >
         <div className="flex items-center gap-2">
           <div style={accent ? { color: accent } : undefined}>
@@ -1100,7 +1117,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
   return (
     <div className={`bg-gray-100 rounded-lg shadow overflow-hidden ${className}`} style={{ backgroundColor: '#f3f4f6' }}>
       {/* Header */}
-      <div className="text-white p-4 rounded-t-lg" style={{ backgroundColor: componentColor || '#2563eb', color: '#ffffff' }}>
+      <div className="text-white p-4 rounded-t-lg" style={{ backgroundColor: componentColor || 'var(--color-ocean-600)', color: '#ffffff' }}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-sm" style={{ color: '#ffffff', opacity: 0.9 }}>{osdData.classification.family}</p>
@@ -1108,7 +1125,7 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
           <button
             onClick={toggleAll}
             className="px-3 py-1.5 bg-white hover:bg-white rounded text-sm font-medium transition-colors shadow-sm whitespace-nowrap flex-shrink-0"
-            style={{ color: componentColor || '#2563eb', opacity: 0.95, minWidth: '110px' }}
+            style={{ color: componentColor || 'var(--color-ocean-600)', opacity: 0.50, minWidth: '110px' }}
             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.95'}
           >
@@ -1339,27 +1356,27 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
                     <div className="mb-1 font-semibold">USDA Texture Classes:</div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                       <div className="flex items-center gap-1.5">
-                        <div className="h-3 w-3 rounded" style={{ backgroundColor: '#f4e4c1' }} />
+                        <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-sand-200)' }} />
                         <span>Sand</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="h-3 w-3 rounded" style={{ backgroundColor: '#8b7355' }} />
+                        <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-sand-600)' }} />
                         <span>Loam</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="h-3 w-3 rounded" style={{ backgroundColor: '#d9c48f' }} />
+                        <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-sand-400)' }} />
                         <span>Sandy loam</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="h-3 w-3 rounded" style={{ backgroundColor: '#7a5c3f' }} />
+                        <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-clay-600)' }} />
                         <span>Clay loam</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="h-3 w-3 rounded" style={{ backgroundColor: '#a0826d' }} />
+                        <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-earth-400)' }} />
                         <span>Silt loam</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <div className="h-3 w-3 rounded" style={{ backgroundColor: '#4a3728' }} />
+                        <div className="h-3 w-3 rounded" style={{ backgroundColor: 'var(--color-clay-900)' }} />
                         <span>Clay</span>
                       </div>
                     </div>
