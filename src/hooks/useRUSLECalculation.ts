@@ -33,31 +33,31 @@ export function useRUSLECalculation() {
 
   const compareScenarios = useCallback(
     async (
-      geometry: string,
+      wkt: string,
       startDate: string,
       endDate: string,
-      baselinePractice: 'none' | 'contour' | 'strip_cropping' | 'terracing',
-      proposedPractice: 'none' | 'contour' | 'strip_cropping' | 'terracing'
+      baselinePractice: 'none' | 'contour_farming' | 'strip_cropping' | 'terracing',
+      proposedPractice: 'none' | 'contour_farming' | 'strip_cropping' | 'terracing'
     ) => {
       // Calculate baseline scenario
       const baselineResult = await calculate({
-        geometry,
+        wkt,
         start_date: startDate,
         end_date: endDate,
-        p_factor_params: { practice_type: baselinePractice },
+        conservation_practices: [baselinePractice],
       })
 
       // Calculate proposed scenario
       const proposedResult = await calculate({
-        geometry,
+        wkt,
         start_date: startDate,
         end_date: endDate,
-        p_factor_params: { practice_type: proposedPractice },
+        conservation_practices: [proposedPractice],
       })
 
       // Compare results
-      const baselineErosion = baselineResult.soil_loss_statistics.mean
-      const proposedErosion = proposedResult.soil_loss_statistics.mean
+      const baselineErosion = baselineResult.soil_loss_rate_tons_acre_yr
+      const proposedErosion = proposedResult.soil_loss_rate_tons_acre_yr
       const reduction = baselineErosion - proposedErosion
       const reductionPercent = (reduction / baselineErosion) * 100
 
@@ -66,7 +66,7 @@ export function useRUSLECalculation() {
         proposed: proposedResult,
         reduction_tons_ac_yr: reduction,
         reduction_percent: reductionPercent,
-        meets_t_value: !proposedResult.erosion_risk.exceeds_t_value,
+        meets_t_value: proposedErosion <= (proposedResult.scenario_comparison?.t_value_used || 5.0),
       }
     },
     [calculate]
