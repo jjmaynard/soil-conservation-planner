@@ -149,7 +149,7 @@ class GEEAPIClient {
         detectContours: request.detect_contours,
         includeScenarios: request.include_scenarios,
         includeFactorMaps: request.include_factor_maps,
-        includeEvents: request.include_events,
+        includeUncertainty: request.include_uncertainty,
       })
       
       const { data } = await this.client.post<RUSLEResponse>(
