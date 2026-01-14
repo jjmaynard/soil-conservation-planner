@@ -2090,6 +2090,11 @@ function AllScenariosExplorerCard({ result }: { result: RUSLEResponse }) {
   const mostEffective = result.scenario_comparison?.most_effective_practice
   const baselineLoss = result.baseline?.soil_loss_rate_tons_acre_yr || 0
   
+  // Calculate average reduction percent from scenarios
+  const averageReductionPercent = result.scenarios && result.scenarios.length > 0
+    ? result.scenarios.reduce((sum, s) => sum + (s.erosion_reduction_percent || 0), 0) / result.scenarios.length
+    : 0
+  
   if (!result.scenarios || result.scenarios.length === 0) {
     return null
   }
@@ -2561,7 +2566,7 @@ function AllScenariosExplorerCard({ result }: { result: RUSLEResponse }) {
             <div>
               <p style={{ color: '#4A7C9E' }}>Avg Reduction</p>
               <p className="font-bold text-lg" style={{ color: '#345770' }}>
-                {result.scenario_comparison.average_reduction_percent?.toFixed(1)}%
+                {averageReductionPercent.toFixed(1)}%
               </p>
               <p className="text-xs" style={{ color: '#6B7676' }}>All practices</p>
             </div>
