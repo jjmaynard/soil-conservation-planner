@@ -397,9 +397,10 @@ class GEEAPIClient {
       // Handle both uppercase (legacy) and lowercase property names from backend
       // Cast to any to handle dynamic property name variations from GEE backend
       const props = feature.properties as any
+      const featureAny = feature as any
       
       return {
-        clu_id: props.clu_id || props.CSBID || props.CLU_ID || feature.id as string,
+        clu_id: props.clu_id || props.CSBID || props.CLU_ID || featureAny.id || 'unknown',
         acres: props.acres || props.CSBACRES || props.ACRES || 0,
         state: props.state || props.STATEFIPS || props.STATE || '',
         county: props.county || props.CNTY || props.COUNTY || '',
