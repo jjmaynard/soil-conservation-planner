@@ -366,10 +366,10 @@ class GEEAPIClient {
       console.log('[GEE API] Feature properties:', feature.properties)
 
       return {
-        clu_id: feature.properties.CSBID || feature.id,
-        acres: feature.properties.CSBACRES || feature.properties.ACRES,
-        state: feature.properties.STATEFIPS,
-        county: feature.properties.CNTY,
+        clu_id: feature.properties.clu_id,
+        acres: feature.properties.acres,
+        state: feature.properties.state,
+        county: feature.properties.county,
         farm_number: feature.properties.farm_number,
         tract_number: feature.properties.tract_number,
         field_number: feature.properties.field_number,
