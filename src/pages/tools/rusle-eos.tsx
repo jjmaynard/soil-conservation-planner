@@ -2096,7 +2096,7 @@ function AllScenariosExplorerCard({ result }: { result: RUSLEResponse }) {
   
   // Sort scenarios based on selected criteria
   const getSortedScenarios = () => {
-    let scenarios = [...result.scenarios]
+    let scenarios = [...(result.scenarios || [])]
     
     if (showOnlyCompliant) {
       scenarios = scenarios.filter(s => s.soil_loss_rate_tons_acre_yr <= tValue)
