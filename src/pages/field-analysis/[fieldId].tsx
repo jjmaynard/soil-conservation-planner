@@ -67,6 +67,7 @@ export default function FieldAnalysisDetail() {
   )
   const [selectedSoil, setSelectedSoil] = useState<any>(null)
   const [activeLayers, setActiveLayers] = useState<string[]>(['soil-boundaries'])
+  const [showCSBLayer, setShowCSBLayer] = useState(true)
 
   useEffect(() => {
     if (fieldId) {
@@ -427,6 +428,8 @@ export default function FieldAnalysisDetail() {
               fieldData={fieldData}
               selectedSoil={selectedSoil}
               activeLayers={activeLayers}
+              showCSBLayer={showCSBLayer}
+              onCSBLayerToggle={() => setShowCSBLayer(!showCSBLayer)}
               onLayerToggle={(layerId) => {
                 setActiveLayers(prev => 
                   prev.includes(layerId) 

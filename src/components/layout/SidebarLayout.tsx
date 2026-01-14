@@ -95,8 +95,8 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
       title: 'Technical Tools',
       items: [
         {
-          path: '/tools/rusle2',
-          label: 'RUSLE2',
+          path: '/tools/rusle-eos',
+          label: 'RUSLE-EOS',
           icon: Mountain,
           description: 'Erosion prediction',
         },

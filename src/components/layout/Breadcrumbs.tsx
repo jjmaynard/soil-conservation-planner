@@ -24,6 +24,7 @@ const breadcrumbLabels: Record<string, string> = {
 
   // Tools
   rusle2: 'RUSLE2',
+  'rusle-eos': 'RUSLE-EOS',
   'nutrient-calc': 'Nutrient Calculator',
 
   // Dynamic routes

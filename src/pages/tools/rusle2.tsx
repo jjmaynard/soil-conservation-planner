@@ -1,53 +1,22 @@
-import { Construction, Mountain, CheckCircle2 } from 'lucide-react'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 export default function RUSLE2() {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Redirect to RUSLE-EOS
+    router.replace('/tools/rusle-eos')
+  }, [router])
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Under Development Banner */}
-        <div
-          className="rounded-lg p-8 mb-8 text-white text-center"
-          style={{
-            background: 'linear-gradient(to right, #f59e0b, #d97706)',
-          }}
-        >
-          <Construction className="w-16 h-16 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold mb-2">Under Development</h1>
-          <p className="text-lg opacity-90">
-            This module is currently being built and will be available soon.
-          </p>
-        </div>
-
-        {/* Module Information */}
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex items-center mb-6">
-            <div
-              className="p-3 rounded-lg mr-4"
-              style={{
-                background: 'linear-gradient(to right, #ea580c, #c2410c)',
-              }}
-            >
-              <Mountain className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">RUSLE2</h2>
-              <p className="text-gray-600">Revised Universal Soil Loss Equation</p>
-            </div>
-          </div>
-
-          <div className="prose max-w-none">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Module Overview</h3>
-            <p className="text-gray-700 mb-4">
-              The RUSLE2 module provides comprehensive soil erosion prediction using the Revised
-              Universal Soil Loss Equation (Version 2). Calculate erosion rates, evaluate
-              conservation practice effectiveness, and generate before/after comparisons for
-              conservation planning.
-            </p>
-
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg mb-6">
-              <p className="text-sm text-gray-700 font-mono">
-                <strong>RUSLE2 Equation:</strong> A = R × K × LS × C × P
-              </p>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <p className="text-gray-600">Redirecting to RUSLE-EOS...</p>
+      </div>
+    </div>
+  )
+}
               <p className="text-xs text-gray-600 mt-2">
                 Where: A = Annual Soil Loss (tons/acre/year), R = Rainfall Erosivity, K = Soil
                 Erodibility, LS = Slope Length & Steepness, C = Cover Management, P = Support

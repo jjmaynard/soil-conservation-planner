@@ -27,29 +27,51 @@ export default function FieldAnalysisLanding() {
   const router = useRouter()
   const [selectionMethod, setSelectionMethod] = useState<SelectionMethod>('browse')
   const [searchQuery, setSearchQuery] = useState('')
-  const [showCLULayer, setShowCLULayer] = useState(true)
+  const [showCLULayer, setShowCLULayer] = useState(false)
+  const [showCSBLayer, setShowCSBLayer] = useState(true)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isFromPlanningWizard, setIsFromPlanningWizard] = useState(false)
+  const [isFromRUSLE, setIsFromRUSLE] = useState(false)
   const [searchSuggestions, setSearchSuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [mapControls, setMapControls] = useState<{ panToLocation?: (lat: number, lng: number, zoom?: number) => void }>({})
 
-  // Check if we're coming from planning wizard
+  // Check if we're coming from planning wizard or RUSLE-EOS
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const returnFlag = sessionStorage.getItem('returnToPlanningWizard')
-      setIsFromPlanningWizard(returnFlag === 'true')
+      const planningFlag = sessionStorage.getItem('returnToPlanningWizard')
+      const rusleFlag = sessionStorage.getItem('returnToRUSLE')
+      setIsFromPlanningWizard(planningFlag === 'true')
+      setIsFromRUSLE(rusleFlag === 'true')
     }
   }, [])
 
   const handleFieldSelected = useCallback((fieldData: any) => {
-    // Check if we're in planning wizard mode
+    // Check if we're in planning wizard or RUSLE-EOS mode
     const returnToPlanningWizard = typeof window !== 'undefined' 
       ? sessionStorage.getItem('returnToPlanningWizard') === 'true'
       : false
+    
+    const returnToRUSLE = typeof window !== 'undefined'
+      ? sessionStorage.getItem('returnToRUSLE') === 'true'
+      : false
 
-    if (returnToPlanningWizard) {
+    if (returnToRUSLE) {
+      // Return to RUSLE-EOS with selected field
+      sessionStorage.removeItem('returnToRUSLE')
+      sessionStorage.removeItem('returnToPlanningWizard')
+      
+      // Navigate to RUSLE-EOS with field data in query params
+      const fieldId = fieldData.clu_id || fieldData.csb_id || `field-${Date.now()}`
+      
+      // Store field data for RUSLE-EOS to retrieve
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('rusleSelectedField', JSON.stringify(fieldData))
+      }
+      
+      router.push(`/tools/rusle-eos?fieldId=${encodeURIComponent(fieldId)}`)
+    } else if (returnToPlanningWizard) {
       // Add field to planning wizard and return
       const wizardState = JSON.parse(sessionStorage.getItem('planningWizardState') || '{}')
       const selectedFields = wizardState.selectedFields || []
@@ -66,7 +88,9 @@ export default function FieldAnalysisLanding() {
       wizardState.selectedFields = selectedFields
       sessionStorage.setItem('planningWizardState', JSON.stringify(wizardState))
       
-      // Return to planning wizard
+      // Clear flags and return to planning wizard
+      sessionStorage.removeItem('returnToPlanningWizard')
+      sessionStorage.removeItem('returnToRUSLE')
       router.push('/conservation/planning-wizard')
     } else {
       // Normal flow - navigate to detailed analysis
@@ -83,8 +107,10 @@ export default function FieldAnalysisLanding() {
   const handleMethodSelect = (method: SelectionMethod) => {
     setSelectionMethod(method)
     if (method === 'browse') {
-      setShowCLULayer(true)
+      setShowCSBLayer(true)
+      setShowCLULayer(false)
     } else {
+      setShowCSBLayer(false)
       setShowCLULayer(false)
     }
     setSearchQuery('')
@@ -225,6 +251,30 @@ export default function FieldAnalysisLanding() {
           </div>
         )}
 
+        {/* RUSLE-EOS Mode Banner */}
+        {isFromRUSLE && (
+          <div 
+            className="px-6 py-2 text-white flex items-center justify-between"
+            style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
+          >
+            <div className="flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                RUSLE-EOS Mode: Select a field for erosion analysis
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('returnToRUSLE')
+                router.push('/tools/rusle-eos')
+              }}
+              className="text-sm underline hover:opacity-80"
+            >
+              Cancel & Return
+            </button>
+          </div>
+        )}
+
         {/* Compact Header */}
         <div 
           className="px-6 py-3 text-white flex-shrink-0"
@@ -236,6 +286,8 @@ export default function FieldAnalysisLanding() {
               <p className="text-xs" style={{ color: 'var(--color-forest-100)' }}>
                 {isFromPlanningWizard 
                   ? 'Click on a field to add it to your conservation plan'
+                  : isFromRUSLE
+                  ? 'Click on a field for erosion analysis'
                   : 'Select a field using one of the methods below'
                 }
               </p>
@@ -374,7 +426,7 @@ export default function FieldAnalysisLanding() {
                   >
                     {isSearching ? 'Searching...' : 'Search Location'}
                   </button>
-                  <div className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'var(--color-forest-700)' }}>
+                  <div className="flex items-center gap-1.5 text-sm font-medium" style={{ color: '#111827' }}>
                     <Zap className="w-4 h-4" />
                     <span>Fastest method</span>
                   </div>
@@ -383,25 +435,15 @@ export default function FieldAnalysisLanding() {
 
               {selectionMethod === 'browse' && (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-600 mb-2">
-                    Navigate the map and click on a CLU boundary to select
+                  <p className="text-xs text-gray-900 mb-2">
+                    Navigate the map and click on a CSB boundary to select
                   </p>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={showCLULayer}
-                      onChange={(e) => setShowCLULayer(e.target.checked)}
-                      className="w-4 h-4 rounded"
-                      style={{ accentColor: '#2563eb' }}
-                    />
-                    <span className="text-gray-700">Show CLU Boundaries</span>
-                  </label>
                   <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-ocean-50)' }}>
-                    <p className="text-xs" style={{ color: 'var(--color-ocean-800)' }}>
-                      💡 Zoom in to see field boundaries. Click any field to analyze it.
+                    <p className="text-xs" style={{ color: '#111827' }}>
+                      💡 Zoom in to level 13+ to see field boundaries. Click any field to analyze it.
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-ocean-700)' }}>
+                  <div className="flex items-center gap-1 text-xs" style={{ color: '#111827' }}>
                     <Eye className="w-3 h-3" />
                     <span>Visual & Interactive</span>
                   </div>
@@ -410,20 +452,20 @@ export default function FieldAnalysisLanding() {
 
               {selectionMethod === 'draw' && (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-600 mb-2">
+                  <p className="text-xs text-gray-900 mb-2">
                     Use drawing tools to create a custom field boundary
                   </p>
                   <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-amber-50)', border: '1px solid var(--color-amber-200)' }}>
-                    <p className="text-xs mb-2" style={{ color: 'var(--color-amber-900)' }}>
+                    <p className="text-xs mb-2" style={{ color: '#111827' }}>
                       <strong>Instructions:</strong>
                     </p>
-                    <ol className="text-xs space-y-1" style={{ color: 'var(--color-amber-900)' }}>
+                    <ol className="text-xs space-y-1" style={{ color: '#111827' }}>
                       <li>1. Click polygon tool on map</li>
                       <li>2. Click points to draw boundary</li>
                       <li>3. Double-click to finish</li>
                     </ol>
                   </div>
-                  <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-amber-700)' }}>
+                  <div className="flex items-center gap-1 text-xs" style={{ color: '#111827' }}>
                     <Pencil className="w-3 h-3" />
                     <span>Custom & Flexible</span>
                   </div>
@@ -432,7 +474,7 @@ export default function FieldAnalysisLanding() {
 
               {selectionMethod === 'upload' && (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-600 mb-2">
+                  <p className="text-xs text-gray-900 mb-2">
                     Import existing field boundaries from file
                   </p>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 transition-colors cursor-pointer">
@@ -449,8 +491,8 @@ export default function FieldAnalysisLanding() {
                         <p className="text-xs font-medium text-gray-900">{uploadedFile.name}</p>
                       ) : (
                         <>
-                          <p className="text-xs font-medium text-gray-700">Click to upload</p>
-                          <p className="text-xs text-gray-500 mt-1">Shapefile, KML, or GeoJSON</p>
+                          <p className="text-xs font-medium text-gray-900">Click to upload</p>
+                          <p className="text-xs text-gray-900 mt-1">Shapefile, KML, or GeoJSON</p>
                         </>
                       )}
                     </label>
@@ -463,7 +505,7 @@ export default function FieldAnalysisLanding() {
                       Process File
                     </button>
                   )}
-                  <div className="flex items-center gap-1 text-xs" style={{ color: 'var(--color-lavender-700)' }}>
+                  <div className="flex items-center gap-1 text-xs" style={{ color: '#111827' }}>
                     <FileUp className="w-3 h-3" />
                     <span>Shapefile, KML, GeoJSON</span>
                   </div>
@@ -477,6 +519,8 @@ export default function FieldAnalysisLanding() {
             mode={selectionMethod || 'browse'}
             searchQuery={searchQuery}
             showCLULayer={showCLULayer}
+            showCSBLayer={showCSBLayer}
+            onCSBLayerToggle={() => setShowCSBLayer(!showCSBLayer)}
             onFieldSelected={handleFieldSelected}
             onMapReady={(controls: { panToLocation?: (lat: number, lng: number, zoom?: number) => void }) => setMapControls(controls)}
           />

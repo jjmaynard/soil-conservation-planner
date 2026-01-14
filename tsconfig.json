@@ -20,8 +20,11 @@
       "#pages/*": ["./src/pages/*"],
       "#components/*": ["./src/components/*"],
       "#lib/*": ["./src/lib/*"],
+      "#types/*": ["./src/types/*"],
+      "#hooks/*": ["./src/hooks/*"],
+      "#utils/*": ["./src/utils/*"],
       "#src/*": ["./src/*"],
-      "#root/*": ["./*"],
+      "#root/*": ["./*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "Property_Panel_Guide/**/*.json"],

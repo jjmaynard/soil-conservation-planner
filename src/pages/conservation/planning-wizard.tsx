@@ -337,6 +337,7 @@ function FieldSelection({ formData, setFormData }: any) {
     // Clear the return flag to ensure fresh start
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('returnToPlanningWizard', 'true')
+      sessionStorage.removeItem('returnToRUSLE')
     }
     
     // Open field analysis

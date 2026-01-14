@@ -60,11 +60,11 @@ export default function ModuleGrid() {
       id: 'erosion-tools',
       title: 'Erosion Assessment',
       description:
-        'Calculate soil erosion using RUSLE2. Evaluate conservation practice effectiveness.',
+        'Calculate soil erosion using RUSLE-EOS (Earth Observation System). Real-time satellite-based assessment.',
       icon: Mountain,
       gradient: { from: '#B8794F', to: '#A06843' },
-      path: '/tools/rusle2',
-      features: ['RUSLE2', 'Practice effects', 'Calculations'],
+      path: '/tools/rusle-eos',
+      features: ['RUSLE-EOS', 'Satellite data', 'Conservation practices'],
       stats: { label: 'Assessments', value: '12K+' },
     },
     {

@@ -74,12 +74,25 @@ export default function MapSearch({ onLocationSelect, className = '' }: MapSearc
     const lat = parseFloat(result.lat)
     const lng = parseFloat(result.lon)
     
-    // Determine zoom level based on place type
-    let zoom = 12
-    if (result.type === 'state' || result.class === 'boundary') {
-      zoom = 7
-    } else if (result.type === 'city' || result.class === 'place') {
-      zoom = 11
+    // Determine appropriate zoom level based on place type
+    let zoom = 15 // Default for addresses and specific locations
+    if (result.class === 'boundary' && result.type === 'administrative') {
+      // Use address rank to distinguish state vs county vs other
+      if (result.addresstype === 'state' || (result.address?.state && !result.address?.city)) {
+        zoom = 7 // State level
+      } else if (result.addresstype === 'county') {
+        zoom = 10 // County level
+      } else {
+        zoom = 12 // Other administrative
+      }
+    }
+    // Check for cities/towns
+    else if (result.class === 'place' && (result.type === 'city' || result.type === 'town' || result.type === 'village')) {
+      zoom = 13 // City/town level
+    }
+    // Check for neighborhoods, suburbs
+    else if (result.class === 'place' && (result.type === 'suburb' || result.type === 'neighbourhood')) {
+      zoom = 14 // Neighborhood level
     }
 
     onLocationSelect(lat, lng, zoom)
