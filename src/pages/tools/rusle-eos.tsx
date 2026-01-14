@@ -927,7 +927,7 @@ function FactorDetailsPanel({ result, fieldAcres, selectedFactorMap }: FactorDet
   
   // Map overview
   if (selectedFactorMap === 'soil_loss') {
-    const tValue = result.scenario_comparison?.t_value_used || result.p_factor.uncertainty?.p_factor_range?.max || 5.0
+    const tValue = result.scenario_comparison?.t_value_used || 5.0
     
     return (
       <div className="space-y-6">
