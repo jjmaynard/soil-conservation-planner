@@ -94,6 +94,8 @@ function handleAPIError(error: unknown): never {
 
 class GEEAPIClient {
   private client: AxiosInstance
+  private fieldDetailsCache: Map<string, { data: CSBFieldDetails; timestamp: number }> = new Map()
+  private readonly CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
   constructor(config: GEEClientConfig = {}) {
     // Use local Next.js API routes as proxy to avoid CORS issues
@@ -360,9 +362,24 @@ class GEEAPIClient {
    */
   async getFieldDetails(csbid: string): Promise<CSBFieldDetails> {
     try {
+      // Check cache first
+      const cached = this.fieldDetailsCache.get(csbid)
+      if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+        console.log('[GEE API] Returning cached field details for:', csbid)
+        return cached.data
+      }
+
       const response = await this.client.get<CSBFieldDetails>(
-        `/api/csb/field/${csbid}`
+        `/api/csb/field/${csbid}`,
+        { timeout: 10000 } // 10 second timeout for field details
       )
+      
+      // Cache the result
+      this.fieldDetailsCache.set(csbid, {
+        data: response.data,
+        timestamp: Date.now()
+      })
+      
       return response.data
     } catch (error) {
       return handleAPIError(error)
@@ -399,21 +416,8 @@ class GEEAPIClient {
       const featureAny = feature as any
       const fieldId = props.clu_id || props.CSBID || props.CLU_ID || featureAny.id
       
-      // If we have a field ID, get detailed info including rotation analysis
-      if (fieldId && fieldId !== 'unknown') {
-        try {
-          console.log('[GEE API] Fetching detailed field data for:', fieldId)
-          const detailedField = await this.getFieldDetails(fieldId)
-          console.log('[GEE API] Received detailed field data:', detailedField)
-          return detailedField
-        } catch (error) {
-          console.warn('[GEE API] Failed to get detailed field data, using basic info:', error)
-          // Fall back to basic info if detailed fetch fails
-        }
-      }
-      
-      // Fallback: return basic field info from bounds
-      return {
+      // Build basic field info from bounds response
+      const basicFieldInfo = {
         clu_id: fieldId || 'unknown',
         acres: props.acres || props.CSBACRES || props.ACRES || 0,
         state: props.state || props.STATEFIPS || props.STATE || '',
@@ -427,6 +431,45 @@ class GEEAPIClient {
           lng: lng,
         },
       }
+      
+      // If we have a field ID, get detailed info including rotation analysis
+      if (fieldId && fieldId !== 'unknown') {
+        try {
+          console.log('[GEE API] Fetching detailed field data for:', fieldId)
+          
+          // Set a shorter timeout for field details to avoid long waits
+          const detailedFieldPromise = this.getFieldDetails(fieldId)
+          const timeoutPromise = new Promise<null>((resolve) => 
+            setTimeout(() => resolve(null), 5000) // 5 second max wait
+          )
+          
+          const detailedField = await Promise.race([detailedFieldPromise, timeoutPromise])
+          
+          if (detailedField) {
+            console.log('[GEE API] Received detailed field data:', detailedField)
+            
+            // Merge basic info with detailed rotation data
+            return {
+              ...basicFieldInfo,
+              ...detailedField,
+              // Ensure basic properties aren't overwritten with undefined
+              clu_id: detailedField.clu_id || basicFieldInfo.clu_id,
+              acres: detailedField.acres ?? basicFieldInfo.acres,
+              state: detailedField.state || basicFieldInfo.state,
+              county: detailedField.county || basicFieldInfo.county,
+              geometry: detailedField.geometry || basicFieldInfo.geometry,
+            }
+          } else {
+            console.warn('[GEE API] Field details fetch timed out, using basic info')
+          }
+        } catch (error) {
+          console.warn('[GEE API] Failed to get detailed field data, using basic info:', error)
+          // Fall back to basic info if detailed fetch fails
+        }
+      }
+      
+      // Fallback: return basic field info from bounds
+      return basicFieldInfo
     } catch (error) {
       console.error('Error querying field at point:', error)
       return null
