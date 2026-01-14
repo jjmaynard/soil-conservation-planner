@@ -370,7 +370,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
           minLat: bounds.getSouth(),
           maxLon: bounds.getEast(),
           maxLat: bounds.getNorth(),
-          limit: 500
+          limit: 100  // Reduced from 500 to avoid browser resource issues
         })
 
         // Remove old layer
@@ -407,6 +407,12 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         console.log(`[CSB] Loaded ${response.features.length} field boundaries`)
       } catch (error) {
         console.error('[CSB] Error loading field boundaries:', error)
+        
+        // Show user-friendly message
+        const errorMsg = (error as any)?.message || 'Unknown error'
+        if (errorMsg.includes('ERR_INSUFFICIENT_RESOURCES') || errorMsg.includes('Network Error')) {
+          console.warn('[CSB] Too many fields in view - try zooming in to a smaller area')
+        }
       }
     }
 

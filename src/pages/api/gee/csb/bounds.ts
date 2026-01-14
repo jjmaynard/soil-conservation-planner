@@ -21,9 +21,11 @@ export default async function handler(
         max_lon,
         max_lat,
         zoom,
-        limit,
+        limit: Math.min(Number(limit) || 100, 100), // Cap at 100 to prevent resource issues
       },
-      timeout: 30000,
+      timeout: 60000, // Increased to 60 seconds
+      maxContentLength: 50 * 1024 * 1024, // 50MB max
+      maxBodyLength: 50 * 1024 * 1024,
     })
 
     res.status(200).json(response.data)

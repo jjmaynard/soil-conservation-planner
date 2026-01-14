@@ -310,21 +310,49 @@ class GEEAPIClient {
    * Get CSB field boundaries within a bounding box
    */
   async getCSBBounds(params: CSBQueryParams): Promise<CSBBounds> {
-    try {
-      const response = await this.client.get<CSBBounds>('/api/csb/bounds', {
-        params: {
-          min_lon: params.minLon,
-          min_lat: params.minLat,
-          max_lon: params.maxLon,
-          max_lat: params.maxLat,
-          zoom: params.zoom,
-          limit: params.limit,
-        },
-      })
-      return response.data
-    } catch (error) {
-      return handleAPIError(error)
+    const maxRetries = 3
+    let lastError: any
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`[GEE API] Fetching CSB bounds (attempt ${attempt}/${maxRetries})...`)
+        
+        const response = await this.client.get<CSBBounds>('/api/csb/bounds', {
+          params: {
+            min_lon: params.minLon,
+            min_lat: params.minLat,
+            max_lon: params.maxLon,
+            max_lat: params.maxLat,
+            zoom: params.zoom,
+            limit: params.limit || 100, // Default to 100 if not specified
+          },
+          timeout: 60000, // 60 second timeout
+        })
+        
+        console.log(`[GEE API] Successfully fetched ${response.data.features?.length || 0} field boundaries`)
+        return response.data
+      } catch (error) {
+        lastError = error
+        console.warn(`[GEE API] Attempt ${attempt} failed:`, (error as any)?.message)
+        
+        // Don't retry on 4xx errors (client errors)
+        const status = (error as any)?.response?.status
+        if (status && status >= 400 && status < 500) {
+          console.error('[GEE API] Client error, not retrying')
+          return handleAPIError(error)
+        }
+        
+        // Wait before retry (exponential backoff)
+        if (attempt < maxRetries) {
+          const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000)
+          console.log(`[GEE API] Waiting ${delay}ms before retry...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+        }
+      }
     }
+    
+    console.error('[GEE API] All retry attempts failed')
+    return handleAPIError(lastError)
   }
 
   /**
