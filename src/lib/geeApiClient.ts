@@ -395,7 +395,8 @@ class GEEAPIClient {
       console.log('[GEE API] Feature properties:', feature.properties)
 
       // Handle both uppercase (legacy) and lowercase property names from backend
-      const props = feature.properties
+      // Cast to any to handle dynamic property name variations from GEE backend
+      const props = feature.properties as any
       
       return {
         clu_id: props.clu_id || props.CSBID || props.CLU_ID || feature.id as string,
