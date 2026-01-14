@@ -1244,6 +1244,8 @@ function ComprehensiveMapGalleryFullScreen({
     const updateTileLayer = async () => {
       const L = (await import('leaflet')).default
 
+      if (!currentMap.url) return
+
       if (tileLayerRef.current) {
         mapRef.current!.removeLayer(tileLayerRef.current)
       }
@@ -1846,6 +1848,8 @@ function ComprehensiveMapGallery({ result, fieldGeometry }: { result: RUSLERespo
 
     const updateTileLayer = async () => {
       const L = (await import('leaflet')).default
+
+      if (!currentMap.url) return
 
       // Remove existing tile layer
       if (tileLayerRef.current) {
