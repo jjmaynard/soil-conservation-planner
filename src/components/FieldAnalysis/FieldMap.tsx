@@ -620,6 +620,29 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
               />
               <span className="text-gray-700">Soil Boundaries</span>
             </label>
+            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
+              <input
+                type="checkbox"
+                checked={activeLayers.includes('erosion-risk')}
+                onChange={() => onLayerToggle('erosion-risk')}
+                className="w-4 h-4 rounded"
+                style={{ accentColor: '#ea580c' }}
+              />
+              <span className="text-gray-700">Erosion Risk</span>
+            </label>
+            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
+              <input
+                type="checkbox"
+                checked={activeLayers.includes('drainage')}
+                onChange={() => onLayerToggle('drainage')}
+                className="w-4 h-4 rounded"
+                style={{ accentColor: '#0891b2' }}
+              />
+              <span className="text-gray-700">Drainage Classes</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       {/* Layer Controls for Browse Mode */}
       {mode === 'browse' && onCSBLayerToggle && (
@@ -643,49 +666,6 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                 style={{ accentColor: '#3b82f6' }}
               />
               <span className="text-gray-700">Field Boundaries (CSB)</span>
-            </label>
-          </div>
-        </div>
-      )}
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-              <input
-                type="checkbox"
-                checked={activeLayers.includes('erosion-risk')}
-                onChange={() => onLayerToggle('erosion-risk')}
-                className="w-4 h-4 rounded"
-                style={{ accentColor: '#ea580c' }}
-              />
-              <span className="text-gray-700">Erosion Risk</span>
-            </label>
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-              <input
-                type="checkbox"
-                checked={activeLayers.includes('drainage')}
-                onChange={() => onLayerToggle('drainage')}
-                className="w-4 h-4 rounded"
-                style={{ accentColor: '#0891b2' }}
-              />
-              <span className="text-gray-700">Drainage Classes</span>
-            </label>
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-              <input
-                type="checkbox"
-                checked={activeLayers.includes('slope')}
-                onChange={() => onLayerToggle('slope')}
-                className="w-4 h-4 rounded"
-                style={{ accentColor: '#d97706' }}
-              />
-              <span className="text-gray-700">Slope</span>
-            </label>
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-              <input
-                type="checkbox"
-                checked={activeLayers.includes('management-zones')}
-                onChange={() => onLayerToggle('management-zones')}
-                className="w-4 h-4 rounded"
-                style={{ accentColor: '#7c3aed' }}
-              />
-              <span className="text-gray-700">Management Zones</span>
             </label>
           </div>
         </div>
