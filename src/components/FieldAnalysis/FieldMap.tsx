@@ -382,13 +382,13 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       try {
         const zoom = map.getZoom()
         
-        // Only load GeoJSON boundaries at zoom 15+ for performance
-        if (zoom < 15) {
+        // Only load GeoJSON boundaries at zoom 13+ for performance
+        if (zoom < 13) {
           if (csbGeoJsonLayerRef.current) {
             map.removeLayer(csbGeoJsonLayerRef.current)
             csbGeoJsonLayerRef.current = null
           }
-          console.log('[CSB] Zoom too low for interactive layer (need zoom ≥15)')
+          console.log('[CSB] Zoom too low for interactive layer (need zoom ≥13)')
           return
         }
 
@@ -742,7 +742,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                   <span className="text-gray-700">Diverse (4+ crops)</span>
                 </div>
                 <div className="pt-2 mt-2 text-xs text-gray-500 border-t border-gray-200">
-                  Zoom in (15+) for field details
+                  Zoom in (13+) for field details
                 </div>
               </div>
             </div>
