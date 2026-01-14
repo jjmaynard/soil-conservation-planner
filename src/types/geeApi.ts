@@ -282,6 +282,24 @@ export interface CSBFieldDetails {
     lng: number
   }
   properties?: Record<string, any>
+  rotation_analysis?: {
+    rotation_sequence: number[]
+    unique_crops: number
+    pattern_type: string
+    years_analyzed: string[]
+    sustainability_rating: string
+  }
+  crop_names?: Record<string, string>
+  sustainability_metrics?: {
+    total_score: number
+    diversity_score: number
+    cover_crop_bonus: number
+    nitrogen_fixation_bonus: number
+    rating: string
+    has_cover_crops: boolean
+    has_nitrogen_fixers: boolean
+    unique_crops_count: number
+  }
 }
 
 export interface CSBQueryParams {

@@ -837,6 +837,82 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                 <div className="font-semibold text-gray-900 text-sm">{selectedCSBField.county || 'N/A'}</div>
               </div>
             </div>
+
+            {/* Rotation Analysis & Sustainability Metrics */}
+            {selectedCSBField.rotation_analysis && selectedCSBField.sustainability_metrics && (
+              <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
+                <h4 className="font-semibold text-gray-900 text-xs mb-2">Crop Rotation Analysis (2017-2023)</h4>
+                
+                {/* Sustainability Score */}
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-gray-600">Sustainability Score:</span>
+                    <span className="text-sm font-bold" style={{ 
+                      color: selectedCSBField.sustainability_metrics.total_score >= 75 ? '#16a34a' : 
+                             selectedCSBField.sustainability_metrics.total_score >= 50 ? '#f59e0b' : '#dc2626'
+                    }}>
+                      {selectedCSBField.sustainability_metrics.total_score}/100 - {selectedCSBField.sustainability_metrics.rating}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="h-2 rounded-full transition-all" 
+                      style={{ 
+                        width: `${selectedCSBField.sustainability_metrics.total_score}%`,
+                        backgroundColor: selectedCSBField.sustainability_metrics.total_score >= 75 ? '#16a34a' : 
+                                       selectedCSBField.sustainability_metrics.total_score >= 50 ? '#f59e0b' : '#dc2626'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Rotation Pattern */}
+                <div className="grid grid-cols-2 gap-3 text-xs mb-2">
+                  <div>
+                    <span className="text-gray-600">Pattern:</span>
+                    <div className="font-semibold text-gray-900">{selectedCSBField.rotation_analysis.pattern_type}</div>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Unique Crops:</span>
+                    <div className="font-semibold text-gray-900">{selectedCSBField.rotation_analysis.unique_crops}</div>
+                  </div>
+                </div>
+
+                {/* Bonuses */}
+                <div className="flex flex-wrap gap-1">
+                  {selectedCSBField.sustainability_metrics.has_cover_crops && (
+                    <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: '#86efac', color: '#166534' }}>
+                      +{selectedCSBField.sustainability_metrics.cover_crop_bonus} Cover Crops
+                    </span>
+                  )}
+                  {selectedCSBField.sustainability_metrics.has_nitrogen_fixers && (
+                    <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: '#86efac', color: '#166534' }}>
+                      +{selectedCSBField.sustainability_metrics.nitrogen_fixation_bonus} N-Fixers
+                    </span>
+                  )}
+                </div>
+
+                {/* Crop History */}
+                {selectedCSBField.crop_names && Object.keys(selectedCSBField.crop_names).length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-green-200">
+                    <span className="text-xs text-gray-600 font-semibold">7-Year Rotation:</span>
+                    <div className="mt-1 space-y-1">
+                      {Object.entries(selectedCSBField.crop_names)
+                        .sort(([yearA], [yearB]) => yearB.localeCompare(yearA))
+                        .slice(0, 7)
+                        .map(([year, crop]) => (
+                          <div key={year} className="flex justify-between text-xs">
+                            <span className="text-gray-600">{year}:</span>
+                            <span className="font-medium text-gray-900">{crop}</span>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <button
               onClick={() => {
                 if (onFieldSelected) {

@@ -389,18 +389,32 @@ class GEEAPIClient {
         return null
       }
 
-      // Return the first (nearest) field
+      // Get the first (nearest) field from bounds
       const feature = bounds.features[0]
       console.log('[GEE API] Raw feature from bounds:', feature)
       console.log('[GEE API] Feature properties:', feature.properties)
 
       // Handle both uppercase (legacy) and lowercase property names from backend
-      // Cast to any to handle dynamic property name variations from GEE backend
       const props = feature.properties as any
       const featureAny = feature as any
+      const fieldId = props.clu_id || props.CSBID || props.CLU_ID || featureAny.id
       
+      // If we have a field ID, get detailed info including rotation analysis
+      if (fieldId && fieldId !== 'unknown') {
+        try {
+          console.log('[GEE API] Fetching detailed field data for:', fieldId)
+          const detailedField = await this.getFieldDetails(fieldId)
+          console.log('[GEE API] Received detailed field data:', detailedField)
+          return detailedField
+        } catch (error) {
+          console.warn('[GEE API] Failed to get detailed field data, using basic info:', error)
+          // Fall back to basic info if detailed fetch fails
+        }
+      }
+      
+      // Fallback: return basic field info from bounds
       return {
-        clu_id: props.clu_id || props.CSBID || props.CLU_ID || featureAny.id || 'unknown',
+        clu_id: fieldId || 'unknown',
         acres: props.acres || props.CSBACRES || props.ACRES || 0,
         state: props.state || props.STATEFIPS || props.STATE || '',
         county: props.county || props.CNTY || props.COUNTY || '',
