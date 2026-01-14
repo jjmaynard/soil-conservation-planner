@@ -334,102 +334,49 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     }
   }, [mode, mapInitialized])
 
-  // Add CSB/CLU field boundary visualization using GeoJSON (only in browse mode)
+  // Add CSB/CLU field boundary visualization using Tile Service (efficient!)
   useEffect(() => {
     if (!mapRef.current || !mapInitialized) return
     if (mode !== 'browse') return // Only show CSB layer in browse/selection mode
 
     const map = mapRef.current
-    let boundaryLayer: L.GeoJSON | null = null
-    let updateTimeout: NodeJS.Timeout
 
-    const updateBoundaries = async () => {
+    const loadCSBTileLayer = async () => {
       try {
-        if (!map) {
-          console.log('[CSB] Map not initialized, skipping boundary update')
-          return
-        }
+        console.log('[CSB] Loading CSB tile service...')
         
-        const bounds = map.getBounds()
-        const zoom = map.getZoom()
-
-        // Only show boundaries at zoom level 13 or higher
-        if (zoom < 13) {
-          if (boundaryLayer) {
-            map.removeLayer(boundaryLayer)
-            boundaryLayer = null
-          }
-          console.log('[CSB] Zoom too low for field boundaries (need zoom ≥13)')
-          return
-        }
-
-        console.log('[CSB] Fetching field boundaries for current view...')
-        
-        const response = await geeApi.getCSBBounds({
-          minLon: bounds.getWest(),
-          minLat: bounds.getSouth(),
-          maxLon: bounds.getEast(),
-          maxLat: bounds.getNorth(),
-          limit: 100  // Reduced from 500 to avoid browser resource issues
+        // Get tile URL from backend
+        const tileResponse = await geeApi.getCSBTileURL({
+          opacity: 0.7,
+          min_complexity: 1,
+          max_complexity: 4
         })
 
-        // Remove old layer
-        if (boundaryLayer) {
-          map.removeLayer(boundaryLayer)
+        // Remove existing tile layer if any
+        if (csbLayerRef.current) {
+          map.removeLayer(csbLayerRef.current)
         }
 
-        // Create new GeoJSON layer
-        boundaryLayer = L.geoJSON(response, {
-          style: {
-            color: '#FF6B35',
-            weight: 2,
-            opacity: 0.7,
-            fillColor: '#FF6B35',
-            fillOpacity: 0.05
-          },
-          onEachFeature: (feature, layer) => {
-            if (feature.properties) {
-              // Handle both uppercase (backend) and lowercase (frontend) property names
-              const props = feature.properties
-              const acres = props.acres || props.CSBACRES || props.ACRES
-              const fieldId = props.clu_id || props.CSBID || props.CLU_ID || feature.id
-              
-              layer.bindTooltip(
-                `Field ID: ${fieldId || 'Unknown'}<br/>` +
-                `Acres: ${acres ? acres.toFixed(2) : 'N/A'}`,
-                { sticky: true }
-              )
-            }
-          }
-        }).addTo(map)
+        // Add CSB tile layer
+        const csbTileLayer = L.tileLayer(tileResponse.tile_url, {
+          attribution: 'USDA CSB',
+          opacity: 0.7,
+          minZoom: 13, // Only show at high zoom levels
+          maxZoom: 20
+        })
 
-        csbLayerRef.current = boundaryLayer as any
-        console.log(`[CSB] Loaded ${response.features.length} field boundaries`)
+        csbTileLayer.addTo(map)
+        csbLayerRef.current = csbTileLayer
+
+        console.log('[CSB] CSB tile layer loaded successfully')
       } catch (error) {
-        console.error('[CSB] Error loading field boundaries:', error)
-        
-        // Show user-friendly message
-        const errorMsg = (error as any)?.message || 'Unknown error'
-        if (errorMsg.includes('ERR_INSUFFICIENT_RESOURCES') || errorMsg.includes('Network Error')) {
-          console.warn('[CSB] Too many fields in view - try zooming in to a smaller area')
-        }
+        console.error('[CSB] Error loading CSB tile layer:', error)
       }
     }
 
     if (showCSBLayer) {
-      console.log('[CSB] Adding field boundary visualization layer (browse mode)')
-      
-      // Update on map move/zoom
-      const handleMapChange = () => {
-        clearTimeout(updateTimeout)
-        updateTimeout = setTimeout(updateBoundaries, 500)
-      }
-
-      map.on('moveend', handleMapChange)
-      map.on('zoomend', handleMapChange)
-
-      // Initial load
-      updateBoundaries()
+      console.log('[CSB] Adding CSB tile layer (browse mode)')
+      loadCSBTileLayer()
 
       // Add click handler for field selection in browse mode
       const handleMapClick = async (e: L.LeafletMouseEvent) => {
@@ -480,14 +427,12 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       }
 
       return () => {
-        clearTimeout(updateTimeout)
-        map.off('moveend', handleMapChange)
-        map.off('zoomend', handleMapChange)
         if (mode === 'browse') {
           map.off('click', handleMapClick)
         }
-        if (boundaryLayer) {
-          map.removeLayer(boundaryLayer)
+        if (csbLayerRef.current) {
+          map.removeLayer(csbLayerRef.current)
+          csbLayerRef.current = null
         }
         if (selectedFieldLayerRef.current) {
           map.removeLayer(selectedFieldLayerRef.current)
