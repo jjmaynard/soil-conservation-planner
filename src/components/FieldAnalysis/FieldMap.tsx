@@ -63,6 +63,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   const [selectedCSBField, setSelectedCSBField] = useState<CSBFieldDetails | null>(null)
   const [isSelectingField, setIsSelectingField] = useState(false)
   const csbLayerRef = useRef<L.TileLayer | null>(null)
+  const csbGeoJsonLayerRef = useRef<L.GeoJSON | null>(null) // Interactive GeoJSON layer
   const selectedFieldLayerRef = useRef<L.GeoJSON | null>(null)
   const fieldBoundaryLayerRef = useRef<L.GeoJSON | null>(null) // For analysis mode field boundary
 
@@ -334,12 +335,14 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     }
   }, [mode, mapInitialized])
 
-  // Add CSB/CLU field boundary visualization using Tile Service (efficient!)
+  // Add CSB/CLU field boundary visualization - Hybrid approach
+  // Tile layer for efficient visualization + GeoJSON for interactivity
   useEffect(() => {
     if (!mapRef.current || !mapInitialized) return
     if (mode !== 'browse') return // Only show CSB layer in browse/selection mode
 
     const map = mapRef.current
+    let updateTimeout: NodeJS.Timeout
 
     const loadCSBTileLayer = async () => {
       try {
@@ -357,11 +360,11 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
           map.removeLayer(csbLayerRef.current)
         }
 
-        // Add CSB tile layer
+        // Add CSB tile layer (non-interactive background)
         const csbTileLayer = L.tileLayer(tileResponse.tile_url, {
-          attribution: 'USDA CSB',
+          attribution: 'USDA CSB - Crop Rotation Complexity',
           opacity: 0.7,
-          minZoom: 13, // Only show at high zoom levels
+          minZoom: 10, // Show tiles at zoom 10+
           maxZoom: 20
         })
 
@@ -374,9 +377,87 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       }
     }
 
+    // Load interactive GeoJSON layer at high zoom for hover/click
+    const updateInteractiveLayer = async () => {
+      try {
+        const zoom = map.getZoom()
+        
+        // Only load GeoJSON boundaries at zoom 15+ for performance
+        if (zoom < 15) {
+          if (csbGeoJsonLayerRef.current) {
+            map.removeLayer(csbGeoJsonLayerRef.current)
+            csbGeoJsonLayerRef.current = null
+          }
+          console.log('[CSB] Zoom too low for interactive layer (need zoom ≥15)')
+          return
+        }
+
+        const bounds = map.getBounds()
+        console.log('[CSB] Fetching interactive field boundaries...')
+        
+        const response = await geeApi.getCSBBounds({
+          minLon: bounds.getWest(),
+          minLat: bounds.getSouth(),
+          maxLon: bounds.getEast(),
+          maxLat: bounds.getNorth(),
+          limit: 50  // Small limit for interactivity
+        })
+
+        // Remove old GeoJSON layer
+        if (csbGeoJsonLayerRef.current) {
+          map.removeLayer(csbGeoJsonLayerRef.current)
+        }
+
+        // Create new GeoJSON layer with hover tooltips and visible boundaries
+        const geoJsonLayer = L.geoJSON(response, {
+          style: {
+            color: '#FF6B35', // Orange boundary lines
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0 // Transparent fill (tiles show rotation colors)
+          },
+          onEachFeature: (feature, layer) => {
+            if (feature.properties) {
+              const props = feature.properties as any
+              const acres = props.acres || props.CSBACRES || props.ACRES
+              const fieldId = props.clu_id || props.CSBID || props.CLU_ID || feature.id
+              const complexity = props.rotation_complexity || props.ROTATION_COMPLEXITY || 'N/A'
+              
+              layer.bindTooltip(
+                `<strong>Field ID:</strong> ${fieldId || 'Unknown'}<br/>` +
+                `<strong>Acres:</strong> ${acres ? acres.toFixed(2) : 'N/A'}<br/>` +
+                `<strong>Rotation:</strong> ${complexity === 1 ? 'Monoculture' : 
+                  complexity === 2 ? '2-crop rotation' : 
+                  complexity === 3 ? '3-crop rotation' : 
+                  complexity >= 4 ? 'Diverse (4+ crops)' : 'N/A'}`,
+                { sticky: true }
+              )
+            }
+          }
+        }).addTo(map)
+
+        csbGeoJsonLayerRef.current = geoJsonLayer
+        console.log(`[CSB] Loaded ${response.features.length} interactive field boundaries`)
+      } catch (error) {
+        console.error('[CSB] Error loading interactive layer:', error)
+      }
+    }
+
     if (showCSBLayer) {
-      console.log('[CSB] Adding CSB tile layer (browse mode)')
+      console.log('[CSB] Adding CSB layers (tile + interactive)')
       loadCSBTileLayer()
+
+      // Update interactive layer on zoom/pan
+      const handleMapChange = () => {
+        clearTimeout(updateTimeout)
+        updateTimeout = setTimeout(updateInteractiveLayer, 500)
+      }
+
+      map.on('moveend', handleMapChange)
+      map.on('zoomend', handleMapChange)
+
+      // Initial load
+      updateInteractiveLayer()
 
       // Add click handler for field selection in browse mode
       const handleMapClick = async (e: L.LeafletMouseEvent) => {
@@ -427,12 +508,19 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       }
 
       return () => {
+        clearTimeout(updateTimeout)
+        map.off('moveend', handleMapChange)
+        map.off('zoomend', handleMapChange)
         if (mode === 'browse') {
           map.off('click', handleMapClick)
         }
         if (csbLayerRef.current) {
           map.removeLayer(csbLayerRef.current)
           csbLayerRef.current = null
+        }
+        if (csbGeoJsonLayerRef.current) {
+          map.removeLayer(csbGeoJsonLayerRef.current)
+          csbGeoJsonLayerRef.current = null
         }
         if (selectedFieldLayerRef.current) {
           map.removeLayer(selectedFieldLayerRef.current)
@@ -600,29 +688,66 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
       {/* Layer Controls for Browse Mode */}
       {mode === 'browse' && onCSBLayerToggle && (
-        <div 
-          className="absolute top-4 right-4 rounded-lg shadow-2xl z-[1000] overflow-hidden"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb' }}
-        >
-          <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-            <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-              <Layers className="w-4 h-4" style={{ color: '#16a34a' }} />
-              Map Layers
-            </h3>
+        <>
+          <div 
+            className="absolute top-4 right-4 rounded-lg shadow-2xl z-[1000] overflow-hidden"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb' }}
+          >
+            <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+              <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
+                <Layers className="w-4 h-4" style={{ color: '#16a34a' }} />
+                Map Layers
+              </h3>
+            </div>
+            <div className="p-4 space-y-3">
+              <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
+                <input
+                  type="checkbox"
+                  checked={showCSBLayer}
+                  onChange={onCSBLayerToggle}
+                  className="w-4 h-4 rounded"
+                  style={{ accentColor: '#3b82f6' }}
+                />
+                <span className="text-gray-700">Field Boundaries (CSB)</span>
+              </label>
+            </div>
           </div>
-          <div className="p-4 space-y-3">
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-              <input
-                type="checkbox"
-                checked={showCSBLayer}
-                onChange={onCSBLayerToggle}
-                className="w-4 h-4 rounded"
-                style={{ accentColor: '#3b82f6' }}
-              />
-              <span className="text-gray-700">Field Boundaries (CSB)</span>
-            </label>
-          </div>
-        </div>
+
+          {/* CSB Legend - Only show when CSB layer is active */}
+          {showCSBLayer && (
+            <div 
+              className="absolute top-32 right-4 rounded-lg shadow-2xl z-[1000] overflow-hidden"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb' }}
+            >
+              <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                <h3 className="font-semibold text-gray-900 text-xs">
+                  Crop Rotation Complexity
+                </h3>
+              </div>
+              <div className="p-3 space-y-2">
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ef4444' }}></div>
+                  <span className="text-gray-700">Monoculture (1 crop)</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-4 h-4 rounded" style={{ backgroundColor: '#f97316' }}></div>
+                  <span className="text-gray-700">2-crop rotation</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-4 h-4 rounded" style={{ backgroundColor: '#22c55e' }}></div>
+                  <span className="text-gray-700">3-crop rotation</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-4 h-4 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
+                  <span className="text-gray-700">Diverse (4+ crops)</span>
+                </div>
+                <div className="pt-2 mt-2 text-xs text-gray-500 border-t border-gray-200">
+                  Zoom in (15+) for field details
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Drawing Instructions - Hidden because instructions are in the left panel */}
