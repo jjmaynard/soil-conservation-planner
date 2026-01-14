@@ -369,18 +369,42 @@ class GEEAPIClient {
         return cached.data
       }
 
-      const response = await this.client.get<CSBFieldDetails>(
+      const response = await this.client.get<any>(
         `/api/csb/field/${csbid}`,
         { timeout: 10000 } // 10 second timeout for field details
       )
       
+      console.log('[GEE API] Raw field details response:', response.data)
+      
+      // Transform API response to match our interface
+      // Backend returns field_id, we use clu_id
+      // Properties may be uppercase (ACRES, STATE, etc.)
+      const data = response.data
+      const props = data.properties || {}
+      
+      const transformedData: CSBFieldDetails = {
+        clu_id: data.field_id || data.clu_id || csbid,
+        acres: props.ACRES || props.acres || data.acres || 0,
+        state: props.STATE || props.STATEFIPS || props.state || data.state || '',
+        county: props.COUNTY || props.CNTY || props.county || data.county || '',
+        farm_number: props.FARM_NUMBER || props.farm_number || data.farm_number,
+        tract_number: props.TRACT_NUMBER || props.tract_number || data.tract_number,
+        field_number: props.FIELD_NUMBER || props.field_number || data.field_number,
+        geometry: data.geometry,
+        centroid: data.centroid || { lat: 0, lng: 0 },
+        properties: data.properties,
+        rotation_analysis: data.rotation_analysis,
+        crop_names: data.crop_names,
+        sustainability_metrics: data.sustainability_metrics,
+      }
+      
       // Cache the result
       this.fieldDetailsCache.set(csbid, {
-        data: response.data,
+        data: transformedData,
         timestamp: Date.now()
       })
       
-      return response.data
+      return transformedData
     } catch (error) {
       return handleAPIError(error)
     }
