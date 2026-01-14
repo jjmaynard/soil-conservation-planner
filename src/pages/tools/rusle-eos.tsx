@@ -150,6 +150,8 @@ export default function RUSLEEOSCalculator() {
       if (rusleFieldData) {
         try {
           const fieldData = JSON.parse(rusleFieldData)
+          console.log('[RUSLE-EOS] Loaded field from sessionStorage:', fieldData)
+          console.log('[RUSLE-EOS] Field acres from storage:', fieldData.acres)
           setSelectedField(fieldData.clu_id || fieldData.csb_id || 'Selected Field')
           setFieldGeometry(fieldData.geometry) // Store as object
           setFieldAcres(fieldData.acres || 0)
@@ -168,9 +170,11 @@ export default function RUSLEEOSCalculator() {
   // ============================================================================
 
   const handleFieldSelect = (field: any) => {
+    console.log('[RUSLE-EOS] Field selected:', field)
+    console.log('[RUSLE-EOS] Field acres:', field.acres)
     setSelectedField(field.clu_id)
     setFieldGeometry(field.geometry) // Store as object
-    setFieldAcres(field.acres)
+    setFieldAcres(field.acres || 0)
   }
 
   const handleCalculate = async () => {

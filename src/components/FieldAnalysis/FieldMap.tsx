@@ -389,8 +389,11 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
           },
           onEachFeature: (feature, layer) => {
             if (feature.properties) {
-              const acres = feature.properties.CSBACRES || feature.properties.ACRES
-              const fieldId = feature.properties.CSBID || feature.id
+              // Handle both uppercase (backend) and lowercase (frontend) property names
+              const props = feature.properties
+              const acres = props.acres || props.CSBACRES || props.ACRES
+              const fieldId = props.clu_id || props.CSBID || props.CLU_ID || feature.id
+              
               layer.bindTooltip(
                 `Field ID: ${fieldId || 'Unknown'}<br/>` +
                 `Acres: ${acres ? acres.toFixed(2) : 'N/A'}`,

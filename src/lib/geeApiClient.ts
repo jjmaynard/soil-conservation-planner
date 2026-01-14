@@ -366,14 +366,17 @@ class GEEAPIClient {
       console.log('[GEE API] Raw feature from bounds:', feature)
       console.log('[GEE API] Feature properties:', feature.properties)
 
+      // Handle both uppercase (legacy) and lowercase property names from backend
+      const props = feature.properties
+      
       return {
-        clu_id: feature.properties.clu_id,
-        acres: feature.properties.acres,
-        state: feature.properties.state,
-        county: feature.properties.county,
-        farm_number: feature.properties.farm_number,
-        tract_number: feature.properties.tract_number,
-        field_number: feature.properties.field_number,
+        clu_id: props.clu_id || props.CSBID || props.CLU_ID || feature.id as string,
+        acres: props.acres || props.CSBACRES || props.ACRES || 0,
+        state: props.state || props.STATEFIPS || props.STATE || '',
+        county: props.county || props.CNTY || props.COUNTY || '',
+        farm_number: props.farm_number || props.FARM_NUMBER,
+        tract_number: props.tract_number || props.TRACT_NUMBER,
+        field_number: props.field_number || props.FIELD_NUMBER,
         geometry: feature.geometry,
         centroid: {
           lat: lat,
