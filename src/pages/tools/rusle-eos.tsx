@@ -234,7 +234,7 @@ export default function RUSLEEOSCalculator() {
         use_multiyear_r_factor: true,
         include_scenarios: true,
         include_factor_maps: true,
-        include_events: true,
+        include_uncertainty: true,
       }
       
       console.log('[RUSLE] Calculating with request:', request)
