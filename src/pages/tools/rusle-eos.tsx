@@ -31,8 +31,7 @@ import {
 import { useRUSLECalculation } from '#hooks/useRUSLECalculation'
 import type { RUSLEResponse, ScenarioResult, RUSLECalculateRequest } from '#types/geeApi'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import type * as LeafletTypes from 'leaflet'
 
 // ============================================================================
 // Conservation Practices Data
@@ -1141,9 +1140,9 @@ function ComprehensiveMapGalleryFullScreen({
   selectedFactorMap, 
   setSelectedFactorMap 
 }: ComprehensiveMapGalleryFullScreenProps) {
-  const mapRef = useRef<L.Map | null>(null)
-  const tileLayerRef = useRef<L.TileLayer | null>(null)
-  const fieldLayerRef = useRef<L.GeoJSON | null>(null)
+  const mapRef = useRef<LeafletTypes.Map | null>(null)
+  const tileLayerRef = useRef<LeafletTypes.TileLayer | null>(null)
+  const fieldLayerRef = useRef<LeafletTypes.GeoJSON | null>(null)
   
   const maps = [
     {
@@ -1190,39 +1189,46 @@ function ComprehensiveMapGalleryFullScreen({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const container = document.getElementById('rusle-fullscreen-map')
-    if (!container) return
+    const initMap = async () => {
+      const L = (await import('leaflet')).default
+      await import('leaflet/dist/leaflet.css')
 
-    if (mapRef.current) {
-      mapRef.current.remove()
-      mapRef.current = null
+      const container = document.getElementById('rusle-fullscreen-map')
+      if (!container) return
+
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+      }
+
+      const map = L.map(container, {
+        center: [41.798, -94.336],
+        zoom: 14,
+        zoomControl: true,
+      })
+
+      mapRef.current = map
+
+      // Esri satellite basemap
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Tiles © Esri',
+          maxZoom: 19,
+        }
+      ).addTo(map)
+
+      // Labels overlay
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Labels © Esri',
+          maxZoom: 19,
+        }
+      ).addTo(map)
     }
 
-    const map = L.map(container, {
-      center: [41.798, -94.336],
-      zoom: 14,
-      zoomControl: true,
-    })
-
-    mapRef.current = map
-
-    // Esri satellite basemap
-    L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: 'Tiles © Esri',
-        maxZoom: 19,
-      }
-    ).addTo(map)
-
-    // Labels overlay
-    L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: 'Labels © Esri',
-        maxZoom: 19,
-      }
-    ).addTo(map)
+    initMap()
 
     return () => {
       if (mapRef.current) {
@@ -1236,16 +1242,22 @@ function ComprehensiveMapGalleryFullScreen({
   useEffect(() => {
     if (!mapRef.current || !currentMap.url) return
 
-    if (tileLayerRef.current) {
-      mapRef.current.removeLayer(tileLayerRef.current)
+    const updateTileLayer = async () => {
+      const L = (await import('leaflet')).default
+
+      if (tileLayerRef.current) {
+        mapRef.current!.removeLayer(tileLayerRef.current)
+      }
+
+      const tileLayer = L.tileLayer(currentMap.url, {
+        opacity: 0.7,
+        maxZoom: 19,
+      })
+      tileLayer.addTo(mapRef.current!)
+      tileLayerRef.current = tileLayer
     }
 
-    const tileLayer = L.tileLayer(currentMap.url, {
-      opacity: 0.7,
-      maxZoom: 19,
-    })
-    tileLayer.addTo(mapRef.current)
-    tileLayerRef.current = tileLayer
+    updateTileLayer()
 
     return () => {
       if (tileLayerRef.current && mapRef.current) {
@@ -1259,25 +1271,31 @@ function ComprehensiveMapGalleryFullScreen({
   useEffect(() => {
     if (!mapRef.current || !fieldGeometry) return
 
-    if (fieldLayerRef.current) {
-      mapRef.current.removeLayer(fieldLayerRef.current)
+    const updateFieldBoundary = async () => {
+      const L = (await import('leaflet')).default
+
+      if (fieldLayerRef.current) {
+        mapRef.current!.removeLayer(fieldLayerRef.current)
+      }
+
+      const fieldLayer = L.geoJSON(fieldGeometry, {
+        style: {
+          color: '#FFD700',
+          weight: 3,
+          fillOpacity: 0,
+          dashArray: '10, 5',
+        },
+      })
+      fieldLayer.addTo(mapRef.current!)
+      fieldLayerRef.current = fieldLayer
+
+      const bounds = fieldLayer.getBounds()
+      if (bounds.isValid()) {
+        mapRef.current!.fitBounds(bounds, { padding: [50, 50] })
+      }
     }
 
-    const fieldLayer = L.geoJSON(fieldGeometry, {
-      style: {
-        color: '#FFD700',
-        weight: 3,
-        fillOpacity: 0,
-        dashArray: '10, 5',
-      },
-    })
-    fieldLayer.addTo(mapRef.current)
-    fieldLayerRef.current = fieldLayer
-
-    const bounds = fieldLayer.getBounds()
-    if (bounds.isValid()) {
-      mapRef.current.fitBounds(bounds, { padding: [50, 50] })
-    }
+    updateFieldBoundary()
 
     return () => {
       if (fieldLayerRef.current && mapRef.current) {
@@ -1718,9 +1736,9 @@ function ScenarioComparisonCard({
 
 function ComprehensiveMapGallery({ result, fieldGeometry }: { result: RUSLEResponse; fieldGeometry: any }) {
   const [activeMap, setActiveMap] = useState<'soil_loss' | 'r' | 'k' | 'ls' | 'c' | 'p'>('soil_loss')
-  const mapRef = useRef<L.Map | null>(null)
-  const tileLayerRef = useRef<L.TileLayer | null>(null)
-  const fieldLayerRef = useRef<L.GeoJSON | null>(null)
+  const mapRef = useRef<LeafletTypes.Map | null>(null)
+  const tileLayerRef = useRef<LeafletTypes.TileLayer | null>(null)
+  const fieldLayerRef = useRef<LeafletTypes.GeoJSON | null>(null)
   
   const maps = [
     {
@@ -1773,41 +1791,48 @@ function ComprehensiveMapGallery({ result, fieldGeometry }: { result: RUSLERespo
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const container = document.getElementById('rusle-map-gallery')
-    if (!container) return
+    const initMap = async () => {
+      const L = (await import('leaflet')).default
+      await import('leaflet/dist/leaflet.css')
 
-    // Clear existing map
-    if (mapRef.current) {
-      mapRef.current.remove()
-      mapRef.current = null
+      const container = document.getElementById('rusle-map-gallery')
+      if (!container) return
+
+      // Clear existing map
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+      }
+
+      // Create new map
+      const map = L.map(container, {
+        center: [41.798, -94.336],
+        zoom: 14,
+        zoomControl: true,
+      })
+
+      mapRef.current = map
+
+      // Add Esri satellite basemap
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Tiles © Esri',
+          maxZoom: 19,
+        }
+      ).addTo(map)
+
+      // Add labels overlay
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Labels © Esri',
+          maxZoom: 19,
+        }
+      ).addTo(map)
     }
 
-    // Create new map
-    const map = L.map(container, {
-      center: [41.798, -94.336],
-      zoom: 14,
-      zoomControl: true,
-    })
-
-    mapRef.current = map
-
-    // Add Esri satellite basemap
-    L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: 'Tiles © Esri',
-        maxZoom: 19,
-      }
-    ).addTo(map)
-
-    // Add labels overlay
-    L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: 'Labels © Esri',
-        maxZoom: 19,
-      }
-    ).addTo(map)
+    initMap()
 
     return () => {
       if (mapRef.current) {
@@ -1821,18 +1846,24 @@ function ComprehensiveMapGallery({ result, fieldGeometry }: { result: RUSLERespo
   useEffect(() => {
     if (!mapRef.current || !currentMap.url) return
 
-    // Remove existing tile layer
-    if (tileLayerRef.current) {
-      mapRef.current.removeLayer(tileLayerRef.current)
+    const updateTileLayer = async () => {
+      const L = (await import('leaflet')).default
+
+      // Remove existing tile layer
+      if (tileLayerRef.current) {
+        mapRef.current!.removeLayer(tileLayerRef.current)
+      }
+
+      // Add new GEE tile layer
+      const tileLayer = L.tileLayer(currentMap.url, {
+        opacity: 0.7,
+        maxZoom: 19,
+      })
+      tileLayer.addTo(mapRef.current!)
+      tileLayerRef.current = tileLayer
     }
 
-    // Add new GEE tile layer
-    const tileLayer = L.tileLayer(currentMap.url, {
-      opacity: 0.7,
-      maxZoom: 19,
-    })
-    tileLayer.addTo(mapRef.current)
-    tileLayerRef.current = tileLayer
+    updateTileLayer()
 
     return () => {
       if (tileLayerRef.current && mapRef.current) {
@@ -1846,28 +1877,34 @@ function ComprehensiveMapGallery({ result, fieldGeometry }: { result: RUSLERespo
   useEffect(() => {
     if (!mapRef.current || !fieldGeometry) return
 
-    // Remove existing field layer
-    if (fieldLayerRef.current) {
-      mapRef.current.removeLayer(fieldLayerRef.current)
+    const updateFieldBoundary = async () => {
+      const L = (await import('leaflet')).default
+
+      // Remove existing field layer
+      if (fieldLayerRef.current) {
+        mapRef.current!.removeLayer(fieldLayerRef.current)
+      }
+
+      // Add field boundary
+      const fieldLayer = L.geoJSON(fieldGeometry, {
+        style: {
+          color: '#FFD700',
+          weight: 3,
+          fillOpacity: 0,
+          dashArray: '10, 5',
+        },
+      })
+      fieldLayer.addTo(mapRef.current!)
+      fieldLayerRef.current = fieldLayer
+
+      // Fit bounds to field
+      const bounds = fieldLayer.getBounds()
+      if (bounds.isValid()) {
+        mapRef.current!.fitBounds(bounds, { padding: [50, 50] })
+      }
     }
 
-    // Add field boundary
-    const fieldLayer = L.geoJSON(fieldGeometry, {
-      style: {
-        color: '#FFD700',
-        weight: 3,
-        fillOpacity: 0,
-        dashArray: '10, 5',
-      },
-    })
-    fieldLayer.addTo(mapRef.current)
-    fieldLayerRef.current = fieldLayer
-
-    // Fit bounds to field
-    const bounds = fieldLayer.getBounds()
-    if (bounds.isValid()) {
-      mapRef.current.fitBounds(bounds, { padding: [50, 50] })
-    }
+    updateFieldBoundary()
 
     return () => {
       if (fieldLayerRef.current && mapRef.current) {
