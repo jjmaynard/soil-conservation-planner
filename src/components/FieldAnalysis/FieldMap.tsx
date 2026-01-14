@@ -421,7 +421,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
           minLat: bounds.getSouth(),
           maxLon: bounds.getEast(),
           maxLat: bounds.getNorth(),
-          limit: 50  // Small limit for interactivity
+          limit: 5000  // API maximum - load all fields in current view
         })
 
         // Remove old GeoJSON layer
