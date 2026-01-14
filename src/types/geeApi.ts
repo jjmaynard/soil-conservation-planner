@@ -57,6 +57,7 @@ export interface RUSLECalculateRequest {
   // Output options
   include_factor_maps?: boolean
   include_uncertainty?: boolean
+  include_events?: boolean // Returns all EI30 values in timeseries
   scale?: number
 }
 

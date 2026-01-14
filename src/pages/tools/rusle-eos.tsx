@@ -27,6 +27,8 @@ import {
   Grid,
   Droplets,
   Clipboard,
+  X,
+  Equal,
 } from 'lucide-react'
 import { useRUSLECalculation } from '#hooks/useRUSLECalculation'
 import type { RUSLEResponse, ScenarioResult, RUSLECalculateRequest } from '#types/geeApi'
@@ -235,6 +237,7 @@ export default function RUSLEEOSCalculator() {
         include_scenarios: true,
         include_factor_maps: true,
         include_uncertainty: true,
+        include_events: true,
       }
       
       console.log('[RUSLE] Calculating with request:', request)
@@ -776,15 +779,15 @@ function InteractiveFactorEquation({ result, onFactorClick }: { result: RUSLERes
       <p className="text-xs font-medium mb-3" style={{ color: '#5C6C6C' }}>RUSLE EQUATION</p>
       <div className="flex items-center justify-center gap-2 flex-wrap">
         <FactorBubble value={result.r_factor.factor_value} letter="R" color="blue" />
-        <X style={{ color: '#6B7D7D' }} />
+        <X color="#6B7D7D" size={20} />
         <FactorBubble value={result.k_factor.factor_value} letter="K" color="yellow" />
-        <X style={{ color: '#6B7D7D' }} />
+        <X color="#6B7D7D" size={20} />
         <FactorBubble value={result.ls_factor.factor_value} letter="LS" color="purple" />
-        <X style={{ color: '#6B7D7D' }} />
+        <X color="#6B7D7D" size={20} />
         <FactorBubble value={result.c_factor.factor_value} letter="C" color="green" />
-        <X style={{ color: '#6B7D7D' }} />
+        <X color="#6B7D7D" size={20} />
         <FactorBubble value={result.p_factor.factor_value} letter="P" color="orange" />
-        <Equal style={{ color: '#6B7D7D' }} />
+        <Equal color="#6B7D7D" size={20} />
         <div className="flex flex-col items-center justify-center rounded-lg p-3" style={{ backgroundColor: '#FDF7F6', border: '3px solid #A0453D', minWidth: '80px' }}>
           <span className="text-xs font-medium" style={{ color: '#5F2A25' }}>Soil Loss</span>
           <span className="text-2xl font-bold" style={{ color: '#A0453D' }}>

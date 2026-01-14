@@ -150,6 +150,7 @@ class GEEAPIClient {
         includeScenarios: request.include_scenarios,
         includeFactorMaps: request.include_factor_maps,
         includeUncertainty: request.include_uncertainty,
+        includeEvents: request.include_events,
       })
       
       const { data } = await this.client.post<RUSLEResponse>(
