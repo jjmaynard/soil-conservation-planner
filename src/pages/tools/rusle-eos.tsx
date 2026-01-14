@@ -1191,7 +1191,6 @@ function ComprehensiveMapGalleryFullScreen({
 
     const initMap = async () => {
       const L = (await import('leaflet')).default
-      await import('leaflet/dist/leaflet.css')
 
       const container = document.getElementById('rusle-fullscreen-map')
       if (!container) return
@@ -1793,7 +1792,6 @@ function ComprehensiveMapGallery({ result, fieldGeometry }: { result: RUSLERespo
 
     const initMap = async () => {
       const L = (await import('leaflet')).default
-      await import('leaflet/dist/leaflet.css')
 
       const container = document.getElementById('rusle-map-gallery')
       if (!container) return
