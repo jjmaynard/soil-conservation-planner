@@ -20,6 +20,27 @@ L.Icon.Default.mergeOptions({
   shadowUrl: '/leaflet/marker-shadow.png',
 })
 
+// State FIPS code to name mapping
+const STATE_FIPS_TO_NAME: Record<string, string> = {
+  '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas', '06': 'California',
+  '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware', '11': 'District of Columbia',
+  '12': 'Florida', '13': 'Georgia', '15': 'Hawaii', '16': 'Idaho', '17': 'Illinois',
+  '18': 'Indiana', '19': 'Iowa', '20': 'Kansas', '21': 'Kentucky', '22': 'Louisiana',
+  '23': 'Maine', '24': 'Maryland', '25': 'Massachusetts', '26': 'Michigan', '27': 'Minnesota',
+  '28': 'Mississippi', '29': 'Missouri', '30': 'Montana', '31': 'Nebraska', '32': 'Nevada',
+  '33': 'New Hampshire', '34': 'New Jersey', '35': 'New Mexico', '36': 'New York',
+  '37': 'North Carolina', '38': 'North Dakota', '39': 'Ohio', '40': 'Oklahoma', '41': 'Oregon',
+  '42': 'Pennsylvania', '44': 'Rhode Island', '45': 'South Carolina', '46': 'South Dakota',
+  '47': 'Tennessee', '48': 'Texas', '49': 'Utah', '50': 'Vermont', '51': 'Virginia',
+  '53': 'Washington', '54': 'West Virginia', '55': 'Wisconsin', '56': 'Wyoming',
+  '72': 'Puerto Rico'
+}
+
+const getStateName = (fipsCode: string): string => {
+  if (!fipsCode) return 'N/A'
+  return STATE_FIPS_TO_NAME[fipsCode] || fipsCode
+}
+
 interface FieldMapProps {
   mode: 'search' | 'browse' | 'draw' | 'upload' | 'analysis'
   searchQuery?: string
@@ -432,6 +453,30 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                   complexity >= 4 ? 'Diverse (4+ crops)' : 'N/A'}`,
                 { sticky: true }
               )
+
+              // Add hover effects
+              layer.on({
+                mouseover: (e) => {
+                  const target = e.target
+                  target.setStyle({
+                    color: '#16a34a', // Green on hover
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.2,
+                    fillColor: '#16a34a'
+                  })
+                  target.bringToFront()
+                },
+                mouseout: (e) => {
+                  const target = e.target
+                  target.setStyle({
+                    color: '#FF6B35', // Back to orange
+                    weight: 2,
+                    opacity: 0.8,
+                    fillOpacity: 0
+                  })
+                }
+              })
             }
           }
         }).addTo(map)
@@ -830,7 +875,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
               </div>
               <div>
                 <span className="text-gray-600 text-xs">State:</span>
-                <div className="font-semibold text-gray-900 text-sm">{selectedCSBField.state || 'N/A'}</div>
+                <div className="font-semibold text-gray-900 text-sm">{getStateName(selectedCSBField.state)}</div>
               </div>
               <div>
                 <span className="text-gray-600 text-xs">County:</span>
