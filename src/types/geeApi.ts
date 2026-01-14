@@ -112,6 +112,7 @@ export interface RFactorResponse {
   methodology: string | null
   data_source: string | null
   map_url: string | null
+  statistics?: StatisticsResponse | null
   qc: QualityControlResponse | null
   annual_precipitation_mm: number | null
   erosive_event_count: number | null
@@ -126,6 +127,7 @@ export interface KFactorResponse {
   methodology: string | null
   data_source: string
   map_url: string | null
+  statistics?: StatisticsResponse | null
   qc: QualityControlResponse | null
   soil_texture: string | null
   organic_matter_percent: number | null
@@ -138,6 +140,7 @@ export interface LSFactorResponse {
   methodology: string | null
   data_source: string | null
   map_url: string | null
+  statistics?: StatisticsResponse | null
   qc: QualityControlResponse | null
   l_factor: number | null
   s_factor: number | null
@@ -153,6 +156,7 @@ export interface CFactorResponse {
   methodology: string | null
   data_source: string | null
   map_url: string | null
+  statistics?: StatisticsResponse | null
   qc: QualityControlResponse | null
   crop_type: string | null
   mean_ndvi: number | null
@@ -168,6 +172,7 @@ export interface PFactorResponse {
   methodology: string | null
   data_source: string | null
   map_url: string | null
+  statistics?: StatisticsResponse | null
   qc: QualityControlResponse | null
   detected_practices: string[] | null
   practice_components: { [key: string]: number } | null
