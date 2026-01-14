@@ -31,6 +31,8 @@ import {
 import { useRUSLECalculation } from '#hooks/useRUSLECalculation'
 import type { RUSLEResponse, ScenarioResult, RUSLECalculateRequest } from '#types/geeApi'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 
 // ============================================================================
 // Conservation Practices Data
