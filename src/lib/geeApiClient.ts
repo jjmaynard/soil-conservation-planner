@@ -95,6 +95,7 @@ function handleAPIError(error: unknown): never {
 class GEEAPIClient {
   private client: AxiosInstance
   private fieldDetailsCache: Map<string, { data: CSBFieldDetails; timestamp: number }> = new Map()
+  private boundsCache: Map<string, { data: CSBBounds; timestamp: number }> = new Map()
   private readonly CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
   constructor(config: GEEClientConfig = {}) {
@@ -312,12 +313,25 @@ class GEEAPIClient {
    * Get CSB field boundaries within a bounding box
    */
   async getCSBBounds(params: CSBQueryParams): Promise<CSBBounds> {
+    // Use the limit parameter with 1000 as default (API default)
+    const limit = params.limit || 1000
+    
+    // Create cache key from bounds parameters
+    const cacheKey = `${params.minLon.toFixed(4)},${params.minLat.toFixed(4)},${params.maxLon.toFixed(4)},${params.maxLat.toFixed(4)},${limit}`
+    
+    // Check cache first
+    const cached = this.boundsCache.get(cacheKey)
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      console.log('[GEE API] Returning cached bounds data')
+      return cached.data
+    }
+    
     const maxRetries = 3
     let lastError: any
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        console.log(`[GEE API] Fetching CSB bounds (attempt ${attempt}/${maxRetries})...`)
+        console.log(`[GEE API] Fetching CSB bounds (attempt ${attempt}/${maxRetries}) with limit ${limit}...`)
         
         const response = await this.client.get<CSBBounds>('/api/csb/bounds', {
           params: {
@@ -326,12 +340,19 @@ class GEEAPIClient {
             max_lon: params.maxLon,
             max_lat: params.maxLat,
             zoom: params.zoom,
-            limit: params.limit || 100, // Default to 100 if not specified
+            limit: limit,
           },
           timeout: 60000, // 60 second timeout
         })
         
         console.log(`[GEE API] Successfully fetched ${response.data.features?.length || 0} field boundaries`)
+        
+        // Cache the result
+        this.boundsCache.set(cacheKey, {
+          data: response.data,
+          timestamp: Date.now()
+        })
+        
         return response.data
       } catch (error) {
         lastError = error
