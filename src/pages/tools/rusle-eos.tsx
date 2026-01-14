@@ -29,7 +29,7 @@ import {
   Clipboard,
 } from 'lucide-react'
 import { useRUSLECalculation } from '#hooks/useRUSLECalculation'
-import type { RUSLEResponse, ScenarioResult } from '#types/geeApi'
+import type { RUSLEResponse, ScenarioResult, RUSLECalculateRequest } from '#types/geeApi'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
 
 // ============================================================================
