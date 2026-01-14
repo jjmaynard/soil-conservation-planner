@@ -519,7 +519,7 @@ See RUSLE_GEE_API_TROUBLESHOOTING.md for technical details.`
                               IMMEDIATE WORKAROUND:
                             </p>
                             <ol className="text-xs space-y-1 ml-4 list-decimal" style={{ color: '#8B3C35' }}>
-                              <li>✅ Enable "Emergency Fallback Mode" above</li>
+                              <li>✅ Enable &quot;Emergency Fallback Mode&quot; above</li>
                               <li>Select a different field (preferably Iowa)</li>
                               <li>Click Calculate again</li>
                             </ol>
@@ -547,7 +547,7 @@ See RUSLE_GEE_API_TROUBLESHOOTING.md for technical details.`
                   Ready to Calculate
                 </h3>
                 <p className="text-gray-600">
-                  Select a field and click "Calculate" to perform comprehensive RUSLE erosion analysis
+                  Select a field and click &quot;Calculate&quot; to perform comprehensive RUSLE erosion analysis
                   with multi-scenario comparison powered by Google Earth Engine.
                 </p>
               </div>
@@ -898,11 +898,11 @@ function RiskInterpretationScale({ soilLoss, tValue }: { soilLoss: number; tValu
         <p className="text-xs leading-relaxed" style={{ color: '#3E4A4A' }}>
           {exceedsT ? (
             <>
-              <span className="font-bold" style={{ color: '#A0453D' }}>⚠ Exceeds sustainable threshold:</span> Your field's erosion rate of <strong>{soilLoss.toFixed(1)} t/ac/yr</strong> is above the T-value of <strong>{tValue.toFixed(1)} t/ac/yr</strong>. Conservation practices are strongly recommended to prevent long-term soil degradation.
+              <span className="font-bold" style={{ color: '#A0453D' }}>⚠ Exceeds sustainable threshold:</span> Your field&apos;s erosion rate of <strong>{soilLoss.toFixed(1)} t/ac/yr</strong> is above the T-value of <strong>{tValue.toFixed(1)} t/ac/yr</strong>. Conservation practices are strongly recommended to prevent long-term soil degradation.
             </>
           ) : (
             <>
-              <span className="font-bold" style={{ color: '#5C8D5A' }}>✓ Within sustainable threshold:</span> Your field's erosion rate of <strong>{soilLoss.toFixed(1)} t/ac/yr</strong> is at or below the T-value of <strong>{tValue.toFixed(1)} t/ac/yr</strong>, indicating sustainable soil management.
+              <span className="font-bold" style={{ color: '#5C8D5A' }}>✓ Within sustainable threshold:</span> Your field&apos;s erosion rate of <strong>{soilLoss.toFixed(1)} t/ac/yr</strong> is at or below the T-value of <strong>{tValue.toFixed(1)} t/ac/yr</strong>, indicating sustainable soil management.
             </>
           )}
         </p>
@@ -1764,8 +1764,6 @@ function ComprehensiveMapGallery({ result, fieldGeometry }: { result: RUSLERespo
     },
   ].filter(map => map.url) // Only show maps with URLs
 
-  if (maps.length === 0) return null
-
   const currentMap = maps.find(m => m.id === activeMap) || maps[0]
 
   // Initialize map
@@ -1875,6 +1873,8 @@ function ComprehensiveMapGallery({ result, fieldGeometry }: { result: RUSLERespo
       }
     }
   }, [fieldGeometry])
+
+  if (maps.length === 0) return null
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -2079,10 +2079,6 @@ function RFactorTimeseriesChart({ result }: { result: RUSLEResponse }) {
 // ============================================================================
 
 function AllScenariosExplorerCard({ result }: { result: RUSLEResponse }) {
-  if (!result.scenarios || result.scenarios.length === 0) {
-    return null
-  }
-
   const [viewMode, setViewMode] = React.useState<'cards' | 'table' | 'chart'>('chart')
   const [sortBy, setSortBy] = React.useState<'effectiveness' | 'soilLoss' | 'pFactor'>('effectiveness')
   const [showOnlyCompliant, setShowOnlyCompliant] = React.useState(false)
@@ -2090,6 +2086,10 @@ function AllScenariosExplorerCard({ result }: { result: RUSLEResponse }) {
   const tValue = result.scenario_comparison?.t_value_used || 5.0
   const mostEffective = result.scenario_comparison?.most_effective_practice
   const baselineLoss = result.baseline?.soil_loss_rate_tons_acre_yr || 0
+  
+  if (!result.scenarios || result.scenarios.length === 0) {
+    return null
+  }
   
   // Sort scenarios based on selected criteria
   const getSortedScenarios = () => {

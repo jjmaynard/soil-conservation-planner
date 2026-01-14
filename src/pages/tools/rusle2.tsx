@@ -17,17 +17,6 @@ export default function RUSLE2() {
     </div>
   )
 }
-              <p className="text-xs text-gray-600 mt-2">
-                Where: A = Annual Soil Loss (tons/acre/year), R = Rainfall Erosivity, K = Soil
-                Erodibility, LS = Slope Length & Steepness, C = Cover Management, P = Support
-                Practices
-              </p>
-            </div>
-
-            <h3 className="text-xl font-semibold text-gray-900 mb-4 mt-6">Planned Features</h3>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <CheckCircle2 className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-900">Slope Profile Builder</p>
                   <p className="text-gray-600 text-sm">
