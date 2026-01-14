@@ -27,8 +27,6 @@ import {
   Grid,
   Droplets,
   Clipboard,
-  X,
-  Equal,
 } from 'lucide-react'
 import { useRUSLECalculation } from '#hooks/useRUSLECalculation'
 import type { RUSLEResponse, ScenarioResult, RUSLECalculateRequest } from '#types/geeApi'
@@ -764,14 +762,14 @@ function FactorBubble({ value, letter, color, unit, onClick }: FactorBubbleProps
 }
 
 function InteractiveFactorEquation({ result, onFactorClick }: { result: RUSLEResponse; onFactorClick: (factor: string) => void }) {
-  const X = ({ className = "" }: { className?: string }) => (
-    <svg className={`w-4 h-4 ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  const X = ({ className = "", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={`w-4 h-4 ${className}`} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
     </svg>
   )
   
-  const Equal = ({ className = "" }: { className?: string }) => (
-    <span className={`text-2xl font-bold ${className}`}>=</span>
+  const Equal = ({ className = "", style }: { className?: string; style?: React.CSSProperties }) => (
+    <span className={`text-2xl font-bold ${className}`} style={style}>=</span>
   )
 
   return (
@@ -779,15 +777,15 @@ function InteractiveFactorEquation({ result, onFactorClick }: { result: RUSLERes
       <p className="text-xs font-medium mb-3" style={{ color: '#5C6C6C' }}>RUSLE EQUATION</p>
       <div className="flex items-center justify-center gap-2 flex-wrap">
         <FactorBubble value={result.r_factor.factor_value} letter="R" color="blue" />
-        <X color="#6B7D7D" size={20} />
+        <X style={{ color: '#6B7D7D' }} />
         <FactorBubble value={result.k_factor.factor_value} letter="K" color="yellow" />
-        <X color="#6B7D7D" size={20} />
+        <X style={{ color: '#6B7D7D' }} />
         <FactorBubble value={result.ls_factor.factor_value} letter="LS" color="purple" />
-        <X color="#6B7D7D" size={20} />
+        <X style={{ color: '#6B7D7D' }} />
         <FactorBubble value={result.c_factor.factor_value} letter="C" color="green" />
-        <X color="#6B7D7D" size={20} />
+        <X style={{ color: '#6B7D7D' }} />
         <FactorBubble value={result.p_factor.factor_value} letter="P" color="orange" />
-        <Equal color="#6B7D7D" size={20} />
+        <Equal style={{ color: '#6B7D7D' }} />
         <div className="flex flex-col items-center justify-center rounded-lg p-3" style={{ backgroundColor: '#FDF7F6', border: '3px solid #A0453D', minWidth: '80px' }}>
           <span className="text-xs font-medium" style={{ color: '#5F2A25' }}>Soil Loss</span>
           <span className="text-2xl font-bold" style={{ color: '#A0453D' }}>
