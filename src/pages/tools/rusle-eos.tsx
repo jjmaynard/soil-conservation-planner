@@ -1147,6 +1147,7 @@ function ComprehensiveMapGalleryFullScreen({
   const mapRef = useRef<LeafletTypes.Map | null>(null)
   const tileLayerRef = useRef<LeafletTypes.TileLayer | null>(null)
   const fieldLayerRef = useRef<LeafletTypes.GeoJSON | null>(null)
+  const [mapInitialized, setMapInitialized] = useState(false)
   
   const maps = [
     {
@@ -1212,6 +1213,10 @@ function ComprehensiveMapGalleryFullScreen({
 
       mapRef.current = map
 
+      // Create custom pane for field boundary with higher z-index
+      map.createPane('fieldBoundaryPane')
+      map.getPane('fieldBoundaryPane')!.style.zIndex = '650'
+
       // Esri satellite basemap
       L.tileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -1229,6 +1234,9 @@ function ComprehensiveMapGalleryFullScreen({
           maxZoom: 19,
         }
       ).addTo(map)
+
+      console.log('[RUSLE Map] Map initialized successfully')
+      setMapInitialized(true)
     }
 
     initMap()
@@ -1238,17 +1246,32 @@ function ComprehensiveMapGalleryFullScreen({
         mapRef.current.remove()
         mapRef.current = null
       }
+      setMapInitialized(false)
     }
   }, [])
 
   // Update GEE tile layer
   useEffect(() => {
-    if (!mapRef.current || !currentMap.url) return
+    if (!mapRef.current || !mapInitialized || !currentMap.url) {
+      console.log('[RUSLE Map] Cannot update tile layer:', {
+        hasMap: !!mapRef.current,
+        mapInitialized,
+        hasUrl: !!currentMap.url,
+        currentMapId: currentMap.id,
+        url: currentMap.url
+      })
+      return
+    }
 
     const updateTileLayer = async () => {
       const L = (await import('leaflet')).default
 
       if (!currentMap.url) return
+
+      console.log('[RUSLE Map] Updating tile layer:', {
+        mapId: currentMap.id,
+        url: currentMap.url
+      })
 
       if (tileLayerRef.current) {
         mapRef.current!.removeLayer(tileLayerRef.current)
@@ -1260,6 +1283,8 @@ function ComprehensiveMapGalleryFullScreen({
       })
       tileLayer.addTo(mapRef.current!)
       tileLayerRef.current = tileLayer
+      
+      console.log('[RUSLE Map] Tile layer added successfully')
     }
 
     updateTileLayer()
@@ -1270,11 +1295,18 @@ function ComprehensiveMapGalleryFullScreen({
         tileLayerRef.current = null
       }
     }
-  }, [currentMap.url])
+  }, [currentMap.url, mapInitialized])
 
   // Update field boundary
   useEffect(() => {
-    if (!mapRef.current || !fieldGeometry) return
+    if (!mapRef.current || !mapInitialized || !fieldGeometry) {
+      console.log('[RUSLE Map] Cannot update field boundary:', {
+        hasMap: !!mapRef.current,
+        mapInitialized,
+        hasGeometry: !!fieldGeometry
+      })
+      return
+    }
 
     const updateFieldBoundary = async () => {
       const L = (await import('leaflet')).default
@@ -1283,6 +1315,8 @@ function ComprehensiveMapGalleryFullScreen({
         mapRef.current!.removeLayer(fieldLayerRef.current)
       }
 
+      console.log('[RUSLE Map] Adding field boundary')
+
       const fieldLayer = L.geoJSON(fieldGeometry, {
         style: {
           color: '#FFD700',
@@ -1290,9 +1324,12 @@ function ComprehensiveMapGalleryFullScreen({
           fillOpacity: 0,
           dashArray: '10, 5',
         },
+        pane: 'fieldBoundaryPane',  // Use custom pane with higher z-index
       })
       fieldLayer.addTo(mapRef.current!)
       fieldLayerRef.current = fieldLayer
+      
+      console.log('[RUSLE Map] Field boundary added successfully')
 
       const bounds = fieldLayer.getBounds()
       if (bounds.isValid()) {
@@ -1308,7 +1345,7 @@ function ComprehensiveMapGalleryFullScreen({
         fieldLayerRef.current = null
       }
     }
-  }, [fieldGeometry])
+  }, [fieldGeometry, mapInitialized])
 
   return (
     <div className="flex flex-col h-full">

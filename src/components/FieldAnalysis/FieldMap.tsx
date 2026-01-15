@@ -41,6 +41,23 @@ const getStateName = (fipsCode: string): string => {
   return STATE_FIPS_TO_NAME[fipsCode] || fipsCode
 }
 
+// Format pattern type for display
+const formatPatternType = (pattern: string | undefined): string => {
+  if (!pattern) return 'N/A'
+  // Convert snake_case to readable format
+  // e.g., "two_crop_rotation" -> "2-Crop Rotation"
+  //       "monoculture" -> "Monoculture"
+  //       "diverse_rotation" -> "Diverse Rotation"
+  return pattern
+    .replace('two_crop', '2-crop')
+    .replace('three_crop', '3-crop')
+    .replace('four_crop', '4-crop')
+    .replace('_', ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 interface FieldMapProps {
   mode: 'search' | 'browse' | 'draw' | 'upload' | 'analysis'
   searchQuery?: string
@@ -83,6 +100,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   const [mapInitialized, setMapInitialized] = useState(false)
   const [selectedCSBField, setSelectedCSBField] = useState<CSBFieldDetails | null>(null)
   const [isSelectingField, setIsSelectingField] = useState(false)
+  const [showCSBTileLayer, setShowCSBTileLayer] = useState(true) // Separate control for tile layer
   const csbLayerRef = useRef<L.TileLayer | null>(null)
   const csbGeoJsonLayerRef = useRef<L.GeoJSON | null>(null) // Interactive GeoJSON layer
   const selectedFieldLayerRef = useRef<L.GeoJSON | null>(null)
@@ -189,6 +207,10 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
     // Add layer control
     L.control.layers(baseLayers, {}, { position: 'topright' }).addTo(map)
+
+    // Create custom pane for selected field with higher z-index
+    map.createPane('selectedFieldPane')
+    map.getPane('selectedFieldPane')!.style.zIndex = '650' // Higher than overlayPane (400)
 
     mapRef.current = map
     setMapInitialized(true)
@@ -413,18 +435,26 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
           return
         }
 
+        // Dynamic limit based on zoom level to prevent huge payloads at low zoom
+        let limit = 500  // Default for zoom 10-12
+        if (zoom >= 15) {
+          limit = 2000  // High detail at close zoom
+        } else if (zoom >= 13) {
+          limit = 1000  // Medium detail
+        }
+
         const bounds = map.getBounds()
-        console.log('[CSB] Fetching interactive field boundaries...')
+        console.log(`[CSB] Fetching interactive field boundaries (zoom ${zoom}, limit ${limit})...`)
         
         const response = await geeApi.getCSBBounds({
           minLon: bounds.getWest(),
           minLat: bounds.getSouth(),
           maxLon: bounds.getEast(),
           maxLat: bounds.getNorth(),
-          limit: 5000  // API maximum limit
+          limit: limit  // Dynamic limit based on zoom
         })
 
-        // Remove old GeoJSON layer
+        // Remove old GeoJSON layer only after new data is ready
         if (csbGeoJsonLayerRef.current) {
           map.removeLayer(csbGeoJsonLayerRef.current)
         }
@@ -523,20 +553,26 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
               map.removeLayer(selectedFieldLayerRef.current)
             }
 
-            // Add highlight layer for selected field
+            // Add highlight layer for selected field with distinct styling
             const fieldLayer = L.geoJSON(field.geometry as any, {
               style: {
-                color: '#16a34a',
-                weight: 3,
-                fillColor: '#16a34a',
-                fillOpacity: 0.2,
+                color: '#3b82f6',      // Bright blue border
+                weight: 6,              // Thick border for visibility
+                fillColor: '#3b82f6',  // Blue fill
+                fillOpacity: 0.15,      // Light fill
+                dashArray: '10, 5',     // Dashed line pattern
               },
+              pane: 'selectedFieldPane',      // Use custom pane with highest z-index
             })
             fieldLayer.addTo(map)
             selectedFieldLayerRef.current = fieldLayer
 
-            // Fit map to field bounds
+            // Fit map to field bounds, then zoom out by 1 level
             map.fitBounds(fieldLayer.getBounds(), { padding: [50, 50] })
+            setTimeout(() => {
+              const currentZoom = map.getZoom()
+              map.setZoom(currentZoom - 1)
+            }, 100)
           } else {
             setValidationError('No field found at this location. Try clicking inside a field boundary.')
           }
@@ -559,26 +595,25 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         if (mode === 'browse') {
           map.off('click', handleMapClick)
         }
-        if (csbLayerRef.current) {
-          map.removeLayer(csbLayerRef.current)
-          csbLayerRef.current = null
-        }
+        // Don't remove tile layer here - it's controlled by showCSBTileLayer
         if (csbGeoJsonLayerRef.current) {
           map.removeLayer(csbGeoJsonLayerRef.current)
           csbGeoJsonLayerRef.current = null
         }
-        if (selectedFieldLayerRef.current) {
+        // Only remove selectedFieldLayerRef in browse mode, not in analysis mode
+        if (mode === 'browse' && selectedFieldLayerRef.current) {
           map.removeLayer(selectedFieldLayerRef.current)
           selectedFieldLayerRef.current = null
         }
       }
     } else {
-      // Remove CSB layer if toggled off
-      if (csbLayerRef.current) {
-        map.removeLayer(csbLayerRef.current)
-        csbLayerRef.current = null
+      // Remove GeoJSON boundaries if toggled off, but keep tile layer
+      if (csbGeoJsonLayerRef.current) {
+        map.removeLayer(csbGeoJsonLayerRef.current)
+        csbGeoJsonLayerRef.current = null
       }
-      if (selectedFieldLayerRef.current) {
+      // Only remove selectedFieldLayerRef in browse mode, not in analysis mode
+      if (mode === 'browse' && selectedFieldLayerRef.current) {
         map.removeLayer(selectedFieldLayerRef.current)
         selectedFieldLayerRef.current = null
       }
@@ -619,10 +654,8 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         },
       })
       
-      // Only add to map if showCSBLayer is true
-      if (showCSBLayer) {
-        fieldLayer.addTo(mapRef.current)
-      }
+      // Always add field boundary in analysis mode, regardless of showCSBLayer
+      fieldLayer.addTo(mapRef.current)
       
       fieldBoundaryLayerRef.current = fieldLayer
 
@@ -634,7 +667,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         fieldBoundaryLayerRef.current = null
       }
     }
-  }, [fieldData, mode, showCSBLayer])
+  }, [fieldData, mode])
 
   // Handle search query
   useEffect(() => {
@@ -733,66 +766,80 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
       {/* Layer Controls for Browse Mode */}
       {mode === 'browse' && onCSBLayerToggle && (
-        <>
-          <div 
-            className="absolute top-4 right-4 rounded-lg shadow-2xl z-[1000] overflow-hidden"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb' }}
-          >
-            <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-                <Layers className="w-4 h-4" style={{ color: '#16a34a' }} />
-                Map Layers
-              </h3>
-            </div>
-            <div className="p-4 space-y-3">
-              <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-                <input
-                  type="checkbox"
-                  checked={showCSBLayer}
-                  onChange={onCSBLayerToggle}
-                  className="w-4 h-4 rounded"
-                  style={{ accentColor: '#3b82f6' }}
-                />
-                <span className="text-gray-700">Field Boundaries (CSB)</span>
-              </label>
-            </div>
+        <div 
+          className="absolute top-4 right-4 rounded-lg shadow-2xl z-[1000] overflow-hidden"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb', minWidth: '240px' }}
+        >
+          <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
+              <Layers className="w-4 h-4" style={{ color: '#16a34a' }} />
+              Map Layers
+            </h3>
+          </div>
+          <div className="p-4 space-y-3">
+            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
+              <input
+                type="checkbox"
+                checked={showCSBLayer}
+                onChange={onCSBLayerToggle}
+                className="w-4 h-4 rounded"
+                style={{ accentColor: '#3b82f6' }}
+              />
+              <span className="text-gray-700">Field Boundaries (CSB)</span>
+            </label>
+            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
+              <input
+                type="checkbox"
+                checked={showCSBTileLayer}
+                onChange={(e) => {
+                  const checked = e.target.checked
+                  setShowCSBTileLayer(checked)
+                  // Toggle tile layer visibility
+                  if (csbLayerRef.current && mapRef.current) {
+                    if (checked) {
+                      mapRef.current.addLayer(csbLayerRef.current)
+                    } else {
+                      mapRef.current.removeLayer(csbLayerRef.current)
+                    }
+                  }
+                }}
+                className="w-4 h-4 rounded"
+                style={{ accentColor: '#3b82f6' }}
+              />
+              <span className="text-gray-700">Rotation History</span>
+            </label>
           </div>
 
-          {/* CSB Legend - Only show when CSB layer is active */}
-          {showCSBLayer && (
-            <div 
-              className="absolute top-32 right-4 rounded-lg shadow-2xl z-[1000] overflow-hidden"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb' }}
-            >
-              <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                <h3 className="font-semibold text-gray-900 text-xs">
-                  Crop Rotation Complexity
-                </h3>
+          {/* Crop Rotation Complexity Legend */}
+          <div style={{ borderTop: '1px solid #e5e7eb' }}>
+            <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+              <h3 className="font-semibold text-gray-900 text-xs">
+                Crop Rotation Complexity
+              </h3>
+            </div>
+            <div className="p-3 space-y-2">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ef4444' }}></div>
+                <span className="text-gray-700">Monoculture (1 crop)</span>
               </div>
-              <div className="p-3 space-y-2">
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-4 h-4 rounded" style={{ backgroundColor: '#ef4444' }}></div>
-                  <span className="text-gray-700">Monoculture (1 crop)</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-4 h-4 rounded" style={{ backgroundColor: '#f97316' }}></div>
-                  <span className="text-gray-700">2-crop rotation</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-4 h-4 rounded" style={{ backgroundColor: '#22c55e' }}></div>
-                  <span className="text-gray-700">3-crop rotation</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-4 h-4 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
-                  <span className="text-gray-700">Diverse (4+ crops)</span>
-                </div>
-                <div className="pt-2 mt-2 text-xs text-gray-500 border-t border-gray-200">
-                  Zoom in (13+) for field details
-                </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: '#f97316' }}></div>
+                <span className="text-gray-700">2-crop rotation</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: '#22c55e' }}></div>
+                <span className="text-gray-700">3-crop rotation</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
+                <span className="text-gray-700">Diverse (4+ crops)</span>
+              </div>
+              <div className="pt-2 mt-2 text-xs text-gray-500 border-t border-gray-200">
+                Zoom in (13+) for field details
               </div>
             </div>
-          )}
-        </>
+          </div>
+        </div>
       )}
 
       {/* Drawing Instructions - Hidden because instructions are in the left panel */}
@@ -838,8 +885,8 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       {/* CSB Field Selection Confirmation */}
       {mode === 'browse' && selectedCSBField && (
         <div 
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 rounded-lg shadow-2xl z-[1000]"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e5e7eb', minWidth: '400px' }}
+          className="absolute bottom-4 left-4 rounded-lg shadow-2xl z-[1000]"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e5e7eb', minWidth: '400px', maxWidth: '450px' }}
         >
           <div className="px-4 py-3" style={{ backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0' }}>
             <div className="flex items-center justify-between">
@@ -915,7 +962,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                 <div className="grid grid-cols-2 gap-3 text-xs mb-2">
                   <div>
                     <span className="text-gray-600">Pattern:</span>
-                    <div className="font-semibold text-gray-900">{selectedCSBField.rotation_analysis.pattern_type}</div>
+                    <div className="font-semibold text-gray-900">{formatPatternType(selectedCSBField.rotation_analysis.pattern_type)}</div>
                   </div>
                   <div>
                     <span className="text-gray-600">Unique Crops:</span>
