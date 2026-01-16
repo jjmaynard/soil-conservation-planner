@@ -18,7 +18,7 @@ import { SOIL_SUBCATEGORIES, TERRAIN_SUBCATEGORIES } from '#src/types/mapLayers'
 export function useSoilProperties() {
   return useQuery<PropertyMetadata[]>({
     queryKey: ['soil-properties'],
-    queryFn: () => mapLayerApi.getSoilProperties(),
+    queryFn: () => mapLayerApi.getAllProperties(),
     staleTime: 24 * 60 * 60 * 1000, // 24 hours - properties don't change often
   })
 }
