@@ -27,13 +27,14 @@ export interface SoilProfile {
 export interface SoilLayer {
   id: string
   name: string
-  type: 'raster' | 'vector' | 'wms'
+  type: 'raster' | 'vector' | 'wms' | 'gee-tile'
   url: string
   visible: boolean
   opacity: number
   depth?: string
   legend?: LegendItem[]
   year?: number // For CDL layer year
+  metadata?: any // For GEE layer metadata
 }
 
 export interface LegendItem {
