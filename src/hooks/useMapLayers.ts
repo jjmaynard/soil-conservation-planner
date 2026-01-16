@@ -53,9 +53,9 @@ export function usePropertyTiles(
   propertyId: string | null
 ) {
   return useQuery<PropertyTileResponse>({
-    queryKey: ['property-tiles', category, propertyId],
-    queryFn: () => mapLayerApi.getPropertyTiles(category!, propertyId!),
-    enabled: !!(category && propertyId),
+    queryKey: ['property-tiles', propertyId],
+    queryFn: () => mapLayerApi.getPropertyTiles(propertyId!),
+    enabled: !!propertyId,
     staleTime: 60 * 60 * 1000, // 1 hour - tile URLs expire
   })
 }
