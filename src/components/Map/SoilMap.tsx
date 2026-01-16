@@ -524,9 +524,9 @@ export default function SoilMap({
 
       try {
         // Fetch tile URL
-        const tileData = await mapLayerApi.getPropertyTiles(category, layerId)
+        const tileData = await mapLayerApi.getPropertyTiles(layerId)
 
-        if (!tileData.tile_url) {
+        if (!tileData?.tile_url) {
           console.error(`No tile URL for layer ${layerId}`)
           return
         }
