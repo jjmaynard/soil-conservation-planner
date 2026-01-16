@@ -9,6 +9,8 @@ import 'leaflet/dist/leaflet.css'
 
 import { useSoilData } from '#src/hooks/useSoilData'
 import type { SoilDepth, SoilLayer, SoilProfile } from '#src/types/soil'
+import { mapLayerApi } from '#src/lib/mapLayerApi'
+import type { PropertyCategory } from '#src/types/mapLayers'
 
 // Fix Leaflet default icon issue with Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -36,6 +38,9 @@ interface SoilMapProps {
   onProcessingStart?: () => void
   isSelectMode?: boolean
   className?: string
+  // GEE Layer Props
+  geeActiveLayers?: Map<string, any>
+  geeLayerGroups?: any[]
 }
 export default function SoilMap({
   initialCenter,
@@ -49,6 +54,8 @@ export default function SoilMap({
   onProcessingStart,
   isSelectMode = false,
   className = '',
+  geeActiveLayers,
+  geeLayerGroups,
 }: SoilMapProps) {
   console.log('SoilMap component rendering...')
   console.log('Props - activeLayers:', activeLayers)
@@ -58,6 +65,7 @@ export default function SoilMap({
   const containerRef = useRef<HTMLDivElement>(null)
   const clickMarkerRef = useRef<L.Marker | null>(null)
   const layersRef = useRef<Map<string, L.Layer>>(new Map())
+  const geeLayersRef = useRef<Map<string, L.TileLayer>>(new Map())
   const activeLayersRef = useRef<string[]>(activeLayers)
 
   const { fetchSoilProfile } = useSoilData()
@@ -410,19 +418,45 @@ export default function SoilMap({
     })
 
     // Add new active layers or update existing ones
-    activeLayers.forEach(layerId => {
+    activeLayers.forEach(async layerId => {
       const layerConfig = soilLayers.find(l => l.id === layerId)
       if (!layerConfig) return
 
       if (!layersRef.current.has(layerId)) {
         // Add new layer
         console.log(`Adding layer: ${layerId}`, layerConfig)
-        const leafletLayer = createLeafletLayer(layerConfig)
-        console.log(`Created Leaflet layer for ${layerId}:`, leafletLayer)
-        if (leafletLayer && mapRef.current) {
-          leafletLayer.addTo(mapRef.current)
-          layersRef.current.set(layerId, leafletLayer)
-          console.log(`Layer ${layerId} added to map`)
+        
+        // Handle GEE tile layers async
+        if (layerConfig.type === 'gee-tile') {
+          try {
+            const { mapLayerApi } = await import('#src/lib/mapLayerApi')
+            const propertyId = layerConfig.metadata?.id || layerId.replace('gee-', '')
+            const tileData = await mapLayerApi.getPropertyTiles(propertyId)
+            
+            if (tileData?.tile_url && mapRef.current) {
+              const leafletLayer = L.tileLayer(tileData.tile_url, {
+                opacity: layerConfig.opacity || 0.7,
+                maxZoom: 18,
+                attribution: `${layerConfig.name} - GEE`,
+              })
+              leafletLayer.addTo(mapRef.current)
+              layersRef.current.set(layerId, leafletLayer)
+              console.log(`GEE layer ${layerId} added to map`)
+            } else {
+              console.warn(`No tile data available for ${layerConfig.name} (${propertyId})`)
+            }
+          } catch (error) {
+            console.warn(`Layer ${layerConfig.name} not available:`, error instanceof Error ? error.message : error)
+          }
+        } else {
+          // Regular layers
+          const leafletLayer = createLeafletLayer(layerConfig)
+          console.log(`Created Leaflet layer for ${layerId}:`, leafletLayer)
+          if (leafletLayer && mapRef.current) {
+            leafletLayer.addTo(mapRef.current)
+            layersRef.current.set(layerId, leafletLayer)
+            console.log(`Layer ${layerId} added to map`)
+          }
         }
       } else {
         // Update existing layer opacity
@@ -439,6 +473,81 @@ export default function SoilMap({
     // Update raster layers based on depth if needed
     console.log(`Selected depth: ${selectedDepth}`)
   }, [selectedDepth])
+
+  // Manage GEE tile layers
+  useEffect(() => {
+    if (!mapRef.current || !geeActiveLayers || !geeLayerGroups) return
+
+    const map = mapRef.current
+
+    // Get all active GEE layer IDs
+    const activeGEEIds = Array.from(geeActiveLayers.keys())
+
+    // Remove layers that are no longer active
+    geeLayersRef.current.forEach((tileLayer, layerId) => {
+      if (!activeGEEIds.includes(layerId)) {
+        console.log(`Removing GEE layer: ${layerId}`)
+        map.removeLayer(tileLayer)
+        geeLayersRef.current.delete(layerId)
+      }
+    })
+
+    // Add new active layers
+    activeGEEIds.forEach(async (layerId) => {
+      if (geeLayersRef.current.has(layerId)) {
+        // Update opacity for existing layer
+        const existingLayer = geeLayersRef.current.get(layerId)
+        const layerData = geeActiveLayers.get(layerId)
+        if (existingLayer && layerData) {
+          existingLayer.setOpacity(layerData.opacity || 0.7)
+        }
+        return
+      }
+
+      // Find layer metadata
+      let layer: any = null
+      let category: PropertyCategory | null = null
+
+      for (const group of geeLayerGroups) {
+        const found = group.layers.find((l: any) => l.id === layerId)
+        if (found) {
+          layer = found
+          category = group.category as PropertyCategory
+          break
+        }
+      }
+
+      if (!layer || !category) {
+        console.warn(`Layer metadata not found for: ${layerId}`)
+        return
+      }
+
+      try {
+        // Fetch tile URL
+        const tileData = await mapLayerApi.getPropertyTiles(category, layerId)
+
+        if (!tileData.tile_url) {
+          console.error(`No tile URL for layer ${layerId}`)
+          return
+        }
+
+        // Create tile layer
+        const tileLayer = L.tileLayer(tileData.tile_url, {
+          opacity: layer.opacity || 0.7,
+          maxZoom: 18,
+          attribution: `${layer.name} - GEE`,
+        })
+
+        // Add to map
+        tileLayer.addTo(map)
+        geeLayersRef.current.set(layerId, tileLayer)
+
+        console.log(`Added GEE tile layer: ${layer.name}`)
+      } catch (error) {
+        console.error(`Failed to load GEE tile layer ${layerId}:`, error)
+      }
+    })
+  }, [geeActiveLayers, geeLayerGroups])
 
   return (
     <div
@@ -904,6 +1013,13 @@ function createLeafletLayer(config: SoilLayer): L.Layer | null {
           opacity: config.opacity,
           maxZoom: 18,
         })
+
+      case 'gee-tile':
+        // GEE tile layers - fetch URL on demand
+        console.log('Creating GEE tile layer for:', config.id)
+        // For now, return null and handle async loading
+        // This will be replaced with proper async handling
+        return null
 
       default:
         return null

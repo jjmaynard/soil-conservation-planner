@@ -41,41 +41,35 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['Conservation Planning', 'Soil Assessment'])
+    new Set(['Soil Conservation Toolkit', 'Soil Assessment'])
   )
 
   const navigationSections: NavigationSection[] = [
-    {
-      title: 'Conservation Planning',
-      items: [
-        {
-          path: '/conservation',
-          label: 'Conservation Practices',
-          icon: Sprout,
-          description: 'NRCS practice standards',
-        },
-        {
-          path: '/conservation/planning-wizard',
-          label: 'Planning Tool',
-          icon: ClipboardCheck,
-          description: 'Create conservation plans',
-        },
-      ],
-    },
     {
       title: 'Soil Assessment',
       items: [
         {
           path: '/soil-map',
           label: 'Soil Map Explorer',
-          icon: Map,
+          icon: Globe,
           description: 'SSURGO mapping',
         },
         {
           path: '/field-analysis',
           label: 'Field Analysis',
-          icon: Globe,
+          icon: Map,
           description: 'Field-level evaluation',
+        },
+      ],
+    },
+    {
+      title: 'Soil Conservation Toolkit',
+      items: [
+        {
+          path: '/conservation',
+          label: 'Conservation Practices',
+          icon: Sprout,
+          description: 'NRCS practice standards',
         },
         {
           path: '/soil-health',
@@ -89,11 +83,6 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           icon: BarChart3,
           description: 'Crop & use suitability',
         },
-      ],
-    },
-    {
-      title: 'Technical Tools',
-      items: [
         {
           path: '/tools/rusle-eos',
           label: 'RUSLE-EOS',

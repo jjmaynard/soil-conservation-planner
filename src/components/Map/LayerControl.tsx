@@ -18,6 +18,10 @@ interface LayerControlProps {
   onCdlYearChange: (year: number) => void
   onHeightChange?: (height: number) => void
   className?: string
+  // GEE Layer Props
+  onGEELayerToggle?: (layerId: string) => void
+  onGEEOpacityChange?: (layerId: string, opacity: number) => void
+  mapRef?: React.RefObject<L.Map | null>
 }
 
 const DEPTH_LABELS: Record<SoilDepth, string> = {
@@ -41,26 +45,29 @@ export default function LayerControl({
   cdlYear,
   onCdlYearChange,
   onHeightChange,
+  onGEELayerToggle,
+  onGEEOpacityChange,
+  mapRef,
   className = '',
 }: LayerControlProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['land-use', 'soil-data', 'soil-properties']),
+    new Set(['soil-data']),
   )
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Track height changes and notify parent
-  useEffect(() => {
-    if (containerRef.current && onHeightChange) {
-      const observer = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          onHeightChange(entry.target.clientHeight)
-        }
-      })
-      observer.observe(containerRef.current)
-      return () => observer.disconnect()
-    }
-  }, [onHeightChange])
+  // Remove height tracking - let panel maintain fixed size
+  // useEffect(() => {
+  //   if (containerRef.current && onHeightChange) {
+  //     const observer = new ResizeObserver((entries) => {
+  //       for (const entry of entries) {
+  //         onHeightChange(entry.target.clientHeight)
+  //       }
+  //     })
+  //     observer.observe(containerRef.current)
+  //     return () => observer.disconnect()
+  //   }
+  // }, [onHeightChange])
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections)
@@ -156,8 +163,8 @@ export default function LayerControl({
 
       {/* Layer List */}
       {isExpanded && (
-        <div className="max-h-96 overflow-y-auto p-3" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
-          <div className="space-y-2">
+        <div className="max-h-96 overflow-y-auto p-2" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
+          <div className="space-y-1.5">
             {/* Soil Data - Moved to top */}
             {layers.filter(l => (l.type === 'vector' || l.type === 'wms') && l.id !== 'cdl').length > 0 && (
               <div 
@@ -172,7 +179,7 @@ export default function LayerControl({
                   onClick={() => toggleSection('soil-data')}
                   className="flex w-full items-center justify-between transition-all duration-200"
                   style={{ 
-                    padding: '8px 10px', 
+                    padding: '6px 8px', 
                     backgroundColor: 'transparent',
                     borderBottom: expandedSections.has('soil-data') ? '1px solid rgba(229, 231, 235, 0.5)' : 'none'
                   }}
@@ -228,7 +235,7 @@ export default function LayerControl({
                   onClick={() => toggleSection('land-use')}
                   className="flex w-full items-center justify-between transition-all duration-200"
                   style={{ 
-                    padding: '8px 10px', 
+                    padding: '6px 8px', 
                     backgroundColor: 'transparent',
                     borderBottom: expandedSections.has('land-use') ? '1px solid rgba(229, 231, 235, 0.5)' : 'none'
                   }}
@@ -265,6 +272,174 @@ export default function LayerControl({
                           onOpacityChange={onOpacityChange}
                           cdlYear={cdlYear}
                           onCdlYearChange={onCdlYearChange}
+                        />
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* GEE Soil Properties Section */}
+            {layers.filter(l => l.type === 'gee-tile' && l.metadata?.category === 'soil' && !l.id.match(/nccpi|droughty|pwsl|svi/)).length > 0 && (
+              <div 
+                className="rounded-xl overflow-hidden" 
+                style={{ 
+                  border: '1px solid rgba(229, 231, 235, 0.8)',
+                  background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(249, 250, 251, 0.4))',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+                }}
+              >
+                <button
+                  onClick={() => toggleSection('gee-soil')}
+                  className="flex w-full items-center justify-between transition-all duration-200"
+                  style={{ 
+                    padding: '6px 8px', 
+                    backgroundColor: 'transparent',
+                    borderBottom: expandedSections.has('gee-soil') ? '1px solid rgba(229, 231, 235, 0.5)' : 'none'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(249, 250, 251, 0.6)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <div className="flex items-center gap-2">
+                    <div 
+                      style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--color-ocean-600) 0%, var(--color-ocean-500) 100%)',
+                        boxShadow: '0 0 4px rgba(74, 124, 158, 0.4)'
+                      }}
+                    />
+                    <h4 className="text-sm font-semibold text-ocean-700">Soil Properties</h4>
+                  </div>
+                  {expandedSections.has('gee-soil') ? (
+                    <ChevronUp className="h-4 w-4 text-slate-500" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-slate-500" />
+                  )}
+                </button>
+                {expandedSections.has('gee-soil') && (
+                  <div className="space-y-1 px-2 pb-2" style={{ paddingTop: '6px' }}>
+                    {layers
+                      .filter(l => l.type === 'gee-tile' && l.metadata?.category === 'soil' && !l.id.match(/nccpi|droughty|pwsl|svi/))
+                      .map(layer => (
+                        <LayerItem
+                          key={layer.id}
+                          layer={layer}
+                          onToggle={onLayerToggle}
+                          onOpacityChange={onOpacityChange}
+                        />
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Interpretations Section */}
+            {layers.filter(l => l.type === 'gee-tile' && l.id.match(/nccpi|droughty|pwsl|svi/)).length > 0 && (
+              <div 
+                className="rounded-xl overflow-hidden" 
+                style={{ 
+                  border: '1px solid rgba(229, 231, 235, 0.8)',
+                  background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(249, 250, 251, 0.4))',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+                }}
+              >
+                <button
+                  onClick={() => toggleSection('interpretations')}
+                  className="flex w-full items-center justify-between transition-all duration-200"
+                  style={{ 
+                    padding: '6px 8px', 
+                    backgroundColor: 'transparent',
+                    borderBottom: expandedSections.has('interpretations') ? '1px solid rgba(229, 231, 235, 0.5)' : 'none'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(249, 250, 251, 0.6)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <div className="flex items-center gap-2">
+                    <div 
+                      style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--color-ocean-600) 0%, var(--color-ocean-500) 100%)',
+                        boxShadow: '0 0 4px rgba(74, 124, 158, 0.4)'
+                      }}
+                    />
+                    <h4 className="text-sm font-semibold text-ocean-700">Interpretations</h4>
+                  </div>
+                  {expandedSections.has('interpretations') ? (
+                    <ChevronUp className="h-4 w-4 text-slate-500" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-slate-500" />
+                  )}
+                </button>
+                {expandedSections.has('interpretations') && (
+                  <div className="space-y-1 px-2 pb-2" style={{ paddingTop: '6px' }}>
+                    {layers
+                      .filter(l => l.type === 'gee-tile' && l.id.match(/nccpi|droughty|pwsl|svi/))
+                      .map(layer => (
+                        <LayerItem
+                          key={layer.id}
+                          layer={layer}
+                          onToggle={onLayerToggle}
+                          onOpacityChange={onOpacityChange}
+                        />
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* GEE Terrain Properties Section */}
+            {layers.filter(l => l.type === 'gee-tile' && l.metadata?.category === 'terrain').length > 0 && (
+              <div 
+                className="rounded-xl overflow-hidden" 
+                style={{ 
+                  border: '1px solid rgba(229, 231, 235, 0.8)',
+                  background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(249, 250, 251, 0.4))',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+                }}
+              >
+                <button
+                  onClick={() => toggleSection('gee-terrain')}
+                  className="flex w-full items-center justify-between transition-all duration-200"
+                  style={{ 
+                    padding: '6px 8px', 
+                    backgroundColor: 'transparent',
+                    borderBottom: expandedSections.has('gee-terrain') ? '1px solid rgba(229, 231, 235, 0.5)' : 'none'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(249, 250, 251, 0.6)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <div className="flex items-center gap-2">
+                    <div 
+                      style={{
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--color-ocean-600) 0%, var(--color-ocean-500) 100%)',
+                        boxShadow: '0 0 4px rgba(74, 124, 158, 0.4)'
+                      }}
+                    />
+                    <h4 className="text-sm font-semibold text-ocean-700">Terrain Properties</h4>
+                  </div>
+                  {expandedSections.has('gee-terrain') ? (
+                    <ChevronUp className="h-4 w-4 text-slate-500" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-slate-500" />
+                  )}
+                </button>
+                {expandedSections.has('gee-terrain') && (
+                  <div className="space-y-1 px-2 pb-2" style={{ paddingTop: '6px' }}>
+                    {layers
+                      .filter(l => l.type === 'gee-tile' && l.metadata?.category === 'terrain')
+                      .map(layer => (
+                        <LayerItem
+                          key={layer.id}
+                          layer={layer}
+                          onToggle={onLayerToggle}
+                          onOpacityChange={onOpacityChange}
                         />
                       ))}
                   </div>

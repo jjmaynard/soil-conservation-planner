@@ -1683,6 +1683,12 @@ export default function PropertyPanel({
               </div>
             </details>
 
+            {/* Map Unit Interpretations - Comprehensive Assessment */}
+            <MapUnitInterpretations 
+              latitude={ssurgoData.coordinates[0]} 
+              longitude={ssurgoData.coordinates[1]} 
+            />
+
             {/* Survey Metadata */}
             <details open className="group mb-4">
               <summary className="cursor-pointer list-none rounded-lg px-6 py-3.5 transition-all"
@@ -3160,6 +3166,320 @@ export default function PropertyPanel({
     </div>
   )
 }
+
+// Map Unit Interpretations Component
+interface MapUnitInterpretationsProps {
+  latitude: number;
+  longitude: number;
+}
+
+const MapUnitInterpretations = ({ latitude, longitude }: MapUnitInterpretationsProps) => {
+  const [assessment, setAssessment] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  const fetchAssessment = async () => {
+    if (!latitude || !longitude || assessment) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/point-assessment/comprehensive?latitude=${latitude}&longitude=${longitude}&year=2023`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch assessment: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setAssessment(data);
+    } catch (err) {
+      console.error('[Map Unit Interpretations] Error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load interpretations');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch when expanded for the first time
+  useEffect(() => {
+    if (expanded && !assessment && !loading && !error) {
+      fetchAssessment();
+    }
+  }, [expanded]);
+
+  const getRiskColor = (riskClass: string) => {
+    switch (riskClass?.toLowerCase()) {
+      case 'low': return 'text-green-700 bg-green-50 border-green-200';
+      case 'moderate': return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+      case 'high': return 'text-orange-700 bg-orange-50 border-orange-200';
+      case 'very high': return 'text-red-700 bg-red-50 border-red-200';
+      default: return 'text-gray-700 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getPerformanceColor = (performanceClass: string) => {
+    switch (performanceClass?.toLowerCase()) {
+      case 'excellent': return 'text-green-700 bg-green-50 border-green-200';
+      case 'good': return 'text-blue-700 bg-blue-50 border-blue-200';
+      case 'fair': return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+      case 'poor': return 'text-orange-700 bg-orange-50 border-orange-200';
+      case 'very poor': return 'text-red-700 bg-red-50 border-red-200';
+      default: return 'text-gray-700 bg-gray-50 border-gray-200';
+    }
+  };
+
+  return (
+    <details 
+      className="group mb-4"
+      open={expanded}
+      onToggle={(e) => setExpanded((e.target as HTMLDetailsElement).open)}
+    >
+      <summary className="cursor-pointer list-none rounded-lg px-6 py-3.5 transition-all"
+        style={{
+          backgroundColor: '#f9fafb',
+          border: '1px solid #e5e7eb'
+        }}>
+        <div className="flex items-center gap-3">
+          <svg
+            className="h-4 w-4 transition-transform group-open:rotate-90"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            style={{ color: '#15803d' }}
+          >
+            <path d="M6 6L14 10L6 14V6Z" />
+          </svg>
+          <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#111827', letterSpacing: '-0.01em' }}>
+            Site Interpretations & Resource Assessment
+          </h3>
+        </div>
+      </summary>
+      
+      <div className="bg-white px-6 pb-4 pt-3">
+        {loading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <span className="ml-3 text-sm text-gray-600">Loading assessment data...</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded p-4 text-sm text-red-800">
+            <p className="font-medium mb-1">⚠️ Failed to Load Assessment</p>
+            <p className="text-xs">{error}</p>
+            <button
+              onClick={() => {
+                setError(null);
+                fetchAssessment();
+              }}
+              className="mt-2 text-xs text-red-600 hover:underline"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {assessment && (
+          <div className="space-y-4">
+            {/* Erosion Risk */}
+            {assessment.erosion_risk && (
+              <div className="border-b border-gray-200 pb-3">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Mountain className="w-4 h-4 text-amber-600" />
+                  Erosion Risk
+                </h4>
+                <div className={`inline-block px-3 py-1 rounded border text-sm font-medium mb-2 ${getRiskColor(assessment.erosion_risk.risk_class)}`}>
+                  {assessment.erosion_risk.risk_class} Risk
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                  <div><span className="text-gray-600">Score:</span> <span className="font-medium">{formatNumber(assessment.erosion_risk.erosion_risk_score, 2)}</span></div>
+                  <div><span className="text-gray-600">Slope:</span> <span className="font-medium">{formatNumber(assessment.erosion_risk.slope_degrees, 1)}°</span></div>
+                  <div><span className="text-gray-600">Stream Power:</span> <span className="font-medium">{formatNumber(assessment.erosion_risk.stream_power_index, 0)}</span></div>
+                  <div><span className="text-gray-600">K-Factor:</span> <span className="font-medium">{formatNumber(assessment.erosion_risk.k_factor_erodibility, 3)}</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Concentrated Flow */}
+            {assessment.concentrated_flow && (
+              <div className="border-b border-gray-200 pb-3">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Waves className="w-4 h-4 text-blue-600" />
+                  Concentrated Flow / Gully Risk
+                </h4>
+                <div className={`inline-block px-3 py-1 rounded border text-sm font-medium mb-2 ${getRiskColor(assessment.concentrated_flow.risk_class)}`}>
+                  {assessment.concentrated_flow.risk_class} Risk
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                  <div><span className="text-gray-600">Gully Score:</span> <span className="font-medium">{formatNumber(assessment.concentrated_flow.gully_risk_score, 2)}</span></div>
+                  <div><span className="text-gray-600">Flow Accumulation:</span> <span className="font-medium">{formatNumber(assessment.concentrated_flow.flow_accumulation_cells, 0)} cells</span></div>
+                  <div><span className="text-gray-600">Convergence:</span> <span className="font-medium">{formatNumber(assessment.concentrated_flow.convergence_index, 2)}</span></div>
+                  <div className="col-span-2"><span className="text-gray-600">Flow Class:</span> <span className="font-medium">{assessment.concentrated_flow.flow_class}</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Ponding Risk */}
+            {assessment.ponding && (
+              <div className="border-b border-gray-200 pb-3">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Droplets className="w-4 h-4 text-blue-500" />
+                  Ponding / Wetness
+                </h4>
+                <div className={`inline-block px-3 py-1 rounded border text-sm font-medium mb-2 ${getRiskColor(assessment.ponding.risk_class)}`}>
+                  {assessment.ponding.risk_class} Risk
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                  <div><span className="text-gray-600">Ponding Score:</span> <span className="font-medium">{formatNumber(assessment.ponding.ponding_risk_score, 2)}</span></div>
+                  <div><span className="text-gray-600">Wetness Index:</span> <span className="font-medium">{formatNumber(assessment.ponding.topographic_wetness_index, 1)}</span></div>
+                  <div><span className="text-gray-600">Wetness Class:</span> <span className="font-medium">{assessment.ponding.wetness_class}</span></div>
+                  <div><span className="text-gray-600">Drainage:</span> <span className="font-medium">{assessment.ponding.drainage_label}</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Drought Stress */}
+            {assessment.drought && (
+              <div className="border-b border-gray-200 pb-3">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                  Drought Stress
+                </h4>
+                <div className={`inline-block px-3 py-1 rounded border text-sm font-medium mb-2 ${getRiskColor(assessment.drought.drought_indices?.drought_severity || 'Unknown')}`}>
+                  {assessment.drought.drought_indices?.drought_severity || 'Unknown'}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                  <div><span className="text-gray-600">Growing Season Precip:</span> <span className="font-medium">{formatNumber(assessment.drought.water_balance?.growing_season_precip_mm, 0)} mm</span></div>
+                  <div><span className="text-gray-600">Growing Season ETo:</span> <span className="font-medium">{formatNumber(assessment.drought.water_balance?.growing_season_eto_mm, 0)} mm</span></div>
+                  <div className="col-span-2"><span className="text-gray-600">Water Deficit:</span> <span className="font-medium">{formatNumber(assessment.drought.water_balance?.water_deficit_mm, 0)} mm</span></div>
+                  <div className="col-span-2"><span className="text-gray-600">VPD Stress:</span> <span className="font-medium">{assessment.drought.drought_indices?.vpd_stress_class}</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Soil Quality */}
+            {assessment.soil_quality && (
+              <div className="border-b border-gray-200 pb-3">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  Soil Quality (5-Year NDVI Stability)
+                </h4>
+                <div className={`inline-block px-3 py-1 rounded border text-sm font-medium mb-2 ${getPerformanceColor(assessment.soil_quality.productivity_stability?.stability_class || 'Unknown')}`}>
+                  {assessment.soil_quality.productivity_stability?.stability_class || 'Unknown'}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                  <div><span className="text-gray-600">Peak NDVI (Mean):</span> <span className="font-medium">{formatNumber(assessment.soil_quality.productivity_stability?.ndvi_peak_mean, 3)}</span></div>
+                  <div><span className="text-gray-600">Peak NDVI (StdDev):</span> <span className="font-medium">{formatNumber(assessment.soil_quality.productivity_stability?.ndvi_peak_std, 3)}</span></div>
+                  <div><span className="text-gray-600">Coefficient of Variation:</span> <span className="font-medium">{formatNumber(assessment.soil_quality.productivity_stability?.ndvi_peak_cv, 2)}</span></div>
+                  <div><span className="text-gray-600">Years Analyzed:</span> <span className="font-medium">{assessment.soil_quality.productivity_stability?.years_analyzed || 'N/A'}</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Productivity */}
+            {assessment.productivity && (
+              <div className="border-b border-gray-200 pb-3">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                  Productivity (5-Year)
+                </h4>
+                <div className={`inline-block px-3 py-1 rounded border text-sm font-medium mb-2 ${getPerformanceColor(assessment.productivity.productivity_metrics?.productivity_class || 'Unknown')}`}>
+                  {assessment.productivity.productivity_metrics?.productivity_class || 'Unknown'}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                  <div><span className="text-gray-600">Yield Gap:</span> <span className="font-medium">{formatNumber(assessment.productivity.yield_gap?.gap_percent, 1)}%</span></div>
+                  <div><span className="text-gray-600">Gap Status:</span> <span className="font-medium">{assessment.productivity.yield_gap?.interpretation || 'N/A'}</span></div>
+                  <div><span className="text-gray-600">Peak NDVI (Mean):</span> <span className="font-medium">{formatNumber(assessment.productivity.productivity_metrics?.ndvi_peak_mean, 3)}</span></div>
+                  <div><span className="text-gray-600">Peak NDVI (Max):</span> <span className="font-medium">{formatNumber(assessment.productivity.productivity_metrics?.ndvi_peak_max, 3)}</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* SVI - Nutrient Loss Vulnerability */}
+            {assessment.svi && (
+              <div className="border-b border-gray-200 pb-3">
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Droplets className="w-4 h-4 text-blue-600" />
+                  Nutrient Loss Vulnerability (SVI)
+                </h4>
+                <div className="grid grid-cols-1 gap-2 text-sm mt-2">
+                  <div>
+                    <span className="text-gray-600">Surface Runoff:</span> 
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${getRiskColor(assessment.svi.svi_metrics?.surface_loss_label || 'Unknown')}`}>
+                      {assessment.svi.svi_metrics?.surface_loss_label || 'N/A'} (Class {assessment.svi.svi_metrics?.surface_loss_class})
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Subsurface (Drained):</span> 
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${getRiskColor(assessment.svi.svi_metrics?.subsurface_drained_label || 'Unknown')}`}>
+                      {assessment.svi.svi_metrics?.subsurface_drained_label || 'N/A'} (Class {assessment.svi.svi_metrics?.subsurface_drained_class})
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Subsurface (Undrained):</span> 
+                    <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${getRiskColor(assessment.svi.svi_metrics?.subsurface_undrained_label || 'Unknown')}`}>
+                      {assessment.svi.svi_metrics?.subsurface_undrained_label || 'N/A'} (Class {assessment.svi.svi_metrics?.subsurface_undrained_class})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* NCCPI - Crop Productivity Index */}
+            {assessment.nccpi && (
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Clover className="w-4 h-4 text-green-600" />
+                  Crop Productivity Index (NCCPI)
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                  <div>
+                    <span className="text-gray-600">Corn:</span> 
+                    <span className="ml-2 font-medium">{formatNumber(assessment.nccpi.nccpi_productivity?.corn?.value, 2)}</span>
+                    <span className="text-xs text-gray-500 ml-1">({formatNumber(assessment.nccpi.nccpi_productivity?.corn?.percent, 1)}% - {assessment.nccpi.nccpi_productivity?.corn?.rating})</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Soybean:</span> 
+                    <span className="ml-2 font-medium">{formatNumber(assessment.nccpi.nccpi_productivity?.soybean?.value, 2)}</span>
+                    <span className="text-xs text-gray-500 ml-1">({formatNumber(assessment.nccpi.nccpi_productivity?.soybean?.percent, 1)}% - {assessment.nccpi.nccpi_productivity?.soybean?.rating})</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Cotton:</span> 
+                    <span className="ml-2 font-medium">{formatNumber(assessment.nccpi.nccpi_productivity?.cotton?.value, 2)}</span>
+                    <span className="text-xs text-gray-500 ml-1">({formatNumber(assessment.nccpi.nccpi_productivity?.cotton?.percent, 1)}% - {assessment.nccpi.nccpi_productivity?.cotton?.rating})</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Small Grains:</span> 
+                    <span className="ml-2 font-medium">{formatNumber(assessment.nccpi.nccpi_productivity?.small_grains?.value, 2)}</span>
+                    <span className="text-xs text-gray-500 ml-1">({formatNumber(assessment.nccpi.nccpi_productivity?.small_grains?.percent, 1)}% - {assessment.nccpi.nccpi_productivity?.small_grains?.rating})</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-gray-600">All Crops:</span> 
+                    <span className="ml-2 font-medium">{formatNumber(assessment.nccpi.nccpi_productivity?.all_crops?.value, 2)}</span>
+                    <span className="text-xs text-gray-500 ml-1">({formatNumber(assessment.nccpi.nccpi_productivity?.all_crops?.percent, 1)}% - {assessment.nccpi.nccpi_productivity?.all_crops?.rating})</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-200">
+              <p>Assessment based on 30m terrain/soil data and 5-year Landsat 8 imagery analysis.</p>
+              <p className="mt-1">Data sources: STEDUS30, GRIDMET, gNATSGO, ACPF SVI</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </details>
+  );
+};
+
+// Helper function to safely format numbers
+const formatNumber = (value: any, decimals: number = 2): string => {
+  if (value === null || value === undefined) return 'N/A';
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  return isNaN(num) ? 'N/A' : num.toFixed(decimals);
+};
 
 interface PropertyRowProps {
   label: string

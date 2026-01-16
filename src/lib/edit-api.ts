@@ -1,6 +1,47 @@
 // EDIT API Service Layer
 // Handles communication with USDA NRCS EDIT (Ecological Dynamics Interpretive Tool) API
 
+// Simple request queue to prevent overwhelming EDIT API
+class RequestQueue {
+  private queue: Array<() => Promise<any>> = [];
+  private processing = 0;
+  private maxConcurrent = 2; // Only 2 concurrent EDIT API requests at a time
+
+  async add<T>(fn: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          const result = await fn();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      });
+      this.processQueue();
+    });
+  }
+
+  private async processQueue() {
+    if (this.processing >= this.maxConcurrent || this.queue.length === 0) {
+      return;
+    }
+
+    this.processing++;
+    const fn = this.queue.shift();
+    
+    if (fn) {
+      try {
+        await fn();
+      } finally {
+        this.processing--;
+        this.processQueue();
+      }
+    }
+  }
+}
+
+const editApiQueue = new RequestQueue();
+
 export interface EcoclassId {
   catalog: string;      // e.g., "esd"
   geoUnit: string;      // e.g., "128X" 
@@ -105,73 +146,95 @@ export class EditApiService {
     ecoclassid: string, 
     measurementSystem: 'usc' | 'metric' = 'usc'
   ): Promise<EcologicalSiteData> {
-    const parsed = EditApiService.parseEcoclassId(ecoclassid);
-    if (!parsed) throw new Error(`Invalid ecoclassid format: ${ecoclassid}`);
+    // Use queue to limit concurrent requests
+    return editApiQueue.add(async () => {
+      const parsed = EditApiService.parseEcoclassId(ecoclassid);
+      if (!parsed) throw new Error(`Invalid ecoclassid format: ${ecoclassid}`);
 
-    const { catalog, geoUnit, ecoclass } = parsed;
-    const url = `${this.baseUrl}/descriptions/${catalog}/${geoUnit}/${ecoclass}.json?measurementSystem=${measurementSystem}`;
-    
-    console.log('EditApiService: Fetching full description from URL:', url);
-    
-    try {
-      const response = await fetch(url);
-      console.log('EditApiService: Response status:', response.status);
+      const { catalog, geoUnit, ecoclass } = parsed;
+      const url = `${this.baseUrl}/descriptions/${catalog}/${geoUnit}/${ecoclass}.json?measurementSystem=${measurementSystem}`;
       
-      if (response.status === 404) {
-        throw new Error('NOT_FOUND');
-      }
+      console.log('EditApiService: Fetching full description from URL:', url);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('EditApiService: Error response:', errorText);
-        throw new Error(`EDIT API error: ${response.status} - ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('EditApiService: Successfully parsed full description JSON data');
-      return data;
-    } catch (error) {
-      if (error instanceof Error && error.message === 'NOT_FOUND') {
+      try {
+        // Increased timeout to 60 seconds for full description (larger payload)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        
+        const response = await fetch(url, {
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        console.log('EditApiService: Response status:', response.status);
+        
+        if (response.status === 404) {
+          throw new Error('NOT_FOUND');
+        }
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('EditApiService: Error response:', errorText);
+          throw new Error(`EDIT API error: ${response.status} - ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log('EditApiService: Successfully parsed full description JSON data');
+        return data;
+      } catch (error) {
+        if (error instanceof Error && error.message === 'NOT_FOUND') {
+          throw error;
+        }
+        console.error('EditApiService: Fetch error:', error);
         throw error;
       }
-      console.error('EditApiService: Fetch error:', error);
-      throw error;
-    }
+    });
   }
 
   // Get overview only (lighter weight)
   async getEcologicalSiteOverview(ecoclassid: string): Promise<any> {
-    const parsed = EditApiService.parseEcoclassId(ecoclassid);
-    if (!parsed) throw new Error(`Invalid ecoclassid format: ${ecoclassid}`);
+    // Use queue to limit concurrent requests
+    return editApiQueue.add(async () => {
+      const parsed = EditApiService.parseEcoclassId(ecoclassid);
+      if (!parsed) throw new Error(`Invalid ecoclassid format: ${ecoclassid}`);
 
-    const { catalog, geoUnit, ecoclass } = parsed;
-    const url = `${this.baseUrl}/descriptions/${catalog}/${geoUnit}/${ecoclass}/overview.json`;
-    
-    console.log('EditApiService: Fetching overview from URL:', url);
-    
-    try {
-      const response = await fetch(url);
-      console.log('EditApiService: Response status:', response.status);
+      const { catalog, geoUnit, ecoclass } = parsed;
+      const url = `${this.baseUrl}/descriptions/${catalog}/${geoUnit}/${ecoclass}/overview.json`;
       
-      if (response.status === 404) {
-        throw new Error('NOT_FOUND');
-      }
+      console.log('EditApiService: Fetching overview from URL:', url);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('EditApiService: Error response:', errorText);
-        throw new Error(`EDIT API error: ${response.status} - ${errorText}`);
-      }
-      
-      const data = await response.json();
-      console.log('EditApiService: Successfully parsed overview JSON data');
-      return data;
-    } catch (error) {
-      if (error instanceof Error && error.message === 'NOT_FOUND') {
+      try {
+        // Increased timeout to 30 seconds for slow EDIT API
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        
+        const response = await fetch(url, {
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        console.log('EditApiService: Response status:', response.status);
+        
+        if (response.status === 404) {
+          throw new Error('NOT_FOUND');
+        }
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('EditApiService: Error response:', errorText);
+          throw new Error(`EDIT API error: ${response.status} - ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log('EditApiService: Successfully parsed overview JSON data');
+        return data;
+      } catch (error) {
+        if (error instanceof Error && error.message === 'NOT_FOUND') {
+          throw error;
+        }
+        console.error('EditApiService: Fetch error:', error);
         throw error;
       }
-      console.error('EditApiService: Fetch error:', error);
-      throw error;
-    }
+    });
   }
 }

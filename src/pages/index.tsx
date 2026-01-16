@@ -3,7 +3,7 @@
 'use client'
 
 import Head from 'next/head'
-import { Wheat, FileCheck, CheckCircle2, TrendingDown } from 'lucide-react'
+import { Layers, Globe, Cloud, Activity } from 'lucide-react'
 
 import NationalHero from '#components/Dashboard/NationalHero'
 import ModuleGrid from '#components/Dashboard/ModuleGrid'
@@ -30,27 +30,27 @@ export default function Dashboard() {
         <section className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <StatCard
-              icon={Wheat}
-              value="235M"
-              label="Acres Under Conservation"
+              icon={Layers}
+              value="SSURGO + SOLUS"
+              label="Soil Data Sources"
               color="green"
             />
             <StatCard
-              icon={FileCheck}
-              value="45,678"
-              label="Active Conservation Plans"
+              icon={Globe}
+              value="Landsat + Sentinel"
+              label="Satellite Imagery"
               color="blue"
             />
             <StatCard
-              icon={CheckCircle2}
-              value="89,234"
-              label="Practices Implemented"
+              icon={Cloud}
+              value="GRIDMET"
+              label="Climate Data"
               color="teal"
             />
             <StatCard
-              icon={TrendingDown}
-              value="1.25B"
-              label="Tons Erosion Prevented"
+              icon={Activity}
+              value="Real-Time"
+              label="NDVI Monitoring"
               color="orange"
             />
           </div>
@@ -72,24 +72,39 @@ function StatCard({
   color: string
 }) {
   const colorStyles = {
-    green: { bg: '#E2EBE1', text: '#5C8D5A' },
-    blue: { bg: '#DCE9F1', text: '#3F6A87' },
-    teal: { bg: '#E2ECF1', text: '#6A8F9E' },
-    orange: { bg: '#F3EAE2', text: '#A06843' },
+    green: { bg: 'linear-gradient(135deg, #E8F5E9 0%, #E2EBE1 100%)', iconBg: '#5C8D5A', iconColor: '#ffffff' },
+    blue: { bg: 'linear-gradient(135deg, #E3F2FD 0%, #DCE9F1 100%)', iconBg: '#3F6A87', iconColor: '#ffffff' },
+    teal: { bg: 'linear-gradient(135deg, #E0F2F7 0%, #E2ECF1 100%)', iconBg: '#6A8F9E', iconColor: '#ffffff' },
+    orange: { bg: 'linear-gradient(135deg, #FFF3E0 0%, #F3EAE2 100%)', iconBg: '#A06843', iconColor: '#ffffff' },
   }
 
   const colors = colorStyles[color as keyof typeof colorStyles]
 
   return (
-    <div className="rounded-xl shadow-md p-6 text-center hover:shadow-lg transition-shadow duration-200" style={{ backgroundColor: '#FEFDFB' }}>
+    <div 
+      className="group relative rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 overflow-hidden" 
+      style={{ background: colors.bg }}
+    >
+      {/* Subtle top accent line */}
+      <div 
+        className="absolute top-0 left-0 right-0 h-1 opacity-60" 
+        style={{ background: colors.iconBg }}
+      />
+      
       <div
-        className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-3"
-        style={{ backgroundColor: colors.bg, color: colors.text }}
+        className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-md group-hover:scale-110 transition-transform duration-300"
+        style={{ backgroundColor: colors.iconBg, color: colors.iconColor }}
       >
-        <IconComponent className="w-6 h-6" />
+        <IconComponent className="w-8 h-8" />
       </div>
-      <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: '#3E4A4A' }}>{value}</div>
-      <div className="text-sm" style={{ color: '#5C6C6C' }}>{label}</div>
+      
+      <div className="text-xl md:text-2xl font-bold mb-2 tracking-tight" style={{ color: '#2C3E50' }}>
+        {value}
+      </div>
+      
+      <div className="text-xs uppercase tracking-wider font-medium" style={{ color: '#64748B', letterSpacing: '0.05em' }}>
+        {label}
+      </div>
     </div>
   )
 }

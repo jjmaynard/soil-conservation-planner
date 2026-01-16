@@ -5,7 +5,7 @@
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import type L from 'leaflet'
 
 import CroplandLegend from '#components/Map/CroplandLegend'
@@ -14,6 +14,7 @@ import MapSearch from '#components/Map/MapSearch'
 import LoadingSpinner from '#components/ui/LoadingSpinner'
 import PropertyPanel from '#components/ui/PropertyPanel'
 import { useDepthSelection } from '#src/hooks/useDepthSelection'
+import { useGEELayers } from '#src/hooks/useGEELayers'
 import type { SoilLayer, SoilProfile, SSURGOData } from '#src/types/soil'
 import { queryCDLHistory, type CDLYearData } from '#src/utils/cdlQuery'
 
@@ -42,8 +43,17 @@ export default function SoilMapPage() {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null)
   const mapRef = useRef<L.Map | null>(null)
 
-  // Define available soil layers
-  const soilLayers: SoilLayer[] = [
+  // Load GEE layers (fetched once on mount, no reload loop)
+  const { geeLayers, isLoading: geeLoading } = useGEELayers()
+
+  // GEE layers will be passed from LayerControl
+  // For now, use empty defaults to avoid SSR issues
+  const geeLayerGroups: any[] = []
+  const geeActiveLayers = new Set<string>()
+  const geeActiveLayerData = new Map<string, any>()
+
+  // Define available soil layers (memoized to prevent reload loop)
+  const soilLayers: SoilLayer[] = useMemo(() => [
     {
       id: 'ssurgo-mapunits',
       name: 'SSURGO Map Units',
@@ -93,7 +103,12 @@ export default function SoilMapPage() {
       visible: false,
       opacity: layerOpacities['clay-content'] ?? 0.8,
     },
-  ]
+    // Add GEE layers with current opacities applied
+    ...geeLayers.map(layer => ({
+      ...layer,
+      opacity: layerOpacities[layer.id] ?? layer.opacity,
+    })),
+  ], [layerOpacities, cdlYear, geeLayers])
 
   const handleSoilClick = useCallback((profile: SoilProfile) => {
     console.log('[SoilMap] handleSoilClick - coordinates:', profile.coordinates);
@@ -281,6 +296,8 @@ export default function SoilMapPage() {
             onMapReady={handleMapReady}
             onProcessingStart={handleProcessingStart}
             isSelectMode={isSelectMode}
+            geeActiveLayers={geeActiveLayerData}
+            geeLayerGroups={geeLayerGroups}
           />
 
           <LayerControl
@@ -292,6 +309,7 @@ export default function SoilMapPage() {
             cdlYear={cdlYear}
             onCdlYearChange={setCdlYear}
             onHeightChange={setLayerControlHeight}
+            mapRef={mapRef}
           />
 
           {activeLayers.includes('cdl') && <CroplandLegend topOffset={layerControlHeight} />}

@@ -1013,8 +1013,20 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
     associated: false,
   })
 
-  // Fetch ecological site data using the hook
-  const { data: esdData, loading: esdLoading, error: esdError } = useEcologicalSite(componentEcoSite?.ecoclassid)
+  // State to control whether to load full ESD details
+  const [loadFullESD, setLoadFullESD] = useState(false);
+  
+  // Fetch overview in background immediately (lightweight, ~200ms)
+  // Data will be ready when user expands the section
+  const { data: esdOverview, loading: overviewLoading, error: overviewError } = useEcologicalSite(
+    componentEcoSite?.ecoclassid, 
+    { mode: 'overview' }
+  );
+  
+  // Only fetch full details when explicitly requested (heavy, 1-2 min)
+  const { data: esdData, loading: esdLoading, error: esdError } = useEcologicalSite(
+    loadFullESD ? componentEcoSite?.ecoclassid : null
+  )
 
   const toggleAll = () => {
     const newState = !allExpanded
@@ -1588,39 +1600,186 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
             onToggle={() => toggleSection('ecological')}
             accent={componentColor}
           >
-            {esdLoading && !esdData && (
-              <div className="space-y-3">
-                <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
-                  <p className="font-medium text-blue-900 mb-1">📍 Basic Ecological Site Information</p>
-                  <div className="text-blue-800 space-y-1">
-                    <div><span className="font-semibold">ID:</span> {componentEcoSite.ecoclassid}</div>
-                    {componentEcoSite.ecoclassname && (
-                      <div><span className="font-semibold">Name:</span> {componentEcoSite.ecoclassname}</div>
-                    )}
-                  </div>
-                </div>
-                <div className="bg-green-50 border border-green-200 rounded p-4">
-                  <div className="flex items-center justify-center space-x-3">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-                    <div className="text-sm text-green-800">
-                      <p className="font-medium">Loading detailed ecological site description...</p>
-                      <p className="text-xs mt-1">This may take 1-2 minutes. Please be patient.</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 bg-white rounded p-2 text-xs text-gray-600">
-                    <p>💡 <span className="font-medium">What&apos;s being loaded:</span></p>
-                    <ul className="ml-4 mt-1 list-disc space-y-0.5">
-                      <li>Site characteristics and suitability</li>
-                      <li>Vegetation and productivity data</li>
-                      <li>Management recommendations</li>
-                      <li>Site images and resources</li>
-                    </ul>
-                  </div>
+            {/* Loading state for overview */}
+            {overviewLoading && !esdOverview && (
+              <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <p className="text-blue-900">Loading ecological site information...</p>
                 </div>
               </div>
             )}
+
+            {/* Show overview data (fast display) */}
+            {esdOverview && !esdData && (
+              <div className="space-y-3">
+                {/* Header */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 shadow-sm">
+                  <div className="mb-2">
+                    <h3 className="text-base font-bold text-green-900 mb-1">
+                      {esdOverview.ecoclassName}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-gray-600 flex-wrap">
+                      <span className="font-mono bg-white px-2 py-0.5 rounded border border-gray-200">
+                        {esdOverview.ecoclassId || componentEcoSite.ecoclassid}
+                      </span>
+                      {esdOverview.location && (
+                        <>
+                          <span>•</span>
+                          <span>{esdOverview.location}</span>
+                        </>
+                      )}
+                      {esdOverview.developmentStage && (
+                        <>
+                          <span>•</span>
+                          <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">
+                            {esdOverview.developmentStage}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Key Criteria */}
+                  {esdOverview.keyCriteria && esdOverview.keyCriteria.length > 0 && (
+                    <div className="bg-white rounded-lg p-3 border border-green-100 mt-3">
+                      <h4 className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
+                        <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+                        Site Identification Criteria
+                      </h4>
+                      <ul className="space-y-1.5">
+                        {esdOverview.keyCriteria.map((criterion: string, idx: number) => (
+                          <li key={idx} className="text-xs text-gray-700 flex items-start gap-2">
+                            <span className="text-green-600 mt-0.5">•</span>
+                            <span>{criterion}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Preview image if available */}
+                  {esdOverview.image && esdOverview.image.url && (
+                    <div className="mt-3 rounded-lg overflow-hidden border border-green-200">
+                      <img 
+                        src={esdOverview.image.url} 
+                        alt={esdOverview.image.caption || 'Ecological site'}
+                        className="w-full h-auto"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                      {esdOverview.image.caption && (
+                        <div className="bg-gray-50 px-3 py-2 text-xs text-gray-600 italic">
+                          {esdOverview.image.caption}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Brief Narratives */}
+                {(esdOverview.narratives?.physiographicFeatures || 
+                  esdOverview.narratives?.soilFeatures ||
+                  esdOverview.narratives?.climaticFeatures) && (
+                  <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                      <Mountain className="w-4 h-4 text-blue-600" />
+                      Site Overview
+                    </h4>
+                    <div className="space-y-3 text-xs text-gray-700">
+                      {esdOverview.narratives.physiographicFeatures && (
+                        <div>
+                          <p className="font-semibold text-gray-800 mb-1">Landscape:</p>
+                          <p className="leading-relaxed">
+                            {esdOverview.narratives.physiographicFeatures.length > 250 
+                              ? `${esdOverview.narratives.physiographicFeatures.substring(0, 250)}...` 
+                              : esdOverview.narratives.physiographicFeatures}
+                          </p>
+                        </div>
+                      )}
+                      {esdOverview.narratives.soilFeatures && (
+                        <div>
+                          <p className="font-semibold text-gray-800 mb-1">Soils:</p>
+                          <p className="leading-relaxed">
+                            {esdOverview.narratives.soilFeatures.length > 250 
+                              ? `${esdOverview.narratives.soilFeatures.substring(0, 250)}...` 
+                              : esdOverview.narratives.soilFeatures}
+                          </p>
+                        </div>
+                      )}
+                      {esdOverview.narratives.climaticFeatures && (
+                        <div>
+                          <p className="font-semibold text-gray-800 mb-1">Climate:</p>
+                          <p className="leading-relaxed">
+                            {esdOverview.narratives.climaticFeatures.length > 250 
+                              ? `${esdOverview.narratives.climaticFeatures.substring(0, 250)}...` 
+                              : esdOverview.narratives.climaticFeatures}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Load Full Details Button */}
+                {!loadFullESD && !esdData && (
+                  <button
+                    onClick={() => setLoadFullESD(true)}
+                    style={{
+                      background: 'linear-gradient(to right, #5a7241, #6b8650)',
+                    }}
+                    className="w-full px-4 py-3 hover:brightness-90 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #4a5f35, #5a7241)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #5a7241, #6b8650)'}
+                  >
+                    <FileText className="w-5 h-5" />
+                    Load Complete Details with Management & Productivity
+                  </button>
+                )}
+
+                {/* Loading full details */}
+                {loadFullESD && esdLoading && (
+                  <div className="bg-green-50 border border-green-200 rounded p-4">
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                      <div className="text-sm text-green-800">
+                        <p className="font-medium">Loading complete description...</p>
+                        <p className="text-xs mt-1">Including management recommendations, vegetation states, and productivity data.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Error loading full details - show retry button */}
+                {loadFullESD && esdError && !esdData && (
+                  <div className="space-y-2">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm text-yellow-800">
+                      <p className="font-medium mb-1">⚠️ Failed to Load Complete Details</p>
+                      <p className="text-xs">The EDIT database timed out or is unavailable. You can try again later.</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setLoadFullESD(false);
+                        setTimeout(() => setLoadFullESD(true), 100);
+                      }}
+                      style={{
+                        background: 'linear-gradient(to right, #5a7241, #6b8650)',
+                      }}
+                      className="w-full px-4 py-3 hover:brightness-90 text-white rounded-lg font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #4a5f35, #5a7241)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(to right, #5a7241, #6b8650)'}
+                    >
+                      <FileText className="w-5 h-5" />
+                      Try Again - Load Complete Details
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
             
-            {esdError && (
+            {/* Show error - fall back to SSURGO data */}
+            {(overviewError && !esdOverview && !overviewLoading) && (
               <div className="space-y-3">
                 <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
                   <p className="font-medium text-blue-900 mb-1">📍 Basic Ecological Site Information</p>
@@ -1632,13 +1791,13 @@ export default function OSDPanel({ osdData, isLoading, className = '', interpret
                   </div>
                 </div>
                 <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm text-yellow-800">
-                  <p className="font-medium mb-1">ℹ️ Detailed Description Unavailable</p>
-                  <p className="text-xs">This ecological site does not have a published description in the USDA EDIT database. This may be because it is newly classified or pending documentation.</p>
+                  <p className="font-medium mb-1">ℹ️ Detailed Description Temporarily Unavailable</p>
+                  <p className="text-xs">The EDIT database is currently slow or unavailable. The ecological site exists but detailed information cannot be loaded at this time. Try expanding the section again later.</p>
                 </div>
               </div>
             )}
             
-            {!esdLoading && !esdData && !esdError && (
+            {!esdLoading && !esdData && !esdError && !esdOverview && !overviewLoading && (
               <div className="border border-gray-200 rounded p-3 bg-gray-50">
                 <div className="text-sm font-semibold text-gray-900 mb-1">
                   {componentEcoSite.ecoclassid}

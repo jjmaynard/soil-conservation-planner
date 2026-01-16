@@ -5,6 +5,19 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { EditApiService } from '#src/lib/edit-api';
 import { formatESDForFarmers } from '#src/lib/esd-formatter';
 
+// Increase API route timeout to 90 seconds for full descriptions
+export const config = {
+  api: {
+    responseLimit: false,
+    externalResolver: true,
+  },
+  maxDuration: 90, // 90 seconds max execution time
+};
+
+// Server-side cache to reduce EDIT API calls
+const serverCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -16,11 +29,22 @@ export default async function handler(
   }
 
   try {
+    // Check server-side cache first
+    const cached = serverCache.get(ecoclassid);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log(`[Server Cache] Using cached ESD for ${ecoclassid}`);
+      return res.status(200).json(cached.data);
+    }
+
     console.log('API Route: Fetching full ESD for', ecoclassid);
     const editService = new EditApiService();
     const esdData = await editService.getEcologicalSiteDescription(ecoclassid);
     console.log('API Route: Successfully fetched full ESD data');
     const farmerFriendly = formatESDForFarmers(esdData);
+    
+    // Cache the result
+    serverCache.set(ecoclassid, { data: farmerFriendly, timestamp: Date.now() });
+    console.log(`[Server Cache] Cached ESD for ${ecoclassid}`);
     
     res.status(200).json(farmerFriendly);
   } catch (error) {

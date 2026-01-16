@@ -7,11 +7,9 @@ import { ChevronRight, Home } from 'lucide-react'
 
 const breadcrumbLabels: Record<string, string> = {
   // Main sections
-  conservation: 'Conservation Planning',
+  conservation: 'Conservation Practices',
   'soil-map': 'Soil Maps',
   'field-analysis': 'Field Analysis',
-  'soil-health': 'Soil Health',
-  suitability: 'Land Suitability',
   tools: 'Technical Tools',
   reports: 'Reports',
 
@@ -22,7 +20,9 @@ const breadcrumbLabels: Record<string, string> = {
   // Land Suitability
   'crop-suitability': 'Crop Suitability',
 
-  // Tools
+  // Tools - These will show under "Technical Tools"
+  'soil-health': 'Soil Health',
+  suitability: 'Land Suitability',
   rusle2: 'RUSLE2',
   'rusle-eos': 'RUSLE-EOS',
   'nutrient-calc': 'Nutrient Calculator',
@@ -33,12 +33,28 @@ const breadcrumbLabels: Record<string, string> = {
   '[fieldId]': 'Field',
 }
 
+// Define which paths should have "Technical Tools" as parent
+const technicalToolsPaths = [
+  '/soil-health',
+  '/suitability',
+  '/suitability/crop-suitability',
+  '/tools/rusle-eos',
+  '/tools/rusle2',
+  '/tools/nutrient-calc',
+  '/conservation',
+]
+
 export default function Breadcrumbs() {
   const router = useRouter()
 
   const breadcrumbs = useMemo(() => {
     // Split path and filter out empty segments
     const pathSegments = router.pathname.split('/').filter(Boolean)
+
+    // Check if this path should have Technical Tools as parent
+    const needsToolsParent = technicalToolsPaths.some(path => 
+      router.pathname.startsWith(path)
+    )
 
     // Build breadcrumb array
     const crumbs = pathSegments.map((segment, index) => {
@@ -65,8 +81,17 @@ export default function Breadcrumbs() {
       }
     })
 
-    // Always add home
-    return [{ label: 'Dashboard', path: '/', isLast: false }, ...crumbs]
+    // Build final breadcrumbs with home
+    let finalCrumbs = [{ label: 'Dashboard', path: '/', isLast: false }]
+    
+    // Insert "Technical Tools" parent if needed
+    if (needsToolsParent && !router.pathname.startsWith('/tools')) {
+      finalCrumbs.push({ label: 'Technical Tools', path: '/tools', isLast: false })
+    }
+    
+    finalCrumbs = [...finalCrumbs, ...crumbs]
+
+    return finalCrumbs
   }, [router.pathname, router.query])
 
   // Don't show breadcrumbs on dashboard

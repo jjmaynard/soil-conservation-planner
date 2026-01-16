@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Sprout, Map, MapPin, FileCheck, Mountain } from 'lucide-react'
+import { Sprout, Map, Globe, MapPin, FileCheck, Mountain } from 'lucide-react'
 
 export default function NationalHero() {
   return (
     <section
       className="relative text-white overflow-hidden"
       style={{
-        background: 'linear-gradient(to bottom right, #426740, #3F6A87, #294559)',
+        background: 'linear-gradient(135deg, #1a4d2e, #2d6a4f, #1b4965)',
       }}
     >
       {/* Background Pattern */}
@@ -54,30 +54,30 @@ export default function NationalHero() {
 
           {/* Subheading */}
           <p className="text-xl md:text-2xl mb-8 leading-relaxed" style={{ color: '#E2EBE1' }}>
-            Comprehensive conservation planning and soil assessment tools for agricultural lands
+            Comprehensive soil assessment tools for agricultural lands
             across the United States
           </p>
 
           {/* Call-to-Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
             <Link
-              href="/conservation/planning-wizard"
+              href="/soil-map"
               className="inline-flex items-center justify-center px-8 py-4 rounded-lg font-semibold text-lg hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               style={{
                 backgroundColor: '#ffffff',
                 color: '#355433',
               }}
             >
-              <Sprout className="mr-2 w-5 h-5" />
-              Start Conservation Plan
+              <Globe className="mr-2 w-5 h-5" />
+              Explore Soil Maps
             </Link>
 
             <Link
-              href="/soil-map"
+              href="/field-analysis"
               className="inline-flex items-center justify-center border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:bg-opacity-10 hover:scale-105 transition-all duration-200 backdrop-blur-sm"
             >
               <Map className="mr-2 w-5 h-5" />
-              Explore Soil Maps
+              Analyze Your Field
             </Link>
           </div>
 
@@ -87,7 +87,7 @@ export default function NationalHero() {
               <div className="bg-white bg-opacity-10 rounded-full p-3 mb-2 backdrop-blur-sm">
                 <MapPin className="w-6 h-6" />
               </div>
-              <div className="text-sm font-medium">50 States Coverage</div>
+              <div className="text-sm font-medium">48 States Coverage</div>
             </div>
             <div className="flex flex-col items-center text-center">
               <div className="bg-white bg-opacity-10 rounded-full p-3 mb-2 backdrop-blur-sm">

@@ -43,17 +43,27 @@ export default function ModuleGrid() {
       gradient: { from: '#7BA4B5', to: '#6A8F9E' },
       path: '/field-analysis',
       features: ['Erosion assessment', 'Suitability ratings', 'Management zones'],
-      stats: { label: 'Fields Available', value: '8M+' },
+      stats: { label: 'Resolution', value: '10-30m' },
+    },
+    {
+      id: 'tools',
+      title: 'Technical Tools',
+      description: 'Access nutrient calculators and other technical assessment tools.',
+      icon: FlaskConical,
+      gradient: { from: '#87A096', to: '#748B81' },
+      path: '/tools',
+      features: ['Nutrient calc', 'SCI calculator', 'Analysis tools'],
+      stats: { label: 'Tools', value: '5+' },
     },
     {
       id: 'conservation',
-      title: 'Conservation Planning',
+      title: 'Conservation Practices',
       description:
-        'Create conservation plans using NRCS practice standards. Address resource concerns.',
+        'Browse NRCS conservation practice standards. Access specifications and implementation guidance.',
       icon: Sprout,
       gradient: { from: '#5C8D5A', to: '#4F7A4D' },
       path: '/conservation',
-      features: ['Practice standards', 'Resource concerns', 'Plan builder'],
+      features: ['170+ NRCS practices', 'Resource concerns', 'Implementation guides'],
       stats: { label: 'Practices', value: '170+' },
     },
     {
@@ -65,7 +75,7 @@ export default function ModuleGrid() {
       gradient: { from: '#B8794F', to: '#A06843' },
       path: '/tools/rusle-eos',
       features: ['RUSLE-EOS', 'Satellite data', 'Conservation practices'],
-      stats: { label: 'Assessments', value: '12K+' },
+      stats: { label: 'Satellite Data', value: 'L8 + S2' },
     },
     {
       id: 'soil-health',
@@ -75,7 +85,7 @@ export default function ModuleGrid() {
       gradient: { from: '#6B7F39', to: '#5C6F32' },
       path: '/soil-health',
       features: ['Health indicators', 'Assessments', 'Tracking'],
-      stats: { label: 'Assessments', value: '3,400+' },
+      stats: { label: 'Indicators', value: '20+' },
     },
     {
       id: 'suitability',
@@ -91,22 +101,12 @@ export default function ModuleGrid() {
     {
       id: 'reports',
       title: 'Reports',
-      description: 'Generate conservation plans and documentation.',
+      description: 'Generate soil conservation plans and assessments.',
       icon: FileText,
       gradient: { from: '#5C6C6C', to: '#4D5B5B' },
       path: '/reports',
-      features: ['Conservation plans', 'Export options', 'Templates'],
-      stats: { label: 'Generated', value: '8,900+' },
-    },
-    {
-      id: 'tools',
-      title: 'Technical Tools',
-      description: 'Access nutrient calculators and other technical assessment tools.',
-      icon: FlaskConical,
-      gradient: { from: '#87A096', to: '#748B81' },
-      path: '/tools',
-      features: ['Nutrient calc', 'SCI calculator', 'Analysis tools'],
-      stats: { label: 'Calculations', value: '5,200+' },
+      features: ['Soil conservation plans', 'Export options', 'Templates'],
+      stats: { label: 'Templates', value: 'PDF/JSON' },
     },
   ]
 
@@ -117,7 +117,7 @@ export default function ModuleGrid() {
           Planning & Assessment Tools
         </h2>
         <p className="text-lg" style={{ color: '#5C6C6C' }}>
-          Comprehensive suite of conservation planning and soil assessment tools
+          Comprehensive suite of soil conservation planning and assessment tools
         </p>
       </div>
 
@@ -190,7 +190,7 @@ function ModuleCard({ module }: { module: Module }) {
         <div className="pt-3" style={{ borderTop: '1px solid #D8DBDB' }}>
           <div className="flex justify-between items-center text-xs">
             <span style={{ color: '#6B7D7D' }}>{module.stats.label}</span>
-            <span className="font-bold text-base" style={{ color: '#3E4A4A' }}>{module.stats.value}</span>
+            <span className="font-semibold text-sm" style={{ color: '#3E4A4A' }}>{module.stats.value}</span>
           </div>
         </div>
       </div>
