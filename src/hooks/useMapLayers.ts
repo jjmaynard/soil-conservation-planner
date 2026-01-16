@@ -29,7 +29,7 @@ export function useSoilProperties() {
 export function useTerrainProperties() {
   return useQuery<PropertyMetadata[]>({
     queryKey: ['terrain-properties'],
-    queryFn: () => mapLayerApi.getTerrainProperties(),
+    queryFn: () => mapLayerApi.getAllProperties(),
     staleTime: 24 * 60 * 60 * 1000, // 24 hours
   })
 }
