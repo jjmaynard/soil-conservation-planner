@@ -124,7 +124,7 @@ export default function TechnicalToolsHub() {
               </h1>
               
               <p className="text-xl mb-6 opacity-90">
-                Comprehensive suite of professional tools for soil conservation planning, assessment, and analysis
+                Comprehensive suite of tools for soil conservation planning, assessment, and analysis
               </p>
 
               <div className="flex flex-wrap gap-4 text-sm">
