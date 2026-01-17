@@ -229,7 +229,7 @@ export default function TechnicalToolsHub() {
             </h2>
             <div className="prose prose-lg" style={{ color: '#475569' }}>
               <p className="mb-4">
-                The Technical Tools suite provides user-friendly web tools for soil conservation planning, 
+                The Soil Conservation Toolkit provides user-friendly web tools for soil conservation planning, 
                 assessment, and analysis. Each tool is built on scientific principles and NRCS standards, 
                 integrating real-time satellite data, comprehensive soil databases, and advanced analysis capabilities.
               </p>
