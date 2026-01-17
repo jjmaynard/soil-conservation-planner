@@ -65,7 +65,7 @@ export default function TechnicalToolsHub() {
       gradient: { from: '#B8794F', to: '#A06843' },
       path: '/tools/rusle-eos',
       features: ['Landsat 8 + Sentinel-2', 'Multi-Scenario Analysis', 'Conservation Practice Effects', 'Field-Scale Assessment'],
-      status: 'active',
+      status: 'beta',
     },
     {
       id: 'nutrient-calc',
@@ -75,7 +75,7 @@ export default function TechnicalToolsHub() {
       gradient: { from: '#87A096', to: '#748B81' },
       path: '/tools/nutrient-calc',
       features: ['Nutrient Balance', 'Application Rates', 'Soil Test Integration', 'Crop Requirements'],
-      status: 'beta',
+      status: 'planned',
     },
   ]
 
