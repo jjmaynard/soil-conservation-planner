@@ -55,7 +55,7 @@ export default function TechnicalToolsHub() {
       gradient: { from: '#8B7AA8', to: '#7A6B92' },
       path: '/suitability',
       features: ['LCC Ratings', 'Crop Suitability', '50+ Interpretations', 'Yield Predictions'],
-      status: 'active',
+      status: 'beta',
     },
     {
       id: 'rusle-eos',
