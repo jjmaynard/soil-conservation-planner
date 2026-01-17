@@ -137,12 +137,13 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         text-white
         transition-all duration-300 ease-in-out
         flex flex-col
-        ${sidebarOpen ? 'w-72' : 'w-20'}
+        ${sidebarOpen ? 'w-72 min-w-[240px] max-w-[320px]' : 'w-20 min-w-[80px]'}
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        overflow-y-auto
       `}
         style={{
           background: 'linear-gradient(to bottom, var(--color-forest-800), var(--color-forest-700), var(--color-forest-600), var(--color-forest-700), var(--color-forest-800))',
+          overflowX: 'hidden',
+          overflowY: 'auto',
         }}
       >
         {/* Sidebar Header */}
