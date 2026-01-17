@@ -137,6 +137,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         text-white
         transition-all duration-300 ease-in-out
         flex flex-col
+        sidebar-scroll
         ${sidebarOpen ? 'w-72 min-w-[240px] max-w-[320px]' : 'w-20 min-w-[80px]'}
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
