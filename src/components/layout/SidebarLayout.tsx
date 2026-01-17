@@ -209,32 +209,41 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 space-y-1">
+        <nav className="flex-1 py-4 space-y-2">
           {navigationSections.map((section, sectionIdx) => (
-            <div key={sectionIdx} className="mb-6">
+            <div key={sectionIdx} className="mb-4">
               {/* Section Title */}
               {sidebarOpen ? (
                 <button
                   onClick={() => toggleSection(section.title)}
-                  className="w-full px-4 mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-colors"
-                  style={{ color: 'var(--color-forest-300)' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-forest-100)'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-forest-300)'}
+                  className="w-full px-4 py-2.5 mb-1 flex items-center justify-between text-xs font-bold uppercase tracking-wider transition-all rounded-lg mx-2"
+                  style={{ 
+                    color: 'var(--color-forest-200)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'white'
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--color-forest-200)'
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
+                  }}
                 >
                   <span>{section.title}</span>
                   {expandedSections.has(section.title) ? (
-                    <ChevronUp className="w-3 h-3" />
+                    <ChevronUp className="w-4 h-4" />
                   ) : (
-                    <ChevronDown className="w-3 h-3" />
+                    <ChevronDown className="w-4 h-4" />
                   )}
                 </button>
               ) : (
-                <div className="h-2 mx-2 mb-2" style={{ borderTop: '1px solid var(--color-forest-500)' }} />
+                <div className="h-px mx-3 mb-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
               )}
 
               {/* Section Items */}
               {(sidebarOpen ? expandedSections.has(section.title) : true) && (
-                <ul className="space-y-1 px-2">
+                <ul className="space-y-1.5 px-2">
                   {section.items.map((item) => {
                     const isActive =
                       router.pathname === item.path ||
@@ -244,15 +253,16 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                       <li key={item.path}>
                         <Link
                           href={item.path}
-                          className="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200"
+                          className="group relative flex items-center px-3 py-3 rounded-lg transition-all duration-200"
                           style={{
-                            backgroundColor: isActive ? 'var(--color-forest-600)' : 'transparent',
+                            backgroundColor: isActive ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
                             color: isActive ? 'white' : 'var(--color-forest-100)',
-                            boxShadow: isActive ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'
+                            borderLeft: isActive ? '3px solid white' : '3px solid transparent',
+                            paddingLeft: isActive ? '9px' : '12px'
                           }}
                           onMouseEnter={(e) => {
                             if (!isActive) {
-                              e.currentTarget.style.backgroundColor = 'var(--color-forest-700)'
+                              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
                               e.currentTarget.style.color = 'white'
                             }
                           }}
@@ -264,22 +274,30 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                           }}
                           title={!sidebarOpen ? item.label : undefined}
                         >
-                          <div className="flex-shrink-0 w-6 flex justify-center">
+                          {/* Icon with background */}
+                          <div 
+                            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg transition-all duration-200"
+                            style={{
+                              backgroundColor: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                            }}
+                          >
                             <item.icon className="w-5 h-5" />
                           </div>
 
                           {sidebarOpen && (
                             <div className="ml-3 flex-1 min-w-0">
-                              <div className="font-medium text-sm">{item.label}</div>
-                              <div className="text-xs truncate" style={{ color: 'var(--color-forest-200)' }}>
+                              <div className={`text-sm leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                                {item.label}
+                              </div>
+                              <div 
+                                className="text-xs truncate mt-0.5" 
+                                style={{ 
+                                  color: isActive ? 'rgba(255, 255, 255, 0.8)' : 'var(--color-forest-200)',
+                                  opacity: isActive ? 1 : 0.9
+                                }}
+                              >
                                 {item.description}
                               </div>
-                            </div>
-                          )}
-
-                          {isActive && sidebarOpen && (
-                            <div className="ml-auto">
-                              <div className="w-1.5 h-8 bg-white rounded-full" />
                             </div>
                           )}
                         </Link>
@@ -288,23 +306,40 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                   })}
                 </ul>
               )}
+              
+              {/* Subtle divider after each section except last */}
+              {sidebarOpen && sectionIdx < navigationSections.length - 1 && (
+                <div className="h-px mx-4 mt-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }} />
+              )}
             </div>
           ))}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="flex-shrink-0 p-4" style={{ borderTop: '1px solid var(--color-forest-500)' }}>
-          {/* Back to Dashboard */}
+        <div className="flex-shrink-0 p-4" style={{ borderTop: '2px solid rgba(255, 255, 255, 0.1)' }}>
+          {/* Back to Dashboard - Enhanced button style */}
           <Link
             href="/"
-            className={`flex items-center ${sidebarOpen ? 'space-x-3 px-3' : 'justify-center'} py-2 rounded-lg transition-colors`}
-            style={{ color: 'white' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-forest-600)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            className={`flex items-center ${sidebarOpen ? 'space-x-3 px-4' : 'justify-center'} py-3 rounded-lg transition-all duration-200 font-medium`}
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              color: 'white',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)'
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
+            }}
             title={!sidebarOpen ? 'Back to Dashboard' : undefined}
           >
             <Home className="w-5 h-5" />
-            {sidebarOpen && <span className="text-sm font-medium">Back to Dashboard</span>}
+            {sidebarOpen && <span className="text-sm">Back to Dashboard</span>}
           </Link>
         </div>
       </aside>
