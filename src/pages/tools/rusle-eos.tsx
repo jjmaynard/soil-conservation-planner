@@ -306,27 +306,18 @@ See RUSLE_GEE_API_TROUBLESHOOTING.md for technical details.`
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F1E8' }}>
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #4A7C9E 0%, #345770 100%)' }} className="text-white shadow-lg rounded-lg mb-6 pt-6">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                <Mountain className="w-8 h-8" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">RUSLE-EOS</h1>
-                <p style={{ color: '#BDD7E5' }}>
-                  RUSLE Earth Observation System - Satellite-Assisted Erosion Assessment
-                </p>
-              </div>
+      <div style={{ background: 'linear-gradient(135deg, #4A7C9E 0%, #345770 100%)' }} className="text-white shadow-lg rounded-lg mb-6">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+              <Mountain className="h-8 w-8" />
             </div>
-            {selectedField && (
-              <div className="text-right">
-                <p className="text-sm" style={{ color: '#BDD7E5' }}>Selected Field</p>
-                <p className="text-lg font-semibold">{selectedField}</p>
-                <p className="text-sm" style={{ color: '#BDD7E5' }}>{fieldAcres.toFixed(1)} acres</p>
-              </div>
-            )}
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">RUSLE-EOS</h1>
+              <p className="text-sm" style={{ color: '#BDD7E5' }}>
+                RUSLE Earth Observation System - Satellite-Assisted Erosion Assessment
+              </p>
+            </div>
           </div>
         </div>
       </div>
