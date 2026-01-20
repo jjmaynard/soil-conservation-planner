@@ -28,7 +28,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
       const hasPondingData = geeData?.geeAssessment?.ponding
       
       if (hasPondingData || ssurgoData?.drainage) {
-        const pondingMetrics = geeData?.combined?.ponding
+        const pondingMetrics = geeData?.combined?.drainage
         const twiStats = geeData?.geeAssessment?.ponding?.twi_stats
         
         setDrainageData({
@@ -39,8 +39,8 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
           
           // GEE ponding data
           depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
-          twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
-          highPondingRiskPct: pondingMetrics?.high_ponding_risk_pct || 0,
+          twiAbove12Pct: twiStats?.twi_above_12_pct || 0,
+          highPondingRiskPct: pondingMetrics?.gee_ponding_risk_pct || 0,
           twiMean: twiStats?.mean || 0,
           twiStd: twiStats?.std || 0,
           twiMax: twiStats?.max || 0,
@@ -54,7 +54,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
         const stored = sessionStorage.getItem('comprehensiveFieldAssessment')
         if (stored) {
           const parsed = JSON.parse(stored) as EnhancedFieldData
-          const pondingMetrics = parsed.combined?.ponding
+          const pondingMetrics = parsed.combined?.drainage
           const twiStats = parsed.geeAssessment?.ponding?.twi_stats
           
           setDrainageData({
@@ -63,8 +63,8 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
             drainageClasses: parsed.ssurgoData?.drainage?.drainageClasses?.filter(dc => dc.acres > 0) || [],
             
             depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
-            twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
-            highPondingRiskPct: pondingMetrics?.high_ponding_risk_pct || 0,
+            twiAbove12Pct: twiStats?.twi_above_12_pct || 0,
+            highPondingRiskPct: pondingMetrics?.gee_ponding_risk_pct || 0,
             twiMean: twiStats?.mean || 0,
             twiStd: twiStats?.std || 0,
             twiMax: twiStats?.max || 0,
@@ -101,8 +101,8 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
     const recs: string[] = []
     
     // GEE ponding data
-    if (pondingMetrics?.high_ponding_risk_pct > 10) {
-      recs.push(`${pondingMetrics.high_ponding_risk_pct.toFixed(1)}% of field has high ponding risk - priority for drainage improvement`)
+    if (pondingMetrics?.gee_ponding_risk_pct > 10) {
+      recs.push(`${pondingMetrics.gee_ponding_risk_pct.toFixed(1)}% of field has high ponding risk - priority for drainage improvement`)
     }
     
     if (pondingMetrics?.twi_above_12_pct > 15) {
