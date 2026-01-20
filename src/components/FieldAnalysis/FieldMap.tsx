@@ -413,7 +413,6 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
             featureGroup: editableFieldGroupRef.current,
             edit: {
               selectedPathOptions: {
-                maintainColor: true,
                 opacity: 0.8,
                 dashArray: '10, 10',
                 fill: true,
