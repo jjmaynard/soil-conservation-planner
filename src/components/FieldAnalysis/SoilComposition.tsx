@@ -1,70 +1,59 @@
-// Soil Composition Component - Pie chart and table
+// Soil Composition Component - Pie chart and table with real SSURGO data
 
 'use client'
 
 import { useState, useEffect } from 'react'
 import { Info } from 'lucide-react'
+import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 
 interface SoilCompositionProps {
   fieldId: string
+  fieldData?: ProcessedFieldData | null
   onSoilSelect?: (soil: any) => void
 }
 
-export default function SoilComposition({ fieldId, onSoilSelect }: SoilCompositionProps) {
+export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: SoilCompositionProps) {
   const [soils, setSoils] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadSoilData()
-  }, [fieldId])
+  }, [fieldId, fieldData])
 
   const loadSoilData = async () => {
     setLoading(true)
     try {
-      // Placeholder data - replace with API call
-      const mockSoils = [
-        { 
-          id: 1, 
-          mapunit_name: 'Clarion loam, 2-5% slopes', 
-          symbol: 'CIC2',
-          area: 18.5, 
-          percent: 40.8,
-          lcc: 'IIe',
-          slope: 3.2,
-          color: '#10b981'
-        },
-        { 
-          id: 2, 
-          mapunit_name: 'Nicollet loam, 1-3% slopes', 
-          symbol: 'NcB',
-          area: 12.3, 
-          percent: 27.2,
-          lcc: 'I',
-          slope: 1.8,
-          color: '#60a5fa'
-        },
-        { 
-          id: 3, 
-          mapunit_name: 'Webster clay loam, 0-2% slopes', 
-          symbol: 'WeA',
-          area: 10.2, 
-          percent: 22.5,
-          lcc: 'IIw',
-          slope: 0.9,
-          color: '#fbbf24'
-        },
-        { 
-          id: 4, 
-          mapunit_name: 'Canisteo clay loam, 0-2% slopes', 
-          symbol: 'CaA',
-          area: 4.3, 
-          percent: 9.5,
-          lcc: 'IIw',
-          slope: 1.1,
-          color: '#a78bfa'
-        },
-      ]
-      setSoils(mockSoils)
+      // Try to load from fieldData prop first (real SSURGO data)
+      if (fieldData?.soils && fieldData.soils.length > 0) {
+        setSoils(fieldData.soils)
+      } else {
+        // Try session storage
+        const storedData = sessionStorage.getItem('fieldSSURGOData')
+        if (storedData) {
+          const parsed = JSON.parse(storedData) as ProcessedFieldData
+          if (parsed.soils) {
+            setSoils(parsed.soils)
+            return
+          }
+        }
+        
+        // Fallback to placeholder data if no real data available
+        const mockSoils = [
+          { 
+            id: '1', 
+            mapunit_name: 'Loading real SSURGO data...', 
+            symbol: 'N/A',
+            area: 0, 
+            percent: 100,
+            lcc: 'N/A',
+            slope: 0,
+            drainageClass: 'N/A',
+            hydric: false,
+            color: '#9ca3af'
+          },
+        ]
+        setSoils(mockSoils)
+      }
     } catch (error) {
       console.error('Error loading soil data:', error)
     } finally {
@@ -91,35 +80,16 @@ export default function SoilComposition({ fieldId, onSoilSelect }: SoilCompositi
         </p>
       </div>
 
-      {/* Simple Visual Bar Chart */}
-      <div className="space-y-2">
-        {soils.map((soil) => (
-          <div key={soil.id}>
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="font-medium text-gray-700 truncate flex-1">{soil.symbol}</span>
-              <span className="text-gray-600 ml-2">{soil.percent.toFixed(1)}%</span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{ 
-                  width: `${soil.percent}%`,
-                  backgroundColor: soil.color
-                }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Detailed Table */}
+      {/* Combined Table with Visual Bars */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">
         <table className="w-full text-xs">
           <thead>
             <tr style={{ backgroundColor: '#f9fafb' }}>
-              <th className="text-left p-2 font-semibold text-gray-700">Soil</th>
-              <th className="text-right p-2 font-semibold text-gray-700">Area</th>
-              <th className="text-right p-2 font-semibold text-gray-700">LCC</th>
+              <th className="text-left p-3 font-semibold text-gray-700">Soil Component</th>
+              <th className="text-right p-3 font-semibold text-gray-700">Area</th>
+              <th className="text-left p-3 font-semibold text-gray-700" style={{ minWidth: '200px' }}>Percent</th>
+              <th className="text-right p-3 font-semibold text-gray-700">Slope</th>
+              <th className="text-right p-3 font-semibold text-gray-700">LCC</th>
             </tr>
           </thead>
           <tbody>
@@ -132,19 +102,54 @@ export default function SoilComposition({ fieldId, onSoilSelect }: SoilCompositi
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0fdf4'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = idx % 2 === 0 ? '#ffffff' : '#fafafa'}
               >
-                <td className="p-2">
+                {/* Soil Name with Color Indicator */}
+                <td className="p-3">
                   <div className="flex items-center gap-2">
                     <div 
                       className="w-3 h-3 rounded-sm flex-shrink-0"
                       style={{ backgroundColor: soil.color }}
                     />
-                    <span className="truncate">{soil.mapunit_name}</span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-medium text-gray-900 truncate">{soil.mapunit_name}</span>
+                      <span className="text-gray-500 text-xs">{soil.symbol}</span>
+                    </div>
                   </div>
                 </td>
-                <td className="p-2 text-right">{soil.area} ac</td>
-                <td className="p-2 text-right">
+                
+                {/* Area */}
+                <td className="p-3 text-right font-medium text-gray-900">
+                  {Number(soil.area || 0).toFixed(2)} ac
+                </td>
+                
+                {/* Percentage with Extended Visual Bar */}
+                <td className="p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-7 bg-gray-100 rounded-md overflow-hidden relative" style={{ minWidth: '150px' }}>
+                      <div
+                        className="h-full rounded-md transition-all flex items-center justify-end pr-2"
+                        style={{ 
+                          width: `${soil.percent}%`,
+                          backgroundColor: soil.color,
+                          minWidth: '35px'
+                        }}
+                      >
+                        <span className="text-xs font-semibold text-white drop-shadow-sm">
+                          {Number(soil.percent || 0).toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                
+                {/* Slope */}
+                <td className="p-3 text-right font-medium text-gray-700">
+                  {Number(soil.slope || 0).toFixed(1)}%
+                </td>
+                
+                {/* Land Capability Class */}
+                <td className="p-3 text-right">
                   <span 
-                    className="px-2 py-0.5 rounded text-xs font-medium"
+                    className="px-2 py-1 rounded text-xs font-semibold"
                     style={{ backgroundColor: '#f0fdf4', color: '#166534' }}
                   >
                     {soil.lcc}

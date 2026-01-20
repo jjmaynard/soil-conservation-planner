@@ -70,3 +70,80 @@ body {
 .sidebar-scroll::-webkit-scrollbar-thumb:active {
   background: rgba(255, 255, 255, 0.6);
 }
+
+/* Modern scrollbar for light backgrounds - auto-hide */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
+}
+
+*:hover {
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.7) !important;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: rgba(75, 85, 99, 0.9) !important;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Make Leaflet.Draw edit handles more visible */
+.leaflet-editing-icon {
+  width: 12px !important;
+  height: 12px !important;
+  margin-left: -6px !important;
+  margin-top: -6px !important;
+  border: 3px solid #3b82f6 !important;
+  background-color: white !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+  cursor: move !important;
+}
+
+.leaflet-edit-marker-selected {
+  background-color: #fbbf24 !important;
+  border-color: #f59e0b !important;
+}
+
+/* Midpoint markers for adding vertices */
+.leaflet-marker-icon.leaflet-div-icon.leaflet-editing-icon.leaflet-touch-icon {
+  opacity: 0.8 !important;
+}
+
+.leaflet-marker-icon.leaflet-div-icon.leaflet-editing-icon.leaflet-touch-icon:hover {
+  opacity: 1 !important;
+  transform: scale(1.2);
+}

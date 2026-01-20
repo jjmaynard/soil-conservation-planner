@@ -1,20 +1,27 @@
-// Field Stats Component - Quick statistics cards
+// Field Stats Component - Quick statistics cards with real SSURGO data
 
 'use client'
 
 import { TrendingUp, Droplets, Mountain, AlertTriangle } from 'lucide-react'
+import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 
 interface FieldStatsProps {
   fieldData: any
+  ssurgoData?: ProcessedFieldData | null
 }
 
-export default function FieldStats({ fieldData }: FieldStatsProps) {
-  // Calculate stats from field data
-  const stats = {
-    totalArea: fieldData.area || 0,
-    soilTypes: fieldData.soils?.length || 4,
-    avgSlope: fieldData.avgSlope || 3.2,
-    erosionRisk: fieldData.erosionRisk || 'Moderate',
+export default function FieldStats({ fieldData, ssurgoData }: FieldStatsProps) {
+  // Calculate stats from SSURGO data if available, otherwise use field data
+  const stats = ssurgoData?.stats ? {
+    totalArea: ssurgoData.stats.totalArea,
+    soilTypes: ssurgoData.stats.soilTypes,
+    avgSlope: ssurgoData.stats.avgSlope,
+    erosionRisk: ssurgoData.stats.erosionRisk,
+  } : {
+    totalArea: fieldData.area || fieldData.acres || 0,
+    soilTypes: fieldData.soils?.length || 0,
+    avgSlope: fieldData.avgSlope || 0,
+    erosionRisk: fieldData.erosionRisk || 'Unknown',
   }
 
   const getRiskColor = (risk: string) => {
@@ -42,7 +49,7 @@ export default function FieldStats({ fieldData }: FieldStatsProps) {
             <TrendingUp className="w-4 h-4" style={{ color: '#16a34a' }} />
           </div>
           <div className="text-2xl font-bold" style={{ color: '#14532d' }}>
-            {stats.totalArea.toFixed(1)} <span className="text-base font-normal">acres</span>
+            {Number(stats.totalArea || 0).toFixed(1)} <span className="text-base font-normal">acres</span>
           </div>
         </div>
 
@@ -64,7 +71,7 @@ export default function FieldStats({ fieldData }: FieldStatsProps) {
             <Mountain className="w-4 h-4" style={{ color: '#2563eb' }} />
           </div>
           <div className="text-2xl font-bold" style={{ color: '#1e3a8a' }}>
-            {stats.avgSlope.toFixed(1)}<span className="text-base font-normal">%</span>
+            {Number(stats.avgSlope || 0).toFixed(1)}<span className="text-base font-normal">%</span>
           </div>
         </div>
 

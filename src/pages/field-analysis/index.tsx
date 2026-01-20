@@ -6,8 +6,9 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
-import { Search, Map as MapIcon, Edit3, Upload, ChevronRight, Zap, Eye, Pencil, FileUp, ArrowLeft } from 'lucide-react'
+import { Search, Map as MapIcon, Edit3, Upload, ChevronRight, Zap, Eye, Pencil, FileUp, ArrowLeft, TrendingDown, Sprout, Droplets, FileCheck, List } from 'lucide-react'
 import type { FieldMapRef } from '#components/FieldAnalysis/FieldMap'
+import UseCaseSelector, { type UseCase } from '#components/FieldAnalysis/UseCaseSelector'
 
 const FieldMap = dynamic(() => import('#components/FieldAnalysis/FieldMap'), {
   ssr: false,
@@ -25,6 +26,7 @@ type SelectionMethod = 'search' | 'browse' | 'draw' | 'upload' | null
 
 export default function FieldAnalysisLanding() {
   const router = useRouter()
+  const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null)
   const [selectionMethod, setSelectionMethod] = useState<SelectionMethod>('browse')
   const [searchQuery, setSearchQuery] = useState('')
   const [showCLULayer, setShowCLULayer] = useState(false)
@@ -44,8 +46,21 @@ export default function FieldAnalysisLanding() {
       const rusleFlag = sessionStorage.getItem('returnToRUSLE')
       setIsFromPlanningWizard(planningFlag === 'true')
       setIsFromRUSLE(rusleFlag === 'true')
+      
+      // Only auto-select use case for special modes or explicit query params
+      // Don't use session storage to allow fresh selection each time
+      const queryUseCase = router.query.useCase as UseCase | undefined
+      
+      if (queryUseCase) {
+        // Direct link with use case in URL
+        setSelectedUseCase(queryUseCase)
+      } else if (planningFlag === 'true' || rusleFlag === 'true') {
+        // Auto-select comprehensive for special modes
+        setSelectedUseCase('comprehensive')
+      }
+      // Otherwise, show use case selector (selectedUseCase remains null)
     }
-  }, [])
+  }, [router.query.useCase])
 
   const handleFieldSelected = useCallback((fieldData: any) => {
     // Check if we're in planning wizard or RUSLE-EOS mode
@@ -93,16 +108,25 @@ export default function FieldAnalysisLanding() {
       sessionStorage.removeItem('returnToRUSLE')
       router.push('/conservation/planning-wizard')
     } else {
-      // Normal flow - navigate to detailed analysis
+      // Normal flow - navigate to detailed analysis with use case
       const fieldId = fieldData.clu_id || `field-${Date.now()}`
       
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('selectedField', JSON.stringify(fieldData))
+        // Store selected use case for analysis page
+        if (selectedUseCase) {
+          sessionStorage.setItem('analysisUseCase', selectedUseCase)
+        }
       }
       
-      router.push(`/field-analysis/${fieldId}`)
+      // Include use case in URL
+      const url = selectedUseCase 
+        ? `/field-analysis/${fieldId}?useCase=${selectedUseCase}`
+        : `/field-analysis/${fieldId}`
+      
+      router.push(url)
     }
-  }, [router])
+  }, [router, selectedUseCase])
 
   const handleMethodSelect = (method: SelectionMethod) => {
     setSelectionMethod(method)
@@ -226,7 +250,38 @@ export default function FieldAnalysisLanding() {
         />
       </Head>
 
-      <div className="h-screen flex flex-col">
+      {/* Show Use Case Selector if no use case selected and not in special modes */}
+      {!selectedUseCase && !isFromPlanningWizard && !isFromRUSLE ? (
+        <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f9fafb' }}>
+          {/* Header */}
+          <div 
+            className="px-6 py-4 text-white flex-shrink-0"
+            style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
+          >
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-2xl font-bold">Field Analysis</h1>
+              <p className="text-sm mt-1" style={{ color: 'var(--color-forest-100)' }}>
+                Select your analysis goal to get started
+              </p>
+            </div>
+          </div>
+
+          {/* Use Case Selector */}
+          <div className="flex-1 flex items-center justify-center p-6">
+            <UseCaseSelector
+              selectedUseCase={selectedUseCase}
+              onSelect={(useCase) => {
+                setSelectedUseCase(useCase)
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('analysisUseCase', useCase)
+                }
+              }}
+            />
+          </div>
+        </div>
+      ) : (
+        // Show Field Selection Interface after use case is selected
+        <div className="h-screen flex flex-col">
         {/* Planning Wizard Banner */}
         {isFromPlanningWizard && (
           <div 
@@ -281,9 +336,23 @@ export default function FieldAnalysisLanding() {
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
         >
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold">Field Analysis</h1>
-              <p className="text-xs" style={{ color: 'var(--color-forest-100)' }}>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-bold">Field Analysis</h1>
+                {selectedUseCase && (
+                  <span 
+                    className="text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1.5"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                  >
+                    {selectedUseCase === 'erosion' && <><TrendingDown className="w-3 h-3" /> Erosion & Conservation</>}
+                    {selectedUseCase === 'production' && <><Sprout className="w-3 h-3" /> Production Optimization</>}
+                    {selectedUseCase === 'water' && <><Droplets className="w-3 h-3" /> Water Management</>}
+                    {selectedUseCase === 'compliance' && <><FileCheck className="w-3 h-3" /> Compliance & Documentation</>}
+                    {selectedUseCase === 'comprehensive' && <><List className="w-3 h-3" /> Full Comprehensive Analysis</>}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs mt-1" style={{ color: 'var(--color-forest-100)' }}>
                 {isFromPlanningWizard 
                   ? 'Click on a field to add it to your conservation plan'
                   : isFromRUSLE
@@ -300,26 +369,92 @@ export default function FieldAnalysisLanding() {
           {/* Method Selector - Top Left */}
           <div 
             className="absolute top-4 left-4 z-[1000] rounded-lg shadow-2xl overflow-hidden"
-            style={{ backgroundColor: '#ffffff', border: '2px solid #d1d5db', maxWidth: '320px' }}
+            style={{ backgroundColor: '#ffffff', border: '2px solid #d1d5db', maxWidth: '360px' }}
           >
             <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-              <h3 className="font-semibold text-gray-900 text-sm">Selection Method</h3>
+              <h3 className="font-semibold text-gray-900 text-sm mb-1">Field Selection</h3>
+              <p className="text-xs text-gray-600">
+                Navigate to your field by entering an address, city, state, or coordinates, 
+                or manually navigate by scrolling and panning the map.
+              </p>
+            </div>
+
+            {/* Search Section - Always Visible */}
+            <div className="px-4 py-3" style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb' }}>
+              <div className="space-y-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    placeholder='e.g., "Lincoln, NE" or "41.25, -95.95"'
+                    className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                    style={{ 
+                      backgroundColor: '#ffffff',
+                      color: '#111827',
+                      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                    }}
+                  />
+                  
+                  {/* Suggestions dropdown */}
+                  {showSuggestions && searchSuggestions.length > 0 && (
+                    <div 
+                      className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto"
+                    >
+                      {searchSuggestions.map((result, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleSuggestionClick(result)}
+                          className="w-full text-left px-3 py-2.5 border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-start gap-2">
+                            <MapIcon className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm truncate text-gray-900">
+                                {result.display_name.split(',')[0]}
+                              </div>
+                              <div className="text-xs truncate text-gray-600">
+                                {result.display_name.split(',').slice(1).join(',').trim()}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <button
+                  onClick={handleSearch}
+                  disabled={!searchQuery.trim() || isSearching}
+                  className="w-full px-4 py-2 text-sm font-semibold text-white rounded-lg transition-all disabled:opacity-50 shadow-sm"
+                  style={{ backgroundColor: 'var(--color-conservation)' }}
+                  onMouseEnter={(e) => {
+                    if (searchQuery.trim() && !isSearching) {
+                      e.currentTarget.style.backgroundColor = 'var(--color-forest-700)'
+                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-conservation)'
+                    e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                  }}
+                >
+                  {isSearching ? 'Searching...' : 'Search Location'}
+                </button>
+              </div>
+            </div>
+
+            {/* Selection Method Instructions */}
+            <div className="px-4 py-3 text-center" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+              <p className="text-xs font-medium text-gray-700">
+                Then select your field using one of the methods below
+              </p>
             </div>
             
-            {/* Method Tabs */}
-            <div className="grid grid-cols-4 border-b border-gray-200" style={{ backgroundColor: '#ffffff' }}>
-              <button
-                onClick={() => handleMethodSelect('search')}
-                className="px-3 py-2.5 text-xs font-medium transition-colors border-b-2"
-                style={{ 
-                  color: selectionMethod === 'search' ? '#1f2937' : '#6b7280',
-                  borderBottomColor: selectionMethod === 'search' ? 'var(--color-conservation)' : 'transparent',
-                  backgroundColor: selectionMethod === 'search' ? '#ffffff' : '#f3f4f6'
-                }}
-              >
-                <Search className="w-4 h-4 mx-auto mb-1" />
-                Search
-              </button>
+            {/* Selection Method Tabs */}
+            <div className="grid grid-cols-3 border-b border-gray-200" style={{ backgroundColor: '#ffffff' }}>
               <button
                 onClick={() => handleMethodSelect('browse')}
                 className="px-3 py-2.5 text-xs font-medium transition-colors border-b-2"
@@ -329,7 +464,7 @@ export default function FieldAnalysisLanding() {
                   backgroundColor: selectionMethod === 'browse' ? '#ffffff' : '#f3f4f6'
                 }}
               >
-                <MapIcon className="w-4 h-4 mx-auto mb-1" />
+                <Eye className="w-4 h-4 mx-auto mb-1" />
                 Browse
               </button>
               <button
@@ -341,7 +476,7 @@ export default function FieldAnalysisLanding() {
                   backgroundColor: selectionMethod === 'draw' ? '#ffffff' : '#f3f4f6'
                 }}
               >
-                <Edit3 className="w-4 h-4 mx-auto mb-1" />
+                <Pencil className="w-4 h-4 mx-auto mb-1" />
                 Draw
               </button>
               <button
@@ -353,99 +488,22 @@ export default function FieldAnalysisLanding() {
                   backgroundColor: selectionMethod === 'upload' ? '#ffffff' : '#f3f4f6'
                 }}
               >
-                <Upload className="w-4 h-4 mx-auto mb-1" />
+                <FileUp className="w-4 h-4 mx-auto mb-1" />
                 Upload
               </button>
             </div>
 
             {/* Method-Specific Controls */}
             <div className="p-4">
-              {selectionMethod === 'search' && (
-                <div className="space-y-3">
-                  <p className="text-sm font-medium text-gray-800 mb-2">
-                    Search by address, city, state, or coordinates
-                  </p>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                      placeholder='e.g., "Lincoln, NE" or "41.25, -95.95"'
-                      className="w-full px-3 py-2.5 text-sm border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
-                      style={{ 
-                        backgroundColor: '#ffffff',
-                        color: '#111827',
-                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
-                      }}
-                    />
-                    
-                    {/* Suggestions dropdown */}
-                    {showSuggestions && searchSuggestions.length > 0 && (
-                      <div 
-                        className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto"
-                      >
-                        {searchSuggestions.map((result, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => handleSuggestionClick(result)}
-                            className="w-full text-left px-3 py-2.5 border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                          >
-                            <div className="flex items-start gap-2">
-                              <MapIcon className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium text-sm truncate text-gray-900">
-                                  {result.display_name.split(',')[0]}
-                                </div>
-                                <div className="text-xs truncate text-gray-600">
-                                  {result.display_name.split(',').slice(1).join(',').trim()}
-                                </div>
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <button
-                    onClick={handleSearch}
-                    disabled={!searchQuery.trim() || isSearching}
-                    className="w-full px-4 py-2.5 text-sm font-semibold text-white rounded-lg transition-all disabled:opacity-50 shadow-sm"
-                    style={{ backgroundColor: 'var(--color-conservation)' }}
-                    onMouseEnter={(e) => {
-                      if (searchQuery.trim() && !isSearching) {
-                        e.currentTarget.style.backgroundColor = 'var(--color-forest-700)'
-                        e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--color-conservation)'
-                      e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
-                    }}
-                  >
-                    {isSearching ? 'Searching...' : 'Search Location'}
-                  </button>
-                  <div className="flex items-center gap-1.5 text-sm font-medium" style={{ color: '#111827' }}>
-                    <Zap className="w-4 h-4" />
-                    <span>Fastest method</span>
-                  </div>
-                </div>
-              )}
-
               {selectionMethod === 'browse' && (
                 <div className="space-y-3">
-                  <p className="text-xs text-gray-900 mb-2">
-                    Navigate the map and click on a CSB boundary to select
+                  <p className="text-sm text-gray-900 mb-2">
+                    Navigate the map and click on a field boundary to select it for analysis.
                   </p>
                   <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-ocean-50)' }}>
                     <p className="text-xs" style={{ color: '#111827' }}>
-                      💡 Zoom in to level 13+ to see field boundaries. Click any field to analyze it.
+                      💡 Zoom in to level 13+ to see interactive field boundaries. Click any field to analyze it.
                     </p>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs" style={{ color: '#111827' }}>
-                    <Eye className="w-3 h-3" />
-                    <span>Visual & Interactive</span>
                   </div>
                 </div>
               )}
@@ -526,6 +584,7 @@ export default function FieldAnalysisLanding() {
           />
         </div>
       </div>
+      )}
     </>
   )
 }

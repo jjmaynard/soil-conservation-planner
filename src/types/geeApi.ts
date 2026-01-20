@@ -484,6 +484,146 @@ export interface ProductivityAssessment {
 }
 
 // ============================================================================
+// Comprehensive Field Assessment (/api/assessment/all)
+// ============================================================================
+
+export interface ComprehensiveFieldAssessment {
+  assessment_year: number
+  timestamp: string
+  erosion_risk: {
+    statistics: {
+      mean_risk: number
+      min_risk: number
+      max_risk: number
+      std_dev: number
+      high_risk_area_pct: number
+    }
+    risk_levels: Record<string, any>
+    visualization: {
+      thumbnail_url: string
+      tile_url: string
+      description: string
+    }
+    methodology: string
+  }
+  concentrated_flow: {
+    flow_metrics: {
+      channel_density_m_per_ha: number
+      convergent_area_pct: number
+      high_gully_risk_pct: number
+    }
+    twi_stats: {
+      mean: number
+      p75: number
+      p90: number
+    }
+    spi_stats: {
+      mean: number
+      max: number
+      p90: number
+      p95: number
+    }
+    visualization: {
+      spi_tile_url: string
+      twi_tile_url: string
+      channels_tile_url: string
+      spi_thumbnail_url: string
+      description: string
+    }
+    methodology: string
+  }
+  ponding: {
+    ponding_metrics: {
+      depression_area_pct: number
+      twi_above_12_pct: number
+      high_ponding_risk_pct: number
+    }
+    twi_stats: {
+      mean: number
+      p75: number
+      p90: number
+    }
+    visualization: {
+      twi_tile_url: string
+      depressions_tile_url: string
+      wet_areas_tile_url: string
+      twi_thumbnail_url: string
+      description: string
+    }
+    methodology: string
+  }
+  drought: {
+    water_balance: {
+      growing_season_precip_mm: number
+      growing_season_eto_mm: number
+      balance_mm: number
+    }
+    drought_indices: {
+      pdsi_mean: number
+      pdsi_min: number
+    }
+    visualization: {
+      water_deficit_tile_url: string
+      vpd_tile_url: string
+      deficit_thumbnail_url: string
+      description: string
+    }
+    methodology: string
+  }
+  soil_quality: {
+    productivity_stability: {
+      ndvi_peak_mean: number
+      ndvi_peak_std: number
+      ndvi_peak_cv: number
+      years_analyzed: number
+    }
+  }
+  productivity: {
+    productivity_metrics: {
+      ndvi_peak_mean: number
+      ndvi_peak_std: number
+    }
+    yield_gap: {
+      mean_gap_pct: number
+      p75_gap_pct: number
+      p90_gap_pct: number
+    }
+    visualization: {
+      yield_gap_tile_url: string
+      mean_ndvi_tile_url: string
+      max_ndvi_tile_url: string
+      yield_gap_thumbnail_url: string
+      description: string
+    }
+    methodology: string
+  }
+  svi: {
+    svi_metrics: {
+      surface_loss_mean: number
+      surface_loss_high_pct: number
+      subsurface_drained_mean: number
+      subsurface_drained_high_pct: number
+      subsurface_undrained_mean: number
+      subsurface_undrained_high_pct: number
+    }
+    visualization: {
+      surface_tile_url: string
+      subsurface_drained_tile_url: string
+      subsurface_undrained_tile_url: string
+      surface_thumbnail_url: string
+      description: string
+    }
+    methodology: string
+  }
+}
+
+export interface ComprehensiveAssessmentRequest {
+  wkt: string
+  year?: number
+  include_visualizations?: boolean
+}
+
+// ============================================================================
 // Error Response Type
 // ============================================================================
 

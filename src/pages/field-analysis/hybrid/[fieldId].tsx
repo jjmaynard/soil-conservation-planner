@@ -1,41 +1,25 @@
-// Field Analysis - Detailed Analysis Dashboard with SSURGO Integration
+// Hybrid Field Analysis Layout - Main Component
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import { 
   ArrowLeft, 
   Download, 
-  Settings,
   LayoutDashboard,
   FileText,
   Map as MapIcon,
-  TrendingDown,
-  Sprout,
-  Droplets,
-  FileCheck,
-  List
+  Settings
 } from 'lucide-react'
 
 import FieldStats from '#components/FieldAnalysis/FieldStats'
 import DashboardView from '#components/FieldAnalysis/layouts/DashboardView'
 import DetailView from '#components/FieldAnalysis/layouts/DetailView'
-import { type UseCase } from '#components/FieldAnalysis/UseCaseSelector'
 import { useFieldSSURGO, type ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import { useComprehensiveFieldAssessment } from '#hooks/useComprehensiveFieldAssessment'
-
-const FieldMap = dynamic(() => import('#components/FieldAnalysis/FieldMap'), {
-  ssr: false,
-  loading: () => (
-    <div className="bg-gray-100 flex h-full w-full items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8" style={{ border: '2px solid #e5e7eb', borderTopColor: '#16a34a' }}></div>
-    </div>
-  ),
-})
 
 type ViewMode = 'dashboard' | 'detail'
 
@@ -47,7 +31,6 @@ interface FieldData {
   boundary: any
   soils?: any[]
   cropHistory?: any[]
-  // Conservation practice inputs
   erosionRate?: number
   slope?: number
   drainageClass?: string
@@ -59,7 +42,7 @@ interface FieldData {
   acres?: number
 }
 
-export default function FieldAnalysisDetail() {
+export default function HybridFieldAnalysis() {
   const router = useRouter()
   const { fieldId } = router.query
   
@@ -70,7 +53,6 @@ export default function FieldAnalysisDetail() {
   const [activeLayers, setActiveLayers] = useState<string[]>(['soil-boundaries'])
   const [showCSBLayer, setShowCSBLayer] = useState(true)
   const [activeDetailTab, setActiveDetailTab] = useState('soil')
-  const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null)
   
   // SSURGO integration
   const { fieldData: ssurgoData, loading: ssurgoLoading, error: ssurgoError, queryField } = useFieldSSURGO()
@@ -90,32 +72,19 @@ export default function FieldAnalysisDetail() {
     if (fieldId) {
       loadFieldData(fieldId as string)
     }
-    
-    // Retrieve selected use case from session storage or query params
-    const useCase = (router.query.useCase as UseCase) || 
-                    (typeof window !== 'undefined' ? sessionStorage.getItem('analysisUseCase') as UseCase : null)
-    
-    if (useCase) {
-      setSelectedUseCase(useCase)
-    }
-  }, [fieldId, router.query.useCase])
+  }, [fieldId])
 
   // Separate effect to trigger GEE assessment after SSURGO data loads
   useEffect(() => {
     const runGeeAssessment = async () => {
-      // Only run if:
-      // 1. We have field data with a boundary
-      // 2. SSURGO data has loaded
-      // 3. We haven't already assessed this field
-      // 4. We're not currently loading SSURGO
       if (fieldData?.boundary && ssurgoData && !geeAssessed && !ssurgoLoading) {
         console.log('Querying GEE comprehensive assessment...')
-        setGeeAssessed(true) // Set flag before calling to prevent duplicates
+        setGeeAssessed(true)
         try {
           await assessField(fieldData.boundary, ssurgoData, new Date().getFullYear())
         } catch (error) {
           console.error('Failed to query GEE assessment:', error)
-          setGeeAssessed(false) // Reset flag on error to allow retry
+          setGeeAssessed(false)
         }
       }
     }
@@ -125,13 +94,11 @@ export default function FieldAnalysisDetail() {
 
   const loadFieldData = async (id: string) => {
     setLoading(true)
-    setGeeAssessed(false) // Reset GEE assessment flag
+    setGeeAssessed(false)
     try {
-      // Try to get data from session storage first
       const storedData = sessionStorage.getItem('selectedField')
       if (storedData) {
         const parsed = JSON.parse(storedData)
-        // Add demo conservation data if not present
         setFieldData({
           ...parsed,
           acres: parsed.acres || parsed.area || 100,
@@ -145,7 +112,6 @@ export default function FieldAnalysisDetail() {
           hydrologicGroup: parsed.hydrologicGroup || 'B'
         })
         
-        // Query SSURGO data if boundary is available
         if (parsed.boundary) {
           console.log('Querying SSURGO for field boundary...')
           try {
@@ -153,18 +119,10 @@ export default function FieldAnalysisDetail() {
           } catch (error) {
             console.error('Failed to query SSURGO:', error)
           }
-          
-          // GEE assessment will be triggered separately in useEffect after SSURGO loads
         } else {
-          console.warn('No field boundary available for analysis queries - cannot run GEE assessment')
+          console.warn('No field boundary available for analysis queries')
         }
       } else {
-        // Fetch from API
-        // const response = await fetch(`/api/field-analysis/${id}`)
-        // const data = await response.json()
-        // setFieldData(data)
-        
-        // Placeholder data with conservation practice inputs
         setFieldData({
           id: id,
           name: 'North 40',
@@ -172,7 +130,6 @@ export default function FieldAnalysisDetail() {
           acres: 45.3,
           clu_id: '12-345-6789',
           boundary: null,
-          // Conservation practice data
           erosionRate: 6.2,
           slope: 8.5,
           drainageClass: 'Moderately well drained',
@@ -197,14 +154,13 @@ export default function FieldAnalysisDetail() {
 
   const handleExportReport = () => {
     console.log('Exporting field analysis report...')
-    // Implement PDF export
   }
 
   if (loading || !fieldData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 mx-auto mb-4" style={{ border: '4px solid #e5e7eb', borderTopColor: 'var(--color-forest-600)' }}></div>
+          <div className="animate-spin rounded-full h-16 w-16 mx-auto mb-4" style={{ border: '4px solid #e5e7eb', borderTopColor: '#16a34a' }}></div>
           <p className="text-gray-600">Loading field analysis...</p>
         </div>
       </div>
@@ -214,7 +170,7 @@ export default function FieldAnalysisDetail() {
   return (
     <>
       <Head>
-        <title>{fieldData.name} - Field Analysis</title>
+        <title>{fieldData.name} - Field Analysis (Hybrid Layout)</title>
         <meta name="description" content={`Comprehensive analysis for field ${fieldData.name}`} />
       </Head>
 
@@ -222,7 +178,7 @@ export default function FieldAnalysisDetail() {
         {/* Header */}
         <div 
           className="p-4 text-white flex-shrink-0"
-          style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
+          style={{ background: 'linear-gradient(to right, #16a34a, #15803d, #166534)' }}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -233,21 +189,7 @@ export default function FieldAnalysisDetail() {
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold">{fieldData.name}</h1>
-                  {selectedUseCase && (
-                    <span 
-                      className="text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1.5"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                    >
-                      {selectedUseCase === 'erosion' && <><TrendingDown className="w-3 h-3" /> Erosion & Conservation</>}
-                      {selectedUseCase === 'production' && <><Sprout className="w-3 h-3" /> Production Optimization</>}
-                      {selectedUseCase === 'water' && <><Droplets className="w-3 h-3" /> Water Management</>}
-                      {selectedUseCase === 'compliance' && <><FileCheck className="w-3 h-3" /> Compliance & Documentation</>}
-                      {selectedUseCase === 'comprehensive' && <><List className="w-3 h-3" /> Full Comprehensive Analysis</>}
-                    </span>
-                  )}
-                </div>
+                <h1 className="text-2xl font-bold">{fieldData.name}</h1>
                 <p className="text-sm opacity-90">
                   {fieldData.area} acres • CSB: {fieldData.clu_id}
                 </p>
@@ -304,7 +246,7 @@ export default function FieldAnalysisDetail() {
         {/* Quick Stats Bar */}
         <FieldStats fieldData={fieldData} ssurgoData={ssurgoData} />
 
-        {/* Main Content Area */}
+        {/* Main Content */}
         <div className="flex-1 overflow-hidden">
           {viewMode === 'dashboard' ? (
             <DashboardView
@@ -322,7 +264,6 @@ export default function FieldAnalysisDetail() {
               onTabChange={setActiveDetailTab}
               onSoilSelect={setSelectedSoil}
               selectedSoil={selectedSoil}
-              selectedUseCase={selectedUseCase}
               activeLayers={activeLayers}
               showCSBLayer={showCSBLayer}
               onCSBLayerToggle={() => setShowCSBLayer(!showCSBLayer)}

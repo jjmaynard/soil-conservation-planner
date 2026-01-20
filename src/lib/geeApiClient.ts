@@ -31,6 +31,8 @@ import type {
   ErosionAssessment,
   PondingAssessment,
   ProductivityAssessment,
+  ComprehensiveFieldAssessment,
+  ComprehensiveAssessmentRequest,
 } from '#types/geeApi'
 
 // ============================================================================
@@ -595,6 +597,38 @@ class GEEAPIClient {
       const { data } = await this.client.get<ClimateResponse>('/api/climate/point', {
         params: { lat, lon, start_year, end_year },
       })
+      return data
+    } catch (error) {
+      return handleAPIError(error)
+    }
+  }
+
+  // ==========================================================================
+  // Comprehensive Field Assessment
+  // ==========================================================================
+
+  /**
+   * Get comprehensive field assessment with all resource concerns
+   * @param request - WKT geometry and optional parameters
+   * @returns Complete assessment with erosion, ponding, drought, productivity, SVI
+   */
+  async getComprehensiveAssessment(
+    request: ComprehensiveAssessmentRequest
+  ): Promise<ComprehensiveFieldAssessment> {
+    try {
+      const body: any = {
+        wkt: request.wkt,
+        year: request.year || new Date().getFullYear()
+      }
+      
+      if (request.include_visualizations !== undefined) {
+        body.include_visualizations = request.include_visualizations
+      }
+
+      const { data } = await this.client.post<ComprehensiveFieldAssessment>(
+        `/api/assessment/all`,
+        body
+      )
       return data
     } catch (error) {
       return handleAPIError(error)

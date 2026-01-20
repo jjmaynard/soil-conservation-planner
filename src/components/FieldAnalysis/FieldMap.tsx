@@ -101,10 +101,18 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   const [selectedCSBField, setSelectedCSBField] = useState<CSBFieldDetails | null>(null)
   const [isSelectingField, setIsSelectingField] = useState(false)
   const [showCSBTileLayer, setShowCSBTileLayer] = useState(true) // Separate control for tile layer
+  const [isEditingBoundary, setIsEditingBoundary] = useState(false)
   const csbLayerRef = useRef<L.TileLayer | null>(null)
   const csbGeoJsonLayerRef = useRef<L.GeoJSON | null>(null) // Interactive GeoJSON layer
-  const selectedFieldLayerRef = useRef<L.GeoJSON | null>(null)
+  const selectedFieldLayerRef = useRef<L.Polygon | null>(null) // Selected field as editable polygon
   const fieldBoundaryLayerRef = useRef<L.GeoJSON | null>(null) // For analysis mode field boundary
+  const editableFieldGroupRef = useRef<L.FeatureGroup | null>(null)
+  const editControlRef = useRef<L.Control.Draw | null>(null)
+  const [layerPanelCollapsed, setLayerPanelCollapsed] = useState(false)
+  const [isInEditMode, setIsInEditMode] = useState(false)
+  const mapClickHandlerRef = useRef<((e: L.LeafletMouseEvent) => void) | null>(null)
+  const vertexMarkersRef = useRef<L.CircleMarker[]>([]) // Store vertex markers
+  const [customFieldName, setCustomFieldName] = useState<string>('') // Custom field name input
 
   // Expose methods to parent component via ref
   useImperativeHandle(ref, () => ({
@@ -256,6 +264,9 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
     const map = mapRef.current
 
+    // Clear validation error when mode changes
+    setValidationError('')
+
     // Remove existing drawing controls if switching away from draw mode
     if (mode !== 'draw' && drawControlRef.current) {
       map.removeControl(drawControlRef.current)
@@ -375,6 +386,152 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         setPolygonArea(0)
         setValidationError('')
       })
+    }
+
+    // Initialize editable feature group for browse mode field boundary editing
+    if (mode === 'browse') {
+      if (!editableFieldGroupRef.current) {
+        const editableGroup = new L.FeatureGroup()
+        map.addLayer(editableGroup)
+        editableFieldGroupRef.current = editableGroup
+        console.log('✅ Editable feature group created')
+      }
+
+      // Create edit control for browse mode if not already present
+      if (!editControlRef.current) {
+        const editControl = new L.Control.Draw({
+          position: 'topright',
+          draw: false, // Disable drawing new shapes
+          edit: {
+            featureGroup: editableFieldGroupRef.current,
+            edit: {
+              selectedPathOptions: {
+                maintainColor: true,
+                opacity: 0.8,
+                dashArray: '10, 10',
+                fill: true,
+                fillOpacity: 0.3
+              }
+            },
+            poly: {
+              allowIntersection: false // Prevent self-intersecting polygons
+            },
+            remove: false // Disable delete
+          }
+        })
+
+        map.addControl(editControl)
+        editControlRef.current = editControl
+        console.log('✅ EDIT CONTROL ADDED to map - pencil icon should appear when field is selected')
+        console.log('💡 TIP: When editing, drag WHITE CIRCLES to move vertices, drag SMALL SQUARES between vertices to add new vertices')
+      } else if (!map.hasControl(editControlRef.current)) {
+        // Re-add control if it was removed
+        map.addControl(editControlRef.current)
+        console.log('✅ EDIT CONTROL RE-ADDED to map')
+      }
+
+      // Listen for edit mode start/stop to disable field selection clicks
+      map.on('draw:editstart', () => {
+        setIsInEditMode(true)
+        // Hide custom vertex markers - Leaflet.Draw shows its own handles
+        vertexMarkersRef.current.forEach(marker => marker.remove())
+        console.log('🔧 Edit mode started - drag handles to move vertices, drag midpoint handles to add new vertices')
+      })
+
+      map.on('draw:editstop', () => {
+        setIsInEditMode(false)
+        // Re-create vertex markers based on current polygon state
+        if (selectedFieldLayerRef.current) {
+          const polygon = selectedFieldLayerRef.current as L.Polygon
+          const latlngs = polygon.getLatLngs()[0] as L.LatLng[]
+          
+          vertexMarkersRef.current.forEach(marker => marker.remove())
+          vertexMarkersRef.current = []
+          
+          latlngs.forEach((latlng: L.LatLng) => {
+            const vertexMarker = L.circleMarker(latlng, {
+              radius: 5,
+              fillColor: '#ffffff',
+              color: '#3b82f6',
+              weight: 2,
+              fillOpacity: 1,
+              opacity: 1,
+            })
+            vertexMarker.addTo(map)
+            vertexMarkersRef.current.push(vertexMarker)
+          })
+          console.log(`✅ Updated ${latlngs.length} vertex markers`)
+        }
+        console.log('✓ Edit mode stopped - field selection re-enabled')
+      })
+
+      // Handle field boundary edits
+      map.on(L.Draw.Event.EDITED, (e: any) => {
+        const layers = e.layers
+        layers.eachLayer((layer: any) => {
+          const latlngs = layer.getLatLngs()[0]
+          
+          // Convert to GeoJSON
+          const coordinates = latlngs.map((latlng: L.LatLng) => [latlng.lng, latlng.lat])
+          coordinates.push(coordinates[0]) // Close the polygon
+          
+          const geoJSON = {
+            type: 'Polygon',
+            coordinates: [coordinates]
+          }
+          
+          const areaSquareMeters = turf.area(geoJSON)
+          const areaAcres = areaSquareMeters * 0.000247105
+
+          console.log('Field boundary edited. New area:', areaAcres, 'acres')
+          
+          // Update selected CSB field with new boundary
+          if (selectedCSBField) {
+            const updatedField = {
+              ...selectedCSBField,
+              geometry: geoJSON,
+              acres: areaAcres
+            }
+            setSelectedCSBField(updatedField)
+            
+            // Notify parent component of the updated field
+            if (onFieldSelected) {
+              onFieldSelected(updatedField)
+            }
+            
+            console.log('✅ Field boundary updated. New area:', areaAcres.toFixed(2), 'acres')
+            console.log('✅ Click "Analyze Field" to run analysis with new boundary.')
+          }
+
+          // Update vertex markers to reflect new vertex positions
+          vertexMarkersRef.current.forEach(marker => marker.remove())
+          vertexMarkersRef.current = []
+          
+          latlngs.forEach((latlng: L.LatLng) => {
+            const vertexMarker = L.circleMarker(latlng, {
+              radius: 5,
+              fillColor: '#ffffff',
+              color: '#3b82f6',
+              weight: 2,
+              fillOpacity: 1,
+              opacity: 1,
+            })
+            if (mapRef.current) {
+              vertexMarker.addTo(mapRef.current)
+              vertexMarkersRef.current.push(vertexMarker)
+            }
+          })
+          console.log(`✅ Updated ${latlngs.length} vertex markers`)
+        })
+      })
+    }
+
+    // Cleanup when leaving browse mode
+    return () => {
+      if (mode !== 'browse' && editControlRef.current && mapRef.current) {
+        mapRef.current.removeControl(editControlRef.current)
+        editControlRef.current = null
+      }
     }
   }, [mode, mapInitialized])
 
@@ -536,7 +693,10 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
       // Add click handler for field selection in browse mode
       const handleMapClick = async (e: L.LeafletMouseEvent) => {
-        if (mode !== 'browse') return
+        if (mode !== 'browse' || isInEditMode) {
+          // Don't select fields while in edit mode
+          return
+        }
 
         setIsSelectingField(true)
         setValidationError('')
@@ -548,27 +708,78 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
             console.log('[CSB] Selected field data:', field)
             setSelectedCSBField(field)
             
-            // Remove previous selection layer
+            // Remove previous selection layer and vertex markers
             if (selectedFieldLayerRef.current) {
+              if (editableFieldGroupRef.current) {
+                editableFieldGroupRef.current.clearLayers()
+              }
               map.removeLayer(selectedFieldLayerRef.current)
             }
+            vertexMarkersRef.current.forEach(marker => marker.remove())
+            vertexMarkersRef.current = []
 
-            // Add highlight layer for selected field with distinct styling
-            const fieldLayer = L.geoJSON(field.geometry as any, {
-              style: {
-                color: '#3b82f6',      // Bright blue border
-                weight: 6,              // Thick border for visibility
-                fillColor: '#3b82f6',  // Blue fill
-                fillOpacity: 0.15,      // Light fill
-                dashArray: '10, 5',     // Dashed line pattern
-              },
-              pane: 'selectedFieldPane',      // Use custom pane with highest z-index
+            // Convert GeoJSON to Leaflet polygon for editing
+            const coords = (field.geometry as any).coordinates[0]
+            const latlngs = coords.map((coord: number[]) => [coord[1], coord[0]])
+            
+            // Create editable polygon with solid outline
+            const editablePolygon = L.polygon(latlngs, {
+              color: '#3b82f6',
+              weight: 3,
+              fillColor: '#3b82f6',
+              fillOpacity: 0.15,
             })
-            fieldLayer.addTo(map)
-            selectedFieldLayerRef.current = fieldLayer
+
+            // Add to editable feature group FIRST
+            if (editableFieldGroupRef.current) {
+              editableFieldGroupRef.current.addLayer(editablePolygon)
+              console.log('✅ Selected field added to editable group as Leaflet polygon')
+              console.log('✅ Editable layers in group:', editableFieldGroupRef.current.getLayers().length)
+              
+              // Ensure edit control is visible
+              if (editControlRef.current && mapRef.current) {
+                console.log('✅ Edit control exists and should show EDIT LAYERS button')
+              } else {
+                console.warn('⚠️ Edit control not found - may need to refresh')
+              }
+              
+              console.log('✅ Click EDIT LAYERS (pencil icon) in top-right')
+              console.log('💡 Edit handles should appear as small circles at each vertex when editing')
+            }
+            
+            selectedFieldLayerRef.current = editablePolygon
+
+            // Clear previous vertex markers
+            vertexMarkersRef.current.forEach(marker => marker.remove())
+            vertexMarkersRef.current = []
+
+            // Add vertex markers to show individual vertices (will be hidden during edit mode)
+            latlngs.forEach((latlng: [number, number]) => {
+              const vertexMarker = L.circleMarker(latlng, {
+                radius: 5,
+                fillColor: '#ffffff',
+                color: '#3b82f6',
+                weight: 2,
+                fillOpacity: 1,
+                opacity: 1,
+                interactive: false, // Don't interfere with Leaflet.Draw's handles
+              })
+              vertexMarker.addTo(map)
+              vertexMarkersRef.current.push(vertexMarker)
+            })
+            console.log(`✅ Showing ${latlngs.length} vertices. Click pencil icon to edit - drag handles to move, drag midpoints to add vertices`)
+            
+            // Prevent clicks on selected field from selecting adjacent fields
+            // BUT ONLY when NOT in edit mode
+            editablePolygon.on('click', (e: L.LeafletMouseEvent) => {
+              if (!isInEditMode) {
+                L.DomEvent.stopPropagation(e)
+                console.log('Click on selected field - ignoring (already selected)')
+              }
+            })
 
             // Fit map to field bounds, then zoom out by 1 level
-            map.fitBounds(fieldLayer.getBounds(), { padding: [50, 50] })
+            map.fitBounds(editablePolygon.getBounds(), { padding: [50, 50] })
             setTimeout(() => {
               const currentZoom = map.getZoom()
               map.setZoom(currentZoom - 1)
@@ -586,37 +797,30 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
       if (mode === 'browse') {
         map.on('click', handleMapClick)
+        mapClickHandlerRef.current = handleMapClick
       }
 
       return () => {
         clearTimeout(updateTimeout)
         map.off('moveend', handleMapChange)
         map.off('zoomend', handleMapChange)
-        if (mode === 'browse') {
-          map.off('click', handleMapClick)
+        if (mode === 'browse' && mapClickHandlerRef.current) {
+          map.off('click', mapClickHandlerRef.current)
         }
         // Don't remove tile layer here - it's controlled by showCSBTileLayer
         if (csbGeoJsonLayerRef.current) {
           map.removeLayer(csbGeoJsonLayerRef.current)
           csbGeoJsonLayerRef.current = null
         }
-        // Only remove selectedFieldLayerRef in browse mode, not in analysis mode
-        if (mode === 'browse' && selectedFieldLayerRef.current) {
-          map.removeLayer(selectedFieldLayerRef.current)
-          selectedFieldLayerRef.current = null
-        }
+        // Don't remove selected field layer - it should persist independently of CSB layer toggle
       }
     } else {
-      // Remove GeoJSON boundaries if toggled off, but keep tile layer
+      // Remove GeoJSON boundaries if toggled off, but keep tile layer and selected field
       if (csbGeoJsonLayerRef.current) {
         map.removeLayer(csbGeoJsonLayerRef.current)
         csbGeoJsonLayerRef.current = null
       }
-      // Only remove selectedFieldLayerRef in browse mode, not in analysis mode
-      if (mode === 'browse' && selectedFieldLayerRef.current) {
-        map.removeLayer(selectedFieldLayerRef.current)
-        selectedFieldLayerRef.current = null
-      }
+      // Don't remove selected field layer - it should persist independently of CSB layer toggle
     }
   }, [showCSBLayer, mapInitialized, mode])
 
@@ -642,10 +846,25 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
   // Add field boundary in analysis mode
   useEffect(() => {
-    if (!mapRef.current || !fieldData || mode !== 'analysis') return
+    if (!mapRef.current || !fieldData || mode !== 'analysis' || !mapInitialized) return
 
-    if (fieldData.boundary) {
-      const fieldLayer = L.geoJSON(fieldData.boundary, {
+    // Wait a tick to ensure editable group is initialized
+    const timer = setTimeout(() => {
+      if (!mapRef.current || !fieldData.boundary) return
+
+      // Remove existing layer if present
+      if (fieldBoundaryLayerRef.current) {
+        if (editableFieldGroupRef.current) {
+          editableFieldGroupRef.current.removeLayer(fieldBoundaryLayerRef.current)
+        } else {
+          mapRef.current.removeLayer(fieldBoundaryLayerRef.current)
+        }
+      }
+
+      // Use edited geometry if available (from selectedCSBField), otherwise use original fieldData.boundary
+      const boundaryToUse = selectedCSBField?.geometry || fieldData.boundary
+
+      const fieldLayer = L.geoJSON(boundaryToUse, {
         style: {
           color: '#16a34a',
           weight: 3,
@@ -654,20 +873,39 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         },
       })
       
-      // Always add field boundary in analysis mode, regardless of showCSBLayer
-      fieldLayer.addTo(mapRef.current)
+      // Add to editable feature group to enable editing
+      if (editableFieldGroupRef.current) {
+        // Important: Each individual layer in the GeoJSON needs to be added
+        fieldLayer.eachLayer((layer) => {
+          editableFieldGroupRef.current!.addLayer(layer)
+        })
+        console.log('✓ Field boundary added to editable group')
+        console.log('✓ Number of editable layers:', editableFieldGroupRef.current.getLayers().length)
+        console.log('✓ Look for EDIT LAYERS button (pencil icon) in top right of map')
+      } else {
+        console.warn('⚠ Editable group not ready yet, adding field directly to map')
+        fieldLayer.addTo(mapRef.current)
+      }
       
       fieldBoundaryLayerRef.current = fieldLayer
 
       // Fit map to field bounds on initial load
-      mapRef.current.fitBounds(fieldLayer.getBounds())
+      if (mapRef.current) {
+        mapRef.current.fitBounds(fieldLayer.getBounds())
+      }
+    }, 100)
 
-      return () => {
-        fieldLayer.remove()
+    return () => {
+      clearTimeout(timer)
+      if (fieldBoundaryLayerRef.current) {
+        if (editableFieldGroupRef.current) {
+          editableFieldGroupRef.current.removeLayer(fieldBoundaryLayerRef.current)
+        }
+        fieldBoundaryLayerRef.current.remove()
         fieldBoundaryLayerRef.current = null
       }
     }
-  }, [fieldData, mode])
+  }, [fieldData, mode, mapInitialized, selectedCSBField])
 
   // Handle search query
   useEffect(() => {
@@ -705,78 +943,43 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     <div className="relative w-full h-full">
       <div ref={containerRef} className="absolute inset-0 w-full h-full" />
 
-      {/* Layer Controls for Analysis Mode */}
-      {mode === 'analysis' && onLayerToggle && (
-        <div 
-          className="absolute top-4 right-4 rounded-lg shadow-2xl z-[1000] overflow-hidden"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb' }}
-        >
-          <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-            <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-              <Layers className="w-4 h-4" style={{ color: '#16a34a' }} />
-              Map Layers
-            </h3>
-          </div>
-          <div className="p-4 space-y-3">
-            {mode === 'analysis' && onCSBLayerToggle && (
-              <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-                <input
-                  type="checkbox"
-                  checked={showCSBLayer}
-                  onChange={onCSBLayerToggle}
-                  className="w-4 h-4 rounded"
-                  style={{ accentColor: '#16a34a' }}
-                />
-                <span className="text-gray-700">Selected Field</span>
-              </label>
-            )}
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-              <input
-                type="checkbox"
-                checked={activeLayers.includes('soil-boundaries')}
-                onChange={() => onLayerToggle('soil-boundaries')}
-                className="w-4 h-4 rounded"
-                style={{ accentColor: '#16a34a' }}
-              />
-              <span className="text-gray-700">Soil Boundaries</span>
-            </label>
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-              <input
-                type="checkbox"
-                checked={activeLayers.includes('erosion-risk')}
-                onChange={() => onLayerToggle('erosion-risk')}
-                className="w-4 h-4 rounded"
-                style={{ accentColor: '#ea580c' }}
-              />
-              <span className="text-gray-700">Erosion Risk</span>
-            </label>
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
-              <input
-                type="checkbox"
-                checked={activeLayers.includes('drainage')}
-                onChange={() => onLayerToggle('drainage')}
-                className="w-4 h-4 rounded"
-                style={{ accentColor: '#0891b2' }}
-              />
-              <span className="text-gray-700">Drainage Classes</span>
-            </label>
-          </div>
-        </div>
-      )}
-
       {/* Layer Controls for Browse Mode */}
       {mode === 'browse' && onCSBLayerToggle && (
         <div 
-          className="absolute top-4 right-4 rounded-lg shadow-2xl z-[1000] overflow-hidden"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb', minWidth: '240px' }}
+          className="absolute top-4 rounded-lg shadow-2xl z-[1000] overflow-hidden transition-all duration-300"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+            border: '1px solid #e5e7eb',
+            right: layerPanelCollapsed ? '74px' : '74px',
+            width: layerPanelCollapsed ? '40px' : '240px'
+          }}
         >
-          <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-            <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
-              <Layers className="w-4 h-4" style={{ color: '#16a34a' }} />
-              Map Layers
-            </h3>
-          </div>
-          <div className="p-4 space-y-3">
+          {layerPanelCollapsed ? (
+            <button
+              onClick={() => setLayerPanelCollapsed(false)}
+              className="p-3 hover:bg-gray-50 transition-colors w-full"
+              title="Expand Layers"
+            >
+              <Layers className="w-4 h-4 mx-auto" style={{ color: '#16a34a' }} />
+            </button>
+          ) : (
+            <>
+              <div className="px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
+                  <Layers className="w-4 h-4" style={{ color: '#16a34a' }} />
+                  Map Layers
+                </h3>
+                <button
+                  onClick={() => setLayerPanelCollapsed(true)}
+                  className="p-1 hover:bg-gray-200 rounded transition-colors"
+                  title="Collapse"
+                >
+                  <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
             <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
               <input
                 type="checkbox"
@@ -839,6 +1042,8 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
               </div>
             </div>
           </div>
+            </>
+          )}
         </div>
       )}
 
@@ -885,7 +1090,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       {/* CSB Field Selection Confirmation */}
       {mode === 'browse' && selectedCSBField && (
         <div 
-          className="absolute bottom-4 left-4 rounded-lg shadow-2xl z-[1000]"
+          className="absolute top-4 left-4 rounded-lg shadow-2xl z-[1000]"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e5e7eb', minWidth: '400px', maxWidth: '450px' }}
         >
           <div className="px-4 py-3" style={{ backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0' }}>
@@ -897,10 +1102,18 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
               <button
                 onClick={() => {
                   setSelectedCSBField(null)
+                  setCustomFieldName('') // Clear custom field name
                   if (selectedFieldLayerRef.current && mapRef.current) {
                     mapRef.current.removeLayer(selectedFieldLayerRef.current)
                     selectedFieldLayerRef.current = null
                   }
+                  // Clear editable feature group
+                  if (editableFieldGroupRef.current) {
+                    editableFieldGroupRef.current.clearLayers()
+                  }
+                  // Clear vertex markers
+                  vertexMarkersRef.current.forEach(marker => marker.remove())
+                  vertexMarkersRef.current = []
                 }}
                 className="text-gray-500 hover:text-gray-700 text-xs font-medium"
               >
@@ -1005,11 +1218,29 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
               </div>
             )}
 
+            {/* Custom Field Name Input */}
+            <div className="mb-4">
+              <label htmlFor="fieldName" className="block text-xs font-semibold text-gray-700 mb-2">
+                Field Name (Optional)
+              </label>
+              <input
+                id="fieldName"
+                type="text"
+                value={customFieldName}
+                onChange={(e) => setCustomFieldName(e.target.value)}
+                placeholder={`Field ${selectedCSBField.clu_id || 'Unknown'}`}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                This name will be used to identify the field in analysis pages
+              </p>
+            </div>
+
             <button
               onClick={() => {
                 if (onFieldSelected) {
                   onFieldSelected({
-                    name: `Field ${selectedCSBField.clu_id || 'Unknown'}`,
+                    name: customFieldName.trim() || `Field ${selectedCSBField.clu_id || 'Unknown'}`,
                     area: selectedCSBField.acres || 0,
                     acres: selectedCSBField.acres || 0,
                     boundary: selectedCSBField.geometry,

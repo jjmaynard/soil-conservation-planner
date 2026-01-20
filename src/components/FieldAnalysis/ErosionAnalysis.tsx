@@ -1,44 +1,130 @@
-// Erosion Analysis Component - RUSLE2-based erosion risk
+// Erosion Analysis Component - RUSLE2-based erosion risk with real SSURGO and GEE data
 
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AlertTriangle, TrendingDown, TrendingUp } from 'lucide-react'
+import { AlertTriangle, TrendingDown, TrendingUp, Info } from 'lucide-react'
+import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
+import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
 
 interface ErosionAnalysisProps {
   fieldId: string
+  ssurgoData?: ProcessedFieldData | null
+  geeData?: EnhancedFieldData | null
 }
 
-export default function ErosionAnalysis({ fieldId }: ErosionAnalysisProps) {
+export default function ErosionAnalysis({ fieldId, ssurgoData, geeData }: ErosionAnalysisProps) {
   const [erosionData, setErosionData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadErosionData()
-  }, [fieldId])
+  }, [fieldId, ssurgoData, geeData])
 
   const loadErosionData = async () => {
     setLoading(true)
     try {
-      // Placeholder data - replace with API calculation
-      const mockData = {
-        avgErosion: 4.2, // tons/acre/year
-        maxErosion: 8.1,
-        tolerable: 5.0, // T value
-        riskLevel: 'Moderate',
-        areas: [
-          { risk: 'Low', acres: 18.5, percent: 40.8, color: '#dcfce7', textColor: '#166534' },
-          { risk: 'Moderate', acres: 20.3, percent: 44.8, color: '#fef3c7', textColor: '#92400e' },
-          { risk: 'High', acres: 6.5, percent: 14.4, color: '#fee2e2', textColor: '#991b1b' },
-        ],
-        factors: {
-          rainfall: 'High',
-          slope: 'Moderate',
-          soilK: 'Moderate',
-          coverManagement: 'Good',
+      // Prefer GEE comprehensive data if available
+      if (geeData?.geeAssessment) {
+        const geeErosion = geeData.geeAssessment.erosion_risk
+        const combined = geeData.combined.erosion
+        
+        setErosionData({
+          avgErosion: geeErosion.statistics.mean_risk * 10, // Convert to T/A/Y scale
+          maxErosion: geeErosion.statistics.max_risk * 10,
+          tolerable: 5.0,
+          riskLevel: combined.combined_risk,
+          areas: [
+            {
+              risk: 'Low',
+              acres: 0,
+              percent: 100 - combined.high_risk_area_pct,
+              color: '#dcfce7',
+              textColor: '#166534',
+            },
+            {
+              risk: 'High',
+              acres: 0,
+              percent: combined.high_risk_area_pct,
+              color: '#fee2e2',
+              textColor: '#991b1b',
+            },
+          ].filter(a => a.percent > 0),
+          factors: {
+            terrain: geeErosion.methodology.includes('slope') ? 'Analyzed' : 'Unknown',
+            soilK: geeErosion.methodology.includes('K-factor') ? 'Analyzed' : 'Unknown',
+            flowAccumulation: geeErosion.methodology.includes('SPI') ? 'High' : 'Unknown',
+            hydrologicGroup: geeErosion.methodology.includes('hydrologic') ? 'Analyzed' : 'Unknown',
+          },
+          dataSource: 'GEE Terrain Analysis',
+          visualization: geeErosion.visualization.tile_url,
+        })
+      } else if (ssurgoData?.erosion) {
+        // Use SSURGO data if available
+        setErosionData({
+          ...ssurgoData.erosion,
+          areas: ssurgoData.erosion.areas.filter(a => a.acres > 0),
+          dataSource: 'SSURGO Soil Data',
+        })
+      } else {
+        // Try session storage
+        const storedData = sessionStorage.getItem('comprehensiveFieldAssessment')
+        if (storedData) {
+          const parsed = JSON.parse(storedData) as EnhancedFieldData
+          if (parsed.geeAssessment) {
+            const geeErosion = parsed.geeAssessment.erosion_risk
+            const combined = parsed.combined.erosion
+            
+            setErosionData({
+              avgErosion: geeErosion.statistics.mean_risk * 10,
+              maxErosion: geeErosion.statistics.max_risk * 10,
+              tolerable: 5.0,
+              riskLevel: combined.combined_risk,
+              areas: [
+                {
+                  risk: 'Low',
+                  acres: 0,
+                  percent: 100 - combined.high_risk_area_pct,
+                  color: '#dcfce7',
+                  textColor: '#166534',
+                },
+                {
+                  risk: 'High',
+                  acres: 0,
+                  percent: combined.high_risk_area_pct,
+                  color: '#fee2e2',
+                  textColor: '#991b1b',
+                },
+              ].filter(a => a.percent > 0),
+              factors: {
+                terrain: 'Analyzed',
+                soilK: 'Analyzed',
+                flowAccumulation: 'High',
+                hydrologicGroup: 'Analyzed',
+              },
+              dataSource: 'GEE Terrain Analysis',
+            })
+            return
+          }
         }
+        
+        // Fallback to placeholder data
+        const mockData = {
+          avgErosion: 0,
+          maxErosion: 0,
+          tolerable: 5.0,
+          riskLevel: 'Unknown',
+          areas: [],
+          factors: {
+            terrain: 'Unknown',
+            soilK: 'Unknown',
+            flowAccumulation: 'Unknown',
+            hydrologicGroup: 'Unknown',
+          },
+          dataSource: 'No Data',
+        }
+        setErosionData(mockData)
       }
-      setErosionData(mockData)
     } catch (error) {
       console.error('Error loading erosion data:', error)
     } finally {
@@ -59,6 +145,16 @@ export default function ErosionAnalysis({ fieldId }: ErosionAnalysisProps) {
 
   return (
     <div className="space-y-4">
+      {/* Data Source Indicator */}
+      {erosionData.dataSource && (
+        <div className="flex items-start gap-2 p-2 rounded" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
+          <Info className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: '#2563eb' }} />
+          <p className="text-xs" style={{ color: '#1e40af' }}>
+            Data source: {erosionData.dataSource}
+          </p>
+        </div>
+      )}
+
       {/* Key Metrics */}
       <div className="grid grid-cols-2 gap-3">
         <div className="p-3 rounded-lg" style={{ backgroundColor: isAboveTolerable ? '#fee2e2' : '#dcfce7', border: `1px solid ${isAboveTolerable ? '#fecaca' : '#bbf7d0'}` }}>

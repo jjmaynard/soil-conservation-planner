@@ -1,50 +1,133 @@
-// Drainage Assessment Component
+// Drainage Assessment Component with SSURGO and GEE data
 
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Droplet, AlertCircle } from 'lucide-react'
+import { Droplet, AlertCircle, Info } from 'lucide-react'
+import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
+import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
 
 interface DrainageAssessmentProps {
   fieldId: string
+  ssurgoData?: ProcessedFieldData | null
+  geeData?: EnhancedFieldData | null
 }
 
-export default function DrainageAssessment({ fieldId }: DrainageAssessmentProps) {
+export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: DrainageAssessmentProps) {
   const [drainageData, setDrainageData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadDrainageData()
-  }, [fieldId])
+  }, [fieldId, ssurgoData, geeData])
 
   const loadDrainageData = async () => {
     setLoading(true)
     try {
-      // Placeholder data - replace with API call
-      const mockData = {
-        hydricSoils: 14.5, // acres
-        hydricPercent: 32.0,
-        wetlandAreas: [
-          { type: 'Palustrine Emergent', acres: 2.1 },
-        ],
-        drainageClasses: [
-          { class: 'Well Drained', acres: 18.5, percent: 40.8, color: '#10b981' },
-          { class: 'Moderately Well', acres: 12.3, percent: 27.2, color: '#60a5fa' },
-          { class: 'Somewhat Poorly', acres: 10.2, percent: 22.5, color: '#fbbf24' },
-          { class: 'Poorly Drained', acres: 4.3, percent: 9.5, color: '#f97316' },
-        ],
-        recommendations: [
-          'Consider tile drainage in poorly drained areas',
-          'Monitor drainage system performance annually',
-          'Maintain buffer zones around wetland areas',
-        ]
+      // Prefer GEE ponding data, supplement with SSURGO
+      const hasPondingData = geeData?.geeAssessment?.ponding
+      
+      if (hasPondingData || ssurgoData?.drainage) {
+        const pondingMetrics = geeData?.combined?.ponding
+        const twiStats = geeData?.geeAssessment?.ponding?.twi_stats
+        
+        setDrainageData({
+          // SSURGO drainage data
+          hydricSoils: ssurgoData?.drainage?.hydricSoils || 0,
+          hydricPercent: ssurgoData?.drainage?.hydricPercent || 0,
+          drainageClasses: ssurgoData?.drainage?.drainageClasses?.filter(dc => dc.acres > 0) || [],
+          
+          // GEE ponding data
+          depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
+          twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
+          highPondingRiskPct: pondingMetrics?.high_ponding_risk_pct || 0,
+          twiMean: twiStats?.mean || 0,
+          twiStd: twiStats?.std || 0,
+          twiMax: twiStats?.max || 0,
+          
+          hasGEEData: !!hasPondingData,
+          hasSSURGOData: !!ssurgoData?.drainage,
+          recommendations: generateRecommendations(ssurgoData?.drainage, pondingMetrics),
+        })
+      } else {
+        // Try session storage
+        const stored = sessionStorage.getItem('comprehensiveFieldAssessment')
+        if (stored) {
+          const parsed = JSON.parse(stored) as EnhancedFieldData
+          const pondingMetrics = parsed.combined?.ponding
+          const twiStats = parsed.geeAssessment?.ponding?.twi_stats
+          
+          setDrainageData({
+            hydricSoils: parsed.ssurgoData?.drainage?.hydricSoils || 0,
+            hydricPercent: parsed.ssurgoData?.drainage?.hydricPercent || 0,
+            drainageClasses: parsed.ssurgoData?.drainage?.drainageClasses?.filter(dc => dc.acres > 0) || [],
+            
+            depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
+            twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
+            highPondingRiskPct: pondingMetrics?.high_ponding_risk_pct || 0,
+            twiMean: twiStats?.mean || 0,
+            twiStd: twiStats?.std || 0,
+            twiMax: twiStats?.max || 0,
+            
+            hasGEEData: !!parsed.geeAssessment?.ponding,
+            hasSSURGOData: !!parsed.ssurgoData?.drainage,
+            recommendations: generateRecommendations(parsed.ssurgoData?.drainage, pondingMetrics),
+          })
+          return
+        }
+        
+        // Fallback to placeholder data
+        const mockData = {
+          hydricSoils: 0,
+          hydricPercent: 0,
+          drainageClasses: [],
+          depressionAreaPct: 0,
+          twiAbove12Pct: 0,
+          highPondingRiskPct: 0,
+          hasGEEData: false,
+          hasSSURGOData: false,
+          recommendations: ['No drainage data available. Draw or select a field to analyze.'],
+        }
+        setDrainageData(mockData)
       }
-      setDrainageData(mockData)
     } catch (error) {
       console.error('Error loading drainage data:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  function generateRecommendations(drainage: any, pondingMetrics: any): string[] {
+    const recs: string[] = []
+    
+    // GEE ponding data
+    if (pondingMetrics?.high_ponding_risk_pct > 10) {
+      recs.push(`${pondingMetrics.high_ponding_risk_pct.toFixed(1)}% of field has high ponding risk - priority for drainage improvement`)
+    }
+    
+    if (pondingMetrics?.twi_above_12_pct > 15) {
+      recs.push('Significant wet areas detected - consider tile drainage or water management')
+    }
+    
+    // SSURGO drainage class data
+    if (drainage?.hydricPercent > 20) {
+      recs.push('Significant hydric soils present - monitor for wetland compliance')
+    }
+    
+    const poorlyDrained = drainage?.drainageClasses?.find((dc: any) => 
+      dc.class.toLowerCase().includes('poorly')
+    )
+    if (poorlyDrained && poorlyDrained.percent > 15) {
+      recs.push('Consider tile drainage in poorly drained areas')
+    }
+    
+    if (recs.length === 0) {
+      recs.push('Drainage conditions are generally favorable')
+    }
+    
+    recs.push('Monitor drainage system performance annually')
+    
+    return recs
   }
 
   if (loading) {
@@ -58,6 +141,66 @@ export default function DrainageAssessment({ fieldId }: DrainageAssessmentProps)
 
   return (
     <div className="space-y-4">
+      {/* Data Source Indicator */}
+      {(drainageData.hasGEEData || drainageData.hasSSURGOData) && (
+        <div className="flex items-start gap-2 p-2 rounded" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
+          <Info className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: '#2563eb' }} />
+          <p className="text-xs" style={{ color: '#1e40af' }}>
+            {drainageData.hasGEEData && drainageData.hasSSURGOData 
+              ? 'GEE terrain analysis + SSURGO drainage classification'
+              : drainageData.hasGEEData 
+                ? 'GEE terrain-based ponding analysis'
+                : 'SSURGO soil drainage classification'}
+          </p>
+        </div>
+      )}
+
+      {/* GEE Ponding Metrics */}
+      {drainageData.hasGEEData && (
+        <>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="p-2 rounded-lg text-center" style={{ backgroundColor: drainageData.depressionAreaPct > 5 ? '#fee2e2' : '#f0fdf4', border: `1px solid ${drainageData.depressionAreaPct > 5 ? '#fecaca' : '#bbf7d0'}` }}>
+              <div className="text-xs text-gray-600 mb-1">Depressions</div>
+              <div className="text-lg font-bold" style={{ color: drainageData.depressionAreaPct > 5 ? '#991b1b' : '#166534' }}>
+                {drainageData.depressionAreaPct.toFixed(1)}%
+              </div>
+            </div>
+            <div className="p-2 rounded-lg text-center" style={{ backgroundColor: drainageData.twiAbove12Pct > 15 ? '#fef3c7' : '#f0fdf4', border: `1px solid ${drainageData.twiAbove12Pct > 15 ? '#fde68a' : '#bbf7d0'}` }}>
+              <div className="text-xs text-gray-600 mb-1">High TWI</div>
+              <div className="text-lg font-bold" style={{ color: drainageData.twiAbove12Pct > 15 ? '#92400e' : '#166534' }}>
+                {drainageData.twiAbove12Pct.toFixed(1)}%
+              </div>
+            </div>
+            <div className="p-2 rounded-lg text-center" style={{ backgroundColor: drainageData.highPondingRiskPct > 10 ? '#fee2e2' : '#f0fdf4', border: `1px solid ${drainageData.highPondingRiskPct > 10 ? '#fecaca' : '#bbf7d0'}` }}>
+              <div className="text-xs text-gray-600 mb-1">High Risk</div>
+              <div className="text-lg font-bold" style={{ color: drainageData.highPondingRiskPct > 10 ? '#991b1b' : '#166534' }}>
+                {drainageData.highPondingRiskPct.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+
+          {drainageData.twiMean > 0 && (
+            <div className="p-3 rounded-lg" style={{ backgroundColor: '#fafafa', border: '1px solid #e5e7eb' }}>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">TWI (Topographic Wetness Index)</h4>
+              <div className="space-y-1 text-xs text-gray-700">
+                <div className="flex justify-between">
+                  <span>Mean:</span>
+                  <span className="font-medium">{drainageData.twiMean.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Std Dev:</span>
+                  <span className="font-medium">{drainageData.twiStd.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Max:</span>
+                  <span className="font-medium">{drainageData.twiMax.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {/* Hydric Soils Alert */}
       {drainageData.hydricPercent > 20 && (
         <div className="flex items-start gap-2 p-3 rounded-lg" style={{ backgroundColor: '#ecfeff', border: '1px solid #a5f3fc' }}>
@@ -97,23 +240,6 @@ export default function DrainageAssessment({ fieldId }: DrainageAssessmentProps)
           ))}
         </div>
       </div>
-
-      {/* Wetland Areas */}
-      {drainageData.wetlandAreas.length > 0 && (
-        <div>
-          <h4 className="text-sm font-semibold text-gray-900 mb-2">Wetland Areas</h4>
-          <div className="space-y-2">
-            {drainageData.wetlandAreas.map((wetland: any, idx: number) => (
-              <div key={idx} className="p-2 rounded border border-gray-200 bg-white">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-gray-700">{wetland.type}</span>
-                  <span className="text-xs text-gray-600">{wetland.acres.toFixed(1)} acres</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Recommendations */}
       <div>
