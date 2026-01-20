@@ -305,18 +305,20 @@ See RUSLE_GEE_API_TROUBLESHOOTING.md for technical details.`
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F1E8' }}>
-      {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #4A7C9E 0%, #345770 100%)' }} className="text-white shadow-lg rounded-lg mb-6">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-              <Mountain className="h-8 w-8" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">RUSLE-EOS</h1>
-              <p className="text-sm" style={{ color: '#BDD7E5' }}>
-                RUSLE Earth Observation System - Satellite-Assisted Erosion Assessment
-              </p>
+      <div className="container mx-auto px-4">
+        {/* Header */}
+        <div style={{ background: 'linear-gradient(135deg, #4A7C9E 0%, #345770 100%)' }} className="text-white shadow-lg rounded-lg mb-6 pt-6">
+          <div className="px-6 py-4">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                <Mountain className="h-8 w-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">RUSLE-EOS</h1>
+                <p className="text-sm" style={{ color: '#BDD7E5' }}>
+                  RUSLE Earth Observation System - Satellite-Assisted Erosion Assessment
+                </p>
+              </div>
             </div>
           </div>
         </div>
