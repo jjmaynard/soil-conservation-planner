@@ -39,7 +39,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
           
           // GEE ponding data
           depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
-          twiAbove12Pct: twiStats?.twi_above_12_pct || 0,
+          twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
           highPondingRiskPct: pondingMetrics?.gee_ponding_risk_pct || 0,
           twiMean: twiStats?.mean || 0,
           twiStd: twiStats?.std || 0,
@@ -63,7 +63,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
             drainageClasses: parsed.ssurgoData?.drainage?.drainageClasses?.filter(dc => dc.acres > 0) || [],
             
             depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
-            twiAbove12Pct: twiStats?.twi_above_12_pct || 0,
+            twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
             highPondingRiskPct: pondingMetrics?.gee_ponding_risk_pct || 0,
             twiMean: twiStats?.mean || 0,
             twiStd: twiStats?.std || 0,
