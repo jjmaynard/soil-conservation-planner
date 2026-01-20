@@ -110,7 +110,7 @@ export default function SoilHealth() {
         {/* Header */}
         <div 
           className="mb-6 p-6 rounded-lg shadow-md"
-          style={{ background: 'linear-gradient(to right, var(--color-soil-health), var(--color-soil-health-dark), var(--color-moss-700))' }}
+          style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700), var(--color-forest-800))' }}
         >
           <div className="flex items-center mb-2">
             <div className="bg-white bg-opacity-20 rounded-lg p-2 mr-3">
