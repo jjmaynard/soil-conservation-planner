@@ -479,7 +479,14 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
             coordinates: [coordinates]
           }
           
-          const areaSquareMeters = turf.area(geoJSON)
+          // Wrap in Feature for turf.area
+          const feature = {
+            type: 'Feature',
+            geometry: geoJSON,
+            properties: {}
+          }
+          
+          const areaSquareMeters = turf.area(feature)
           const areaAcres = areaSquareMeters * 0.000247105
 
           console.log('Field boundary edited. New area:', areaAcres, 'acres')
