@@ -255,15 +255,20 @@ export default function FieldAnalysisLanding() {
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f9fafb' }}>
           {/* Header */}
           <div 
-            className="px-6 py-4 text-white flex-shrink-0 rounded-lg my-6"
+            className="px-6 py-4 text-white flex-shrink-0 rounded-lg shadow-lg my-6"
             style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
           >
             <div className="max-w-4xl mx-auto">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight">Field Analysis</h1>
-                <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
-                  Select your analysis goal to get started
-                </p>
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                  <MapIcon className="h-8 w-8" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">Field Analysis</h1>
+                  <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
+                    Select your analysis goal to get started
+                  </p>
+                </div>
               </div>
             </div>
           </div>
