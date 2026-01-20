@@ -475,13 +475,13 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
           coordinates.push(coordinates[0]) // Close the polygon
           
           const geoJSON = {
-            type: 'Polygon',
+            type: 'Polygon' as const,
             coordinates: [coordinates]
           }
           
           // Wrap in Feature for turf.area
           const feature = {
-            type: 'Feature',
+            type: 'Feature' as const,
             geometry: geoJSON,
             properties: {}
           }
