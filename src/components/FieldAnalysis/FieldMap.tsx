@@ -427,10 +427,6 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         editControlRef.current = editControl
         console.log('✅ EDIT CONTROL ADDED to map - pencil icon should appear when field is selected')
         console.log('💡 TIP: When editing, drag WHITE CIRCLES to move vertices, drag SMALL SQUARES between vertices to add new vertices')
-      } else if (!map.hasControl(editControlRef.current)) {
-        // Re-add control if it was removed
-        map.addControl(editControlRef.current)
-        console.log('✅ EDIT CONTROL RE-ADDED to map')
       }
 
       // Listen for edit mode start/stop to disable field selection clicks
