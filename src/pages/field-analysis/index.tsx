@@ -255,7 +255,7 @@ export default function FieldAnalysisLanding() {
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f9fafb' }}>
           {/* Header */}
           <div 
-            className="px-6 py-4 text-white flex-shrink-0"
+            className="px-6 py-4 text-white flex-shrink-0 rounded-lg my-6"
             style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
           >
             <div className="max-w-4xl mx-auto">
@@ -332,7 +332,7 @@ export default function FieldAnalysisLanding() {
 
         {/* Compact Header */}
         <div 
-          className="px-6 py-3 text-white flex-shrink-0"
+          className="px-6 py-3 text-white flex-shrink-0 rounded-lg my-6"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
         >
           <div className="flex items-center justify-between">

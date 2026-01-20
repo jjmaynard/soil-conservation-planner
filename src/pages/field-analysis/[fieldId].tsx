@@ -221,7 +221,7 @@ export default function FieldAnalysisDetail() {
       <div className="min-h-screen bg-gray-50 flex flex-col">
         {/* Header */}
         <div 
-          className="p-4 text-white flex-shrink-0"
+          className="p-4 text-white flex-shrink-0 rounded-lg my-6"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
         >
           <div className="flex items-center justify-between">

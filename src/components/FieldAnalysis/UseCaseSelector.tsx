@@ -137,15 +137,6 @@ export default function UseCaseSelector({ selectedUseCase, onSelect, onClose }: 
                 <span className="text-gray-500">
                   {useCase.tabs.length} {useCase.tabs.length === 1 ? 'analysis' : 'analyses'}
                 </span>
-                <span 
-                  className="font-medium px-2 py-1 rounded"
-                  style={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                    color: useCase.color
-                  }}
-                >
-                  ~{useCase.estimatedTime}
-                </span>
               </div>
             </button>
           )
