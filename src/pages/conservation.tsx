@@ -206,14 +206,18 @@ export default function ConservationPracticesModule() {
           className="text-white shadow-lg rounded-lg mb-6 pt-6"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-conservation-dark), var(--color-forest-800))' }}
         >
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="flex items-center gap-3 mb-2">
-              <Sprout className="h-8 w-8" />
-              <h1 className="text-3xl font-bold">Conservation Practices</h1>
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                <Sprout className="h-8 w-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Conservation Practices</h1>
+                <p className="text-sm text-conservation-light">
+                  NRCS Practice Standards Database • {allNRCSPractices.length} practices available
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-conservation-light">
-              NRCS Practice Standards Database • {allNRCSPractices.length} practices available
-            </p>
           </div>
         </div>
 

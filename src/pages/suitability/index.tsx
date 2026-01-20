@@ -118,14 +118,18 @@ export default function LandSuitabilityDashboard() {
             className="text-white shadow-lg rounded-lg my-6 mb-8"
             style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700), var(--color-forest-800))' }}
           >
-            <div className="px-6 py-6">
-              <div className="flex items-center gap-3 mb-2">
-                <BarChart3 className="h-8 w-8" />
-                <h1 className="text-3xl font-bold">Land Suitability Assessment</h1>
+            <div className="px-6 py-4">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                  <BarChart3 className="h-8 w-8" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">Land Suitability Assessment</h1>
+                  <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
+                    Evaluate soil suitability for various land uses including agriculture, construction, and recreation
+                  </p>
+                </div>
               </div>
-              <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
-                Evaluate soil suitability for various land uses including agriculture, construction, and recreation
-              </p>
             </div>
           </div>
 

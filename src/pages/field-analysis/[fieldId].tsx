@@ -234,7 +234,7 @@ export default function FieldAnalysisDetail() {
               </Link>
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold">{fieldData.name}</h1>
+                  <h1 className="text-2xl font-bold tracking-tight">{fieldData.name}</h1>
                   {selectedUseCase && (
                     <span 
                       className="text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1.5"

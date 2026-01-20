@@ -259,10 +259,12 @@ export default function FieldAnalysisLanding() {
             style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
           >
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-2xl font-bold">Field Analysis</h1>
-              <p className="text-sm mt-1" style={{ color: 'var(--color-forest-100)' }}>
-                Select your analysis goal to get started
-              </p>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">Field Analysis</h1>
+                <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
+                  Select your analysis goal to get started
+                </p>
+              </div>
             </div>
           </div>
 
@@ -338,7 +340,7 @@ export default function FieldAnalysisLanding() {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold">Field Analysis</h1>
+                <h1 className="text-xl font-bold tracking-tight">Field Analysis</h1>
                 {selectedUseCase && (
                   <span 
                     className="text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1.5"
