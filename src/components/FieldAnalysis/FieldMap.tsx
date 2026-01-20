@@ -401,7 +401,14 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       if (!editControlRef.current) {
         const editControl = new L.Control.Draw({
           position: 'topright',
-          draw: false, // Disable drawing new shapes
+          draw: {
+            polygon: false,
+            polyline: false,
+            rectangle: false,
+            circle: false,
+            marker: false,
+            circlemarker: false
+          },
           edit: {
             featureGroup: editableFieldGroupRef.current,
             edit: {
