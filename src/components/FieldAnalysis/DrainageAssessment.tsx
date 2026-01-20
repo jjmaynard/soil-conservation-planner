@@ -43,8 +43,8 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
           twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
           highPondingRiskPct: combinedDrainage?.gee_ponding_risk_pct || 0,
           twiMean: twiStats?.mean || 0,
-          twiStd: twiStats?.std || 0,
-          twiMax: twiStats?.max || 0,
+          twiP75: twiStats?.p75 || 0,
+          twiP90: twiStats?.p90 || 0,
           
           hasGEEData: !!hasPondingData,
           hasSSURGOData: !!ssurgoData?.drainage,
@@ -68,8 +68,8 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
             twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
             highPondingRiskPct: combinedDrainage?.gee_ponding_risk_pct || 0,
             twiMean: twiStats?.mean || 0,
-            twiStd: twiStats?.std || 0,
-            twiMax: twiStats?.max || 0,
+            twiP75: twiStats?.p75 || 0,
+            twiP90: twiStats?.p90 || 0,
             
             hasGEEData: !!parsed.geeAssessment?.ponding,
             hasSSURGOData: !!parsed.ssurgoData?.drainage,
