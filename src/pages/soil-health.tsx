@@ -153,7 +153,7 @@ export default function SoilHealth() {
         <div className="bg-surface p-4 rounded-lg shadow mb-6 flex flex-wrap items-center gap-4 border border-border">
           <button
             onClick={createNewAssessment}
-            className="btn-soil-health flex items-center px-4 py-2 text-white rounded-lg transition-colors shadow-md"
+            className="btn-conservation flex items-center px-4 py-2 text-white rounded-lg transition-colors shadow-md"
           >
             <Plus className="w-5 h-5 mr-2" />
             New Assessment
@@ -200,7 +200,7 @@ export default function SoilHealth() {
             {assessments.length === 0 && (
               <button
                 onClick={createNewAssessment}
-                className="btn-soil-health inline-flex items-center px-6 py-3 text-white rounded-lg shadow-md transition-colors hover:opacity-90"
+                className="btn-conservation inline-flex items-center px-6 py-3 text-white rounded-lg shadow-md transition-colors hover:opacity-90"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Create First Assessment
