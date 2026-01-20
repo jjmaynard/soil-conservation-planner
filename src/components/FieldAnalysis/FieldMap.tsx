@@ -419,9 +419,6 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                 fillOpacity: 0.3
               }
             },
-            poly: {
-              allowIntersection: false // Prevent self-intersecting polygons
-            },
             remove: false // Disable delete
           }
         })
