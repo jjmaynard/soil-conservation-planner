@@ -89,12 +89,12 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           icon: Mountain,
           description: 'Erosion prediction',
         },
-        {
-          path: '/tools/nutrient-calc',
-          label: 'Nutrient Calculator',
-          icon: FlaskConical,
-          description: 'Nutrient management',
-        },
+        // {
+        //   path: '/tools/nutrient-calc',
+        //   label: 'Nutrient Calculator',
+        //   icon: FlaskConical,
+        //   description: 'Nutrient management',
+        // },
       ],
     },
     {

@@ -203,10 +203,10 @@ export default function ConservationPracticesModule() {
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div 
-          className="text-white shadow-lg rounded-lg mb-6"
+          className="mb-6 rounded-lg shadow-lg text-white"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-conservation-dark), var(--color-forest-800))' }}
         >
-          <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="px-6 py-4">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
                 <Sprout className="h-8 w-8" />

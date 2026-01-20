@@ -67,16 +67,16 @@ export default function TechnicalToolsHub() {
       features: ['Landsat 8 + Sentinel-2', 'Multi-Scenario Analysis', 'Conservation Practice Effects', 'Field-Scale Assessment'],
       status: 'beta',
     },
-    {
-      id: 'nutrient-calc',
-      title: 'Nutrient Calculator',
-      description: 'Calculate nutrient management requirements and application rates. Assess fertilizer needs based on soil test results and crop requirements.',
-      icon: FlaskConical,
-      gradient: { from: '#87A096', to: '#748B81' },
-      path: '/tools/nutrient-calc',
-      features: ['Nutrient Balance', 'Application Rates', 'Soil Test Integration', 'Crop Requirements'],
-      status: 'planned',
-    },
+    // {
+    //   id: 'nutrient-calc',
+    //   title: 'Nutrient Calculator',
+    //   description: 'Calculate nutrient management requirements and application rates. Assess fertilizer needs based on soil test results and crop requirements.',
+    //   icon: FlaskConical,
+    //   gradient: { from: '#87A096', to: '#748B81' },
+    //   path: '/tools/nutrient-calc',
+    //   features: ['Nutrient Balance', 'Application Rates', 'Soil Test Integration', 'Crop Requirements'],
+    //   status: 'planned',
+    // },
   ]
 
   const getStatusBadge = (status: string) => {

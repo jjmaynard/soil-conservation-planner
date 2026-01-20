@@ -48,12 +48,12 @@ export default function ModuleGrid() {
     {
       id: 'tools',
       title: 'Technical Tools',
-      description: 'Access nutrient calculators and other technical assessment tools.',
+      description: 'Professional soil conservation and assessment tools for planning and analysis.',
       icon: FlaskConical,
       gradient: { from: '#87A096', to: '#748B81' },
       path: '/tools',
-      features: ['Nutrient calc', 'SCI calculator', 'Analysis tools'],
-      stats: { label: 'Tools', value: '5+' },
+      features: ['Conservation Practices', 'Soil Health & Land Suitability', 'Soil Erosion Modeling'],
+      stats: { label: 'Tools', value: '4' },
     },
     {
       id: 'conservation',
