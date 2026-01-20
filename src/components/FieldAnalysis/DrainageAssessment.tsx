@@ -28,7 +28,8 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
       const hasPondingData = geeData?.geeAssessment?.ponding
       
       if (hasPondingData || ssurgoData?.drainage) {
-        const pondingMetrics = geeData?.combined?.drainage
+        const combinedDrainage = geeData?.combined?.drainage
+        const pondingMetrics = geeData?.geeAssessment?.ponding?.ponding_metrics
         const twiStats = geeData?.geeAssessment?.ponding?.twi_stats
         
         setDrainageData({
@@ -40,21 +41,22 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
           // GEE ponding data
           depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
           twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
-          highPondingRiskPct: pondingMetrics?.gee_ponding_risk_pct || 0,
+          highPondingRiskPct: combinedDrainage?.gee_ponding_risk_pct || 0,
           twiMean: twiStats?.mean || 0,
           twiStd: twiStats?.std || 0,
           twiMax: twiStats?.max || 0,
           
           hasGEEData: !!hasPondingData,
           hasSSURGOData: !!ssurgoData?.drainage,
-          recommendations: generateRecommendations(ssurgoData?.drainage, pondingMetrics),
+          recommendations: generateRecommendations(ssurgoData?.drainage, combinedDrainage, pondingMetrics),
         })
       } else {
         // Try session storage
         const stored = sessionStorage.getItem('comprehensiveFieldAssessment')
         if (stored) {
           const parsed = JSON.parse(stored) as EnhancedFieldData
-          const pondingMetrics = parsed.combined?.drainage
+          const combinedDrainage = parsed.combined?.drainage
+          const pondingMetrics = parsed.geeAssessment?.ponding?.ponding_metrics
           const twiStats = parsed.geeAssessment?.ponding?.twi_stats
           
           setDrainageData({
@@ -64,14 +66,14 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
             
             depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
             twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
-            highPondingRiskPct: pondingMetrics?.gee_ponding_risk_pct || 0,
+            highPondingRiskPct: combinedDrainage?.gee_ponding_risk_pct || 0,
             twiMean: twiStats?.mean || 0,
             twiStd: twiStats?.std || 0,
             twiMax: twiStats?.max || 0,
             
             hasGEEData: !!parsed.geeAssessment?.ponding,
             hasSSURGOData: !!parsed.ssurgoData?.drainage,
-            recommendations: generateRecommendations(parsed.ssurgoData?.drainage, pondingMetrics),
+            recommendations: generateRecommendations(parsed.ssurgoData?.drainage, combinedDrainage, pondingMetrics),
           })
           return
         }
@@ -97,12 +99,12 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
     }
   }
 
-  function generateRecommendations(drainage: any, pondingMetrics: any): string[] {
+  function generateRecommendations(drainage: any, combinedDrainage: any, pondingMetrics: any): string[] {
     const recs: string[] = []
     
     // GEE ponding data
-    if (pondingMetrics?.gee_ponding_risk_pct > 10) {
-      recs.push(`${pondingMetrics.gee_ponding_risk_pct.toFixed(1)}% of field has high ponding risk - priority for drainage improvement`)
+    if (combinedDrainage?.gee_ponding_risk_pct > 10) {
+      recs.push(`${combinedDrainage.gee_ponding_risk_pct.toFixed(1)}% of field has high ponding risk - priority for drainage improvement`)
     }
     
     if (pondingMetrics?.twi_above_12_pct > 15) {
