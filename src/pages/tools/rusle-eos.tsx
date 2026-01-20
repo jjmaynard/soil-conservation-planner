@@ -306,7 +306,7 @@ See RUSLE_GEE_API_TROUBLESHOOTING.md for technical details.`
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F5F1E8' }}>
       {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #4A7C9E 0%, #345770 100%)' }} className="text-white shadow-lg">
+      <div style={{ background: 'linear-gradient(135deg, #4A7C9E 0%, #345770 100%)' }} className="text-white shadow-lg rounded-lg my-6">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">

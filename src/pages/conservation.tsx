@@ -203,7 +203,7 @@ export default function ConservationPracticesModule() {
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div 
-          className="text-white shadow-lg"
+          className="text-white shadow-lg rounded-lg my-6"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-conservation-dark), var(--color-forest-800))' }}
         >
           <div className="max-w-7xl mx-auto px-4 py-6">
