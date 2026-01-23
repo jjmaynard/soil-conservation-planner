@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as LucideIcons from 'lucide-react';
 import { Clock, Star, Calendar } from 'lucide-react';
 import { getRecentUseCases, getFavoriteUseCases, getRecommendedUseCases } from '@/lib/use-case-utils';
-import { getUseCase } from '@/config/use-cases';
+import { getUseCase, type UseCase } from '@/config/use-cases';
 import { getLandType } from '@/config/land-types';
 
 interface QuickStartProps {
