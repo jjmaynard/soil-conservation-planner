@@ -168,7 +168,7 @@ function UseCaseCard({
       {/* Objectives */}
       <div className="mb-4">
         <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
-          What you'll get:
+          What you&apos;ll get:
         </p>
         <ul className="space-y-1">
           {useCase.objectives.map((objective, idx) => (

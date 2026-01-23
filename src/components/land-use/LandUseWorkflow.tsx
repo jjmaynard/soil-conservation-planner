@@ -219,7 +219,7 @@ export function LandUseWorkflow({ onAnalysisStart }: LandUseWorkflowProps) {
                   </p>
                   <div className="border-t border-blue-200 pt-4 mt-4">
                     <p className="text-sm text-gray-600 mb-4">
-                      For this demo, click "Continue with Demo Field" to use a sample field, 
+                      For this demo, click &quot;Continue with Demo Field&quot; to use a sample field, 
                       or use the map tools to draw your own field boundary.
                     </p>
                     <button

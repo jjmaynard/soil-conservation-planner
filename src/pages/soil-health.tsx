@@ -107,7 +107,7 @@ export default function SoilHealth() {
       </Head>
 
       <div className="h-full flex flex-col overflow-auto">
-        {/* Header */
+        {/* Header */}
         <div 
           className="mb-6 rounded-lg shadow-lg text-white"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700), var(--color-forest-800))' }}

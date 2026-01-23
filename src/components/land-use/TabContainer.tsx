@@ -46,14 +46,14 @@ export function TabContainer({
     if (activeTabId && !tabData[activeTabId]) {
       loadTabData(activeTabId);
     }
-  }, [activeTabId]);
+  }, [activeTabId, tabData, loadTabData]);
 
   // Check if all tabs are complete
   useEffect(() => {
     if (completedTabIds.length === tabs.length && onAllTabsComplete) {
       onAllTabsComplete();
     }
-  }, [completedTabIds, tabs.length]);
+  }, [completedTabIds, tabs.length, onAllTabsComplete]);
 
   /**
    * Load data for a specific tab
