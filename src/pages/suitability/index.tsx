@@ -107,7 +107,7 @@ export default function LandSuitabilityDashboard() {
   return (
     <>
       <Head>
-        <title>Land Suitability Assessment - Soil Conservation Explorer</title>
+        <title>Land Suitability Assessment - Soil Interpretation Engine</title>
         <meta name="description" content="Comprehensive soil suitability assessments for agricultural, residential, and engineering applications" />
       </Head>
 

@@ -102,12 +102,12 @@ export default function SoilHealth() {
   return (
     <>
       <Head>
-        <title>Soil Health Assessment - Soil Conservation Explorer</title>
+        <title>Soil Health Assessment - Soil Interpretation Engine</title>
         <meta name="description" content="NRCS In-Field Soil Health Assessment Tool" />
       </Head>
 
       <div className="h-full flex flex-col overflow-auto">
-        {/* Header */}
+        {/* Header */
         <div 
           className="mb-6 rounded-lg shadow-lg text-white"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700), var(--color-forest-800))' }}

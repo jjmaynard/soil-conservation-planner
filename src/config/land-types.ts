@@ -6,8 +6,9 @@ export interface LandType {
   name: string;
   display_name: string;
   description: string;
-  icon: string;
+  icon: string; // Lucide icon name
   color: string;
+  gradient: { from: string; to: string };
   sort_order: number;
   is_active: boolean;
 }
@@ -18,8 +19,9 @@ export const LAND_TYPES: LandType[] = [
     name: 'Cropland',
     display_name: 'Cropland & Agriculture',
     description: 'Agricultural fields for crop production',
-    icon: '🌾',
-    color: 'green',
+    icon: 'Wheat',
+    color: '#6B7F39',
+    gradient: { from: '#6B7F39', to: '#5C6F32' },
     sort_order: 1,
     is_active: true
   },
@@ -28,8 +30,9 @@ export const LAND_TYPES: LandType[] = [
     name: 'Forestry',
     display_name: 'Forestry & Timber',
     description: 'Forest lands for timber production and management',
-    icon: '🌲',
-    color: 'emerald',
+    icon: 'Trees',
+    color: '#5C8D5A',
+    gradient: { from: '#5C8D5A', to: '#4F7A4D' },
     sort_order: 2,
     is_active: true
   },
@@ -38,8 +41,9 @@ export const LAND_TYPES: LandType[] = [
     name: 'Rangeland',
     display_name: 'Rangeland & Pasture',
     description: 'Grazing lands and pasture for livestock',
-    icon: '🐄',
-    color: 'lime',
+    icon: 'Mountain',
+    color: '#8B7AA8',
+    gradient: { from: '#8B7AA8', to: '#7A6B92' },
     sort_order: 3,
     is_active: true
   },
@@ -48,8 +52,9 @@ export const LAND_TYPES: LandType[] = [
     name: 'Wetland',
     display_name: 'Wetlands',
     description: 'Wetland ecosystems and hydric soils',
-    icon: '💧',
-    color: 'blue',
+    icon: 'Droplets',
+    color: '#4A90E2',
+    gradient: { from: '#4A90E2', to: '#3A7BC8' },
     sort_order: 4,
     is_active: true
   },
@@ -58,8 +63,9 @@ export const LAND_TYPES: LandType[] = [
     name: 'Developed',
     display_name: 'Developed & Urban',
     description: 'Urban and developed lands',
-    icon: '🏘️',
-    color: 'slate',
+    icon: 'Building2',
+    color: '#64748B',
+    gradient: { from: '#64748B', to: '#475569' },
     sort_order: 5,
     is_active: true
   },
@@ -68,8 +74,9 @@ export const LAND_TYPES: LandType[] = [
     name: 'Natural',
     display_name: 'Natural Areas & Conservation',
     description: 'Conservation and natural areas',
-    icon: '🦋',
-    color: 'teal',
+    icon: 'Sprout',
+    color: '#87A096',
+    gradient: { from: '#87A096', to: '#748B81' },
     sort_order: 6,
     is_active: true
   }

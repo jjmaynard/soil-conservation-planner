@@ -99,7 +99,7 @@ export default function TechnicalToolsHub() {
   return (
     <>
       <Head>
-        <title>Technical Tools - Soil Conservation Explorer</title>
+        <title>Technical Tools - Soil Interpretation Engine</title>
         <meta
           name="description"
           content="Professional technical tools for soil conservation planning and assessment"
@@ -120,7 +120,7 @@ export default function TechnicalToolsHub() {
               </div>
               
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Soil Conservation Toolkit
+                Soil Interpretation Toolkit
               </h1>
               
               <p className="text-xl mb-6 opacity-90">
@@ -229,7 +229,7 @@ export default function TechnicalToolsHub() {
             </h2>
             <div className="prose prose-lg" style={{ color: '#475569' }}>
               <p className="mb-4">
-                The Soil Conservation Toolkit provides user-friendly web tools for soil conservation planning, 
+                The Soil Interpretation Toolkit provides user-friendly web tools for soil conservation planning, 
                 assessment, and analysis. Each tool is built on scientific principles and NRCS standards, 
                 integrating real-time satellite data, comprehensive soil databases, and advanced analysis capabilities.
               </p>

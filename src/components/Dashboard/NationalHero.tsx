@@ -49,13 +49,12 @@ export default function NationalHero() {
 
           {/* Main Headline */}
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            Soil Conservation Explorer
+            Soil Interpretation Engine
           </h1>
 
           {/* Subheading */}
           <p className="text-xl md:text-2xl mb-8 leading-relaxed" style={{ color: '#E2EBE1' }}>
-            Comprehensive soil assessment tools for agricultural lands
-            across the United States
+            Comprehensive soil interpretation and assessment tools for U.S. lands
           </p>
 
           {/* Call-to-Action Buttons */}

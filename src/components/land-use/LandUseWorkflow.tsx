@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { LandTypeSelector } from './LandTypeSelector';
 import { UseCaseSelector } from './UseCaseSelector';
 import { UseCaseQuickStart } from './UseCaseQuickStart';
+import { TabContainer } from './TabContainer';
 import { getCurrentSession, saveCurrentSession, createNewSession } from '@/lib/storage/browser-storage';
 import { getLandType } from '@/config/land-types';
+import { getUseCase } from '@/config/use-cases';
+import { getTabsForUseCase } from '@/config/tab-configs';
 
 type WorkflowStep = 'land-type' | 'use-case' | 'field-selection' | 'analysis';
 
@@ -15,6 +18,8 @@ export function LandUseWorkflow({ onAnalysisStart }: LandUseWorkflowProps) {
   const [currentStep, setCurrentStep] = useState<WorkflowStep>('land-type');
   const [selectedLandType, setSelectedLandType] = useState<string | null>(null);
   const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null);
+  const [fieldGeometry, setFieldGeometry] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
   const [showQuickStart, setShowQuickStart] = useState(true);
 
   // Handle quick start selection
@@ -56,18 +61,27 @@ export function LandUseWorkflow({ onAnalysisStart }: LandUseWorkflowProps) {
       addRecentUseCase(useCaseId, selectedLandType);
     }
     
-    // Create new analysis session (field geometry will be added in Phase 4)
-    if (selectedLandType) {
-      const session = createNewSession(selectedLandType, useCaseId, null);
-      saveCurrentSession(session);
+    // Move to field selection step
+    setCurrentStep('field-selection');
+  };
+
+  // Handle field selection completion
+  const handleFieldSelect = (geometry: any) => {
+    setFieldGeometry(geometry);
+    
+    // Create new analysis session with field geometry
+    if (selectedLandType && selectedUseCase) {
+      const newSession = createNewSession(selectedLandType, selectedUseCase, geometry);
+      saveCurrentSession(newSession);
+      setSession(newSession);
       
       // Notify parent component
       if (onAnalysisStart) {
-        onAnalysisStart(session);
+        onAnalysisStart(newSession);
       }
       
-      // Advance to field selection
-      setCurrentStep('field-selection');
+      // Now move to analysis
+      setCurrentStep('analysis');
     }
   };
 
@@ -85,8 +99,33 @@ export function LandUseWorkflow({ onAnalysisStart }: LandUseWorkflowProps) {
     setCurrentStep('land-type');
     setSelectedLandType(null);
     setSelectedUseCase(null);
+    setFieldGeometry(null);
+    setSession(null);
     setShowQuickStart(true);
   };
+
+  // Handle tab completion
+  const handleTabComplete = (tabId: string, data: any) => {
+    console.log(`Tab ${tabId} completed with data:`, data);
+    // Update session with completed tab
+    if (session) {
+      const updatedSession = {
+        ...session,
+        completed_tabs: [...(session.completed_tabs || []), tabId]
+      };
+      saveCurrentSession(updatedSession);
+      setSession(updatedSession);
+    }
+  };
+
+  // Handle all tabs complete
+  const handleAllTabsComplete = () => {
+    console.log('All tabs completed!');
+    // Could show a completion screen or export results
+  };
+
+  // Get tabs for current use case
+  const tabs = selectedUseCase ? getTabsForUseCase(getUseCase(selectedUseCase)?.tab_ids || []) : [];
 
   return (
     <div className="land-use-workflow min-h-screen bg-gray-50 py-8 px-4">
@@ -161,34 +200,69 @@ export function LandUseWorkflow({ onAnalysisStart }: LandUseWorkflowProps) {
           {currentStep === 'field-selection' && (
             <div className="text-center py-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Field Selection
+                Select Your Field or Area
               </h2>
               <p className="text-gray-600 mb-8">
-                This step will be implemented in Phase 4
+                Draw or select the field you want to analyze
               </p>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-500">
-                  Selected Land Type: <span className="font-semibold">
-                    {getLandType(selectedLandType!)?.display_name}
-                  </span>
-                </p>
-                <p className="text-sm text-gray-500">
-                  Selected Use Case ID: <span className="font-semibold">
-                    {selectedUseCase}
-                  </span>
-                </p>
+              <div className="space-y-6 max-w-2xl mx-auto">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <p className="text-sm text-gray-700 mb-4">
+                    Selected Land Type: <span className="font-semibold text-blue-900">
+                      {getLandType(selectedLandType!)?.display_name}
+                    </span>
+                  </p>
+                  <p className="text-sm text-gray-700 mb-4">
+                    Use Case: <span className="font-semibold text-blue-900">
+                      {getUseCase(selectedUseCase!)?.short_name}
+                    </span>
+                  </p>
+                  <div className="border-t border-blue-200 pt-4 mt-4">
+                    <p className="text-sm text-gray-600 mb-4">
+                      For this demo, click "Continue with Demo Field" to use a sample field, 
+                      or use the map tools to draw your own field boundary.
+                    </p>
+                    <button
+                      onClick={() => {
+                        // Create demo field geometry
+                        const demoGeometry = {
+                          type: 'Feature',
+                          properties: { name: 'Demo Field', acres: 40 },
+                          geometry: {
+                            type: 'Polygon',
+                            coordinates: [[
+                              [-93.5, 42.0],
+                              [-93.5, 42.01],
+                              [-93.49, 42.01],
+                              [-93.49, 42.0],
+                              [-93.5, 42.0]
+                            ]]
+                          }
+                        };
+                        handleFieldSelect(demoGeometry);
+                      }}
+                      className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                    >
+                      Continue with Demo Field (40 acres)
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="text-sm text-gray-500">
+                  <p>🗺️ Interactive field selection with map drawing tools coming in Phase 4</p>
+                </div>
               </div>
             </div>
           )}
 
-          {currentStep === 'analysis' && (
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Analysis View
-              </h2>
-              <p className="text-gray-600">
-                This step will be implemented in Phase 5-6
-              </p>
+          {currentStep === 'analysis' && session && (
+            <div className="h-[calc(100vh-300px)]">
+              <TabContainer
+                session={session}
+                tabs={tabs}
+                onTabComplete={handleTabComplete}
+                onAllTabsComplete={handleAllTabsComplete}
+              />
             </div>
           )}
         </div>

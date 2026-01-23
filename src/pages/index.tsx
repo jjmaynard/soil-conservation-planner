@@ -1,4 +1,4 @@
-// Soil Conservation Explorer - Dashboard
+// Soil Interpretation Engine - Dashboard
 
 'use client'
 
@@ -12,7 +12,7 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Soil Conservation Explorer - Dashboard</title>
+        <title>Soil Interpretation Engine - Dashboard</title>
         <meta
           name="description"
           content="Professional web application for visualizing soil properties and conservation planning"

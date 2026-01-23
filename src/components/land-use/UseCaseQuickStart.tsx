@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import * as LucideIcons from 'lucide-react';
+import { Clock, Star, Calendar } from 'lucide-react';
 import { getRecentUseCases, getFavoriteUseCases, getRecommendedUseCases } from '@/lib/use-case-utils';
 import { getUseCase } from '@/config/use-cases';
 import { getLandType } from '@/config/land-types';
@@ -8,8 +10,21 @@ interface QuickStartProps {
 }
 
 export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
-  const recentUseCases = getRecentUseCases().slice(0, 4);
-  const allFavorites = getFavoriteUseCases();
+  const [mounted, setMounted] = useState(false);
+  const [recentUseCases, setRecentUseCases] = useState<any[]>([]);
+  const [allFavorites, setAllFavorites] = useState<any[]>([]);
+
+  // Only access localStorage on the client
+  useEffect(() => {
+    setMounted(true);
+    setRecentUseCases(getRecentUseCases().slice(0, 4));
+    setAllFavorites(getFavoriteUseCases());
+  }, []);
+
+  // Don't render anything until mounted (prevents hydration mismatch)
+  if (!mounted) {
+    return null;
+  }
   
   // Group favorites by land type
   const favoritesByLandType = allFavorites.reduce((acc, uc) => {
@@ -39,9 +54,7 @@ export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
       {recentUseCases.length > 0 && (
         <div className="mb-6">
           <h4 className="text-sm font-semibold text-gray-700 uppercase mb-3 flex items-center">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Clock className="w-4 h-4 mr-2" />
             Recent Analyses
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -51,6 +64,8 @@ export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
               
               if (!useCase || !landType) return null;
               
+              const LandIcon = (LucideIcons as any)[landType.icon] || LucideIcons.Sprout;
+              
               return (
                 <button
                   key={`recent-${recent.use_case_id}-${recent.timestamp}`}
@@ -58,8 +73,16 @@ export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
                   className="quick-start-card p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 hover:shadow-md transition-all text-left group"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <span className="text-2xl">{landType.icon}</span>
-                    <span className="text-xs text-gray-400">
+                    <div 
+                      className="w-8 h-8 rounded flex items-center justify-center"
+                      style={{
+                        background: `linear-gradient(135deg, ${landType.gradient.from}, ${landType.gradient.to})`
+                      }}
+                    >
+                      <LandIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-xs text-gray-400 flex items-center">
+                      <Calendar className="w-3 h-3 mr-1" />
                       {new Date(recent.timestamp).toLocaleDateString()}
                     </span>
                   </div>
@@ -70,9 +93,7 @@ export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
                     {landType.display_name}
                   </p>
                   <div className="mt-2 flex items-center text-xs text-gray-400">
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <Clock className="w-3 h-3 mr-1" />
                     {useCase.estimated_time}
                   </div>
                 </button>
@@ -86,19 +107,26 @@ export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
       {Object.keys(favoritesByLandType).length > 0 && (
         <div>
           <h4 className="text-sm font-semibold text-gray-700 uppercase mb-3 flex items-center">
-            <svg className="w-4 h-4 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
+            <Star className="w-4 h-4 mr-2 text-yellow-500" fill="currentColor" />
             Favorites
           </h4>
           {Object.entries(favoritesByLandType).map(([landTypeId, useCases]) => {
             const landType = getLandType(landTypeId);
             if (!landType) return null;
             
+            const LandIcon = (LucideIcons as any)[landType.icon] || LucideIcons.Sprout;
+            
             return (
               <div key={landTypeId} className="mb-4">
                 <h5 className="text-xs font-medium text-gray-600 mb-2 flex items-center">
-                  <span className="mr-2">{landType.icon}</span>
+                  <div 
+                    className="w-6 h-6 rounded flex items-center justify-center mr-2"
+                    style={{
+                      background: `linear-gradient(135deg, ${landType.gradient.from}, ${landType.gradient.to})`
+                    }}
+                  >
+                    <LandIcon className="w-4 h-4 text-white" />
+                  </div>
                   {landType.display_name}
                 </h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -112,14 +140,10 @@ export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
                         <h6 className="font-semibold text-gray-900 text-sm group-hover:text-yellow-700">
                           {useCase.short_name}
                         </h6>
-                        <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                        </svg>
+                        <Star className="w-4 h-4 text-yellow-500" fill="currentColor" />
                       </div>
                       <div className="flex items-center text-xs text-gray-500">
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <Clock className="w-3 h-3 mr-1" />
                         {useCase.estimated_time}
                         <span className="mx-2">•</span>
                         {useCase.tab_ids.length} tabs

@@ -49,12 +49,12 @@ export default function Header({ className = '' }: HeaderProps) {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Soil Conservation Explorer
+                Soil Interpretation Engine
               </h1>
               <p 
                 className="font-medium" 
                 style={{ 
-                  color: 'rgba(255, 255, 255, 0.85)',
+                  color: 'rgba(255, 255, 255, 0.85)'
                   fontSize: '13px',
                   marginTop: '2px',
                 }}

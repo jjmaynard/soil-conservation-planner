@@ -1,4 +1,4 @@
-// Soil Conservation Explorer - Interactive Soil Map
+// Soil Interpretation Engine - Interactive Soil Map
 
 'use client'
 
@@ -201,7 +201,7 @@ export default function SoilMapPage() {
   return (
     <>
       <Head>
-        <title>Interactive Soil Map - Soil Conservation Explorer</title>
+        <title>Interactive Soil Map - Soil Interpretation Engine</title>
         <meta
           name="description"
           content="Interactive SSURGO soil mapping tool with layer controls and property analysis"

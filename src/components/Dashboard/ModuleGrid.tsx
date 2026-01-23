@@ -114,10 +114,10 @@ export default function ModuleGrid() {
     <section className="container mx-auto px-4 py-12 md:py-16">
       <div className="mb-10">
         <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: '#3E4A4A' }}>
-          Planning & Assessment Tools
+          Interpretation and Assessment Tools
         </h2>
         <p className="text-lg" style={{ color: '#5C6C6C' }}>
-          Comprehensive suite of soil conservation planning and assessment tools
+          Comprehensive suite of soil interpretation and assessment tools
         </p>
       </div>
 
