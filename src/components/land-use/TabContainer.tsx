@@ -46,7 +46,8 @@ export function TabContainer({
     if (activeTabId && !tabData[activeTabId]) {
       loadTabData(activeTabId);
     }
-  }, [activeTabId, tabData, loadTabData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTabId, tabData]);
 
   // Check if all tabs are complete
   useEffect(() => {
