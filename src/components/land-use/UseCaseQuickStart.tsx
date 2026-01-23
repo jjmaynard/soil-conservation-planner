@@ -115,6 +115,7 @@ export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
             if (!landType) return null;
             
             const LandIcon = (LucideIcons as any)[landType.icon] || LucideIcons.Sprout;
+            const useCasesList = useCases as UseCase[];
             
             return (
               <div key={landTypeId} className="mb-4">
@@ -130,7 +131,7 @@ export function UseCaseQuickStart({ onStartAnalysis }: QuickStartProps) {
                   {landType.display_name}
                 </h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {useCases.map((useCase) => (
+                  {useCasesList.map((useCase) => (
                     <button
                       key={`fav-${useCase.id}`}
                       onClick={() => onStartAnalysis(landTypeId, useCase.id)}
