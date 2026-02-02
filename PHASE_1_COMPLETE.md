@@ -1,6 +1,6 @@
 # Phase 1 Implementation Complete ✅
 
-## GEE API v2.1.0 Foundation - Soil Interpretation Engine
+## GEE API v2.1.0 Foundation - Soil Interpretation Explorer
 
 **Implementation Date:** January 7, 2026  
 **Status:** ✅ All Phase 1 Tasks Completed  

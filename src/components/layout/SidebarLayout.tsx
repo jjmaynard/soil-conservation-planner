@@ -157,7 +157,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                     <Sprout className="w-5 h-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="font-bold text-sm leading-tight">Soil Interpretation Engine</span>
+                    <span className="font-bold text-sm leading-tight">Soil Interpretation Explorer</span>
                     <span className="text-xs leading-tight" style={{ color: 'var(--color-forest-200)' }}>
                       USDA-NRCS
                     </span>
@@ -365,7 +365,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
             <div className="rounded-lg p-1.5 bg-forest-500">
               <Sprout className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-sm text-text">Soil Interpretation Engine</span>
+            <span className="font-bold text-sm text-text">Soil Interpretation Explorer</span>
           </Link>
 
           <div className="w-10" /> {/* Spacer for centering */}

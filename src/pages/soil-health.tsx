@@ -102,7 +102,7 @@ export default function SoilHealth() {
   return (
     <>
       <Head>
-        <title>Soil Health Assessment - Soil Interpretation Engine</title>
+        <title>Soil Health Assessment - Soil Interpretation Explorer</title>
         <meta name="description" content="NRCS In-Field Soil Health Assessment Tool" />
       </Head>
 

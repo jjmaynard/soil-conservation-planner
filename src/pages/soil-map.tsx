@@ -201,7 +201,7 @@ export default function SoilMapPage() {
   return (
     <>
       <Head>
-        <title>Interactive Soil Map - Soil Interpretation Engine</title>
+        <title>Interactive Soil Map - Soil Interpretation Explorer</title>
         <meta
           name="description"
           content="Interactive SSURGO soil mapping tool with layer controls and property analysis"

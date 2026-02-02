@@ -1,6 +1,6 @@
 # Phase 2 Implementation Complete ✅
 
-## RUSLE-EOS Module - Soil Interpretation Engine
+## RUSLE-EOS Module - Soil Interpretation Explorer
 
 **Implementation Date:** January 7, 2026  
 **Status:** ✅ All Phase 2 Tasks Completed  

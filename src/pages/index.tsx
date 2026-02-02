@@ -12,7 +12,7 @@ export default function Dashboard() {
   return (
     <>
       <Head>
-        <title>Soil Interpretation Engine - Dashboard</title>
+        <title>Soil Interpretation Explorer - Dashboard</title>
         <meta
           name="description"
           content="Professional web application for visualizing soil properties and conservation planning"

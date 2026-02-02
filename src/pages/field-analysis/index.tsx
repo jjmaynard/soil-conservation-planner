@@ -243,7 +243,7 @@ export default function FieldAnalysisLanding() {
   return (
     <>
       <Head>
-        <title>Field Analysis - Soil Interpretation Engine</title>
+        <title>Field Analysis - Soil Interpretation Explorer</title>
         <meta 
           name="description" 
           content="Comprehensive field-level soil assessment and analysis" 

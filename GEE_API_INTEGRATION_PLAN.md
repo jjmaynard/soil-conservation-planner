@@ -1,5 +1,5 @@
 # GEE API Integration Plan
-## Soil Interpretation Engine - Google Earth Engine API Integration Strategy
+## Soil Interpretation Explorer - Google Earth Engine API Integration Strategy
 
 **Date:** January 7, 2026  
 **API Version:** v2.1.0  
@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-This document outlines a comprehensive integration strategy for connecting the GEE (Google Earth Engine) API v2.1.0 with the Soil Interpretation Engine app. The API provides **unified server-side RUSLE calculations**, CSB field boundaries, terrain analysis, vegetation monitoring (NDVI), drought assessment, resource concerns, and comprehensive climate data.
+This document outlines a comprehensive integration strategy for connecting the GEE (Google Earth Engine) API v2.1.0 with the Soil Interpretation Explorer app. The API provides **unified server-side RUSLE calculations**, CSB field boundaries, terrain analysis, vegetation monitoring (NDVI), drought assessment, resource concerns, and comprehensive climate data.
 
 ### Key Architecture Shift (v2.1.0)
 

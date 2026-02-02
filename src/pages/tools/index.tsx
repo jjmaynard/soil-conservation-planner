@@ -99,7 +99,7 @@ export default function TechnicalToolsHub() {
   return (
     <>
       <Head>
-        <title>Technical Tools - Soil Interpretation Engine</title>
+        <title>Technical Tools - Soil Interpretation Explorer</title>
         <meta
           name="description"
           content="Professional technical tools for soil conservation planning and assessment"

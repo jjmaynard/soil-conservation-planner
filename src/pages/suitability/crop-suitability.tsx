@@ -78,7 +78,7 @@ export default function CropSuitabilityPage() {
   return (
     <>
       <Head>
-        <title>Crop Suitability Assessment - Soil Interpretation Engine</title>
+        <title>Crop Suitability Assessment - Soil Interpretation Explorer</title>
         <meta name="description" content="Evaluate soil quality and suitability for crop production using GAEZ methodology" />
       </Head>
 

@@ -49,7 +49,7 @@ export default function NationalHero() {
 
           {/* Main Headline */}
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-            Soil Interpretation Engine
+            Soil Interpretation Explorer
           </h1>
 
           {/* Subheading */}

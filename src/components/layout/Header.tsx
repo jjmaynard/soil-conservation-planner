@@ -49,7 +49,7 @@ export default function Header({ className = '' }: HeaderProps) {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Soil Interpretation Engine
+                Soil Interpretation Explorer
               </h1>
               <p 
                 className="font-medium" 
