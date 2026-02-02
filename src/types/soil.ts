@@ -86,6 +86,7 @@ export interface SSURGOComponent {
   // Other limitations
   drainagecl?: string
   hydricrating?: string
+  hydgrp?: string
   tfact?: number
   wei?: string
   weg?: string
