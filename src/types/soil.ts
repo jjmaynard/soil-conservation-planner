@@ -107,6 +107,9 @@ export interface SSURGOComponent {
   // Ecological Site
   ecoclassid?: string
   ecoclassname?: string
+  // Agricultural Productivity
+  cropprodindex?: number
+  rsprod_r?: number
   // Hydrologic features
   pondfreqcl?: string
   ponddurcl?: string
