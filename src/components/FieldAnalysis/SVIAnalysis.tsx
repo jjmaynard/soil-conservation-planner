@@ -93,7 +93,7 @@ export default function SVIAnalysis({ fieldId, geeData }: SVIAnalysisProps) {
 
   const getSVIRating = (svi: number) => {
     if (svi < 3) return { label: 'Low', color: '#166534', bg: '#dcfce7' }
-    if (svi < 5) return { label: 'Moderate', color: '#92400e', bg: '#fef3c7' }
+    if (svi < 5) return { label: 'Moderate', color: '#b45309', bg: '#fef3c7' } // Amber-700 for text readability
     if (svi < 7) return { label: 'High', color: '#ea580c', bg: '#ffedd5' }
     return { label: 'Very High', color: '#991b1b', bg: '#fee2e2' }
   }
@@ -106,7 +106,7 @@ export default function SVIAnalysis({ fieldId, geeData }: SVIAnalysisProps) {
       <div className="flex items-start gap-2 p-2 rounded" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
         <Info className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: '#2563eb' }} />
         <p className="text-xs" style={{ color: '#1e40af' }}>
-          {sviData.methodology || 'SVI = Soil Vulnerability Index based on erosion susceptibility'}
+          Soil Vulnerability Index - surface and subsurface soil nutrient loss potential
         </p>
       </div>
 
@@ -157,7 +157,7 @@ export default function SVIAnalysis({ fieldId, geeData }: SVIAnalysisProps) {
         <div className="space-y-3">
           <div>
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-gray-700">Surface Erosion Loss</span>
+              <span className="text-xs text-gray-700">Surface loss: Erosion-driven nutrient transport</span>
               <span className="text-xs font-medium text-gray-900">{sviData.surfaceLossMean.toFixed(2)}</span>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -173,7 +173,7 @@ export default function SVIAnalysis({ fieldId, geeData }: SVIAnalysisProps) {
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-gray-700">Subsurface (Drained)</span>
+              <span className="text-xs text-gray-700">Subsurface loss (drained): Leaching in tile-drained systems</span>
               <span className="text-xs font-medium text-gray-900">{sviData.subsurfaceDrainedMean.toFixed(2)}</span>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -189,7 +189,7 @@ export default function SVIAnalysis({ fieldId, geeData }: SVIAnalysisProps) {
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-gray-700">Subsurface (Undrained)</span>
+              <span className="text-xs text-gray-700">Subsurface loss (undrained): Natural drainage leaching</span>
               <span className="text-xs font-medium text-gray-900">{sviData.subsurfaceUndrainedMean.toFixed(2)}</span>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">

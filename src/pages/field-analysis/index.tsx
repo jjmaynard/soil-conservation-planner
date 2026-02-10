@@ -8,7 +8,10 @@ import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { Search, Map as MapIcon, Edit3, Upload, ChevronRight, Zap, Eye, Pencil, FileUp, ArrowLeft, TrendingDown, Sprout, Droplets, FileCheck, List } from 'lucide-react'
 import type { FieldMapRef } from '#components/FieldAnalysis/FieldMap'
-import UseCaseSelector, { type UseCase } from '#components/FieldAnalysis/UseCaseSelector'
+import { LandTypeSelector } from '#components/FieldAnalysis/LandTypeSelector'
+import { FieldUseCaseSelector } from '#components/FieldAnalysis/FieldUseCaseSelector'
+import { getLandType } from '@/config/land-types'
+import { getUseCase } from '@/config/use-cases'
 
 const FieldMap = dynamic(() => import('#components/FieldAnalysis/FieldMap'), {
   ssr: false,
@@ -26,7 +29,8 @@ type SelectionMethod = 'search' | 'browse' | 'draw' | 'upload' | null
 
 export default function FieldAnalysisLanding() {
   const router = useRouter()
-  const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null)
+  const [selectedLandType, setSelectedLandType] = useState<string | null>(null)
+  const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null)
   const [selectionMethod, setSelectionMethod] = useState<SelectionMethod>('browse')
   const [searchQuery, setSearchQuery] = useState('')
   const [showCLULayer, setShowCLULayer] = useState(false)
@@ -250,40 +254,62 @@ export default function FieldAnalysisLanding() {
         />
       </Head>
 
-      {/* Show Use Case Selector if no use case selected and not in special modes */}
-      {!selectedUseCase && !isFromPlanningWizard && !isFromRUSLE ? (
+      {/* Show Two-Stage Selector if land type or use case not selected and not in special modes */}
+      {(!selectedLandType || !selectedUseCase) && !isFromPlanningWizard && !isFromRUSLE ? (
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f9fafb' }}>
           {/* Header */}
           <div 
-            className="px-6 py-4 text-white flex-shrink-0 rounded-lg shadow-lg my-6"
+            className="px-6 py-2 text-white flex-shrink-0 rounded-lg mt-2"
             style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
           >
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-                  <MapIcon className="h-8 w-8" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight">Field Analysis</h1>
-                  <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
-                    Select your analysis goal to get started
-                  </p>
-                </div>
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
+                <MapIcon className="h-8 w-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Field Analysis</h1>
+                <p className="text-sm" style={{ color: 'var(--color-forest-100)' }}>
+                  Select your analysis goal to get started
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Use Case Selector */}
-          <div className="flex-1 flex items-center justify-center p-6">
-            <UseCaseSelector
-              selectedUseCase={selectedUseCase}
-              onSelect={(useCase) => {
-                setSelectedUseCase(useCase)
-                if (typeof window !== 'undefined') {
-                  sessionStorage.setItem('analysisUseCase', useCase)
-                }
-              }}
-            />
+          {/* Two-Stage Selection: Land Type then Use Case */}
+          <div className="flex-1 px-6 pt-6">
+            {!selectedLandType ? (
+              <LandTypeSelector
+                onSelect={(landType) => {
+                  setSelectedLandType(landType)
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.setItem('analysisLandType', landType)
+                  }
+                }}
+                selectedLandType={selectedLandType}
+              />
+            ) : (
+              <div className="w-full max-w-6xl mx-auto">
+                <button
+                  onClick={() => setSelectedLandType(null)}
+                  className="mb-6 flex items-center text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Change Land Type
+                </button>
+                <FieldUseCaseSelector
+                  landTypeId={selectedLandType}
+                  selectedUseCase={selectedUseCase}
+                  onSelect={(useCase) => {
+                    setSelectedUseCase(useCase)
+                    if (typeof window !== 'undefined') {
+                      sessionStorage.setItem('analysisUseCase', useCase)
+                    }
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -339,25 +365,25 @@ export default function FieldAnalysisLanding() {
 
         {/* Compact Header */}
         <div 
-          className="px-6 py-3 text-white flex-shrink-0 rounded-lg my-6"
+          className="px-6 py-2 text-white flex-shrink-0 rounded-lg"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-xl font-bold tracking-tight">Field Analysis</h1>
-                {selectedUseCase && (
-                  <span 
-                    className="text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1.5"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                  >
-                    {selectedUseCase === 'erosion' && <><TrendingDown className="w-3 h-3" /> Erosion & Conservation</>}
-                    {selectedUseCase === 'production' && <><Sprout className="w-3 h-3" /> Production Optimization</>}
-                    {selectedUseCase === 'water' && <><Droplets className="w-3 h-3" /> Water Management</>}
-                    {selectedUseCase === 'compliance' && <><FileCheck className="w-3 h-3" /> Compliance & Documentation</>}
-                    {selectedUseCase === 'comprehensive' && <><List className="w-3 h-3" /> Full Comprehensive Analysis</>}
-                  </span>
-                )}
+                {selectedLandType && selectedUseCase && (() => {
+                  const landType = getLandType(selectedLandType)
+                  const useCase = getUseCase(selectedUseCase)
+                  return (
+                    <span 
+                      className="text-xs px-3 py-1 rounded-full font-medium"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                    >
+                      {landType?.name} - {useCase?.short_name}
+                    </span>
+                  )
+                })()}
               </div>
               <p className="text-xs mt-1" style={{ color: 'var(--color-forest-100)' }}>
                 {isFromPlanningWizard 

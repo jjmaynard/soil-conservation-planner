@@ -190,12 +190,12 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
                   <span className="font-medium">{drainageData.twiMean.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Std Dev:</span>
-                  <span className="font-medium">{drainageData.twiStd.toFixed(2)}</span>
+                  <span>75th Percentile:</span>
+                  <span className="font-medium">{drainageData.twiP75?.toFixed(2) || '0.00'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Max:</span>
-                  <span className="font-medium">{drainageData.twiMax.toFixed(2)}</span>
+                  <span>90th Percentile:</span>
+                  <span className="font-medium">{drainageData.twiP90?.toFixed(2) || '0.00'}</span>
                 </div>
               </div>
             </div>

@@ -131,27 +131,58 @@ export function geometryToWKT(
 
 /**
  * Parse WKT string to GeoJSON geometry
+ * Supports basic POLYGON and MULTIPOLYGON (simple implementation)
  */
-export function wktToGeoJSON(wkt: string): GeoJSON.Polygon | null {
+export function wktToGeoJSON(wkt: string): GeoJSON.Polygon | GeoJSON.MultiPolygon | null {
   try {
-    // Simple WKT POLYGON parser
-    const match = wkt.match(/POLYGON\(\((.*?)\)\)/i)
-    if (!match) return null
+    if (!wkt) return null;
+    const cleanWkt = wkt.trim().toUpperCase();
 
-    const coordString = match[1]
-    const coords = coordString.split(',').map((pair) => {
-      const [lng, lat] = pair.trim().split(' ').map(Number)
-      return [lng, lat]
-    })
-
-    return {
-      type: 'Polygon',
-      coordinates: [coords],
+    // Handle POLYGON
+    if (cleanWkt.startsWith('POLYGON')) {
+      const match = cleanWkt.match(/POLYGON\s*\(\((.*?)\)\)/);
+      if (match) {
+        const coordString = match[1];
+        const coords = parseCoordString(coordString);
+        return {
+          type: 'Polygon',
+          coordinates: [coords],
+        };
+      }
     }
+    
+    // Handle MULTIPOLYGON (basic support for single outer rings of parts)
+    // NOTE: This is a simplified parser. For full WKT support, use 'wellknown' or 'wkt' package.
+    if (cleanWkt.startsWith('MULTIPOLYGON')) {
+       // Remove "MULTIPOLYGON" and outer parens
+       const content = cleanWkt.replace(/^MULTIPOLYGON\s*\(/, '').replace(/\)$/, '');
+       // Split by "), (" to find polygon parts roughly
+       const parts = content.split(/\)\s*,\s*\(/);
+       
+       const coordinates = parts.map(part => {
+           // Clean up parens
+           const cleanPart = part.replace(/^\(+/, '').replace(/\)+$/, '');
+           return [parseCoordString(cleanPart)];
+       });
+       
+       return {
+           type: 'MultiPolygon',
+           coordinates: coordinates
+       };
+    }
+
+    return null;
   } catch (error) {
-    console.error('Error parsing WKT:', error)
-    return null
+    console.error('Error parsing WKT:', error);
+    return null;
   }
+}
+
+function parseCoordString(coordString: string): number[][] {
+    return coordString.split(',').map((pair) => {
+      const [lng, lat] = pair.trim().split(' ').map(Number);
+      return [lng, lat];
+    });
 }
 
 // ============================================================================

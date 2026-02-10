@@ -623,6 +623,148 @@ export interface ComprehensiveAssessmentRequest {
   include_visualizations?: boolean
 }
 
+// ============================================================================ 
+// Climate History Types (New /api/climate/comprehensive)
+// ============================================================================ 
+
+export interface ClimateHistoryRequest {
+  wkt: string
+  year?: number // Assessment year context
+}
+
+export interface ClimateHistoryResponse {
+  location: {
+    wkt: string
+    field_area_acres: number
+    county: string | null
+    mlra: string | null
+    usda_hardiness_zone: string | null
+  }
+  temporal_coverage: {
+    period_of_record: string
+    years: number
+    data_completeness_pct: number
+    start_date: string
+    end_date: string
+  }
+  precipitation: {
+    annual: {
+      mean: number
+      min: number
+      max: number
+      std_dev: number
+      current_year: number
+      current_year_percentile: number
+    }
+    monthly_normals_mm: Record<string, number>
+    growing_season: {
+      apr_oct_mean_mm: number
+      may_sep_mean_mm: number
+      total_days: number
+    }
+    intensity_statistics: {
+      days_over_25mm_per_year: number
+      days_over_50mm_per_year: number
+      max_daily_mm: number
+      max_daily_date: string
+      erosive_events_per_year_mean: number
+    }
+    drought_metrics: {
+      consecutive_dry_days_max: number
+      consecutive_dry_days_mean: number
+      dry_spells_over_14days_per_year: number
+    }
+  }
+  temperature: {
+    annual: {
+      mean_c: number
+      max_c: number
+      min_c: number
+      extreme_max_c: number
+      extreme_min_c: number
+    }
+    monthly_normals: {
+      tmax: Record<string, number>
+      tmin: Record<string, number>
+      tmean: Record<string, number>
+    }
+    growing_season: {
+      last_spring_freeze_doy: number
+      last_spring_freeze_date: string
+      first_fall_freeze_doy: number
+      first_fall_freeze_date: string
+      frost_free_days: number
+      frost_free_days_80pct_probability: number
+    }
+    critical_thresholds: {
+      days_below_minus18c: number
+      days_below_0c: number
+      days_above_32c: number
+      days_above_35c: number
+    }
+    thermal_time: {
+      gdd_base_10c: number
+      gdd_base_5c: number
+      gdd_base_0c: number
+      gdd_apr_oct: number
+      accumulated_by_month: Record<string, number>
+    }
+  }
+  soil_conditions: {
+    workability: {
+      wet_days_per_year: number
+      spring_workable_date_median: string
+      fall_workable_date_median: string
+    }
+    freeze_thaw: {
+      freeze_thaw_cycles_per_year: number
+      frost_depth_risk: string
+    }
+    erosion_risk: {
+      high_risk_period: string
+      winter_cover_critical: string
+      erosive_rainfall_days_per_year: number
+    }
+  }
+  crop_suitability: Record<string, {
+    gdd_adequacy: string
+    planting_window?: string
+    risk_level?: string
+    limiting_factors?: string[]
+    winter_survival_risk?: string
+    spring_planting_window?: string
+  }>
+  management_windows: Record<string, {
+    earliest_safe_date?: string
+    optimal_start_date?: string
+    soil_temp_10cm_reach_10c?: string
+    fall_seeding_deadline?: string
+    winter_kill_risk_date?: string
+    spring_greenup_date?: string
+    spring_window_start?: string
+    fall_window_end?: string
+    frozen_ground_constraint?: string
+    high_flow_period?: string
+    peak_nutrient_loss_risk?: string
+  }>
+  climate_trends: {
+    note: string
+  }
+  conservation_planning: {
+    critical_erosion_period: string
+    cover_needed_period: string
+    residue_management_priority: string
+    buffer_strip_effectiveness: string
+  }
+  comparison_to_normals: {
+    current_year_deviation_pct: number
+  }
+  data_sources: {
+    precipitation: string
+    temperature: string
+    methodology: string
+  }
+}
 // ============================================================================
 // Error Response Type
 // ============================================================================

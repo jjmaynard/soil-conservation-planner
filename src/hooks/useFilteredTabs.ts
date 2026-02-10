@@ -1,7 +1,6 @@
 // Hook to manage use case-based tab filtering
 
 import { useMemo } from 'react'
-import type { UseCase } from '../components/FieldAnalysis/UseCaseSelector'
 
 export type TabId = 'soil' | 'erosion' | 'drainage' | 'productivity' | 'svi' | 'flow' | 'drought' | 'concerns' | 'practices' | 'zones'
 
@@ -21,20 +20,26 @@ const useCaseTabMapping: Record<UseCase, TabId[]> = {
   comprehensive: ['soil', 'erosion', 'drainage', 'productivity', 'svi', 'flow', 'drought', 'concerns', 'practices', 'zones']
 }
 
-export function useFilteredTabs(allTabs: Tab[], selectedUseCase: UseCase | null): Tab[] {
+export function useFilteredTabs(allTabs: Tab[], selectedUseCase: string | null): Tab[] {
   return useMemo(() => {
-    if (!selectedUseCase || selectedUseCase === 'comprehensive') {
-      return allTabs
-    }
+    // Return all tabs for all use cases until land type/land-use sub models are developed
+    return allTabs
     
-    const allowedTabIds = useCaseTabMapping[selectedUseCase]
-    return allTabs.filter(tab => allowedTabIds.includes(tab.id))
+    // Original filtering logic (commented out for now):
+    // if (!selectedUseCase || selectedUseCase === 'comprehensive') {
+    //   return allTabs
+    // }
+    // const allowedTabIds = useCaseTabMapping[selectedUseCase]
+    // return allTabs.filter(tab => allowedTabIds?.includes(tab.id))
   }, [allTabs, selectedUseCase])
 }
 
-export function getDefaultTab(selectedUseCase: UseCase | null): TabId {
-  if (!selectedUseCase) return 'soil'
+export function getDefaultTab(selectedUseCase: string | null): TabId {
+  // Return default tab until land type/land-use sub models are developed
+  return 'soil'
   
-  const firstTab = useCaseTabMapping[selectedUseCase][0]
-  return firstTab as TabId
+  // Original logic (commented out for now):
+  // if (!selectedUseCase) return 'soil'
+  // const firstTab = useCaseTabMapping[selectedUseCase]?.[0]
+  // return firstTab as TabId || 'soil'
 }

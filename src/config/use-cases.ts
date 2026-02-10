@@ -15,7 +15,40 @@ export interface UseCase {
   api_integrations: Record<string, boolean>;
   sort_order: number;
   is_active: boolean;
+  color?: string;
+  bgColor?: string;
+  gradient?: { from: string; to: string };
 }
+
+// Utility function to generate color shades from base color
+function generateColorShades(baseColor: string, count: number): string[] {
+  // Parse hex color
+  const hex = baseColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  
+  const shades: string[] = [];
+  for (let i = 0; i < count; i++) {
+    // Generate variations: lighter for first items, darker for later items
+    const factor = 1 + (i - count / 2) * 0.15; // Range from lighter to darker
+    const newR = Math.max(0, Math.min(255, Math.round(r * factor)));
+    const newG = Math.max(0, Math.min(255, Math.round(g * factor)));
+    const newB = Math.max(0, Math.min(255, Math.round(b * factor)));
+    shades.push(`#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`);
+  }
+  return shades;
+}
+
+// Land type base colors (from land-types.ts)
+const LAND_TYPE_COLORS: Record<string, string> = {
+  cropland: '#6B7F39',
+  forestry: '#5C8D5A',
+  rangeland: '#8B7AA8',
+  wetland: '#4A90E2',
+  developed: '#64748B',
+  natural: '#87A096'
+};
 
 export const USE_CASES: UseCase[] = [
   // ============================================================================
@@ -658,13 +691,60 @@ export const USE_CASES: UseCase[] = [
 
 // Helper functions
 export function getUseCasesByLandType(landTypeId: string): UseCase[] {
-  return USE_CASES
+  const useCases = USE_CASES
     .filter(uc => uc.land_type_id === landTypeId && uc.is_active)
     .sort((a, b) => a.sort_order - b.sort_order);
+  
+  // Generate color shades for this land type's use cases
+  const baseColor = LAND_TYPE_COLORS[landTypeId] || '#6B7F39';
+  const shades = generateColorShades(baseColor, useCases.length);
+  
+  // Assign colors to use cases
+  return useCases.map((uc, index) => ({
+    ...uc,
+    color: shades[index],
+    bgColor: `${shades[index]}15`, // 15 is ~8% opacity in hex
+    gradient: {
+      from: shades[index],
+      to: adjustBrightness(shades[index], -10)
+    }
+  }));
 }
 
 export function getUseCase(id: string): UseCase | undefined {
-  return USE_CASES.find(uc => uc.id === id);
+  const useCase = USE_CASES.find(uc => uc.id === id);
+  if (!useCase) return undefined;
+  
+  // Add colors to individual use case
+  const landTypeUseCases = USE_CASES.filter(uc => 
+    uc.land_type_id === useCase.land_type_id && uc.is_active
+  ).sort((a, b) => a.sort_order - b.sort_order);
+  
+  const index = landTypeUseCases.findIndex(uc => uc.id === id);
+  const baseColor = LAND_TYPE_COLORS[useCase.land_type_id] || '#6B7F39';
+  const shades = generateColorShades(baseColor, landTypeUseCases.length);
+  
+  return {
+    ...useCase,
+    color: shades[index],
+    bgColor: `${shades[index]}15`,
+    gradient: {
+      from: shades[index],
+      to: adjustBrightness(shades[index], -10)
+    }
+  };
+}
+
+// Utility to adjust brightness
+function adjustBrightness(color: string, percent: number): string {
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  
+  const adjust = (val: number) => Math.max(0, Math.min(255, val + (val * percent / 100)));
+  
+  return `#${adjust(r).toString(16).padStart(2, '0')}${adjust(g).toString(16).padStart(2, '0')}${adjust(b).toString(16).padStart(2, '0')}`;
 }
 
 export function getAllUseCases(): UseCase[] {

@@ -6,6 +6,7 @@
 // Reference: Property_Panel_Guide/gee-api-docs/nextjs-erosion-module/
 
 import axios, { AxiosInstance, AxiosError } from 'axios'
+import type { DroughtAssessmentRequest, DroughtAssessmentResponse } from '@/types/drought'
 import type {
   RUSLECalculateRequest,
   RUSLEResponse,
@@ -24,8 +25,6 @@ import type {
   SentinelResponse,
   ClimateRequest,
   ClimateResponse,
-  DroughtAssessmentRequest,
-  DroughtAssessment,
   ResourceConcernRequest,
   ComprehensiveAssessment,
   ErosionAssessment,
@@ -33,6 +32,8 @@ import type {
   ProductivityAssessment,
   ComprehensiveFieldAssessment,
   ComprehensiveAssessmentRequest,
+  ClimateHistoryRequest,
+  ClimateHistoryResponse,
 } from '#types/geeApi'
 
 // ============================================================================
@@ -208,18 +209,19 @@ class GEEAPIClient {
   // Drought Assessment (GRIDMET)
   // ==========================================================================
 
-  async getDroughtAssessment(request: DroughtAssessmentRequest): Promise<DroughtAssessment> {
+  async getDroughtAssessment(request: DroughtAssessmentRequest): Promise<DroughtAssessmentResponse> {
     try {
-      const params = new URLSearchParams()
-      params.append('wkt', request.wkt)
-      if (request.date) params.append('date', request.date)
-      if (request.soil_awc) params.append('soil_awc', request.soil_awc.toString())
-      if (request.soil_texture) params.append('soil_texture', request.soil_texture)
-      params.append('include_technical', request.include_technical?.toString() || 'false')
-      params.append('auto_adjust_date', request.auto_adjust_date?.toString() || 'true')
-
-      const { data } = await this.client.post<DroughtAssessment>(
-        `/api/climate/drought-assessment?${params}`
+      // Send data in the request BODY, not query params
+      const { data } = await this.client.post<DroughtAssessmentResponse>(
+        '/api/climate/drought-assessment',
+        {
+          wkt: request.wkt,
+          date: request.date,
+          soil_awc: request.soil_awc,
+          soil_texture: request.soil_texture,
+          include_technical: request.include_technical ?? false,
+          auto_adjust_date: request.auto_adjust_date ?? true
+        }
       )
       return data
     } catch (error) {
@@ -579,6 +581,18 @@ class GEEAPIClient {
     try {
       const { data } = await this.client.post<ClimateResponse>(
         '/api/climate/polygon',
+        request
+      )
+      return data
+    } catch (error) {
+      return handleAPIError(error)
+    }
+  }
+
+  async getClimateHistory(request: ClimateHistoryRequest): Promise<ClimateHistoryResponse> {
+    try {
+      const { data } = await this.client.post<ClimateHistoryResponse>(
+        '/api/climate/comprehensive',
         request
       )
       return data

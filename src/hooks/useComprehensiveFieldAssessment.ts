@@ -58,6 +58,7 @@ export interface EnhancedFieldData {
     svi: {
       surface_loss_mean: number | null
       subsurface_drained_mean: number | null
+      subsurface_undrained_mean: number | null
     }
   }
 }
@@ -197,6 +198,7 @@ function combineData(
       svi: {
         surface_loss_mean: geeAssessment.svi.svi_metrics.surface_loss_mean,
         subsurface_drained_mean: geeAssessment.svi.svi_metrics.subsurface_drained_mean,
+        subsurface_undrained_mean: geeAssessment.svi.svi_metrics.subsurface_undrained_mean,
       },
     },
   }

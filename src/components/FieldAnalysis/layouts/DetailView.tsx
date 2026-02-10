@@ -3,7 +3,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Layers, TrendingDown, Droplets, Target, Sprout, CloudRain, Wind, AlertTriangle, Eye, EyeOff, Maximize2, Map as MapIcon } from 'lucide-react'
+import { Layers, TrendingDown, Droplets, Target, Sprout, CloudRain, Wind, AlertTriangle, Eye, EyeOff, Maximize2, Map as MapIcon, TrendingUp, Mountain } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import SoilComposition from '../SoilComposition'
 import ErosionAnalysis from '../ErosionAnalysis'
@@ -15,10 +15,14 @@ import DroughtRiskAnalysis from '../DroughtRiskAnalysis'
 import ResourceConcerns from '../ResourceConcerns'
 import ConservationPractices from '../ConservationPractices'
 import ManagementZones from '../ManagementZones'
+import VegetationMonitoring from '../VegetationMonitoring'
+import TerrainAttributes from '../TerrainAttributes'
+import ClimateHistory from '../ClimateHistory'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
 import { type UseCase } from '../UseCaseSelector'
 import { useFilteredTabs, getDefaultTab } from '#hooks/useFilteredTabs'
+import { geoJsonToWkt } from '#utils/geoJsonToWkt'
 
 const FieldMap = dynamic(() => import('../FieldMap'), {
   ssr: false,
@@ -44,7 +48,7 @@ interface DetailViewProps {
   selectedUseCase?: UseCase | null
 }
 
-type TabId = 'soil' | 'erosion' | 'drainage' | 'productivity' | 'svi' | 'flow' | 'drought' | 'concerns' | 'practices' | 'zones'
+export type TabId = 'soil' | 'erosion' | 'drainage' | 'productivity' | 'svi' | 'flow' | 'drought' | 'vegetation' | 'terrain' | 'climate' | 'concerns' | 'practices' | 'zones'
 
 interface Tab {
   id: TabId
@@ -52,6 +56,39 @@ interface Tab {
   icon: any
   color: string
   bgColor: string
+}
+
+export const TAB_LAYER_CONFIG: Record<TabId, { id: string; label: string; default?: boolean }[]> = {
+  soil: [{ id: 'soil-boundaries', label: 'Soil', default: true }],
+  erosion: [{ id: 'erosion-risk', label: 'Erosion', default: true }],
+  drainage: [
+      { id: 'twi', label: 'TWI', default: true },
+      { id: 'flow-channels', label: 'Flow', default: false },
+      { id: 'depressions', label: 'Depressions', default: false }
+  ],
+  productivity: [
+      { id: 'nccpi', label: 'Productivity', default: true },
+      { id: 'yield-gap', label: 'Yield Gap', default: false },
+      { id: 'mean-ndvi', label: 'Mean NDVI', default: false },
+      { id: 'max-ndvi', label: 'Max NDVI', default: false }
+  ],
+  svi: [
+    { id: 'svi-surface', label: 'Surface Loss', default: true },
+    { id: 'svi-subsurface-drained', label: 'Sub (Drained)' },
+    { id: 'svi-subsurface-undrained', label: 'Sub (Undrained)' }
+  ],
+  flow: [{ id: 'flow-accumulation', label: 'Flow Accumulation', default: true }],
+  drought: [{ id: 'drought-risk', label: 'Drought Risk', default: true }],
+  vegetation: [{ id: 'ndvi', label: 'Vegetation (NDVI)', default: true }],
+  terrain: [
+      { id: 'elevation', label: 'Elevation', default: true },
+      { id: 'slope', label: 'Slope', default: false },
+      { id: 'aspect', label: 'Aspect', default: false }
+  ],
+  climate: [{ id: 'precip-grid', label: 'Precipitation', default: false }],
+  concerns: [],
+  practices: [],
+  zones: [{ id: 'management-zones', label: 'Management Zones', default: true }]
 }
 
 const tabs: Tab[] = [
@@ -62,6 +99,9 @@ const tabs: Tab[] = [
   { id: 'svi', label: 'Soil Vulnerability', icon: AlertTriangle, color: '#ea580c', bgColor: '#fef3c7' },
   { id: 'flow', label: 'Concentrated Flow', icon: Wind, color: '#0284c7', bgColor: '#e0f2fe' },
   { id: 'drought', label: 'Drought Risk', icon: CloudRain, color: '#f97316', bgColor: '#fff7ed' },
+  { id: 'vegetation', label: 'Vegetation Monitoring', icon: TrendingUp, color: '#16a34a', bgColor: '#f0fdf4' },
+  { id: 'terrain', label: 'Terrain Attributes', icon: Mountain, color: '#78716c', bgColor: '#fafaf9' },
+  { id: 'climate', label: 'Climate History', icon: CloudRain, color: '#0369a1', bgColor: '#e0f2fe' },
   { id: 'concerns', label: 'Resource Concerns', icon: AlertTriangle, color: '#d97706', bgColor: '#fef3c7' },
   { id: 'practices', label: 'Conservation Practices', icon: Target, color: '#15803d', bgColor: '#f0fdf4' },
   { id: 'zones', label: 'Management Zones', icon: Layers, color: '#7c3aed', bgColor: '#faf5ff' },
@@ -126,29 +166,21 @@ export default function DetailView({
               Fields
             </button>
 
-            <button
-              onClick={() => onLayerToggle?.('soil-boundaries')}
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
-              style={{
-                backgroundColor: activeLayers.includes('soil-boundaries') ? '#dcfce7' : '#f3f4f6',
-                color: activeLayers.includes('soil-boundaries') ? '#166534' : '#6b7280'
-              }}
-            >
-              {activeLayers.includes('soil-boundaries') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-              Soil
-            </button>
-
-            <button
-              onClick={() => onLayerToggle?.('erosion-risk')}
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
-              style={{
-                backgroundColor: activeLayers.includes('erosion-risk') ? '#fee2e2' : '#f3f4f6',
-                color: activeLayers.includes('erosion-risk') ? '#991b1b' : '#6b7280'
-              }}
-            >
-              {activeLayers.includes('erosion-risk') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-              Erosion
-            </button>
+            {/* Dynamic Layer Buttons based on Tab */}
+            {TAB_LAYER_CONFIG[selectedTab]?.map(layer => (
+                <button
+                key={layer.id}
+                onClick={() => onLayerToggle?.(layer.id)}
+                className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                style={{
+                    backgroundColor: activeLayers.includes(layer.id) ? '#dcfce7' : '#f3f4f6',
+                    color: activeLayers.includes(layer.id) ? '#166534' : '#6b7280'
+                }}
+                >
+                {activeLayers.includes(layer.id) ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                {layer.label}
+                </button>
+            ))}
 
             <button
               onClick={() => setMapFullscreen(false)}
@@ -166,7 +198,10 @@ export default function DetailView({
             fieldData={fieldData}
             selectedSoil={selectedSoil}
             activeLayers={activeLayers}
+            layerOptions={TAB_LAYER_CONFIG[selectedTab] || []}
             showCSBLayer={showCSBLayer}
+            geeData={geeData}
+            ssurgoData={ssurgoData} // Pass ssurgoData
             onCSBLayerToggle={onCSBLayerToggle}
             onLayerToggle={onLayerToggle}
           />
@@ -226,7 +261,7 @@ export default function DetailView({
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             {selectedTab === 'soil' && (
               <SoilComposition 
-                fieldId={fieldData?.id}
+                fieldId={fieldData?.id || fieldData?.clu_id}
                 fieldData={ssurgoData}
                 onSoilSelect={onSoilSelect}
               />
@@ -234,7 +269,7 @@ export default function DetailView({
 
             {selectedTab === 'erosion' && (
               <ErosionAnalysis 
-                fieldId={fieldData?.id}
+                fieldId={fieldData?.id || fieldData?.clu_id}
                 ssurgoData={ssurgoData}
                 geeData={geeData}
               />
@@ -242,7 +277,7 @@ export default function DetailView({
 
             {selectedTab === 'drainage' && (
               <DrainageAssessment 
-                fieldId={fieldData?.id}
+                fieldId={fieldData?.id || fieldData?.clu_id}
                 ssurgoData={ssurgoData}
                 geeData={geeData}
               />
@@ -250,34 +285,39 @@ export default function DetailView({
 
             {selectedTab === 'productivity' && (
               <ProductivityAnalysis 
-                fieldId={fieldData?.id}
+                fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
               />
             )}
 
             {selectedTab === 'svi' && (
               <SVIAnalysis 
-                fieldId={fieldData?.id}
+                fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
               />
             )}
 
             {selectedTab === 'flow' && (
               <ConcentratedFlowAnalysis 
-                fieldId={fieldData?.id}
+                fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
               />
             )}
 
             {selectedTab === 'drought' && (
               <DroughtRiskAnalysis 
-                fieldId={fieldData?.id}
+                fieldId={fieldData?.id || fieldData?.clu_id}
+                wkt={typeof fieldData?.boundary === 'string' ? fieldData.boundary : fieldData?.boundary ? geoJsonToWkt(fieldData.boundary) : undefined}
                 geeData={geeData}
               />
             )}
 
             {selectedTab === 'concerns' && (
-              <ResourceConcerns fieldId={fieldData?.id} />
+              <ResourceConcerns 
+                fieldId={fieldData?.id || fieldData?.clu_id}
+                geeData={geeData}
+                fieldAcres={fieldData?.area || fieldData?.acres || 0}
+              />
             )}
 
             {selectedTab === 'practices' && (
@@ -285,7 +325,29 @@ export default function DetailView({
             )}
 
             {selectedTab === 'zones' && (
-              <ManagementZones fieldId={fieldData?.id} />
+              <ManagementZones fieldId={fieldData?.id || fieldData?.clu_id} />
+            )}
+
+            {selectedTab === 'vegetation' && (
+              <VegetationMonitoring 
+                fieldId={fieldData?.id || fieldData?.clu_id}
+                geeData={geeData}
+              />
+            )}
+
+            {selectedTab === 'terrain' && (
+              <TerrainAttributes 
+                fieldId={fieldData?.id || fieldData?.clu_id}
+                geeData={geeData}
+              />
+            )}
+
+            {selectedTab === 'climate' && (
+              <ClimateHistory 
+                fieldId={fieldData?.id || fieldData?.clu_id}
+                geeData={geeData}
+                wkt={typeof fieldData?.boundary === 'string' ? fieldData.boundary : fieldData?.boundary ? geoJsonToWkt(fieldData.boundary) : undefined}
+              />
             )}
           </div>
         </div>
@@ -313,29 +375,21 @@ export default function DetailView({
                   Fields
                 </button>
 
-                <button
-                  onClick={() => onLayerToggle?.('soil-boundaries')}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
-                  style={{
-                    backgroundColor: activeLayers.includes('soil-boundaries') ? '#dcfce7' : '#f3f4f6',
-                    color: activeLayers.includes('soil-boundaries') ? '#166534' : '#6b7280'
-                  }}
-                >
-                  {activeLayers.includes('soil-boundaries') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                  Soil
-                </button>
-
-                <button
-                  onClick={() => onLayerToggle?.('erosion-risk')}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
-                  style={{
-                    backgroundColor: activeLayers.includes('erosion-risk') ? '#fee2e2' : '#f3f4f6',
-                    color: activeLayers.includes('erosion-risk') ? '#991b1b' : '#6b7280'
-                  }}
-                >
-                  {activeLayers.includes('erosion-risk') ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                  Erosion
-                </button>
+                {/* Dynamic Layer Buttons based on Tab */}
+                {TAB_LAYER_CONFIG[selectedTab]?.map(layer => (
+                    <button
+                    key={layer.id}
+                    onClick={() => onLayerToggle?.(layer.id)}
+                    className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                    style={{
+                        backgroundColor: activeLayers.includes(layer.id) ? '#dcfce7' : '#f3f4f6',
+                        color: activeLayers.includes(layer.id) ? '#166534' : '#6b7280'
+                    }}
+                    >
+                    {activeLayers.includes(layer.id) ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    {layer.label}
+                    </button>
+                ))}
 
                 {/* Fullscreen Button */}
                 <button
@@ -355,7 +409,9 @@ export default function DetailView({
                 fieldData={fieldData}
                 selectedSoil={selectedSoil}
                 activeLayers={activeLayers}
+                layerOptions={TAB_LAYER_CONFIG[selectedTab] || []}
                 showCSBLayer={showCSBLayer}
+                geeData={geeData}
                 onCSBLayerToggle={onCSBLayerToggle}
                 onLayerToggle={onLayerToggle}
               />
@@ -376,6 +432,9 @@ function getTabDescription(tab: TabId): string {
     svi: 'Soil Vulnerability Index - surface and subsurface loss potential assessment',
     flow: 'Concentrated flow pathways, channel density, and gully erosion risk',
     drought: 'Water balance, PDSI drought indices, and moisture deficit analysis',
+    vegetation: 'NDVI time series analysis with peak performance, stability, and yield gap metrics',
+    terrain: 'Detailed terrain analysis including slope, TWI, SPI, flow accumulation, and gully risk',
+    climate: 'Growing season water balance, precipitation trends, and drought severity indices',
     concerns: 'Identified resource concerns based on NRCS criteria and field conditions',
     practices: 'Recommended conservation practices matched to field resource concerns',
     zones: 'Management zone delineation based on soil and productivity variability'

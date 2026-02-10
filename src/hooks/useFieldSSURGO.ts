@@ -11,9 +11,13 @@ import {
   querySSURGOByArea,
   type MapUnitWithComponents,
   type Component,
+  type MapUnitPolygon, // Import MapUnitPolygon
 } from '#lib/ssurgo-area-query'
 
 export interface ProcessedFieldData {
+  // Map Unit Polygons (Geometry)
+  mapUnitPolygons?: MapUnitPolygon[]
+
   // Soil composition data
   soils: Array<{
     id: string
@@ -27,6 +31,9 @@ export interface ProcessedFieldData {
     hydric: boolean
     color: string
   }>
+  
+  // Geometry quality warning (optional)
+  geometryWarning?: string
   
   // Aggregate statistics
   stats: {
@@ -71,8 +78,9 @@ interface UseFieldSSURGOResult {
   fieldData: ProcessedFieldData | null
   loading: boolean
   error: Error | null
-  queryField: (geometry: GeoJSON.Polygon | number[][]) => Promise<void>
+  queryField: (geometry: GeoJSON.Polygon | number[][], expectedAcres?: number, fieldId?: string) => Promise<void>
   reset: () => void
+  currentFieldId: string | null
 }
 
 // Color palette for soil map units
@@ -90,19 +98,53 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
   const [fieldData, setFieldData] = useState<ProcessedFieldData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [currentFieldId, setCurrentFieldId] = useState<string | null>(null)
 
   const queryField = useCallback(
-    async (geometry: GeoJSON.Polygon | number[][]) => {
+    async (geometry: GeoJSON.Polygon | number[][], expectedAcres?: number, fieldId?: string) => {
       setLoading(true)
       setError(null)
 
       try {
+        // Debug geometry to identify issues
+        console.log('=== SSURGO QUERY DEBUG ===')
+        let geomType = 'unknown'
+        let coordCount = 0
+        
+        if ('type' in geometry && geometry.type === 'Polygon') {
+          geomType = 'Polygon'
+          coordCount = geometry.coordinates[0]?.length || 0
+          console.log('Geometry type:', geomType)
+          console.log('Coordinate count:', coordCount)
+          console.log('First coordinate:', geometry.coordinates[0]?.[0])
+          console.log('Expected field area:', expectedAcres || 'unknown', 'acres')
+        } else if (Array.isArray(geometry)) {
+          geomType = 'Array'
+          coordCount = geometry.length
+          console.log('Geometry type: Coordinate array')
+          console.log('Coordinate count:', coordCount)
+        }
+        
+        if (coordCount < 4) {
+          console.warn('⚠️ WARNING: Very few coordinates detected. Boundary may be incomplete.')
+        }
+        
         // First get map unit polygons with area calculation
         const muPolygons = await querySSURGOByArea(geometry, {
           what: 'mupolygon',
           geomAcres: true,
           geomIntersection: true,
         }) as Array<{ mukey: string; area_ac?: number }>
+
+        console.log('🗺️ SSURGO Polygon Query Result:')
+        console.log('  - Number of polygons:', muPolygons?.length || 0)
+        if (muPolygons && muPolygons.length > 0) {
+          muPolygons.forEach((poly, idx) => {
+            console.log(`  - Polygon ${idx + 1}: mukey=${poly.mukey}, area_ac=${poly.area_ac}`)
+          })
+        } else {
+          console.error('  ❌ No polygon data returned!')
+        }
 
         if (!muPolygons || muPolygons.length === 0) {
           throw new Error('No SSURGO data found for this area')
@@ -113,26 +155,118 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
           what: 'components',
         }) as MapUnitWithComponents[]
 
+        console.log('🔍 SSURGO Components Query Result:')
+        console.log('  - Number of map units:', mapUnits.length)
+        mapUnits.forEach((mu, idx) => {
+          console.log(`  - Map Unit ${idx + 1}: ${mu.muname} (${mu.musym})`)
+          console.log(`    - mukey: ${mu.mukey}`)
+          console.log(`    - Components:`, mu.components?.length || 0)
+          if (mu.components && mu.components.length > 0) {
+            mu.components.forEach((comp, compIdx) => {
+              console.log(`      ${compIdx + 1}. ${comp.compname} - ${comp.comppct_r}%`)
+            })
+          } else {
+            console.log('    ⚠️ NO COMPONENTS for this map unit!')
+          }
+        })
+
         // Merge area data from polygons into map units
         const areaMap = new Map<string, number>()
         muPolygons.forEach(poly => {
           const existing = areaMap.get(poly.mukey) || 0
-          areaMap.set(poly.mukey, existing + (poly.area_ac || 0))
+          const polyArea = Number(poly.area_ac) || 0
+          areaMap.set(poly.mukey, existing + polyArea)
+          console.log(`  Adding polygon: mukey=${poly.mukey}, area=${polyArea}, total for mukey=${existing + polyArea}`)
+        })
+
+        console.log('📍 Area map after processing polygons:')
+        areaMap.forEach((area, mukey) => {
+          console.log(`  - mukey ${mukey}: ${area} acres`)
         })
 
         mapUnits.forEach(mu => {
           mu.area_ac = areaMap.get(mu.mukey) || 0
         })
 
-        // Process the data - pass the total area from SSURGO
-        const totalAreaFromSSURGO = Array.from(areaMap.values()).reduce((sum, area) => sum + area, 0)
-        console.log('Total area from SSURGO:', totalAreaFromSSURGO, 'areaMap:', areaMap)
-        const processed = processSSURGOData(mapUnits, totalAreaFromSSURGO)
-        console.log('Processed soils:', processed.soils.map(s => ({ name: s.mapunit_name, area: s.area, percent: s.percent })))
+        // Calculate total area from SSURGO
+        const totalAreaFromSSURGO = Array.from(areaMap.values()).reduce((sum, area) => sum + (Number(area) || 0), 0)
+        console.log('Total area from SSURGO intersection:', totalAreaFromSSURGO, 'acres')
+        console.log('totalAreaFromSSURGO type:', typeof totalAreaFromSSURGO)
+        console.log('Is totalAreaFromSSURGO a number?', typeof totalAreaFromSSURGO === 'number' && !isNaN(totalAreaFromSSURGO))
+        
+        // Check for geometry quality issues
+        let usedArea = totalAreaFromSSURGO
+        let geometryWarning: string | null = null
+        
+        if (expectedAcres && totalAreaFromSSURGO > 0) {
+          const percentDiff = Math.abs(totalAreaFromSSURGO - expectedAcres) / expectedAcres * 100
+          console.log('Expected area:', expectedAcres, 'acres')
+          console.log('Difference:', percentDiff, '%')
+          
+          if (percentDiff > 20) {
+            // Significant difference - likely geometry issue
+            console.warn('⚠️ GEOMETRY QUALITY WARNING')
+            console.warn(`SSURGO area (${Number(totalAreaFromSSURGO).toFixed(1)} ac) differs from field metadata (${Number(expectedAcres).toFixed(1)} ac) by ${Number(percentDiff).toFixed(0)}%`)
+            console.warn('This indicates incomplete or inaccurate field boundary geometry.')
+            console.warn('Using proportional scaling to correct component areas.')
+            
+            geometryWarning = `Boundary geometry appears incomplete (${Number(totalAreaFromSSURGO).toFixed(1)} of ${Number(expectedAcres).toFixed(0)} acres analyzed). Component percentages are preserved but areas are scaled to match expected field size.`
+            
+            // Use expected area for calculations to maintain correct total
+            usedArea = expectedAcres
+            
+            // Scale map unit areas proportionally
+            const scaleFactor = expectedAcres / totalAreaFromSSURGO
+            areaMap.forEach((area, mukey) => {
+              areaMap.set(mukey, area * scaleFactor)
+            })
+            
+            mapUnits.forEach(mu => {
+              mu.area_ac = (mu.area_ac || 0) * scaleFactor
+            })
+          }
+        }
+        console.log('Final area for calculations:', Number(usedArea).toFixed(2), 'acres')
+        console.log('========================\n')
+        
+        const processed = processSSURGOData(mapUnits, usedArea)
+        
+        // Enrich polygons with metadata (musym, muname) from mapUnits lookup
+        // muPolygons only has {mukey, geom, area}. We need musym for coloring.
+        const muInfoMap = new Map<string, { musym: string; muname: string }>();
+        mapUnits.forEach(mu => {
+            muInfoMap.set(mu.mukey, { musym: mu.musym, muname: mu.muname });
+        });
+
+        const enrichedPolygons = muPolygons.map(poly => {
+            const info = muInfoMap.get(poly.mukey);
+            if (!info) return poly;
+            return { ...poly, ...info };
+        }) as any[]; // Type assertion to PolygonWithMetadata
+
+        // Add geometry to processed data
+        processed.mapUnitPolygons = enrichedPolygons;
+
+        // Add geometry warning to processed data if present
+        if (geometryWarning) {
+          (processed as any).geometryWarning = geometryWarning
+        }
+        
+        console.log('Processed soils:', processed.soils.map(s => ({ 
+          name: s.mapunit_name, 
+          area: s.area.toFixed(2), 
+          percent: s.percent.toFixed(1) 
+        })))
         setFieldData(processed)
         
-        // Store in session storage
-        sessionStorage.setItem('fieldSSURGOData', JSON.stringify(processed))
+        // Store in session storage with field-specific key
+        if (fieldId) {
+          setCurrentFieldId(fieldId)
+          sessionStorage.setItem(`fieldSSURGOData-${fieldId}`, JSON.stringify(processed))
+        } else {
+          // Fallback to generic key if no fieldId provided
+          sessionStorage.setItem('fieldSSURGOData', JSON.stringify(processed))
+        }
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Unknown error')
         setError(error)
@@ -148,6 +282,7 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
     setFieldData(null)
     setError(null)
     setLoading(false)
+    setCurrentFieldId(null)
   }, [])
 
   return {
@@ -156,6 +291,7 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
     error,
     queryField,
     reset,
+    currentFieldId,
   }
 }
 
@@ -167,6 +303,10 @@ function processSSURGOData(
   totalArea: number
 ): ProcessedFieldData {
   
+  console.log('📊 processSSURGOData called with:')
+  console.log('  - Map units:', mapUnits.length)
+  console.log('  - Total area:', totalArea)
+  
   // Process soil composition by COMPONENT
   // Step 1: For each map unit, calculate component areas based on comppct_r
   // Step 2: Aggregate components by name across map units
@@ -174,6 +314,13 @@ function processSSURGOData(
   
   mapUnits.forEach((mu, muIndex) => {
     const muArea = mu.area_ac || 0
+    
+    console.log(`  Processing MU ${muIndex + 1}: ${mu.muname} (area: ${muArea} ac, components: ${mu.components?.length || 0})`)
+    
+    if (!mu.components || mu.components.length === 0) {
+      console.warn(`    ⚠️ Map unit ${mu.muname} has NO components!`)
+      return // Skip this map unit
+    }
     
     mu.components.forEach((comp) => {
       // Calculate this component's area within this map unit
@@ -237,6 +384,11 @@ function processSSURGOData(
       percent: percent
     }
   }).sort((a, b) => b.percent - a.percent)
+  
+  console.log(`✅ Processed ${soils.length} soil components`)
+  soils.forEach((s, idx) => {
+    console.log(`  ${idx + 1}. ${s.mapunit_name}: ${s.area.toFixed(2)} ac (${s.percent.toFixed(1)}%)`)
+  })
   
   // Use actual total for stats
   const finalTotalArea = actualTotal

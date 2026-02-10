@@ -11,7 +11,7 @@ interface UseCaseSelectorProps {
   selectedUseCase?: string | null;
 }
 
-export function UseCaseSelector({ 
+export function FieldUseCaseSelector({ 
   landTypeId, 
   onSelect, 
   selectedUseCase
@@ -48,7 +48,7 @@ export function UseCaseSelector({
   const LandIcon = getIcon(landType.icon);
 
   return (
-    <div className="use-case-selector">
+    <div className="use-case-selector max-w-6xl mx-auto">
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center mb-4">
           <div 
@@ -76,7 +76,7 @@ export function UseCaseSelector({
         </p>
       </div>
 
-      <div className="use-case-list grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div className="use-case-list grid grid-cols-1 lg:grid-cols-2 gap-6 mx-auto">
         {displayedUseCases.map((useCase) => (
           <UseCaseCard
             key={useCase.id}
@@ -123,10 +123,12 @@ function UseCaseCard({
     : '#d1d5db';
   
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       className={`
         use-case-card text-left p-6 rounded-lg border-2 transition-all duration-200
-        hover:shadow-lg hover:scale-102 relative
+        hover:shadow-lg hover:scale-102 relative cursor-pointer
         ${isSelected ? 'shadow-md' : 'hover:border-gray-400'}
       `}
       style={{
@@ -134,6 +136,12 @@ function UseCaseCard({
         borderColor: borderColor
       }}
       onClick={() => onSelect(useCase.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(useCase.id);
+        }
+      }}
       aria-pressed={isSelected}
     >
       {/* Color accent bar on left */}
@@ -221,6 +229,6 @@ function UseCaseCard({
           ))}
         </div>
       )}
-    </button>
+    </div>
   );
 }

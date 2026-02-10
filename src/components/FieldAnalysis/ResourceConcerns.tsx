@@ -1,12 +1,15 @@
-// Resource Concerns Component
+// Resource Concerns Component - GEE Integration
 
 'use client'
 
 import { useState, useEffect } from 'react'
-import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle } from 'lucide-react'
+import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
 
 interface ResourceConcernsProps {
   fieldId: string
+  geeData?: EnhancedFieldData | null
+  fieldAcres?: number
 }
 
 interface Concern {
@@ -15,63 +18,184 @@ interface Concern {
   concern: string
   severity: 'High' | 'Moderate' | 'Low'
   affectedAcres: number
+  affectedPct: number
   detected: boolean
   practices: string[]
+  metrics?: Record<string, number | string>
 }
 
-export default function ResourceConcerns({ fieldId }: ResourceConcernsProps) {
+export default function ResourceConcerns({ fieldId, geeData, fieldAcres = 0 }: ResourceConcernsProps) {
   const [concerns, setConcerns] = useState<Concern[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadResourceConcerns()
-  }, [fieldId])
+  }, [fieldId, geeData])
 
   const loadResourceConcerns = async () => {
     setLoading(true)
     try {
-      // Placeholder data - replace with automated concern detection
-      const mockConcerns: Concern[] = [
-        {
-          id: '1',
+      const detectedConcerns: Concern[] = []
+      
+      // Try to get data from props or session storage
+      let assessmentData = geeData
+      if (!assessmentData) {
+        const stored = sessionStorage.getItem('comprehensiveFieldAssessment')
+        if (stored) {
+          assessmentData = JSON.parse(stored) as EnhancedFieldData
+        }
+      }
+
+      if (!assessmentData?.geeAssessment) {
+        console.warn('No GEE assessment data available')
+        setConcerns([])
+        setLoading(false)
+        return
+      }
+
+      const assessment = assessmentData.geeAssessment
+      const combined = assessmentData.combined
+
+      // 1. EROSION CONCERN
+      if (combined.erosion.high_risk_area_pct > 10) {
+        const severity = 
+          combined.erosion.high_risk_area_pct > 30 ? 'High' :
+          combined.erosion.high_risk_area_pct > 15 ? 'Moderate' : 'Low'
+        
+        detectedConcerns.push({
+          id: 'erosion',
           category: 'Soil Erosion',
           concern: 'Sheet and Rill Erosion',
-          severity: 'Moderate',
-          affectedAcres: 26.8,
+          severity,
+          affectedPct: combined.erosion.high_risk_area_pct,
+          affectedAcres: (fieldAcres * combined.erosion.high_risk_area_pct / 100),
           detected: true,
-          practices: ['Cover Crops (340)', 'Contour Farming (330)', 'Terraces (600)']
-        },
-        {
-          id: '2',
-          category: 'Water Quality',
-          concern: 'Nutrients in Surface Water',
-          severity: 'Moderate',
-          affectedAcres: 45.3,
-          detected: true,
-          practices: ['Nutrient Management (590)', 'Filter Strip (393)', 'Grassed Waterway (412)']
-        },
-        {
-          id: '3',
-          category: 'Soil Quality',
-          concern: 'Soil Organic Matter Depletion',
-          severity: 'Low',
-          affectedAcres: 45.3,
-          detected: true,
-          practices: ['Cover Crops (340)', 'Residue Management (329)', 'Conservation Crop Rotation (328)']
-        },
-        {
-          id: '4',
+          practices: ['Cover Crops (340)', 'Contour Farming (330)', 'Terraces (600)', 'Residue Management (329)'],
+          metrics: {
+            'Mean Risk': combined.erosion.gee_terrain_risk?.toFixed(2) || 'N/A',
+            'High Risk Area': `${combined.erosion.high_risk_area_pct.toFixed(1)}%`
+          }
+        })
+      }
+
+      // 2. PONDING/DRAINAGE CONCERN
+      if (combined.drainage.gee_ponding_risk_pct > 10 || combined.drainage.combined_concern) {
+        const severity = 
+          combined.drainage.gee_ponding_risk_pct > 25 ? 'High' :
+          combined.drainage.gee_ponding_risk_pct > 15 ? 'Moderate' : 'Low'
+        
+        detectedConcerns.push({
+          id: 'ponding',
           category: 'Water Management',
-          concern: 'Ponding and Flooding',
-          severity: 'High',
-          affectedAcres: 14.5,
+          concern: 'Ponding and Poor Drainage',
+          severity,
+          affectedPct: combined.drainage.gee_ponding_risk_pct,
+          affectedAcres: (fieldAcres * combined.drainage.gee_ponding_risk_pct / 100),
           detected: true,
-          practices: ['Drainage Water Management (554)', 'Surface Drainage (607)', 'Subsurface Drain (606)']
-        },
-      ]
-      setConcerns(mockConcerns)
+          practices: ['Drainage Water Management (554)', 'Surface Drainage (607)', 'Subsurface Drain (606)'],
+          metrics: {
+            'Ponding Risk Area': `${combined.drainage.gee_ponding_risk_pct.toFixed(1)}%`,
+            'Depression Area': `${combined.drainage.depression_area_pct?.toFixed(1) || 'N/A'}%`
+          }
+        })
+      }
+
+      // 3. CONCENTRATED FLOW / GULLY CONCERN
+      if (combined.concentrated_flow.gully_risk_pct > 5) {
+        const severity = 
+          combined.concentrated_flow.gully_risk_pct > 15 ? 'High' :
+          combined.concentrated_flow.gully_risk_pct > 8 ? 'Moderate' : 'Low'
+        
+        detectedConcerns.push({
+          id: 'concentrated_flow',
+          category: 'Soil Erosion',
+          concern: 'Concentrated Flow and Gully Formation',
+          severity,
+          affectedPct: combined.concentrated_flow.gully_risk_pct,
+          affectedAcres: (fieldAcres * combined.concentrated_flow.gully_risk_pct / 100),
+          detected: true,
+          practices: ['Grassed Waterway (412)', 'Grade Stabilization (410)', 'Diversion (362)', 'Contour Farming (330)'],
+          metrics: {
+            'Gully Risk Area': `${combined.concentrated_flow.gully_risk_pct.toFixed(1)}%`,
+            'Channel Density': `${combined.concentrated_flow.channel_density?.toFixed(1) || 'N/A'} m/ha`
+          }
+        })
+      }
+
+      // 4. DROUGHT / WATER DEFICIT CONCERN
+      if (combined.drought_risk.water_balance_mm !== null && combined.drought_risk.water_balance_mm < -50) {
+        const severity = 
+          combined.drought_risk.water_balance_mm < -150 ? 'High' :
+          combined.drought_risk.water_balance_mm < -100 ? 'Moderate' : 'Low'
+        
+        detectedConcerns.push({
+          id: 'drought',
+          category: 'Water Management',
+          concern: 'Drought and Water Deficit',
+          severity,
+          affectedPct: 100, // Affects whole field
+          affectedAcres: fieldAcres,
+          detected: true,
+          practices: ['Irrigation System (442)', 'Mulching (484)', 'Cover Crops (340)', 'Conservation Crop Rotation (328)'],
+          metrics: {
+            'Water Balance': `${combined.drought_risk.water_balance_mm.toFixed(0)} mm`,
+            'PDSI': combined.drought_risk.pdsi_mean?.toFixed(2) || 'N/A'
+          }
+        })
+      }
+
+      // 5. PRODUCTIVITY / YIELD GAP CONCERN
+      if (combined.productivity.yield_gap_pct > 15) {
+        const severity = 
+          combined.productivity.yield_gap_pct > 30 ? 'High' :
+          combined.productivity.yield_gap_pct > 20 ? 'Moderate' : 'Low'
+        
+        detectedConcerns.push({
+          id: 'productivity',
+          category: 'Soil Quality',
+          concern: 'Below-Average Productivity',
+          severity,
+          affectedPct: 100,
+          affectedAcres: fieldAcres,
+          detected: true,
+          practices: ['Nutrient Management (590)', 'Soil Testing', 'Cover Crops (340)', 'Conservation Crop Rotation (328)'],
+          metrics: {
+            'Yield Gap': `${combined.productivity.yield_gap_pct.toFixed(1)}%`,
+            'NDVI Stability (CV)': `${combined.productivity.stability_cv?.toFixed(1) || 'N/A'}%`
+          }
+        })
+      }
+
+      // 6. SOIL QUALITY (SVI) CONCERN
+      if (combined.svi.surface_loss_mean > 0.5) {
+        const severity = 
+          combined.svi.surface_loss_mean > 0.7 ? 'High' :
+          combined.svi.surface_loss_mean > 0.6 ? 'Moderate' : 'Low'
+        
+        detectedConcerns.push({
+          id: 'svi',
+          category: 'Soil Quality',
+          concern: 'Soil Vulnerability to Degradation',
+          severity,
+          affectedPct: 100,
+          affectedAcres: fieldAcres,
+          detected: true,
+          practices: ['Residue Management (329)', 'Cover Crops (340)', 'Reduced Till (345)', 'No-Till (329A)'],
+          metrics: {
+            'Surface Loss Index': combined.svi.surface_loss_mean.toFixed(2),
+            'Subsurface Drained': combined.svi.subsurface_drained_mean?.toFixed(2) || 'N/A'
+          }
+        })
+      }
+
+      // Sort by severity (High > Moderate > Low)
+      const severityOrder = { 'High': 0, 'Moderate': 1, 'Low': 2 }
+      detectedConcerns.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity])
+
+      setConcerns(detectedConcerns)
     } catch (error) {
       console.error('Error loading resource concerns:', error)
+      setConcerns([])
     } finally {
       setLoading(false)
     }
@@ -163,7 +287,21 @@ export default function ResourceConcerns({ fieldId }: ResourceConcernsProps) {
                 </div>
               </div>
 
-              <div>
+              {/* Metrics Display */}
+              {concern.metrics && (
+                <div className="mt-2 pt-2 border-t" style={{ borderColor: colors.border }}>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(concern.metrics).map(([key, value]) => (
+                      <div key={key} className="text-xs">
+                        <span className="opacity-75">{key}: </span>
+                        <span className="font-semibold">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-2">
                 <h5 className="text-xs font-semibold mb-1" style={{ color: colors.text }}>
                   Recommended Practices:
                 </h5>

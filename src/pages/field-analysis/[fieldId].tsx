@@ -23,8 +23,7 @@ import {
 
 import FieldStats from '#components/FieldAnalysis/FieldStats'
 import DashboardView from '#components/FieldAnalysis/layouts/DashboardView'
-import DetailView from '#components/FieldAnalysis/layouts/DetailView'
-import { type UseCase } from '#components/FieldAnalysis/UseCaseSelector'
+import DetailView, { TAB_LAYER_CONFIG, type TabId } from '#components/FieldAnalysis/layouts/DetailView'
 import { useFieldSSURGO, type ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import { useComprehensiveFieldAssessment } from '#hooks/useComprehensiveFieldAssessment'
 
@@ -65,12 +64,12 @@ export default function FieldAnalysisDetail() {
   
   const [fieldData, setFieldData] = useState<FieldData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [viewMode, setViewMode] = useState<ViewMode>('dashboard')
+  const [viewMode, setViewMode] = useState<ViewMode>('detail')
   const [selectedSoil, setSelectedSoil] = useState<any>(null)
   const [activeLayers, setActiveLayers] = useState<string[]>(['soil-boundaries'])
   const [showCSBLayer, setShowCSBLayer] = useState(true)
   const [activeDetailTab, setActiveDetailTab] = useState('soil')
-  const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null)
+  const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null)
   
   // SSURGO integration
   const { fieldData: ssurgoData, loading: ssurgoLoading, error: ssurgoError, queryField } = useFieldSSURGO()
@@ -92,8 +91,8 @@ export default function FieldAnalysisDetail() {
     }
     
     // Retrieve selected use case from session storage or query params
-    const useCase = (router.query.useCase as UseCase) || 
-                    (typeof window !== 'undefined' ? sessionStorage.getItem('analysisUseCase') as UseCase : null)
+    const useCase = (router.query.useCase as string) || 
+                    (typeof window !== 'undefined' ? sessionStorage.getItem('analysisUseCase') : null)
     
     if (useCase) {
       setSelectedUseCase(useCase)
@@ -148,8 +147,9 @@ export default function FieldAnalysisDetail() {
         // Query SSURGO data if boundary is available
         if (parsed.boundary) {
           console.log('Querying SSURGO for field boundary...')
+          const expectedAcres = parsed.acres || parsed.area || 0
           try {
-            await queryField(parsed.boundary)
+            await queryField(parsed.boundary, expectedAcres, id)
           } catch (error) {
             console.error('Failed to query SSURGO:', error)
           }
@@ -190,9 +190,26 @@ export default function FieldAnalysisDetail() {
     }
   }
 
+  const handleDetailTabChange = (tabId: string) => {
+    setActiveDetailTab(tabId)
+    
+    // Update active layers based on the tab configuration
+    // Use type assertion since tabId matches config keys
+    const config = TAB_LAYER_CONFIG[tabId as TabId]
+    if (config) {
+      // Set active layers to the ones marked as default for this tab
+      const defaultLayers = config
+        .filter(layer => layer.default)
+        .map(layer => layer.id)
+      
+      setActiveLayers(defaultLayers)
+    }
+  }
+
   const handleCardClick = (section: string) => {
     setViewMode('detail')
-    setActiveDetailTab(section)
+    // Use the comprehensive handler to ensure layers are synced
+    handleDetailTabChange(section)
   }
 
   const handleExportReport = () => {
@@ -221,7 +238,7 @@ export default function FieldAnalysisDetail() {
       <div className="min-h-screen bg-gray-50 flex flex-col">
         {/* Header */}
         <div 
-          className="p-4 text-white flex-shrink-0 rounded-lg my-6"
+          className="p-2 text-white flex-shrink-0 rounded-lg"
           style={{ background: 'linear-gradient(to right, var(--color-conservation), var(--color-forest-700))' }}
         >
           <div className="flex items-center justify-between">
@@ -257,17 +274,6 @@ export default function FieldAnalysisDetail() {
               {/* View Mode Toggle */}
               <div className="flex items-center gap-1 p-1 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
                 <button
-                  onClick={() => setViewMode('dashboard')}
-                  className="flex items-center gap-2 px-3 py-2 rounded-md transition-all text-sm font-medium"
-                  style={{
-                    backgroundColor: viewMode === 'dashboard' ? '#ffffff' : 'transparent',
-                    color: viewMode === 'dashboard' ? '#16a34a' : '#ffffff'
-                  }}
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  Dashboard
-                </button>
-                <button
                   onClick={() => setViewMode('detail')}
                   className="flex items-center gap-2 px-3 py-2 rounded-md transition-all text-sm font-medium"
                   style={{
@@ -277,6 +283,17 @@ export default function FieldAnalysisDetail() {
                 >
                   <FileText className="w-4 h-4" />
                   Detail
+                </button>
+                <button
+                  onClick={() => setViewMode('dashboard')}
+                  className="flex items-center gap-2 px-3 py-2 rounded-md transition-all text-sm font-medium"
+                  style={{
+                    backgroundColor: viewMode === 'dashboard' ? '#ffffff' : 'transparent',
+                    color: viewMode === 'dashboard' ? '#16a34a' : '#ffffff'
+                  }}
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
                 </button>
               </div>
 
@@ -301,8 +318,10 @@ export default function FieldAnalysisDetail() {
           </div>
         </div>
 
-        {/* Quick Stats Bar */}
-        <FieldStats fieldData={fieldData} ssurgoData={ssurgoData} />
+        {/* Quick Stats Bar - Only show in dashboard view */}
+        {viewMode === 'dashboard' && (
+          <FieldStats fieldData={fieldData} ssurgoData={ssurgoData} />
+        )}
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-hidden">
@@ -319,7 +338,7 @@ export default function FieldAnalysisDetail() {
               ssurgoData={ssurgoData}
               geeData={geeData}
               activeTab={activeDetailTab}
-              onTabChange={setActiveDetailTab}
+              onTabChange={handleDetailTabChange}
               onSoilSelect={setSelectedSoil}
               selectedSoil={selectedSoil}
               selectedUseCase={selectedUseCase}

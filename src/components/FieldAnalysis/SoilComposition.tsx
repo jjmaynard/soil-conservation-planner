@@ -23,20 +23,32 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
   const loadSoilData = async () => {
     setLoading(true)
     try {
+      console.log('[SoilComposition] Loading data for fieldId:', fieldId)
+      console.log('[SoilComposition] fieldData prop:', fieldData)
+      console.log('[SoilComposition] fieldData.soils:', fieldData?.soils)
+      console.log('[SoilComposition] soils length:', fieldData?.soils?.length)
+      
       // Try to load from fieldData prop first (real SSURGO data)
       if (fieldData?.soils && fieldData.soils.length > 0) {
+        console.log('[SoilComposition] ✅ Using fieldData prop with', fieldData.soils.length, 'soils')
         setSoils(fieldData.soils)
       } else {
-        // Try session storage
-        const storedData = sessionStorage.getItem('fieldSSURGOData')
+        console.log('[SoilComposition] ❌ No valid fieldData prop, checking session storage')
+        // Try session storage with field-specific key
+        const storedData = sessionStorage.getItem(`fieldSSURGOData-${fieldId}`)
+        console.log('[SoilComposition] Session storage key:', `fieldSSURGOData-${fieldId}`)
+        console.log('[SoilComposition] Session storage has data:', !!storedData)
         if (storedData) {
           const parsed = JSON.parse(storedData) as ProcessedFieldData
+          console.log('[SoilComposition] Parsed session data:', parsed)
           if (parsed.soils) {
+            console.log('[SoilComposition] ✅ Using session storage with', parsed.soils.length, 'soils')
             setSoils(parsed.soils)
             return
           }
         }
         
+        console.log('[SoilComposition] ⚠️ No data available, showing placeholder')
         // Fallback to placeholder data if no real data available
         const mockSoils = [
           { 
@@ -79,6 +91,16 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
           This field contains {soils.length} different soil map units with varying properties and capabilities.
         </p>
       </div>
+      
+      {/* Geometry Quality Warning */}
+      {fieldData?.geometryWarning && (
+        <div className="flex items-start gap-2 p-3 rounded-lg" style={{ backgroundColor: '#fef3c7', border: '1px solid #fde68a' }}>
+          <Info className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#f59e0b' }} />
+          <p className="text-xs" style={{ color: '#92400e' }}>
+            {fieldData.geometryWarning}
+          </p>
+        </div>
+      )}
 
       {/* Combined Table with Visual Bars */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">

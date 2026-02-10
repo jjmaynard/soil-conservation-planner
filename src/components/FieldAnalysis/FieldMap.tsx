@@ -8,9 +8,11 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet-draw'
 import * as turf from '@turf/turf'
-import { Layers, Square, MapPin, CheckCircle, AlertCircle } from 'lucide-react'
+import { Layers, Square, MapPin, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { geeApi } from '#lib/geeApiClient'
 import type { CSBFieldDetails } from '#types/geeApi'
+import { wktToGeoJSON } from '#lib/ssurgo-area-query'
+import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 
 // Fix for default marker icons in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -34,6 +36,151 @@ const STATE_FIPS_TO_NAME: Record<string, string> = {
   '47': 'Tennessee', '48': 'Texas', '49': 'Utah', '50': 'Vermont', '51': 'Virginia',
   '53': 'Washington', '54': 'West Virginia', '55': 'Wisconsin', '56': 'Wyoming',
   '72': 'Puerto Rico'
+}
+
+const LEGEND_DATA: Record<string, { title: string; items: { color: string; label: string }[] }> = {
+  'soil-boundaries': {
+    title: 'Soil Types',
+    items: [
+      { color: '#fcd34d', label: 'Sandy Loam' },
+      { color: '#fb923c', label: 'Silt Loam' },
+      { color: '#a8a29e', label: 'Clay' }
+    ]
+  },
+  'erosion-risk': {
+    title: 'Erosion Risk',
+    items: [
+      { color: '#22c55e', label: 'Low (< 2 t/ac)' },
+      { color: '#eab308', label: 'Moderate (2-5 t/ac)' },
+      { color: '#ef4444', label: 'High (> 5 t/ac)' }
+    ]
+  },
+  'twi': {
+    title: 'Topographic Wetness',
+    items: [
+      { color: '#14532d', label: 'High (Wet)' },
+      { color: '#4ade80', label: 'Moderate' },
+      { color: '#ffffff', label: 'Low (Dry)' }
+    ]
+  },
+  'depressions': {
+    title: 'Depressions',
+    items: [
+      { color: '#ef4444', label: 'Depression Area' }
+    ]
+  },
+  'flow-accumulation': {
+    title: 'Flow Accumulation',
+    items: [
+      { color: '#1e40af', label: 'High Flow' },
+      { color: '#93c5fd', label: 'Moderate' },
+      { color: '#ffffff', label: 'Low' }
+    ]
+  },
+  'flow-channels': {
+    title: 'Concentrated Flow',
+    items: [
+      { color: '#2563eb', label: 'Flow Channels' }
+    ]
+  },
+  'svi': {
+    title: 'Soil Vulnerability (SVI)',
+    items: [
+      { color: '#ef4444', label: 'High Vulnerability' },
+      { color: '#eab308', label: 'Moderate' },
+      { color: '#22c55e', label: 'Low Vulnerability' }
+    ]
+  },
+  'elevation': {
+    title: 'Elevation',
+    items: [
+      { color: '#57534e', label: 'High' },
+      { color: '#d6d3d1', label: 'Low' }
+    ]
+  },
+  'slope': {
+    title: 'Slope Percentage',
+    items: [
+      { color: '#22c55e', label: '0-2% (Flat)' },
+      { color: '#eab308', label: '2-5% (Gentle)' },
+      { color: '#ef4444', label: '> 5% (Steep)' }
+    ]
+  },
+  'ndvi': {
+    title: 'Vegetation Health (NDVI)',
+    items: [
+      { color: '#15803d', label: 'High (Healthy)' },
+      { color: '#eab308', label: 'Moderate' },
+      { color: '#ef4444', label: 'Low (Stressed)' }
+    ]
+  },
+  'drought-risk': {
+    title: 'Drought Risk',
+    items: [
+      { color: '#ef4444', label: 'High Risk' },
+      { color: '#eab308', label: 'Moderate' },
+      { color: '#22c55e', label: 'Low Risk' }
+    ]
+  },
+  'nccpi': {
+    title: 'Productivity (NCCPI)',
+    items: [
+      { color: '#15803d', label: 'High Productivity' },
+      { color: '#eab308', label: 'Moderate' },
+      { color: '#ef4444', label: 'Low Productivity' }
+    ]
+  },
+  'yield-gap': {
+    title: 'Yield Gap (Percent)',
+    items: [
+        { color: '#ef4444', label: 'High Gap (>20%)' },
+        { color: '#eab308', label: 'Moderate Gap (10-20%)' },
+        { color: '#22c55e', label: 'Low Gap (<10%)' }
+    ]
+  },
+  'mean-ndvi': {
+    title: 'Mean NDVI',
+    items: [
+        { color: '#15803d', label: 'High Vigor' },
+        { color: '#eab308', label: 'Moderate' },
+        { color: '#ef4444', label: 'Low Vigor' }
+    ]
+  },
+  'max-ndvi': {
+    title: 'Peak Season NDVI',
+    items: [
+        { color: '#15803d', label: 'High Vigor' },
+        { color: '#eab308', label: 'Moderate' },
+        { color: '#ef4444', label: 'Low Vigor' }
+    ]
+  },
+  'svi-surface': {
+    title: 'SVI Surface Runoff',
+    items: [
+        { color: '#991b1b', label: 'Very High Risk' },
+        { color: '#ea580c', label: 'High Risk' },
+        { color: '#fbbf24', label: 'Moderate Risk' },
+        { color: '#166534', label: 'Low Risk' }
+    ]
+  },
+  'svi-subsurface-drained': {
+    title: 'SVI Subsurface (Drained)',
+    items: [
+        { color: '#991b1b', label: 'Very High Risk' },
+        { color: '#ea580c', label: 'High Risk' },
+        { color: '#fbbf24', label: 'Moderate Risk' },
+        { color: '#166534', label: 'Low Risk' }
+    ]
+  },
+  'svi-subsurface-undrained': {
+    title: 'SVI Subsurface (Undrained)',
+    items: [
+        { color: '#991b1b', label: 'Very High Risk' },
+        { color: '#ea580c', label: 'High Risk' },
+        { color: '#fbbf24', label: 'Moderate Risk' },
+        { color: '#166534', label: 'Low Risk' }
+    ]
+  }
 }
 
 const getStateName = (fipsCode: string): string => {
@@ -62,8 +209,11 @@ interface FieldMapProps {
   mode: 'search' | 'browse' | 'draw' | 'upload' | 'analysis'
   searchQuery?: string
   fieldData?: any
+  geeData?: any
+  ssurgoData?: ProcessedFieldData | null
   selectedSoil?: any
   activeLayers?: string[]
+  layerOptions?: { id: string; label: string }[]
   showCLULayer?: boolean
   showCSBLayer?: boolean
   onFieldSelected?: (field: any) => void
@@ -80,8 +230,11 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   mode,
   searchQuery,
   fieldData,
+  geeData,
+  ssurgoData,
   selectedSoil,
   activeLayers = [],
+  layerOptions = [],
   showCLULayer = false,
   showCSBLayer = true,
   onFieldSelected,
@@ -113,6 +266,9 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   const mapClickHandlerRef = useRef<((e: L.LeafletMouseEvent) => void) | null>(null)
   const vertexMarkersRef = useRef<L.CircleMarker[]>([]) // Store vertex markers
   const [customFieldName, setCustomFieldName] = useState<string>('') // Custom field name input
+  const [opacity, setOpacity] = useState(0.7)
+  const [isLegendOpen, setIsLegendOpen] = useState(true)
+  const overlayLayersRef = useRef<any[]>([])
 
   // Expose methods to parent component via ref
   useImperativeHandle(ref, () => ({
@@ -856,16 +1012,20 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
     // Wait a tick to ensure editable group is initialized
     const timer = setTimeout(() => {
-      if (!mapRef.current || !fieldData.boundary) return
-
-      // Remove existing layer if present
+      // Remove existing layer if present (cleanup before potential re-add)
       if (fieldBoundaryLayerRef.current) {
         if (editableFieldGroupRef.current) {
           editableFieldGroupRef.current.removeLayer(fieldBoundaryLayerRef.current)
         } else {
-          mapRef.current.removeLayer(fieldBoundaryLayerRef.current)
+          mapRef.current?.removeLayer(fieldBoundaryLayerRef.current)
         }
+        fieldBoundaryLayerRef.current = null
       }
+
+      // If toggled off, stop here
+      if (!showCSBLayer) return
+
+      if (!mapRef.current || !fieldData.boundary) return
 
       // Use edited geometry if available (from selectedCSBField), otherwise use original fieldData.boundary
       const boundaryToUse = selectedCSBField?.geometry || fieldData.boundary
@@ -911,7 +1071,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         fieldBoundaryLayerRef.current = null
       }
     }
-  }, [fieldData, mode, mapInitialized, selectedCSBField])
+  }, [fieldData, mode, mapInitialized, selectedCSBField, showCSBLayer])
 
   // Handle search query
   useEffect(() => {
@@ -922,32 +1082,283 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     console.log('Searching for:', searchQuery)
   }, [searchQuery])
 
-  // Add soil boundaries layer in analysis mode
+  // Add layers in analysis mode
   useEffect(() => {
     if (!mapRef.current || mode !== 'analysis') return
 
+    const layers: L.Layer[] = []
+    overlayLayersRef.current = []
+
+    // Soil Boundaries (SSURGO) - Colored Polygons + WMS
     if (activeLayers.includes('soil-boundaries')) {
-      // Add SSURGO WMS layer
+      // 1. Add WMS for labels and sharp outlines
       const ssurgoLayer = L.tileLayer.wms(
         'https://sdmdataaccess.nrcs.usda.gov/Spatial/SDM.wms',
         {
           layers: 'MapunitPoly',
           format: 'image/png',
           transparent: true,
-          opacity: 0.6,
+          opacity: opacity, // Use slider opacity
         }
       )
       ssurgoLayer.addTo(mapRef.current)
+      layers.push(ssurgoLayer)
+      overlayLayersRef.current.push(ssurgoLayer as L.TileLayer)
 
-      return () => {
-        ssurgoLayer.remove()
+      // 2. Add Colored Polygons if available
+      if (ssurgoData?.mapUnitPolygons && ssurgoData.mapUnitPolygons.length > 0) {
+         // Create a map of musym -> color based on dominant component
+         const soilColorMap = new Map<string, string>();
+         
+         // 1. Map Component Name -> Color (from processed soils list)
+         const compNameToColor = new Map<string, string>();
+         ssurgoData.soils.forEach(s => compNameToColor.set(s.mapunit_name, s.color));
+
+         // 2. Map MapUnit Symbol (musym) -> Dominant Component Color
+         if (ssurgoData.rawData) {
+           ssurgoData.rawData.forEach(mu => {
+             if (mu.components && mu.components.length > 0) {
+                // Find dominant component (highest percentage)
+                const dominant = mu.components.reduce((prev, current) => 
+                   (prev.comppct_r > current.comppct_r) ? prev : current
+                );
+                
+                // Get color for this component
+                if (dominant) {
+                   const color = compNameToColor.get(dominant.compname);
+                   // Fallback: try to find any matching soil entry by ID if name fails
+                   if (color) {
+                       soilColorMap.set(mu.musym, color);
+                   }
+                }
+             }
+           });
+         }
+
+         const features = ssurgoData.mapUnitPolygons.map(poly => {
+            const geojson = wktToGeoJSON(poly.geom);
+            if (geojson) {
+                const color = soilColorMap.get(poly.musym) || '#cccccc'; 
+                return {
+                    type: 'Feature',
+                    properties: { ...poly, color: color },
+                    geometry: geojson
+                }
+            }
+            return null;
+         }).filter(Boolean);
+
+         if (features.length > 0) {
+             const geoJsonLayer = L.geoJSON(features as any, {
+                 style: (feature) => ({
+                     fillColor: feature?.properties.color,
+                     weight: 1,
+                     opacity: opacity,
+                     color: 'white',
+                     fillOpacity: opacity * 0.6 // Slightly more transparent fill
+                 }),
+                 onEachFeature: (feature, layer) => {
+                     layer.bindPopup(`
+                        <div class="p-2">
+                          <strong>${feature.properties.muname}</strong><br/>
+                          Symbol: ${feature.properties.musym}<br/>
+                          Area: ${feature.properties.area_ac ? Number(feature.properties.area_ac).toFixed(1) + ' ac' : 'N/A'}
+                        </div>
+                     `);
+                 }
+             });
+             geoJsonLayer.addTo(mapRef.current);
+             layers.push(geoJsonLayer);
+             // We can't push to overlayLayersRef easily because it expects TileLayer type for setOpacity? 
+             // Actually I implemented setOpacity loop using any or specific type?
+             // Let's check overlayLayersRef type. It is L.TileLayer[]. 
+             // I should update it to L.Layer[].
+             
+             // Cast to any to store in ref for opacity control (GeoJSON has setStyle for opacity, differs from TileLayer setOpacity)
+             (geoJsonLayer as any).setOpacity = (op: number) => {
+                 geoJsonLayer.setStyle({ opacity: op, fillOpacity: op * 0.6 });
+             };
+             overlayLayersRef.current.push(geoJsonLayer as any);
+         }
       }
     }
-  }, [activeLayers, mode])
+
+    const assessment = geeData?.geeAssessment
+
+    // Erosion Risk (GEE)
+    if (activeLayers.includes('erosion-risk') && assessment?.erosion_risk?.visualization?.tile_url) {
+      const tileUrl = assessment.erosion_risk.visualization.tile_url
+      const erosionLayer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine' })
+      erosionLayer.addTo(mapRef.current)
+      layers.push(erosionLayer)
+      overlayLayersRef.current.push(erosionLayer)
+    }
+
+    // TWI (GEE)
+    if (activeLayers.includes('twi') && assessment?.ponding?.visualization?.twi_tile_url) {
+      const tileUrl = assessment.ponding.visualization.twi_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - TWI' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Depressions (GEE)
+    if (activeLayers.includes('depressions') && assessment?.ponding?.visualization?.depressions_tile_url) {
+      const tileUrl = assessment.ponding.visualization.depressions_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Depressions' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Flow Channels / SPI (GEE)
+    if (activeLayers.includes('flow-channels') && assessment?.concentrated_flow?.visualization?.spi_tile_url) {
+      const tileUrl = assessment.concentrated_flow.visualization.spi_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Flow' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // NDVI / Vegetation (GEE)
+    if (activeLayers.includes('ndvi') && assessment?.productivity?.visualization?.mean_ndvi_tile_url) {
+      const tileUrl = assessment.productivity.visualization.mean_ndvi_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - NDVI' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Productivity: Yield Gap (GEE)
+    if (activeLayers.includes('yield-gap') && assessment?.productivity?.visualization?.yield_gap_tile_url) {
+      const tileUrl = assessment.productivity.visualization.yield_gap_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Yield Gap' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Productivity: Mean NDVI (GEE)
+    if (activeLayers.includes('mean-ndvi') && assessment?.productivity?.visualization?.mean_ndvi_tile_url) {
+      const tileUrl = assessment.productivity.visualization.mean_ndvi_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Mean NDVI' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Productivity: Max NDVI (GEE)
+    if (activeLayers.includes('max-ndvi') && assessment?.productivity?.visualization?.max_ndvi_tile_url) {
+      const tileUrl = assessment.productivity.visualization.max_ndvi_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Max NDVI' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Drought / Water Balance (GEE)
+    if (activeLayers.includes('drought-risk') && assessment?.drought?.visualization?.water_balance_tile_url) {
+      const tileUrl = assessment.drought.visualization.water_balance_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Drought' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // SVI: Surface Runoff (GEE)
+    if (activeLayers.includes('svi-surface') && assessment?.svi?.visualization?.surface_tile_url) {
+      const tileUrl = assessment.svi.visualization.surface_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - SVI Surface' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // SVI: Subsurface Drained (GEE)
+    if (activeLayers.includes('svi-subsurface-drained') && assessment?.svi?.visualization?.subsurface_drained_tile_url) {
+      const tileUrl = assessment.svi.visualization.subsurface_drained_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - SVI SubSrfc Drained' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // SVI: Subsurface Undrained (GEE)
+    if (activeLayers.includes('svi-subsurface-undrained') && assessment?.svi?.visualization?.subsurface_undrained_tile_url) {
+      const tileUrl = assessment.svi.visualization.subsurface_undrained_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - SVI SubSrfc Undrained' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    return () => {
+      layers.forEach(layer => layer.remove())
+      overlayLayersRef.current = [] 
+    }
+  }, [activeLayers, mode, geeData]) // Intentionally omit opacity to prevent reload
+
+  // Update opacity separately
+  useEffect(() => {
+    overlayLayersRef.current.forEach(layer => {
+      layer.setOpacity(opacity)
+    })
+  }, [opacity])
 
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="absolute inset-0 w-full h-full" />
+
+      {/* Dynamic Legend (Bottom Right) */}
+      {mode === 'analysis' && activeLayers.some(id => LEGEND_DATA[id]) && (
+        <div className="absolute bottom-24 right-3 bg-white/95 backdrop-blur-sm shadow-xl z-[1000] max-w-[220px] border border-gray-100 rounded-lg overflow-hidden transition-all duration-300">
+          <div 
+            className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors"
+            onClick={() => setIsLegendOpen(!isLegendOpen)}
+          >
+            <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Map Legend</h3>
+            {isLegendOpen ? <ChevronDown className="w-4 h-4 text-gray-500" /> : <ChevronUp className="w-4 h-4 text-gray-500" />}
+          </div>
+
+          {isLegendOpen && (
+            <div className="p-3">
+              <div className="space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                {activeLayers.map(id => LEGEND_DATA[id] && (
+                  <div key={id} className="last:mb-0">
+                      <h4 className="text-xs font-bold text-gray-800 mb-2 pb-1 border-b border-gray-100">{LEGEND_DATA[id].title}</h4>
+                      <div className="space-y-1.5">
+                        {LEGEND_DATA[id].items.map((item, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full shadow-sm flex-shrink-0" style={{ backgroundColor: item.color, border: '1px solid rgba(0,0,0,0.1)' }}></span>
+                            <span className="text-xs text-gray-600 font-medium leading-tight">{item.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Opacity Slider */}
+              <div className="mt-4 pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs text-gray-600 font-medium">Layer Opacity</label>
+                  <span className="text-xs font-bold text-green-600">{Math.round(opacity * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={opacity}
+                  onChange={(e) => setOpacity(parseFloat(e.target.value))}
+                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Layer Controls for Browse Mode */}
       {mode === 'browse' && onCSBLayerToggle && (

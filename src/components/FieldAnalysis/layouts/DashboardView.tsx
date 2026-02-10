@@ -5,6 +5,9 @@
 import { TrendingUp, AlertTriangle, Droplets, Layers, Sprout, CloudRain } from 'lucide-react'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
+import RankedConcernsList from '../RankedConcernsList'
+import PracticeRecommendations from '../PracticeRecommendations'
+import DroughtDashboard from '../DroughtDashboard'
 
 interface DashboardViewProps {
   fieldData: any
@@ -21,6 +24,13 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
   const productivity = geeData?.combined?.productivity?.ndvi_peak_mean
   const droughtRisk = geeData?.combined?.drought_risk?.water_balance_mm
   const sviRisk = geeData?.combined?.svi?.surface_loss_mean
+
+  console.log('[DashboardView] Rendering with data:')
+  console.log('  - ssurgoData:', ssurgoData)
+  console.log('  - ssurgoData.soils:', ssurgoData?.soils)
+  console.log('  - soils length:', ssurgoData?.soils?.length)
+  console.log('  - dominantSoil:', dominantSoil)
+  console.log('  - geeData:', geeData)
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
@@ -289,6 +299,28 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
           Last updated: {new Date().toLocaleDateString()}
         </div>
       </div>
+
+      {/* Enhanced Analysis Sections */}
+      {geeData && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          {/* Priority Resource Concerns */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <RankedConcernsList geeData={geeData} />
+          </div>
+
+          {/* Conservation Practice Recommendations */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <PracticeRecommendations geeData={geeData} compact={true} />
+          </div>
+        </div>
+      )}
+
+      {/* Drought Assessment Section */}
+      {geeData?.geeAssessment?.drought && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+          <DroughtDashboard geeData={geeData} />
+        </div>
+      )}
     </div>
   )
 }
