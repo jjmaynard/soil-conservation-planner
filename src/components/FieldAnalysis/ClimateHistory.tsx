@@ -230,7 +230,7 @@ export default function ClimateHistory({ fieldId, geeData, wkt }: ClimateHistory
                   <td className="p-3 font-medium text-right">{temperature.growing_season.first_fall_freeze_date}</td>
                 </tr>
                 <tr className="hover:bg-gray-50">
-                  <td className="p-3 text-gray-600">Days > 32°C (90°F)</td>
+                  <td className="p-3 text-gray-600">Days {'>'} 32°C (90°F)</td>
                   <td className="p-3 font-medium text-right text-orange-600">{temperature.critical_thresholds.days_above_32c}</td>
                 </tr>
                 <tr className="hover:bg-gray-50">
