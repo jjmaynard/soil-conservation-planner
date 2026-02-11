@@ -1764,7 +1764,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
           <div className="p-4">
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <span className="text-gray-600 text-xs">CLU ID:</span>
+                <span className="text-gray-600 text-xs">CSB ID:</span>
                 <div className="font-semibold text-gray-900 text-sm">{selectedCSBField.clu_id || 'N/A'}</div>
               </div>
               <div>
