@@ -126,7 +126,10 @@ export default function FieldAnalysisDetail() {
         setGeeAssessed(true) // Set flag before calling to prevent duplicates
         try {
           // Pass CSB ID if available for crop-specific productivity
-          const csbId = (fieldData as any).csb_id || (fieldData as any).csbid
+          // CSB fields use clu_id to store the CSB ID when method is 'csb-selected'
+          const csbId = (fieldData as any).csb_id || 
+                        (fieldData as any).csbid || 
+                        ((fieldData as any).method === 'csb-selected' && (fieldData as any).clu_id)
           await assessField(fieldData.boundary, ssurgoData, new Date().getFullYear(), csbId)
         } catch (error) {
           console.error('Failed to query GEE assessment:', error)
