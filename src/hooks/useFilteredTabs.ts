@@ -12,7 +12,9 @@ export interface Tab {
   bgColor: string
 }
 
-const useCaseTabMapping: Record<UseCase, TabId[]> = {
+type UseCaseId = 'erosion' | 'production' | 'water' | 'compliance' | 'comprehensive'
+
+const useCaseTabMapping: Record<UseCaseId, TabId[]> = {
   erosion: ['erosion', 'svi', 'flow', 'concerns', 'practices'],
   production: ['soil', 'productivity', 'zones', 'drainage'],
   water: ['drainage', 'drought', 'flow'],
