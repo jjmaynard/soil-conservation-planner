@@ -20,7 +20,6 @@ import TerrainAttributes from '../TerrainAttributes'
 import ClimateHistory from '../ClimateHistory'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
-import type { UseCase } from '@/config/use-cases'
 import { useFilteredTabs, getDefaultTab } from '#hooks/useFilteredTabs'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
 
@@ -45,7 +44,7 @@ interface DetailViewProps {
   showCSBLayer?: boolean
   onCSBLayerToggle?: () => void
   onLayerToggle?: (layerId: string) => void
-  selectedUseCase?: UseCase | null
+  selectedUseCase?: string | null
 }
 
 export type TabId = 'soil' | 'erosion' | 'drainage' | 'productivity' | 'svi' | 'flow' | 'drought' | 'vegetation' | 'terrain' | 'climate' | 'concerns' | 'practices' | 'zones'
