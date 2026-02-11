@@ -20,7 +20,7 @@ import TerrainAttributes from '../TerrainAttributes'
 import ClimateHistory from '../ClimateHistory'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
-import { type UseCase } from '../UseCaseSelector'
+import type { UseCase } from '@/config/use-cases'
 import { useFilteredTabs, getDefaultTab } from '#hooks/useFilteredTabs'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
 
