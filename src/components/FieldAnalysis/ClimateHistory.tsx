@@ -200,7 +200,7 @@ export default function ClimateHistory({ fieldId, geeData, wkt }: ClimateHistory
                   <td className="p-3 font-medium text-right text-orange-600">{precipitation.intensity_statistics.max_daily_mm} mm</td>
                 </tr>
                 <tr className="hover:bg-gray-50">
-                  <td className="p-3 text-gray-600">Days > 25mm (1 inch)</td>
+                  <td className="p-3 text-gray-600">Days {'>'} 25mm (1 inch)</td>
                   <td className="p-3 font-medium text-right">{precipitation.intensity_statistics.days_over_25mm_per_year}/yr</td>
                 </tr>
                 <tr className="hover:bg-gray-50">
