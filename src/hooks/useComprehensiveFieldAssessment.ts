@@ -101,6 +101,11 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
     ) => {
       setLoading(true)
       setError(null)
+      
+      // Clear any existing data to prevent showing stale cached data
+      setData(null)
+      sessionStorage.removeItem('comprehensiveFieldAssessment')
+      console.log('Cleared existing assessment data')
 
       try {
         // Convert geometry to WKT for GEE API
@@ -120,7 +125,7 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
           try {
             console.log('Querying crop-specific productivity for CSB ID:', csbId)
             const endYear = year || new Date().getFullYear()
-            const startYear = endYear - 14 // 15 years total to capture full rotation history
+            const startYear = 2017 // API requires >= 2017, use minimum allowed year
             console.log('Year range:', startYear, 'to', endYear)
             cropProductivity = await geeApi.getProductivityCropSpecific({
               csbid: csbId,

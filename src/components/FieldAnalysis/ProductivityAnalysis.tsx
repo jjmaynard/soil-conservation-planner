@@ -51,8 +51,8 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
             setSelectedCrop(cropProd.crops_analyzed[0].crop_name)
           }
         } else if (geeData.geeAssessment?.productivity) {
-          // Fall back to overall productivity data
-          console.log('Using fallback productivity data')
+          // Use non-crop-specific data from current field assessment
+          console.log('Using current field productivity data (non-crop-specific)')
           const prod = geeData.geeAssessment.productivity
           const combined = geeData.combined.productivity
           
@@ -68,41 +68,14 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
             hasData: true,
           })
         } else {
-          console.log('No productivity data available')
+          console.log('No productivity data available for current field')
           setProductivityData({ hasData: false })
         }
       } else {
-        // Try session storage
-        console.log('No geeData, checking session storage...')
-        const stored = sessionStorage.getItem('comprehensiveFieldAssessment')
-        console.log('Session storage data:', stored ? JSON.parse(stored) : null)
-        
-        if (stored) {
-          const parsed = JSON.parse(stored) as EnhancedFieldData
-          console.log('Parsed session data cropProductivity:', parsed.cropProductivity)
-          
-          if (parsed.cropProductivity && parsed.cropProductivity.crops_analyzed.length > 0) {
-            console.log('Using session storage crop-specific data')
-            const cropProd = parsed.cropProductivity
-            setProductivityData({
-              hasCropSpecific: true,
-              overall_yield_gap_pct: cropProd.overall_yield_gap_pct,
-              dominant_crop: cropProd.dominant_crop,
-              recommendation: cropProd.recommendation,
-              crops: cropProd.crops_analyzed,
-              time_series: cropProd.time_series,
-              rotation_summary: cropProd.rotation_summary,
-              overall_assessment: cropProd.overall_assessment,
-              hasData: true,
-            })
-            if (!selectedCrop && cropProd.crops_analyzed.length > 0) {
-              setSelectedCrop(cropProd.crops_analyzed[0].crop_name)
-            }
-            return
-          } else if (parsed.geeAssessment?.productivity) {
-            console.log('Using session storage fallback data')
-            const prod = parsed.geeAssessment.productivity
-            const combined = parsed.combined.productivity
+        // Show loading state - don't use cached session storage to avoid stale data
+        console.log('No current field data - showing loading state')
+        setProductivityData({ hasData: false, loading: true })
+      }
             
             setProductivityData({
               hasCropSpecific: false,
