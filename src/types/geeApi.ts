@@ -644,6 +644,96 @@ export interface ClimateHistoryRequest {
   year?: number // Assessment year context
 }
 
+// ============================================================================
+// Crop-Specific Productivity Assessment (/api/assessment/productivity-crop-specific)
+// ============================================================================
+
+export interface ProductivityCropSpecificRequest {
+  csbid: string
+  start_year: number
+  end_year: number
+}
+
+export interface CropProductivityViz {
+  yield_gap_tile_url: string
+  mean_ndvi_tile_url: string
+  max_ndvi_tile_url: string
+  yield_gap_thumbnail_url: string
+  yield_gap_viz: {
+    min: number
+    max: number
+    palette: string[]
+  }
+  mean_ndvi_viz: {
+    min: number
+    max: number
+    palette: string[]
+  }
+  max_ndvi_viz: {
+    min: number
+    max: number
+    palette: string[]
+  }
+  description: string
+}
+
+export interface CropAnalysis {
+  crop_name: string
+  crop_code: number
+  years_analyzed: number
+  year_list: number[]
+  ndvi_mean: number
+  ndvi_max: number
+  ndvi_std: number
+  yield_gap_pct: number
+  yield_gap_interpretation: string
+  visualization: CropProductivityViz
+}
+
+export interface TimeSeriesEntry {
+  year: number
+  crop_name: string
+  crop_code: number
+  ndvi_max: number
+  yield_gap_pct: number
+}
+
+export interface ProductivityCropSpecificResponse {
+  field_id: string
+  total_years_analyzed: number
+  crops_analyzed: CropAnalysis[]
+  rotation_summary: Record<string, number>
+  overall_yield_gap_pct: number
+  dominant_crop: string
+  recommendation: string
+  overall_assessment: {
+    productivity_metrics: {
+      ndvi_peak_mean: number
+      ndvi_peak_std: number
+    }
+    yield_gap: {
+      mean_gap_pct: number
+      p75_gap_pct: number
+      p90_gap_pct: number
+    }
+    visualization: CropProductivityViz & {
+      description: string
+    }
+    description: string
+  }
+  time_series: TimeSeriesEntry[]
+  methodology: string
+}
+
+// ============================================================================
+// Climate History Types (/api/climate/comprehensive)
+// ============================================================================
+
+export interface ClimateHistoryRequest {
+  wkt: string
+  year?: number // Assessment year context
+}
+
 export interface ClimateHistoryResponse {
   location: {
     wkt: string

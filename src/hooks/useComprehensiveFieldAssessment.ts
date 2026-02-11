@@ -9,7 +9,7 @@ import { useState, useCallback } from 'react'
 import type * as GeoJSON from 'geojson'
 import { geeApi } from '#lib/geeApiClient'
 import { geometryToWKT } from '#lib/ssurgo-area-query'
-import type { ComprehensiveFieldAssessment } from '#types/geeApi'
+import type { ComprehensiveFieldAssessment, ProductivityCropSpecificResponse } from '#types/geeApi'
 import type { ProcessedFieldData } from './useFieldSSURGO'
 
 export interface EnhancedFieldData {
@@ -18,6 +18,9 @@ export interface EnhancedFieldData {
   
   // GEE comprehensive assessment
   geeAssessment: ComprehensiveFieldAssessment | null
+  
+  // Crop-specific productivity (optional - requires CSB ID)
+  cropProductivity: ProductivityCropSpecificResponse | null
   
   // Combined/enhanced metrics
   combined: {
@@ -70,7 +73,13 @@ interface UseComprehensiveFieldAssessmentResult {
   assessField: (
     geometry: GeoJSON.Polygon | number[][],
     ssurgoData?: ProcessedFieldData | null,
-    year?: number
+    year?: number,
+    csbId?: string
+  ) => Promise<void>
+  assessCropProductivity: (
+    csbId: string,
+    startYear?: number,
+    endYear?: number
   ) => Promise<void>
   reset: () => void
 }
@@ -87,7 +96,8 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
     async (
       geometry: GeoJSON.Polygon | number[][],
       ssurgoData?: ProcessedFieldData | null,
-      year?: number
+      year?: number,
+      csbId?: string
     ) => {
       setLoading(true)
       setError(null)
@@ -104,8 +114,26 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
           include_visualizations: true,
         })
 
+        // Query crop-specific productivity if CSB ID is available
+        let cropProductivity: ProductivityCropSpecificResponse | null = null
+        if (csbId) {
+          try {
+            console.log('Querying crop-specific productivity for CSB ID:', csbId)
+            const endYear = year || new Date().getFullYear()
+            const startYear = endYear - 6 // 7 years total
+            cropProductivity = await geeApi.getProductivityCropSpecific({
+              csbid: csbId,
+              start_year: startYear,
+              end_year: endYear
+            })
+          } catch (cropError) {
+            console.warn('Failed to fetch crop-specific productivity:', cropError)
+            // Don't fail the whole assessment if crop-specific fails
+          }
+        }
+
         // Combine SSURGO and GEE data
-        const enhancedData = combineData(ssurgoData, geeAssessment)
+        const enhancedData = combineData(ssurgoData, geeAssessment, cropProductivity)
         setData(enhancedData)
         
         // Store in session storage
@@ -121,6 +149,51 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
     []
   )
 
+  const assessCropProductivity = useCallback(
+    async (
+      csbId: string,
+      startYear?: number,
+      endYear?: number
+    ) => {
+      if (!data) {
+        console.warn('No comprehensive assessment data available')
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+
+      try {
+        const end = endYear || new Date().getFullYear()
+        const start = startYear || end - 6 // 7 years total
+
+        console.log('Querying crop-specific productivity for CSB ID:', csbId)
+        const cropProductivity = await geeApi.getProductivityCropSpecific({
+          csbid: csbId,
+          start_year: start,
+          end_year: end
+        })
+
+        // Update data with crop-specific productivity
+        const updatedData: EnhancedFieldData = {
+          ...data,
+          cropProductivity
+        }
+        setData(updatedData)
+        
+        // Update session storage
+        sessionStorage.setItem('comprehensiveFieldAssessment', JSON.stringify(updatedData))
+      } catch (err) {
+        const error = err instanceof Error ?err : new Error('Unknown error')
+        setError(error)
+        console.error('Crop-specific productivity error:', error)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [data]
+  )
+
   const reset = useCallback(() => {
     setData(null)
     setError(null)
@@ -132,6 +205,7 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
     loading,
     error,
     assessField,
+    assessCropProductivity,
     reset,
   }
 }
@@ -141,7 +215,8 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
  */
 function combineData(
   ssurgoData: ProcessedFieldData | null,
-  geeAssessment: ComprehensiveFieldAssessment
+  geeAssessment: ComprehensiveFieldAssessment,
+  cropProductivity: ProductivityCropSpecificResponse | null = null
 ): EnhancedFieldData {
   // Calculate combined erosion risk
   const ssurgoErosionRisk = ssurgoData?.erosion.avgErosion || null
@@ -169,6 +244,7 @@ function combineData(
   return {
     ssurgoData,
     geeAssessment,
+    cropProductivity,
     combined: {
       erosion: {
         ssurgo_slope_based: ssurgoErosionRisk,

@@ -32,6 +32,8 @@ import type {
   ProductivityAssessment,
   ComprehensiveFieldAssessment,
   ComprehensiveAssessmentRequest,
+  ProductivityCropSpecificRequest,
+  ProductivityCropSpecificResponse,
   ClimateHistoryRequest,
   ClimateHistoryResponse,
 } from '#types/geeApi'
@@ -642,6 +644,25 @@ class GEEAPIClient {
       const { data } = await this.client.post<ComprehensiveFieldAssessment>(
         `/api/assessment/all`,
         body
+      )
+      return data
+    } catch (error) {
+      return handleAPIError(error)
+    }
+  }
+
+  /**
+   * Get crop-specific productivity assessment using CSB rotation data
+   * @param request - CSB ID and year range
+   * @returns Crop-stratified productivity analysis with yield gaps per crop
+   */
+  async getProductivityCropSpecific(
+    request: ProductivityCropSpecificRequest
+  ): Promise<ProductivityCropSpecificResponse> {
+    try {
+      const { data } = await this.client.post<ProductivityCropSpecificResponse>(
+        `/api/assessment/productivity-crop-specific`,
+        request
       )
       return data
     } catch (error) {
