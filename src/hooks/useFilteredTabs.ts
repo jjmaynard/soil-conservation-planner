@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 
-export type TabId = 'soil' | 'erosion' | 'drainage' | 'productivity' | 'svi' | 'flow' | 'drought' | 'concerns' | 'practices' | 'zones'
+export type TabId = 'soil' | 'erosion' | 'drainage' | 'productivity' | 'svi' | 'flow' | 'drought' | 'vegetation' | 'terrain' | 'climate' | 'concerns' | 'practices' | 'zones'
 
 export interface Tab {
   id: TabId
@@ -17,7 +17,7 @@ const useCaseTabMapping: Record<UseCase, TabId[]> = {
   production: ['soil', 'productivity', 'zones', 'drainage'],
   water: ['drainage', 'drought', 'flow'],
   compliance: ['concerns', 'practices', 'erosion', 'drainage'],
-  comprehensive: ['soil', 'erosion', 'drainage', 'productivity', 'svi', 'flow', 'drought', 'concerns', 'practices', 'zones']
+  comprehensive: ['soil', 'erosion', 'drainage', 'productivity', 'svi', 'flow', 'drought', 'vegetation', 'terrain', 'climate', 'concerns', 'practices', 'zones']
 }
 
 export function useFilteredTabs(allTabs: Tab[], selectedUseCase: string | null): Tab[] {
