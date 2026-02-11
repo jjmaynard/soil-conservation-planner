@@ -55,6 +55,47 @@ const LEGEND_DATA: Record<string, { title: string; items: { color: string; label
       { color: '#ef4444', label: 'High (> 5 t/ac)' }
     ]
   },
+  'slope': {
+    title: 'Slope',
+    items: [
+      { color: '#ffffff', label: '0% (Flat)' },
+      { color: '#fbbf24', label: '3-8%' },
+      { color: '#f97316', label: '8-15%' },
+      { color: '#dc2626', label: '>15% (Steep)' }
+    ]
+  },
+  'k-factor': {
+    title: 'K-Factor (Erodibility)',
+    items: [
+      { color: '#22c55e', label: 'Low (< 0.20)' },
+      { color: '#eab308', label: 'Moderate (0.20-0.35)' },
+      { color: '#ef4444', label: 'High (> 0.35)' }
+    ]
+  },
+  'spi': {
+    title: 'Stream Power Index',
+    items: [
+      { color: '#dbeafe', label: 'Low' },
+      { color: '#3b82f6', label: 'Moderate' },
+      { color: '#1e3a8a', label: 'High' }
+    ]
+  },
+  'runoff': {
+    title: 'Runoff Factor',
+    items: [
+      { color: '#dcfce7', label: 'Low' },
+      { color: '#22c55e', label: 'Moderate' },
+      { color: '#15803d', label: 'High' }
+    ]
+  },
+  't-value': {
+    title: 'T-Value (Soil Loss Tolerance)',
+    items: [
+      { color: '#fef3c7', label: '3 T/A/Y' },
+      { color: '#fbbf24', label: '4 T/A/Y' },
+      { color: '#15803d', label: '5 T/A/Y' }
+    ]
+  },
   'twi': {
     title: 'Topographic Wetness',
     items: [
@@ -67,6 +108,40 @@ const LEGEND_DATA: Record<string, { title: string; items: { color: string; label
     title: 'Depressions',
     items: [
       { color: '#ef4444', label: 'Depression Area' }
+    ]
+  },
+  'wet-areas': {
+    title: 'Wet Areas (TWI > 12)',
+    items: [
+      { color: '#0c4a6e', label: 'Very Wet (>15)' },
+      { color: '#0369a1', label: 'Wet (12-15)' },
+      { color: '#7dd3fc', label: 'Moderate (<12)' }
+    ]
+  },
+  'ponding-risk': {
+    title: 'Ponding Risk',
+    items: [
+      { color: '#22c55e', label: 'Low Risk' },
+      { color: '#eab308', label: 'Moderate Risk' },
+      { color: '#ef4444', label: 'High Risk' }
+    ]
+  },
+  'hydrologic-group': {
+    title: 'Hydrologic Group',
+    items: [
+      { color: '#bfdbfe', label: 'A (High Infiltration)' },
+      { color: '#60a5fa', label: 'B (Moderate)' },
+      { color: '#2563eb', label: 'C (Slow)' },
+      { color: '#1e3a8a', label: 'D (Very Slow)' }
+    ]
+  },
+  'drainage-class': {
+    title: 'Drainage Class',
+    items: [
+      { color: '#14532d', label: 'Poorly Drained' },
+      { color: '#166534', label: 'Somewhat Poorly' },
+      { color: '#22c55e', label: 'Moderately Well' },
+      { color: '#86efac', label: 'Well Drained' }
     ]
   },
   'flow-accumulation': {
@@ -98,14 +173,6 @@ const LEGEND_DATA: Record<string, { title: string; items: { color: string; label
       { color: '#d6d3d1', label: 'Low' }
     ]
   },
-  'slope': {
-    title: 'Slope Percentage',
-    items: [
-      { color: '#22c55e', label: '0-2% (Flat)' },
-      { color: '#eab308', label: '2-5% (Gentle)' },
-      { color: '#ef4444', label: '> 5% (Steep)' }
-    ]
-  },
   'ndvi': {
     title: 'Vegetation Health (NDVI)',
     items: [
@@ -122,12 +189,44 @@ const LEGEND_DATA: Record<string, { title: string; items: { color: string; label
       { color: '#22c55e', label: 'Low Risk' }
     ]
   },
-  'nccpi': {
-    title: 'Productivity (NCCPI)',
+  'nccpi-all': {
+    title: 'NCCPI All Crops',
     items: [
-      { color: '#15803d', label: 'High Productivity' },
-      { color: '#eab308', label: 'Moderate' },
-      { color: '#ef4444', label: 'Low Productivity' }
+      { color: '#15803d', label: 'High (>66)' },
+      { color: '#eab308', label: 'Moderate (33-66)' },
+      { color: '#ef4444', label: 'Low (<33)' }
+    ]
+  },
+  'nccpi-corn': {
+    title: 'NCCPI Corn Productivity',
+    items: [
+      { color: '#15803d', label: 'High (>66)' },
+      { color: '#eab308', label: 'Moderate (33-66)' },
+      { color: '#ef4444', label: 'Low (<33)' }
+    ]
+  },
+  'nccpi-soy': {
+    title: 'NCCPI Soybean Productivity',
+    items: [
+      { color: '#15803d', label: 'High (>66)' },
+      { color: '#eab308', label: 'Moderate (33-66)' },
+      { color: '#ef4444', label: 'Low (<33)' }
+    ]
+  },
+  'nccpi-sg': {
+    title: 'NCCPI Small Grains Productivity',
+    items: [
+      { color: '#15803d', label: 'High (>66)' },
+      { color: '#eab308', label: 'Moderate (33-66)' },
+      { color: '#ef4444', label: 'Low (<33)' }
+    ]
+  },
+  'nccpi-cotton': {
+    title: 'NCCPI Cotton Productivity',
+    items: [
+      { color: '#15803d', label: 'High (>66)' },
+      { color: '#eab308', label: 'Moderate (33-66)' },
+      { color: '#ef4444', label: 'Low (<33)' }
     ]
   },
   'yield-gap': {
@@ -269,6 +368,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   const [opacity, setOpacity] = useState(0.7)
   const [isLegendOpen, setIsLegendOpen] = useState(true)
   const overlayLayersRef = useRef<any[]>([])
+  // NCCPI layers now come from comprehensive assessment, not global tile service
 
   // Expose methods to parent component via ref
   useImperativeHandle(ref, () => ({
@@ -1082,6 +1182,8 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     console.log('Searching for:', searchQuery)
   }, [searchQuery])
 
+  // NCCPI layers removed - now using field-masked tiles from comprehensive assessment
+
   // Add layers in analysis mode
   useEffect(() => {
     if (!mapRef.current || mode !== 'analysis') return
@@ -1194,6 +1296,51 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       overlayLayersRef.current.push(erosionLayer)
     }
 
+    // Slope (GEE)
+    if (activeLayers.includes('slope') && assessment?.erosion_risk?.visualization?.slope_tile_url) {
+      const tileUrl = assessment.erosion_risk.visualization.slope_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Slope' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // K-Factor (GEE)
+    if (activeLayers.includes('k-factor') && assessment?.erosion_risk?.visualization?.k_factor_tile_url) {
+      const tileUrl = assessment.erosion_risk.visualization.k_factor_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - K-Factor' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Stream Power Index (GEE)
+    if (activeLayers.includes('spi') && assessment?.erosion_risk?.visualization?.spi_tile_url) {
+      const tileUrl = assessment.erosion_risk.visualization.spi_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - SPI' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Runoff Factor (GEE)
+    if (activeLayers.includes('runoff') && assessment?.erosion_risk?.visualization?.runoff_tile_url) {
+      const tileUrl = assessment.erosion_risk.visualization.runoff_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Runoff' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // T-Value (GEE)
+    if (activeLayers.includes('t-value') && assessment?.erosion_risk?.visualization?.t_value_tile_url) {
+      const tileUrl = assessment.erosion_risk.visualization.t_value_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - T-Value' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
     // TWI (GEE)
     if (activeLayers.includes('twi') && assessment?.ponding?.visualization?.twi_tile_url) {
       const tileUrl = assessment.ponding.visualization.twi_tile_url
@@ -1212,7 +1359,42 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       overlayLayersRef.current.push(layer)
     }
 
-    // Flow Channels / SPI (GEE)
+    // Wet Areas (GEE)
+    if (activeLayers.includes('wet-areas') && assessment?.ponding?.visualization?.wet_areas_tile_url) {
+      const tileUrl = assessment.ponding.visualization.wet_areas_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Wet Areas' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Ponding Risk (GEE)
+    if (activeLayers.includes('ponding-risk') && assessment?.ponding?.visualization?.ponding_risk_tile_url) {
+      const tileUrl = assessment.ponding.visualization.ponding_risk_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Ponding Risk' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Hydrologic Group (GEE)
+    if (activeLayers.includes('hydrologic-group') && assessment?.ponding?.visualization?.hydrologic_group_tile_url) {
+      const tileUrl = assessment.ponding.visualization.hydrologic_group_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Hydrologic Group' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Drainage Class (GEE)
+    if (activeLayers.includes('drainage-class') && assessment?.ponding?.visualization?.drainage_class_tile_url) {
+      const tileUrl = assessment.ponding.visualization.drainage_class_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Drainage Class' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
     if (activeLayers.includes('flow-channels') && assessment?.concentrated_flow?.visualization?.spi_tile_url) {
       const tileUrl = assessment.concentrated_flow.visualization.spi_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Flow' })
@@ -1252,6 +1434,47 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     if (activeLayers.includes('max-ndvi') && assessment?.productivity?.visualization?.max_ndvi_tile_url) {
       const tileUrl = assessment.productivity.visualization.max_ndvi_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Max NDVI' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Productivity: NCCPI Crop-Specific Layers (GEE - field-masked)
+    if (activeLayers.includes('nccpi-all') && assessment?.productivity?.visualization?.nccpi_all_tile_url) {
+      const tileUrl = assessment.productivity.visualization.nccpi_all_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI All Crops' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    if (activeLayers.includes('nccpi-corn') && assessment?.productivity?.visualization?.nccpi_corn_tile_url) {
+      const tileUrl = assessment.productivity.visualization.nccpi_corn_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI Corn' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    if (activeLayers.includes('nccpi-soy') && assessment?.productivity?.visualization?.nccpi_soy_tile_url) {
+      const tileUrl = assessment.productivity.visualization.nccpi_soy_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI Soybean' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    if (activeLayers.includes('nccpi-sg') && assessment?.productivity?.visualization?.nccpi_sg_tile_url) {
+      const tileUrl = assessment.productivity.visualization.nccpi_sg_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI Small Grains' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    if (activeLayers.includes('nccpi-cotton') && assessment?.productivity?.visualization?.nccpi_cotton_tile_url) {
+      const tileUrl = assessment.productivity.visualization.nccpi_cotton_tile_url
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI Cotton' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
@@ -1297,7 +1520,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       layers.forEach(layer => layer.remove())
       overlayLayersRef.current = [] 
     }
-  }, [activeLayers, mode, geeData]) // Intentionally omit opacity to prevent reload
+  }, [activeLayers, mode, geeData, ssurgoData]) // Intentionally omit opacity to prevent reload
 
   // Update opacity separately
   useEffect(() => {

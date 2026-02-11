@@ -588,11 +588,23 @@ export interface ComprehensiveFieldAssessment {
       p75_gap_pct: number
       p90_gap_pct: number
     }
+    nccpi_metrics?: {
+      corn_mean: number
+      soybean_mean: number
+      small_grains_mean: number
+      cotton_mean: number
+      all_crops_mean: number
+    }
     visualization: {
       yield_gap_tile_url: string
       mean_ndvi_tile_url: string
       max_ndvi_tile_url: string
       yield_gap_thumbnail_url: string
+      nccpi_corn_tile_url?: string
+      nccpi_soy_tile_url?: string
+      nccpi_sg_tile_url?: string
+      nccpi_cotton_tile_url?: string
+      nccpi_all_tile_url?: string
       description: string
     }
     methodology: string

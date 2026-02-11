@@ -60,14 +60,28 @@ interface Tab {
 
 export const TAB_LAYER_CONFIG: Record<TabId, { id: string; label: string; default?: boolean }[]> = {
   soil: [{ id: 'soil-boundaries', label: 'Soil', default: true }],
-  erosion: [{ id: 'erosion-risk', label: 'Erosion', default: true }],
+  erosion: [
+    { id: 'erosion-risk', label: 'Erosion Risk', default: true },
+    { id: 'slope', label: 'Slope', default: false },
+    { id: 'k-factor', label: 'K-Factor', default: false },
+    { id: 'spi', label: 'Stream Power Index', default: false },
+    { id: 'runoff', label: 'Runoff', default: false },
+    { id: 't-value', label: 'T-Value', default: false }
+  ],
   drainage: [
       { id: 'twi', label: 'TWI', default: true },
-      { id: 'flow-channels', label: 'Flow', default: false },
-      { id: 'depressions', label: 'Depressions', default: false }
+      { id: 'depressions', label: 'Depressions', default: false },
+      { id: 'wet-areas', label: 'Wet Areas', default: false },
+      { id: 'ponding-risk', label: 'Ponding Risk', default: false },
+      { id: 'hydrologic-group', label: 'Hydrologic Group', default: false },
+      { id: 'drainage-class', label: 'Drainage Class', default: false }
   ],
   productivity: [
-      { id: 'nccpi', label: 'Productivity', default: true },
+      { id: 'nccpi-all', label: 'NCCPI All Crops', default: true },
+      { id: 'nccpi-corn', label: 'NCCPI Corn', default: false },
+      { id: 'nccpi-soy', label: 'NCCPI Soybean', default: false },
+      { id: 'nccpi-sg', label: 'NCCPI Small Grains', default: false },
+      { id: 'nccpi-cotton', label: 'NCCPI Cotton', default: false },
       { id: 'yield-gap', label: 'Yield Gap', default: false },
       { id: 'mean-ndvi', label: 'Mean NDVI', default: false },
       { id: 'max-ndvi', label: 'Max NDVI', default: false }
@@ -356,16 +370,28 @@ export default function DetailView({
         <div className="w-[500px] flex-shrink-0 flex flex-col">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full flex flex-col">
             {/* Map Header with Layer Controls */}
-            <div className="p-3 border-b border-gray-200 flex items-center justify-between bg-gray-50 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <MapIcon className="w-5 h-5" style={{ color: '#16a34a' }} />
-                <span className="text-sm font-semibold text-gray-700">Field Map</span>
+            <div className="p-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <MapIcon className="w-5 h-5" style={{ color: '#16a34a' }} />
+                  <span className="text-sm font-semibold text-gray-700">Field Map</span>
+                </div>
+                
+                {/* Fullscreen Button - Always Visible */}
+                <button
+                  onClick={() => setMapFullscreen(true)}
+                  className="flex items-center gap-1 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-700 flex-shrink-0"
+                >
+                  <Maximize2 className="w-3 h-3" />
+                  Expand
+                </button>
               </div>
-              <div className="flex items-center gap-2">
-                {/* Layer Toggle Buttons */}
+              
+              {/* Layer Toggle Buttons - Scrollable */}
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
                 <button
                   onClick={onCSBLayerToggle}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0"
                   style={{
                     backgroundColor: showCSBLayer ? '#dcfce7' : '#f3f4f6',
                     color: showCSBLayer ? '#166534' : '#6b7280'
@@ -380,7 +406,7 @@ export default function DetailView({
                     <button
                     key={layer.id}
                     onClick={() => onLayerToggle?.(layer.id)}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                    className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0"
                     style={{
                         backgroundColor: activeLayers.includes(layer.id) ? '#dcfce7' : '#f3f4f6',
                         color: activeLayers.includes(layer.id) ? '#166534' : '#6b7280'
@@ -390,15 +416,6 @@ export default function DetailView({
                     {layer.label}
                     </button>
                 ))}
-
-                {/* Fullscreen Button */}
-                <button
-                  onClick={() => setMapFullscreen(true)}
-                  className="flex items-center gap-1 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-700"
-                >
-                  <Maximize2 className="w-3 h-3" />
-                  Expand
-                </button>
               </div>
             </div>
 

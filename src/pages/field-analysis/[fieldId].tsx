@@ -18,7 +18,11 @@ import {
   Sprout,
   Droplets,
   FileCheck,
-  List
+  List,
+  Wheat,
+  Trees,
+  Mountain,
+  Building2
 } from 'lucide-react'
 
 import FieldStats from '#components/FieldAnalysis/FieldStats'
@@ -26,6 +30,8 @@ import DashboardView from '#components/FieldAnalysis/layouts/DashboardView'
 import DetailView, { TAB_LAYER_CONFIG, type TabId } from '#components/FieldAnalysis/layouts/DetailView'
 import { useFieldSSURGO, type ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import { useComprehensiveFieldAssessment } from '#hooks/useComprehensiveFieldAssessment'
+import { getLandType } from '@/config/land-types'
+import { getUseCase } from '@/config/use-cases'
 
 const FieldMap = dynamic(() => import('#components/FieldAnalysis/FieldMap'), {
   ssr: false,
@@ -56,6 +62,7 @@ interface FieldData {
   landCapabilityClass?: string
   hydrologicGroup?: string
   acres?: number
+  landType?: string
 }
 
 export default function FieldAnalysisDetail() {
@@ -70,6 +77,7 @@ export default function FieldAnalysisDetail() {
   const [showCSBLayer, setShowCSBLayer] = useState(true)
   const [activeDetailTab, setActiveDetailTab] = useState('soil')
   const [selectedUseCase, setSelectedUseCase] = useState<string | null>(null)
+  const [selectedLandType, setSelectedLandType] = useState<string | null>(null)
   
   // SSURGO integration
   const { fieldData: ssurgoData, loading: ssurgoLoading, error: ssurgoError, queryField } = useFieldSSURGO()
@@ -96,6 +104,12 @@ export default function FieldAnalysisDetail() {
     
     if (useCase) {
       setSelectedUseCase(useCase)
+    }
+    
+    // Retrieve selected land type from session storage
+    const landType = typeof window !== 'undefined' ? sessionStorage.getItem('analysisLandType') : null
+    if (landType) {
+      setSelectedLandType(landType)
     }
   }, [fieldId, router.query.useCase])
 
@@ -141,7 +155,8 @@ export default function FieldAnalysisDetail() {
           soilDepth: parsed.soilDepth || 36,
           floodFrequency: parsed.floodFrequency || 'None',
           landCapabilityClass: parsed.landCapabilityClass || 'IIIe',
-          hydrologicGroup: parsed.hydrologicGroup || 'B'
+          hydrologicGroup: parsed.hydrologicGroup || 'B',
+          landType: parsed.landType || (typeof window !== 'undefined' ? sessionStorage.getItem('analysisLandType') : null)
         })
         
         // Query SSURGO data if boundary is available
@@ -228,6 +243,21 @@ export default function FieldAnalysisDetail() {
     )
   }
 
+  const getLandTypeIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'Wheat': return Wheat;
+      case 'Trees': return Trees;
+      case 'Mountain': return Mountain;
+      case 'Droplets': return Droplets;
+      case 'Building2': return Building2;
+      case 'Sprout': return Sprout;
+      default: return Sprout;
+    }
+  }
+
+  const landTypeInfo = fieldData.landType ? getLandType(fieldData.landType) : null
+  const LandIcon = landTypeInfo ? getLandTypeIcon(landTypeInfo.icon) : null
+
   return (
     <>
       <Head>
@@ -251,21 +281,22 @@ export default function FieldAnalysisDetail() {
               </Link>
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold tracking-tight">{fieldData.name}</h1>
-                  {selectedUseCase && (
-                    <span 
-                      className="text-xs px-3 py-1 rounded-full font-medium flex items-center gap-1.5"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                    >
-                      {selectedUseCase === 'erosion' && <><TrendingDown className="w-3 h-3" /> Erosion & Conservation</>}
-                      {selectedUseCase === 'production' && <><Sprout className="w-3 h-3" /> Production Optimization</>}
-                      {selectedUseCase === 'water' && <><Droplets className="w-3 h-3" /> Water Management</>}
-                      {selectedUseCase === 'compliance' && <><FileCheck className="w-3 h-3" /> Compliance & Documentation</>}
-                      {selectedUseCase === 'comprehensive' && <><List className="w-3 h-3" /> Full Comprehensive Analysis</>}
-                    </span>
-                  )}
+                  <h1 className="text-xl font-bold tracking-tight">{fieldData.name}</h1>
+                  
+                  {/* Combined Land Type and Use Case Badge */}
+                  {landTypeInfo && selectedUseCase && (() => {
+                    const useCaseInfo = getUseCase(selectedUseCase);
+                    return useCaseInfo ? (
+                      <span 
+                        className="text-xs px-3 py-1 rounded-full font-medium"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)' }}
+                      >
+                        {landTypeInfo.name} - {useCaseInfo.short_name}
+                      </span>
+                    ) : null;
+                  })()}
                 </div>
-                <p className="text-sm opacity-90">
+                <p className="text-xs opacity-90">
                   {fieldData.area} acres • CSB: {fieldData.clu_id}
                 </p>
               </div>

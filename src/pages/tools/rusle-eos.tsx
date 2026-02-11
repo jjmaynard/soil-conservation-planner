@@ -1288,7 +1288,7 @@ function ComprehensiveMapGalleryFullScreen({
         tileLayerRef.current = null
       }
     }
-  }, [currentMap.url, mapInitialized])
+  }, [currentMap.url, currentMap.id, mapInitialized])
 
   // Update field boundary
   useEffect(() => {

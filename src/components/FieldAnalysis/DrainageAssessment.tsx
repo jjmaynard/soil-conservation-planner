@@ -31,6 +31,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
         const combinedDrainage = geeData?.combined?.drainage
         const pondingMetrics = geeData?.geeAssessment?.ponding?.ponding_metrics
         const twiStats = geeData?.geeAssessment?.ponding?.twi_stats
+        const pondingData = geeData?.geeAssessment?.ponding
         
         setDrainageData({
           // SSURGO drainage data
@@ -41,10 +42,12 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
           // GEE ponding data
           depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
           twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
-          highPondingRiskPct: combinedDrainage?.gee_ponding_risk_pct || 0,
+          highPondingRiskPct: pondingMetrics?.high_ponding_risk_pct || combinedDrainage?.gee_ponding_risk_pct || 0,
           twiMean: twiStats?.mean || 0,
           twiP75: twiStats?.p75 || 0,
           twiP90: twiStats?.p90 || 0,
+          
+          methodology: pondingData?.methodology,
           
           hasGEEData: !!hasPondingData,
           hasSSURGOData: !!ssurgoData?.drainage,
@@ -66,10 +69,12 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
             
             depressionAreaPct: pondingMetrics?.depression_area_pct || 0,
             twiAbove12Pct: pondingMetrics?.twi_above_12_pct || 0,
-            highPondingRiskPct: combinedDrainage?.gee_ponding_risk_pct || 0,
+            highPondingRiskPct: pondingMetrics?.high_ponding_risk_pct || combinedDrainage?.gee_ponding_risk_pct || 0,
             twiMean: twiStats?.mean || 0,
             twiP75: twiStats?.p75 || 0,
             twiP90: twiStats?.p90 || 0,
+            
+            methodology: parsed.geeAssessment?.ponding?.methodology,
             
             hasGEEData: !!parsed.geeAssessment?.ponding,
             hasSSURGOData: !!parsed.ssurgoData?.drainage,
@@ -147,13 +152,20 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
       {(drainageData.hasGEEData || drainageData.hasSSURGOData) && (
         <div className="flex items-start gap-2 p-2 rounded" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
           <Info className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: '#2563eb' }} />
-          <p className="text-xs" style={{ color: '#1e40af' }}>
-            {drainageData.hasGEEData && drainageData.hasSSURGOData 
-              ? 'GEE terrain analysis + SSURGO drainage classification'
-              : drainageData.hasGEEData 
-                ? 'GEE terrain-based ponding analysis'
-                : 'SSURGO soil drainage classification'}
-          </p>
+          <div className="flex-1">
+            <p className="text-xs" style={{ color: '#1e40af' }}>
+              <strong>Data source:</strong> {drainageData.hasGEEData && drainageData.hasSSURGOData 
+                ? 'GEE terrain analysis + SSURGO drainage classification'
+                : drainageData.hasGEEData 
+                  ? 'GEE terrain-based ponding analysis'
+                  : 'SSURGO soil drainage classification'}
+            </p>
+            {drainageData.methodology && (
+              <p className="text-xs mt-1" style={{ color: '#1e40af' }}>
+                <strong>Methodology:</strong> {drainageData.methodology}
+              </p>
+            )}
+          </div>
         </div>
       )}
 

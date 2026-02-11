@@ -6,6 +6,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
+import * as LucideIcons from 'lucide-react'
 import { Search, Map as MapIcon, Edit3, Upload, ChevronRight, Zap, Eye, Pencil, FileUp, ArrowLeft, TrendingDown, Sprout, Droplets, FileCheck, List } from 'lucide-react'
 import type { FieldMapRef } from '#components/FieldAnalysis/FieldMap'
 import { LandTypeSelector } from '#components/FieldAnalysis/LandTypeSelector'
@@ -116,10 +117,22 @@ export default function FieldAnalysisLanding() {
       const fieldId = fieldData.clu_id || `field-${Date.now()}`
       
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('selectedField', JSON.stringify(fieldData))
+        // Add selected land type to field data before storing
+        const fieldDataToStore = {
+          ...fieldData,
+          landType: selectedLandType
+        }
+        
+        sessionStorage.setItem('selectedField', JSON.stringify(fieldDataToStore))
+        
         // Store selected use case for analysis page
         if (selectedUseCase) {
           sessionStorage.setItem('analysisUseCase', selectedUseCase)
+        }
+        
+        // Store selected land type separately as well
+        if (selectedLandType) {
+          sessionStorage.setItem('analysisLandType', selectedLandType)
         }
       }
       
@@ -289,15 +302,52 @@ export default function FieldAnalysisLanding() {
               />
             ) : (
               <div className="w-full max-w-6xl mx-auto">
-                <button
-                  onClick={() => setSelectedLandType(null)}
-                  className="mb-6 flex items-center text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Change Land Type
-                </button>
+                {/* Land Type Header with Badge */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="p-3 rounded-lg"
+                        style={{ 
+                          backgroundColor: getLandType(selectedLandType)?.color || '#6B7F39',
+                          color: '#ffffff'
+                        }}
+                      >
+                        {(() => {
+                          const iconName = getLandType(selectedLandType)?.icon || 'Sprout';
+                          const Icon = (LucideIcons as any)[iconName] || Sprout;
+                          return <Icon className="w-6 h-6" />;
+                        })()}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-xl font-bold text-gray-900">
+                            {getLandType(selectedLandType)?.display_name}
+                          </h2>
+                          <span 
+                            className="text-xs px-2.5 py-1 rounded font-semibold"
+                            style={{ 
+                              backgroundColor: `${getLandType(selectedLandType)?.color}20`,
+                              color: getLandType(selectedLandType)?.color
+                            }}
+                          >
+                            Selected
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-0.5">
+                          {getLandType(selectedLandType)?.description}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSelectedLandType(null)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      Change Land Type
+                    </button>
+                  </div>
+                </div>
+
                 <FieldUseCaseSelector
                   landTypeId={selectedLandType}
                   selectedUseCase={selectedUseCase}

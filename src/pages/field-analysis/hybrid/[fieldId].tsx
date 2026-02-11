@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -68,31 +68,7 @@ export default function HybridFieldAnalysis() {
   // Track if GEE assessment has been called to prevent duplicates
   const [geeAssessed, setGeeAssessed] = useState(false)
 
-  useEffect(() => {
-    if (fieldId) {
-      loadFieldData(fieldId as string)
-    }
-  }, [fieldId])
-
-  // Separate effect to trigger GEE assessment after SSURGO data loads
-  useEffect(() => {
-    const runGeeAssessment = async () => {
-      if (fieldData?.boundary && ssurgoData && !geeAssessed && !ssurgoLoading) {
-        console.log('Querying GEE comprehensive assessment...')
-        setGeeAssessed(true)
-        try {
-          await assessField(fieldData.boundary, ssurgoData, new Date().getFullYear())
-        } catch (error) {
-          console.error('Failed to query GEE assessment:', error)
-          setGeeAssessed(false)
-        }
-      }
-    }
-
-    runGeeAssessment()
-  }, [fieldData?.boundary, ssurgoData, geeAssessed, ssurgoLoading, assessField])
-
-  const loadFieldData = async (id: string) => {
+  const loadFieldData = useCallback(async (id: string) => {
     setLoading(true)
     setGeeAssessed(false)
     try {
@@ -145,7 +121,33 @@ export default function HybridFieldAnalysis() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [queryField])
+
+  useEffect(() => {
+    if (fieldId) {
+      loadFieldData(fieldId as string)
+    }
+  }, [fieldId, loadFieldData])
+
+  // Separate effect to trigger GEE assessment after SSURGO data loads
+  useEffect(() => {
+    const runGeeAssessment = async () => {
+      if (fieldData?.boundary && ssurgoData && !geeAssessed && !ssurgoLoading) {
+        console.log('Querying GEE comprehensive assessment...')
+        setGeeAssessed(true)
+        try {
+          await assessField(fieldData.boundary, ssurgoData, new Date().getFullYear())
+        } catch (error) {
+          console.error('Failed to query GEE assessment:', error)
+          setGeeAssessed(false)
+        }
+      }
+    }
+
+    runGeeAssessment()
+  }, [fieldData?.boundary, ssurgoData, geeAssessed, ssurgoLoading, assessField])
+
+
 
   const handleCardClick = (section: string) => {
     setViewMode('detail')
