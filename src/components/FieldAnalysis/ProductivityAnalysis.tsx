@@ -23,11 +23,17 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
   const loadProductivityData = async () => {
     setLoading(true)
     try {
+      console.log('ProductivityAnalysis - Loading data...')
+      console.log('geeData:', geeData)
+      console.log('geeData.cropProductivity:', geeData?.cropProductivity)
+      
       if (geeData) {
         const hasCropSpecific = geeData.cropProductivity && geeData.cropProductivity.crops_analyzed.length > 0
+        console.log('Has crop-specific data:', hasCropSpecific)
         
         if (hasCropSpecific) {
           // Use crop-specific data
+          console.log('Using crop-specific productivity data')
           const cropProd = geeData.cropProductivity!
           setProductivityData({
             hasCropSpecific: true,
@@ -46,6 +52,7 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
           }
         } else if (geeData.geeAssessment?.productivity) {
           // Fall back to overall productivity data
+          console.log('Using fallback productivity data')
           const prod = geeData.geeAssessment.productivity
           const combined = geeData.combined.productivity
           
@@ -61,14 +68,21 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
             hasData: true,
           })
         } else {
+          console.log('No productivity data available')
           setProductivityData({ hasData: false })
         }
       } else {
         // Try session storage
+        console.log('No geeData, checking session storage...')
         const stored = sessionStorage.getItem('comprehensiveFieldAssessment')
+        console.log('Session storage data:', stored ? JSON.parse(stored) : null)
+        
         if (stored) {
           const parsed = JSON.parse(stored) as EnhancedFieldData
+          console.log('Parsed session data cropProductivity:', parsed.cropProductivity)
+          
           if (parsed.cropProductivity && parsed.cropProductivity.crops_analyzed.length > 0) {
+            console.log('Using session storage crop-specific data')
             const cropProd = parsed.cropProductivity
             setProductivityData({
               hasCropSpecific: true,
@@ -86,6 +100,7 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
             }
             return
           } else if (parsed.geeAssessment?.productivity) {
+            console.log('Using session storage fallback data')
             const prod = parsed.geeAssessment.productivity
             const combined = parsed.combined.productivity
             
