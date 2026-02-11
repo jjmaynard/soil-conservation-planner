@@ -126,10 +126,12 @@ export default function FieldAnalysisDetail() {
         setGeeAssessed(true) // Set flag before calling to prevent duplicates
         try {
           // Pass CSB ID if available for crop-specific productivity
-          // CSB fields use clu_id to store the CSB ID when method is 'csb-selected'
-          const csbId = (fieldData as any).csb_id || 
-                        (fieldData as any).csbid || 
-                        ((fieldData as any).method === 'csb-selected' && (fieldData as any).clu_id)
+          // CSB fields have clu_id - use it directly and let the API determine if rotation data exists
+          const csbId = (fieldData as any).clu_id || 
+                        (fieldData as any).csb_id || 
+                        (fieldData as any).csbid
+          console.log('Field data:', fieldData)
+          console.log('Extracted CSB ID:', csbId)
           await assessField(fieldData.boundary, ssurgoData, new Date().getFullYear(), csbId)
         } catch (error) {
           console.error('Failed to query GEE assessment:', error)
