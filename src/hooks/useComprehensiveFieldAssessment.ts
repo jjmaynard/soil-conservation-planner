@@ -121,23 +121,29 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
             console.log('Querying crop-specific productivity for CSB ID:', csbId)
             const endYear = year || new Date().getFullYear()
             const startYear = endYear - 14 // 15 years total to capture full rotation history
+            console.log('Year range:', startYear, 'to', endYear)
             cropProductivity = await geeApi.getProductivityCropSpecific({
               csbid: csbId,
               start_year: startYear,
               end_year: endYear
             })
+            console.log('Crop-specific productivity response:', cropProductivity)
           } catch (cropError) {
             console.warn('Failed to fetch crop-specific productivity:', cropError)
             // Don't fail the whole assessment if crop-specific fails
           }
+        } else {
+          console.log('No CSB ID available - skipping crop-specific productivity')
         }
 
         // Combine SSURGO and GEE data
         const enhancedData = combineData(ssurgoData, geeAssessment, cropProductivity)
+        console.log('Combined data cropProductivity:', enhancedData.cropProductivity)
         setData(enhancedData)
         
         // Store in session storage
         sessionStorage.setItem('comprehensiveFieldAssessment', JSON.stringify(enhancedData))
+        console.log('Stored enhanced data in session storage')
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Unknown error')
         setError(error)
@@ -218,6 +224,11 @@ function combineData(
   geeAssessment: ComprehensiveFieldAssessment,
   cropProductivity: ProductivityCropSpecificResponse | null = null
 ): EnhancedFieldData {
+  console.log('combineData called with:')
+  console.log('- ssurgoData:', !!ssurgoData)
+  console.log('- geeAssessment:', !!geeAssessment)
+  console.log('- cropProductivity:', cropProductivity)
+  
   // Calculate combined erosion risk
   const ssurgoErosionRisk = ssurgoData?.erosion.avgErosion || null
   const geeErosionRisk = geeAssessment.erosion_risk.statistics.mean_risk
