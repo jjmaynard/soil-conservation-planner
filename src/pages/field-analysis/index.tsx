@@ -54,7 +54,7 @@ export default function FieldAnalysisLanding() {
       
       // Only auto-select use case for special modes or explicit query params
       // Don't use session storage to allow fresh selection each time
-      const queryUseCase = router.query.useCase as UseCase | undefined
+      const queryUseCase = router.query.useCase as string | undefined
       
       if (queryUseCase) {
         // Direct link with use case in URL
