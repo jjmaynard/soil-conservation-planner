@@ -650,8 +650,8 @@ export interface ClimateHistoryRequest {
 
 export interface ProductivityCropSpecificRequest {
   csbid: string
-  start_year: number
-  end_year: number
+  start_year?: number
+  end_year?: number
 }
 
 export interface CropProductivityViz {

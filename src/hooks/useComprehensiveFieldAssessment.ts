@@ -120,7 +120,7 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
           try {
             console.log('Querying crop-specific productivity for CSB ID:', csbId)
             const endYear = year || new Date().getFullYear()
-            const startYear = endYear - 6 // 7 years total
+            const startYear = endYear - 14 // 15 years total to capture full rotation history
             cropProductivity = await geeApi.getProductivityCropSpecific({
               csbid: csbId,
               start_year: startYear,
