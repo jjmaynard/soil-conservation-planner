@@ -49,33 +49,6 @@ export function FieldUseCaseSelector({
 
   return (
     <div className="use-case-selector max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center mb-4">
-          <div 
-            className="w-16 h-16 rounded-lg flex items-center justify-center mr-3"
-            style={{
-              background: `linear-gradient(135deg, ${landType.gradient.from}, ${landType.gradient.to})`
-            }}
-          >
-            <LandIcon className="w-8 h-8 text-white" />
-          </div>
-          <div className="text-left">
-            <h2 className="text-3xl font-bold text-gray-900">
-              {landType.display_name}
-            </h2>
-            <p className="text-sm text-gray-500">
-              {landType.description}
-            </p>
-          </div>
-        </div>
-        <h3 className="text-xl font-semibold text-gray-700 mt-4">
-          What do you want to analyze?
-        </h3>
-        <p className="text-gray-600">
-          Choose an analysis workflow that matches your goals
-        </p>
-      </div>
-
       <div className="use-case-list grid grid-cols-1 lg:grid-cols-2 gap-6 mx-auto">
         {displayedUseCases.map((useCase) => (
           <UseCaseCard
