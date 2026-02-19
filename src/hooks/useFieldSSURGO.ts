@@ -14,6 +14,10 @@ import {
   type MapUnitPolygon, // Import MapUnitPolygon
 } from '#lib/ssurgo-area-query'
 
+// Cache configuration
+const CACHE_DURATION_HOURS = 24
+const CACHE_KEY_PREFIX = 'ssurgo_data_'
+
 export interface ProcessedFieldData {
   // Map Unit Polygons (Geometry)
   mapUnitPolygons?: MapUnitPolygon[]
@@ -90,6 +94,62 @@ const SOIL_COLORS = [
   '#4ade80', '#38bdf8', '#facc15', '#c084fc'
 ]
 
+// Generate cache key from field identifier
+const getCacheKey = (geometry: any, fieldId?: string): string => {
+  if (fieldId) {
+    return `${CACHE_KEY_PREFIX}${fieldId}`
+  }
+  // Fallback to geometry hash
+  const geoStr = JSON.stringify(geometry).substring(0, 100)
+  return `${CACHE_KEY_PREFIX}${geoStr.replace(/[^a-zA-Z0-9]/g, '_')}`
+}
+
+// Check if cached data is still valid
+const getCachedData = (cacheKey: string): ProcessedFieldData | null => {
+  try {
+    const cached = localStorage.getItem(cacheKey)
+    if (!cached) return null
+
+    const { data, timestamp } = JSON.parse(cached)
+    const now = Date.now()
+    const ageHours = (now - timestamp) / (1000 * 60 * 60)
+
+    if (ageHours < CACHE_DURATION_HOURS) {
+      console.log(`📦 Using cached SSURGO data (${ageHours.toFixed(1)}h old)`)
+      return data
+    } else {
+      console.log(`⏰ SSURGO cache expired (${ageHours.toFixed(1)}h old), refreshing...`)
+      localStorage.removeItem(cacheKey)
+      return null
+    }
+  } catch (error) {
+    console.error('Failed to read SSURGO cache:', error)
+    return null
+  }
+}
+
+// Save data to cache
+const setCachedData = (cacheKey: string, data: ProcessedFieldData) => {
+  try {
+    const cacheEntry = { data, timestamp: Date.now() }
+    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry))
+    console.log('💾 Cached SSURGO data for future use')
+  } catch (error) {
+    console.error('Failed to cache SSURGO data:', error)
+    // Clear old caches if storage is full
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(CACHE_KEY_PREFIX) && key !== cacheKey) {
+          localStorage.removeItem(key)
+        }
+      })
+      localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }))
+    } catch (retryError) {
+      console.warn('Unable to cache SSURGO data - localStorage may be full')
+    }
+  }
+}
+
 /**
  * Hook for field analysis with SSURGO integration
  * Automatically processes SSURGO data for field analysis components
@@ -102,6 +162,18 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
 
   const queryField = useCallback(
     async (geometry: GeoJSON.Polygon | number[][], expectedAcres?: number, fieldId?: string) => {
+      const cacheKey = getCacheKey(geometry, fieldId)
+      
+      // Check cache first
+      const cachedData = getCachedData(cacheKey)
+      if (cachedData) {
+        setFieldData(cachedData)
+        setError(null)
+        setCurrentFieldId(fieldId || null)
+        return
+      }
+      
+      // No cache - fetch from API
       setLoading(true)
       setError(null)
 
@@ -110,6 +182,13 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
         console.log('=== SSURGO QUERY DEBUG ===')
         let geomType = 'unknown'
         let coordCount = 0
+        
+        // Check if it's a Feature (should not be after extraction)
+        if ('type' in geometry && geometry.type === 'Feature') {
+          console.error('⚠️ ERROR: Received GeoJSON Feature instead of Geometry!')
+          console.error('Please extract .geometry before calling queryField')
+          throw new Error('queryField expects Geometry, not Feature. Use geometry.geometry to extract.')
+        }
         
         if ('type' in geometry && geometry.type === 'Polygon') {
           geomType = 'Polygon'
@@ -258,15 +337,10 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
           percent: s.percent.toFixed(1) 
         })))
         setFieldData(processed)
+        setCurrentFieldId(fieldId || null)
         
-        // Store in session storage with field-specific key
-        if (fieldId) {
-          setCurrentFieldId(fieldId)
-          sessionStorage.setItem(`fieldSSURGOData-${fieldId}`, JSON.stringify(processed))
-        } else {
-          // Fallback to generic key if no fieldId provided
-          sessionStorage.setItem('fieldSSURGOData', JSON.stringify(processed))
-        }
+        // Cache the processed data
+        setCachedData(cacheKey, processed)
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Unknown error')
         setError(error)

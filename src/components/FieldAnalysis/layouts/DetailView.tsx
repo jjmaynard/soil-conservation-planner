@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Layers, TrendingDown, Droplets, Target, Sprout, CloudRain, Wind, AlertTriangle, Eye, EyeOff, Maximize2, Map as MapIcon, TrendingUp, Mountain } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import SoilComposition from '../SoilComposition'
@@ -45,6 +45,7 @@ interface DetailViewProps {
   onCSBLayerToggle?: () => void
   onLayerToggle?: (layerId: string) => void
   selectedUseCase?: string | null
+  assessCropProductivity?: (params: { csbId?: string; wkt?: string; startYear?: number; endYear?: number; fieldId?: string }) => Promise<void>
 }
 
 export type TabId = 'soil' | 'erosion' | 'drainage' | 'productivity' | 'svi' | 'flow' | 'drought' | 'vegetation' | 'terrain' | 'climate' | 'concerns' | 'practices' | 'zones'
@@ -76,14 +77,18 @@ export const TAB_LAYER_CONFIG: Record<TabId, { id: string; label: string; defaul
       { id: 'drainage-class', label: 'Drainage Class', default: false }
   ],
   productivity: [
+      // NCCPI Soil Productivity Layers (share same legend)
       { id: 'nccpi-all', label: 'NCCPI All Crops', default: true },
       { id: 'nccpi-corn', label: 'NCCPI Corn', default: false },
       { id: 'nccpi-soy', label: 'NCCPI Soybean', default: false },
       { id: 'nccpi-sg', label: 'NCCPI Small Grains', default: false },
       { id: 'nccpi-cotton', label: 'NCCPI Cotton', default: false },
-      { id: 'yield-gap', label: 'Yield Gap', default: false },
-      { id: 'mean-ndvi', label: 'Mean NDVI', default: false },
-      { id: 'max-ndvi', label: 'Max NDVI', default: false }
+      // Overall (All Years Combined) NDVI Layers
+      { id: 'overall-yield-gap', label: 'Yield Gap (All Years)', default: false },
+      { id: 'overall-mean-ndvi', label: 'Mean NDVI (All Years)', default: false },
+      { id: 'overall-max-ndvi', label: 'Max NDVI (All Years)', default: false },
+      // Crop-Specific NDVI Layers (populated dynamically based on crops analyzed)
+      // These will be added programmatically based on the crops_analyzed data
   ],
   svi: [
     { id: 'svi-surface', label: 'Surface Loss', default: true },
@@ -96,7 +101,10 @@ export const TAB_LAYER_CONFIG: Record<TabId, { id: string; label: string; defaul
   terrain: [
       { id: 'elevation', label: 'Elevation', default: true },
       { id: 'slope', label: 'Slope', default: false },
-      { id: 'aspect', label: 'Aspect', default: false }
+      { id: 'aspect', label: 'Aspect', default: false },
+      { id: 'twi', label: 'TWI', default: false },
+      { id: 'flow-accumulation', label: 'SPI Channel Density', default: false },
+      { id: 'convergent-areas', label: 'Convergent Areas', default: false }
   ],
   climate: [{ id: 'precip-grid', label: 'Precipitation', default: false }],
   concerns: [],
@@ -132,8 +140,18 @@ export default function DetailView({
   showCSBLayer = true,
   onCSBLayerToggle,
   onLayerToggle,
-  selectedUseCase = null
+  selectedUseCase = null,
+  assessCropProductivity
 }: DetailViewProps) {
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('[DetailView] Props received:')
+    console.log('  - fieldData:', fieldData)
+    console.log('  - ssurgoData:', ssurgoData)
+    console.log('  - ssurgoData.soils:', ssurgoData?.soils)
+    console.log('  - geeData:', geeData)
+  }, [fieldData, ssurgoData, geeData])
   
   // Filter tabs based on selected use case
   const filteredTabs = useFilteredTabs(tabs, selectedUseCase)
@@ -300,6 +318,52 @@ export default function DetailView({
               <ProductivityAnalysis 
                 fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
+                onLoadCropSpecific={async () => {
+                  if (assessCropProductivity) {
+                    // Detect if this is a custom drawn field
+                    const isCustomField = fieldData?.method === 'drawn' || 
+                                         fieldData?.clu_id?.startsWith('custom-') ||
+                                         fieldData?.id?.startsWith('custom-')
+                    
+                    // Only use csbId for actual CSB fields, not custom drawn fields
+                    const csbId = isCustomField ? undefined : (fieldData?.clu_id || fieldData?.csb_id || fieldData?.csbid)
+                    let wkt: string | undefined = undefined
+                    
+                    // Get WKT from boundary if available
+                    try {
+                      if (typeof fieldData?.boundary === 'string') {
+                        wkt = fieldData.boundary
+                      } else if (fieldData?.boundary && typeof fieldData.boundary === 'object') {
+                        // Handle GeoJSON Feature (custom fields)
+                        let geom = fieldData.boundary
+                        if (geom.type === 'Feature' && geom.geometry) {
+                          geom = geom.geometry
+                        }
+                        // Now convert the geometry to WKT
+                        if (geom.type && geom.coordinates) {
+                          wkt = geoJsonToWkt(geom)
+                        }
+                      }
+                    } catch (error) {
+                      console.warn('Failed to convert boundary to WKT:', error)
+                    }
+                    
+                    console.log('[DetailView] Productivity query params:', {
+                      isCustomField,
+                      csbId,
+                      wkt: wkt ? `${wkt.substring(0, 50)}...` : 'none',
+                      fieldId: fieldData?.id || fieldData?.clu_id
+                    })
+                    
+                    await assessCropProductivity({
+                      csbId,
+                      wkt,
+                      startYear: 2017,
+                      endYear: new Date().getFullYear(),
+                      fieldId: fieldData?.id || fieldData?.clu_id
+                    })
+                  }
+                }}
               />
             )}
 
@@ -320,7 +384,18 @@ export default function DetailView({
             {selectedTab === 'drought' && (
               <DroughtRiskAnalysis 
                 fieldId={fieldData?.id || fieldData?.clu_id}
-                wkt={typeof fieldData?.boundary === 'string' ? fieldData.boundary : fieldData?.boundary ? geoJsonToWkt(fieldData.boundary) : undefined}
+                wkt={(() => {
+                  try {
+                    if (typeof fieldData?.boundary === 'string') {
+                      return fieldData.boundary
+                    } else if (fieldData?.boundary && typeof fieldData.boundary === 'object' && fieldData.boundary.type && fieldData.boundary.coordinates) {
+                      return geoJsonToWkt(fieldData.boundary)
+                    }
+                  } catch (error) {
+                    console.warn('Failed to convert boundary to WKT for drought analysis:', error)
+                  }
+                  return undefined
+                })()}
                 geeData={geeData}
               />
             )}
@@ -345,6 +420,18 @@ export default function DetailView({
               <VegetationMonitoring 
                 fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
+                wkt={(() => {
+                  try {
+                    if (typeof fieldData?.boundary === 'string') {
+                      return fieldData.boundary
+                    } else if (fieldData?.boundary && typeof fieldData.boundary === 'object' && fieldData.boundary.type && fieldData.boundary.coordinates) {
+                      return geoJsonToWkt(fieldData.boundary)
+                    }
+                  } catch (error) {
+                    console.warn('Failed to convert boundary to WKT for vegetation monitoring:', error)
+                  }
+                  return undefined
+                })()}
               />
             )}
 
@@ -359,7 +446,18 @@ export default function DetailView({
               <ClimateHistory 
                 fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
-                wkt={typeof fieldData?.boundary === 'string' ? fieldData.boundary : fieldData?.boundary ? geoJsonToWkt(fieldData.boundary) : undefined}
+                wkt={(() => {
+                  try {
+                    if (typeof fieldData?.boundary === 'string') {
+                      return fieldData.boundary
+                    } else if (fieldData?.boundary && typeof fieldData.boundary === 'object' && fieldData.boundary.type && fieldData.boundary.coordinates) {
+                      return geoJsonToWkt(fieldData.boundary)
+                    }
+                  } catch (error) {
+                    console.warn('Failed to convert boundary to WKT for climate history:', error)
+                  }
+                  return undefined
+                })()}
               />
             )}
           </div>

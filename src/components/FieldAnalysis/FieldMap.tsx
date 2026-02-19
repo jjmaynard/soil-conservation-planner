@@ -158,6 +158,14 @@ const LEGEND_DATA: Record<string, { title: string; items: { color: string; label
       { color: '#2563eb', label: 'Flow Channels' }
     ]
   },
+  'convergent-areas': {
+    title: 'Convergent Areas',
+    items: [
+      { color: '#0c4a6e', label: 'High Convergence' },
+      { color: '#38bdf8', label: 'Moderate' },
+      { color: '#e0f2fe', label: 'Low' }
+    ]
+  },
   'svi': {
     title: 'Soil Vulnerability (SVI)',
     items: [
@@ -171,6 +179,14 @@ const LEGEND_DATA: Record<string, { title: string; items: { color: string; label
     items: [
       { color: '#57534e', label: 'High' },
       { color: '#d6d3d1', label: 'Low' }
+    ]
+  },
+  'aspect': {
+    title: 'Aspect',
+    items: [
+      { color: '#ef4444', label: 'South-facing' },
+      { color: '#f59e0b', label: 'East/West-facing' },
+      { color: '#3b82f6', label: 'North-facing' }
     ]
   },
   'ndvi': {
@@ -253,6 +269,30 @@ const LEGEND_DATA: Record<string, { title: string; items: { color: string; label
         { color: '#ef4444', label: 'Low Vigor' }
     ]
   },
+  'overall-yield-gap': {
+    title: 'Yield Gap (All Years)',
+    items: [
+        { color: '#ef4444', label: 'High Gap (>20%)' },
+        { color: '#eab308', label: 'Moderate Gap (10-20%)' },
+        { color: '#22c55e', label: 'Low Gap (<10%)' }
+    ]
+  },
+  'overall-mean-ndvi': {
+    title: 'Mean NDVI (All Years)',
+    items: [
+        { color: '#15803d', label: 'High Vigor' },
+        { color: '#eab308', label: 'Moderate' },
+        { color: '#ef4444', label: 'Low Vigor' }
+    ]
+  },
+  'overall-max-ndvi': {
+    title: 'Max NDVI (All Years)',
+    items: [
+        { color: '#15803d', label: 'High Vigor' },
+        { color: '#eab308', label: 'Moderate' },
+        { color: '#ef4444', label: 'Low Vigor' }
+    ]
+  },
   'svi-surface': {
     title: 'SVI Surface Runoff',
     items: [
@@ -302,6 +342,462 @@ const formatPatternType = (pattern: string | undefined): string => {
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
+}
+
+const getConcentratedFlowTileUrl = (assessment: any): string | undefined => {
+  const visualization = assessment?.concentrated_flow?.visualization
+  return (
+    visualization?.flow_accumulation_tile_url ||
+    visualization?.spi_tile_url ||
+    visualization?.channels_tile_url
+  )
+}
+
+const getConcentratedFlowLegendItems = (assessment: any): { color: string; label: string }[] => {
+  const visualization = assessment?.concentrated_flow?.visualization
+  const palette =
+    visualization?.flow_accumulation_viz?.palette ||
+    visualization?.spi_viz?.palette ||
+    visualization?.palette ||
+    visualization?.flow_accumulation_palette ||
+    visualization?.spi_palette
+
+  if (Array.isArray(palette) && palette.length > 0) {
+    if (palette.length === 3) {
+      return [
+        { color: palette[0], label: 'Low' },
+        { color: palette[1], label: 'Moderate' },
+        { color: palette[2], label: 'High' }
+      ]
+    }
+
+    return palette.map((color: string, index: number) => ({
+      color,
+      label: `Class ${index + 1}`
+    }))
+  }
+
+  return LEGEND_DATA['flow-accumulation'].items
+}
+
+const getConvergentAreasTileUrl = (assessment: any): string | undefined => {
+  const visualization = assessment?.concentrated_flow?.visualization
+  return (
+    visualization?.convergent_areas_tile_url ||
+    visualization?.channels_tile_url
+  )
+}
+
+const getConvergentAreasLegendItems = (assessment: any): { color: string; label: string }[] => {
+  const visualization = assessment?.concentrated_flow?.visualization
+  const palette =
+    visualization?.convergent_areas_viz?.palette ||
+    visualization?.channels_viz?.palette ||
+    visualization?.channels_palette
+
+  if (Array.isArray(palette) && palette.length > 0) {
+    if (palette.length === 3) {
+      return [
+        { color: palette[0], label: 'Low' },
+        { color: palette[1], label: 'Moderate' },
+        { color: palette[2], label: 'High' }
+      ]
+    }
+
+    return palette.map((color: string, index: number) => ({
+      color,
+      label: `Class ${index + 1}`
+    }))
+  }
+
+  return LEGEND_DATA['convergent-areas'].items
+}
+
+const getPondingVisualizationSources = (assessment: any): any[] => {
+  return [
+    assessment?.ponding?.visualization,
+    assessment?.ponding,
+    assessment?.drainage?.visualization,
+    assessment?.drainage
+  ].filter(Boolean)
+}
+
+const getLegendItemsFromConfig = (
+  legendConfig: any,
+  fallbackItems: { color: string; label: string }[]
+): { color: string; label: string }[] => {
+  const palette = Array.isArray(legendConfig?.palette) ? legendConfig.palette : null
+  if (!palette || palette.length === 0) return fallbackItems
+
+  const labels = Array.isArray(legendConfig?.labels) ? legendConfig.labels : null
+  const minValue = Number(legendConfig?.min_value)
+  const maxValue = Number(legendConfig?.max_value)
+  const hasRange = Number.isFinite(minValue) && Number.isFinite(maxValue) && maxValue > minValue
+  const step = hasRange ? (maxValue - minValue) / palette.length : 0
+
+  const formatValue = (value: number) => {
+    if (Math.abs(value) >= 100 || Number.isInteger(value)) return `${Math.round(value)}`
+    return value.toFixed(2).replace(/\.00$/, '')
+  }
+
+  return palette.map((color: string, index: number) => {
+    const labelFromApi = labels?.[index]
+    if (labelFromApi) {
+      return { color, label: labelFromApi }
+    }
+
+    if (hasRange) {
+      const start = minValue + (index * step)
+      const end = index === palette.length - 1 ? maxValue : minValue + ((index + 1) * step)
+      return { color, label: `${formatValue(start)}-${formatValue(end)}` }
+    }
+
+    return { color, label: `Class ${index + 1}` }
+  })
+}
+
+const getErosionLegendItems = (
+  layerId: 'erosion-risk' | 'slope' | 'k-factor' | 'spi' | 'runoff' | 't-value',
+  assessment: any
+): { color: string; label: string }[] => {
+  const visualization = assessment?.erosion_risk?.visualization
+  if (!visualization) return LEGEND_DATA[layerId].items
+
+  const legendConfig = layerId === 'erosion-risk'
+    ? visualization?.erosion_risk_legend
+    : layerId === 'slope'
+      ? visualization?.slope_legend
+      : layerId === 'k-factor'
+        ? visualization?.k_factor_legend
+        : layerId === 'spi'
+          ? visualization?.spi_legend
+          : layerId === 'runoff'
+            ? visualization?.runoff_legend
+            : visualization?.t_value_legend
+
+  return getLegendItemsFromConfig(legendConfig, LEGEND_DATA[layerId].items)
+}
+
+const getPondingLegendItems = (
+  layerId: 'twi' | 'depressions' | 'wet-areas' | 'ponding-risk' | 'hydrologic-group' | 'drainage-class',
+  assessment: any
+): { color: string; label: string }[] => {
+  const sources = getPondingVisualizationSources(assessment)
+  const legendConfig = sources
+    .map((source) => layerId === 'twi'
+      ? source?.twi_legend
+      : layerId === 'depressions'
+        ? source?.depressions_legend
+        : layerId === 'wet-areas'
+          ? source?.wet_areas_legend
+          : layerId === 'ponding-risk'
+            ? source?.ponding_risk_legend
+            : layerId === 'hydrologic-group'
+              ? source?.hydrologic_group_legend
+              : source?.drainage_class_legend)
+    .find(Boolean)
+
+  return getLegendItemsFromConfig(legendConfig, LEGEND_DATA[layerId].items)
+}
+
+const getPondingTileUrl = (
+  layerId: 'twi' | 'depressions' | 'wet-areas' | 'ponding-risk' | 'hydrologic-group' | 'drainage-class',
+  assessment: any
+): string | undefined => {
+  const sources = getPondingVisualizationSources(assessment)
+  const findFirst = (values: Array<string | undefined>) => values.find((value) => !!value)
+
+  if (layerId === 'depressions') {
+    return findFirst(
+      sources.flatMap((source) => [
+        source?.depression_areas_tile_url,
+        source?.depression_area_tile_url,
+        source?.depressions_area_tile_url,
+        source?.depressions_tile_url,
+        source?.depressions?.tile_url
+      ])
+    )
+  }
+
+  if (layerId === 'twi') {
+    return findFirst(sources.flatMap((source) => [source?.twi_tile_url, source?.twi?.tile_url]))
+  }
+
+  if (layerId === 'wet-areas') {
+    return findFirst(sources.flatMap((source) => [source?.wet_areas_tile_url, source?.wet_areas?.tile_url]))
+  }
+
+  if (layerId === 'ponding-risk') {
+    return findFirst(
+      sources.flatMap((source) => [
+        source?.ponding_risk_class_tile_url,
+        source?.ponding_class_tile_url,
+        source?.risk_class_tile_url,
+        source?.ponding_risk_tile_url,
+        source?.ponding_risk?.tile_url
+      ])
+    )
+  }
+
+  if (layerId === 'hydrologic-group') {
+    return findFirst(
+      sources.flatMap((source) => [
+        source?.hydrologic_group_class_tile_url,
+        source?.hydrologic_group_tile_url,
+        source?.hydrologic_group?.tile_url
+      ])
+    )
+  }
+
+  return findFirst(sources.flatMap((source) => [source?.drainage_class_tile_url, source?.drainage_class?.tile_url]))
+}
+
+const getHydrologicGroupLegendItems = (assessment: any): { color: string; label: string }[] => {
+  return getPondingLegendItems('hydrologic-group', assessment)
+}
+
+const getSVILegendItems = (
+  layerId: 'svi-surface' | 'svi-subsurface-drained' | 'svi-subsurface-undrained',
+  assessment: any
+): { color: string; label: string }[] => {
+  const visualization = assessment?.svi?.visualization
+
+  const getPaletteFromAny = (sources: any[]): string[] | null => {
+    for (const source of sources) {
+      if (!source) continue
+      if (Array.isArray(source?.palette) && source.palette.length > 0) return source.palette
+      if (Array.isArray(source?.colors) && source.colors.length > 0) return source.colors
+    }
+    return null
+  }
+
+  const getDefaultLabels = (count: number): string[] => {
+    if (count === 2) return ['Low', 'High']
+    if (count === 3) return ['Low', 'Moderate', 'High']
+    if (count === 4) return ['Low', 'Moderate', 'High', 'Very High']
+    if (count === 5) return ['Very Low', 'Low', 'Moderate', 'High', 'Very High']
+    return Array.from({ length: count }, (_, index) => `Class ${index + 1}`)
+  }
+
+  const legendConfig = layerId === 'svi-surface'
+    ? visualization?.surface_legend
+    : layerId === 'svi-subsurface-drained'
+      ? visualization?.subsurface_drained_legend
+      : visualization?.subsurface_undrained_legend
+
+  const vizConfig = layerId === 'svi-surface'
+    ? (
+        visualization?.surface_viz ||
+        visualization?.surface_tile_viz ||
+        visualization?.surfaceViz ||
+        visualization?.surface?.viz ||
+        visualization?.surface
+      )
+    : layerId === 'svi-subsurface-drained'
+      ? (
+          visualization?.subsurface_drained_viz ||
+          visualization?.subsurface_drained_tile_viz ||
+          visualization?.subsurfaceDrainedViz ||
+          visualization?.subsurface_drained?.viz ||
+          visualization?.subsurface_drained
+        )
+      : (
+          visualization?.subsurface_undrained_viz ||
+          visualization?.subsurface_undrained_tile_viz ||
+          visualization?.subsurfaceUndrainedViz ||
+          visualization?.subsurface_undrained?.viz ||
+          visualization?.subsurface_undrained
+        )
+
+  const palette = getPaletteFromAny([
+    legendConfig,
+    vizConfig,
+    layerId === 'svi-surface'
+      ? { palette: visualization?.surface_palette }
+      : layerId === 'svi-subsurface-drained'
+        ? { palette: visualization?.subsurface_drained_palette }
+        : { palette: visualization?.subsurface_undrained_palette },
+    visualization
+  ])
+
+  const labels = Array.isArray(legendConfig?.labels) && legendConfig.labels.length > 0
+    ? legendConfig.labels
+    : null
+
+  if (palette && palette.length > 0) {
+    const resolvedLabels = labels && labels.length === palette.length
+      ? labels
+      : getDefaultLabels(palette.length)
+
+    const minValue = Number(legendConfig?.min_value)
+    const maxValue = Number(legendConfig?.max_value)
+    const hasRange = Number.isFinite(minValue) && Number.isFinite(maxValue) && maxValue > minValue
+    const step = hasRange ? (maxValue - minValue) / palette.length : 0
+    const formatValue = (value: number) => {
+      if (Math.abs(value) >= 100 || Number.isInteger(value)) return `${Math.round(value)}`
+      return value.toFixed(1)
+    }
+
+    return palette.map((color: string, index: number) => ({
+      color,
+      label: hasRange
+        ? `${resolvedLabels[index] || `Class ${index + 1}`} (${formatValue(minValue + (index * step))}-${formatValue(index === palette.length - 1 ? maxValue : minValue + ((index + 1) * step))})`
+        : (resolvedLabels[index] || `Class ${index + 1}`)
+    }))
+  }
+
+  return LEGEND_DATA[layerId].items
+}
+
+const getTerrainVisualizationSource = (assessment: any, geeData: any): any[] => {
+  return [
+    assessment?.terrain?.visualization,
+    assessment?.terrain,
+    assessment?.terrain_attributes?.visualization,
+    assessment?.terrain_attributes,
+    assessment?.topography?.visualization,
+    assessment?.topography,
+    geeData?.terrain?.visualization,
+    geeData?.terrain,
+    geeData?.terrainVisualization
+  ].filter(Boolean)
+}
+
+const getTerrainMapLayerConfig = (
+  layerId: 'slope' | 'elevation' | 'aspect',
+  assessment: any,
+  geeData: any
+): any | null => {
+  const layerCollections = [
+    assessment?.map_layers?.layers,
+    assessment?.terrain?.map_layers?.layers,
+    assessment?.terrain_attributes?.map_layers?.layers,
+    assessment?.topography?.map_layers?.layers,
+    geeData?.map_layers?.layers,
+    geeData?.terrain?.map_layers?.layers,
+    geeData?.terrain_attributes?.map_layers?.layers,
+    geeData?.topography?.map_layers?.layers
+  ].filter(Boolean)
+
+  const keyPriority = layerId === 'slope'
+    ? ['slope_percent', 'slope_pct', 'slope', 'slp_8', 'slope_degrees']
+    : layerId === 'elevation'
+      ? ['elevation', 'meanelev_8', 'meanelev_16', 'dem']
+      : ['aspect', 'aspct_8', 'aspect_degrees', 'asepct']
+
+  for (const layers of layerCollections) {
+    for (const key of keyPriority) {
+      const config = layers?.[key]
+      if (config?.tile_url) return config
+    }
+  }
+
+  return null
+}
+
+const getTerrainTileUrl = (layerId: 'slope' | 'elevation' | 'aspect', assessment: any, geeData: any): string | undefined => {
+  const mapLayerConfig = getTerrainMapLayerConfig(layerId, assessment, geeData)
+  if (mapLayerConfig?.tile_url) {
+    return mapLayerConfig.tile_url
+  }
+
+  const terrainSources = getTerrainVisualizationSource(assessment, geeData)
+
+  const getFirstUrl = (urls: Array<string | undefined>): string | undefined => urls.find((url) => !!url)
+
+  if (layerId === 'slope') {
+    return getFirstUrl([
+      ...terrainSources.flatMap((source) => [source?.slope_tile_url, source?.slope?.tile_url]),
+      assessment?.erosion_risk?.visualization?.slope_tile_url,
+      assessment?.erosion_risk?.visualization?.slope?.tile_url
+    ])
+  }
+
+  if (layerId === 'elevation') {
+    return getFirstUrl([
+      ...terrainSources.flatMap((source) => [
+        source?.elevation_tile_url,
+        source?.dem_tile_url,
+        source?.elevation?.tile_url,
+        source?.dem?.tile_url,
+        source?.elevationTileUrl,
+        source?.demTileUrl
+      ])
+    ])
+  }
+
+  return getFirstUrl([
+    ...terrainSources.flatMap((source) => [
+      source?.aspect_tile_url,
+      source?.aspect?.tile_url,
+      source?.aspectTileUrl
+    ])
+  ])
+}
+
+const getTerrainLegendItems = (layerId: 'slope' | 'elevation' | 'aspect', assessment: any, geeData: any): { color: string; label: string }[] => {
+  const mapLayerConfig = getTerrainMapLayerConfig(layerId, assessment, geeData)
+  if (mapLayerConfig?.visualization) {
+    const legendFromMapLayer = getLegendItemsFromConfig(mapLayerConfig.visualization, LEGEND_DATA[layerId].items)
+    if (legendFromMapLayer.length > 0) {
+      return legendFromMapLayer
+    }
+  }
+
+  const terrainSources = getTerrainVisualizationSource(assessment, geeData)
+  const erosionViz = assessment?.erosion_risk?.visualization
+
+  const firstConfig = (...configs: any[]): any => configs.find(Boolean)
+
+  const config = layerId === 'slope'
+    ? firstConfig(
+        ...terrainSources.flatMap((source) => [
+          source?.slope_viz,
+          source?.slope?.viz,
+          source?.slopeViz
+        ]),
+        erosionViz?.slope_viz,
+        erosionViz?.viz
+      )
+    : layerId === 'elevation'
+      ? firstConfig(
+          ...terrainSources.flatMap((source) => [
+            source?.elevation_viz,
+            source?.dem_viz,
+            source?.elevation?.viz,
+            source?.dem?.viz,
+            source?.elevationViz,
+            source?.demViz
+          ])
+        )
+      : firstConfig(
+          ...terrainSources.flatMap((source) => [
+            source?.aspect_viz,
+            source?.aspect?.viz,
+            source?.aspectViz
+          ])
+        )
+
+  const palette = config?.palette || config?.colors || null
+  const min = config?.min
+  const max = config?.max
+
+  if (Array.isArray(palette) && palette.length > 0) {
+    if (palette.length === 3) {
+      return [
+        { color: palette[0], label: min !== undefined ? `Low (${min.toFixed ? min.toFixed(2) : min})` : 'Low' },
+        { color: palette[1], label: 'Moderate' },
+        { color: palette[2], label: max !== undefined ? `High (${max.toFixed ? max.toFixed(2) : max})` : 'High' }
+      ]
+    }
+
+    return palette.map((color: string, index: number) => ({
+      color,
+      label: `Class ${index + 1}`
+    }))
+  }
+
+  return LEGEND_DATA[layerId].items
 }
 
 interface FieldMapProps {
@@ -1286,6 +1782,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     }
 
     const assessment = geeData?.geeAssessment
+    const cropProductivity = geeData?.cropProductivity
 
     // Erosion Risk (GEE)
     if (activeLayers.includes('erosion-risk') && assessment?.erosion_risk?.visualization?.tile_url) {
@@ -1296,10 +1793,31 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       overlayLayersRef.current.push(erosionLayer)
     }
 
-    // Slope (GEE)
-    if (activeLayers.includes('slope') && assessment?.erosion_risk?.visualization?.slope_tile_url) {
-      const tileUrl = assessment.erosion_risk.visualization.slope_tile_url
+    // Terrain: Slope
+    const slopeTileUrl = getTerrainTileUrl('slope', assessment, geeData)
+    if (activeLayers.includes('slope') && slopeTileUrl) {
+      const tileUrl = slopeTileUrl
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Slope' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Terrain: Elevation
+    const elevationTileUrl = getTerrainTileUrl('elevation', assessment, geeData)
+    if (activeLayers.includes('elevation') && elevationTileUrl) {
+      const tileUrl = elevationTileUrl
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Elevation' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    // Terrain: Aspect
+    const aspectTileUrl = getTerrainTileUrl('aspect', assessment, geeData)
+    if (activeLayers.includes('aspect') && aspectTileUrl) {
+      const tileUrl = aspectTileUrl
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Aspect' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
@@ -1341,63 +1859,91 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       overlayLayersRef.current.push(layer)
     }
 
+    const twiTileUrl = getPondingTileUrl('twi', assessment)
     // TWI (GEE)
-    if (activeLayers.includes('twi') && assessment?.ponding?.visualization?.twi_tile_url) {
-      const tileUrl = assessment.ponding.visualization.twi_tile_url
+    if (activeLayers.includes('twi') && twiTileUrl) {
+      const tileUrl = twiTileUrl
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - TWI' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
+    const depressionsTileUrl = getPondingTileUrl('depressions', assessment)
     // Depressions (GEE)
-    if (activeLayers.includes('depressions') && assessment?.ponding?.visualization?.depressions_tile_url) {
-      const tileUrl = assessment.ponding.visualization.depressions_tile_url
-      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Depressions' })
+    if (activeLayers.includes('depressions') && depressionsTileUrl) {
+      const tileUrl = depressionsTileUrl
+      const layer = L.tileLayer(tileUrl, {
+        opacity: opacity,
+        attribution: 'Google Earth Engine - Depressions',
+        className: 'gee-depressions-layer',
+        updateWhenZooming: false,
+        keepBuffer: 4
+      })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
+    const wetAreasTileUrl = getPondingTileUrl('wet-areas', assessment)
     // Wet Areas (GEE)
-    if (activeLayers.includes('wet-areas') && assessment?.ponding?.visualization?.wet_areas_tile_url) {
-      const tileUrl = assessment.ponding.visualization.wet_areas_tile_url
+    if (activeLayers.includes('wet-areas') && wetAreasTileUrl) {
+      const tileUrl = wetAreasTileUrl
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Wet Areas' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
+    const pondingRiskTileUrl = getPondingTileUrl('ponding-risk', assessment)
     // Ponding Risk (GEE)
-    if (activeLayers.includes('ponding-risk') && assessment?.ponding?.visualization?.ponding_risk_tile_url) {
-      const tileUrl = assessment.ponding.visualization.ponding_risk_tile_url
-      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Ponding Risk' })
+    if (activeLayers.includes('ponding-risk') && pondingRiskTileUrl) {
+      const tileUrl = pondingRiskTileUrl
+      const layer = L.tileLayer(tileUrl, {
+        opacity: opacity,
+        attribution: 'Google Earth Engine - Ponding Risk',
+        className: 'gee-ponding-risk-layer',
+        updateWhenZooming: false,
+        keepBuffer: 4
+      })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
+    const hydrologicGroupTileUrl = getPondingTileUrl('hydrologic-group', assessment)
     // Hydrologic Group (GEE)
-    if (activeLayers.includes('hydrologic-group') && assessment?.ponding?.visualization?.hydrologic_group_tile_url) {
-      const tileUrl = assessment.ponding.visualization.hydrologic_group_tile_url
+    if (activeLayers.includes('hydrologic-group') && hydrologicGroupTileUrl) {
+      const tileUrl = hydrologicGroupTileUrl
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Hydrologic Group' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
+    const drainageClassTileUrl = getPondingTileUrl('drainage-class', assessment)
     // Drainage Class (GEE)
-    if (activeLayers.includes('drainage-class') && assessment?.ponding?.visualization?.drainage_class_tile_url) {
-      const tileUrl = assessment.ponding.visualization.drainage_class_tile_url
+    if (activeLayers.includes('drainage-class') && drainageClassTileUrl) {
+      const tileUrl = drainageClassTileUrl
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Drainage Class' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
-    if (activeLayers.includes('flow-channels') && assessment?.concentrated_flow?.visualization?.spi_tile_url) {
-      const tileUrl = assessment.concentrated_flow.visualization.spi_tile_url
+    const concentratedFlowTileUrl = getConcentratedFlowTileUrl(assessment)
+    if ((activeLayers.includes('flow-accumulation') || activeLayers.includes('flow-channels')) && concentratedFlowTileUrl) {
+      const tileUrl = concentratedFlowTileUrl
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Flow' })
+      layer.addTo(mapRef.current)
+      layers.push(layer)
+      overlayLayersRef.current.push(layer)
+    }
+
+    const convergentAreasTileUrl = getConvergentAreasTileUrl(assessment)
+    if (activeLayers.includes('convergent-areas') && convergentAreasTileUrl) {
+      const tileUrl = convergentAreasTileUrl
+      const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Convergent Areas' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
@@ -1412,68 +1958,73 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       overlayLayersRef.current.push(layer)
     }
 
-    // Productivity: Yield Gap (GEE)
-    if (activeLayers.includes('yield-gap') && assessment?.productivity?.visualization?.yield_gap_tile_url) {
-      const tileUrl = assessment.productivity.visualization.yield_gap_tile_url
+    const overallProductivityViz = cropProductivity?.overall_assessment?.visualization || assessment?.productivity?.visualization
+
+    // Productivity: Yield Gap (Overall / All Years)
+    if ((activeLayers.includes('overall-yield-gap') || activeLayers.includes('yield-gap')) && overallProductivityViz?.yield_gap_tile_url) {
+      const tileUrl = overallProductivityViz.yield_gap_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Yield Gap' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
-    // Productivity: Mean NDVI (GEE)
-    if (activeLayers.includes('mean-ndvi') && assessment?.productivity?.visualization?.mean_ndvi_tile_url) {
-      const tileUrl = assessment.productivity.visualization.mean_ndvi_tile_url
+    // Productivity: Mean NDVI (Overall / All Years)
+    if ((activeLayers.includes('overall-mean-ndvi') || activeLayers.includes('mean-ndvi')) && overallProductivityViz?.mean_ndvi_tile_url) {
+      const tileUrl = overallProductivityViz.mean_ndvi_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Mean NDVI' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
-    // Productivity: Max NDVI (GEE)
-    if (activeLayers.includes('max-ndvi') && assessment?.productivity?.visualization?.max_ndvi_tile_url) {
-      const tileUrl = assessment.productivity.visualization.max_ndvi_tile_url
+    // Productivity: Max NDVI (Overall / All Years)
+    if ((activeLayers.includes('overall-max-ndvi') || activeLayers.includes('max-ndvi')) && overallProductivityViz?.max_ndvi_tile_url) {
+      const tileUrl = overallProductivityViz.max_ndvi_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'Google Earth Engine - Max NDVI' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
-    // Productivity: NCCPI Crop-Specific Layers (GEE - field-masked)
-    if (activeLayers.includes('nccpi-all') && assessment?.productivity?.visualization?.nccpi_all_tile_url) {
-      const tileUrl = assessment.productivity.visualization.nccpi_all_tile_url
+    // Productivity: NCCPI Crop-Specific Layers (from crop-specific endpoint)
+    const nccpiViz = cropProductivity?.soil_productivity?.visualization
+    const legacyNccpiViz = cropProductivity?.soil_productivity?.nccpi_visualization
+
+    if (activeLayers.includes('nccpi-all') && (nccpiViz?.all_crops?.tile_url || legacyNccpiViz?.nccpi_all_tile_url)) {
+      const tileUrl = nccpiViz?.all_crops?.tile_url || legacyNccpiViz?.nccpi_all_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI All Crops' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
-    if (activeLayers.includes('nccpi-corn') && assessment?.productivity?.visualization?.nccpi_corn_tile_url) {
-      const tileUrl = assessment.productivity.visualization.nccpi_corn_tile_url
+    if (activeLayers.includes('nccpi-corn') && (nccpiViz?.corn?.tile_url || legacyNccpiViz?.nccpi_corn_tile_url)) {
+      const tileUrl = nccpiViz?.corn?.tile_url || legacyNccpiViz?.nccpi_corn_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI Corn' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
-    if (activeLayers.includes('nccpi-soy') && assessment?.productivity?.visualization?.nccpi_soy_tile_url) {
-      const tileUrl = assessment.productivity.visualization.nccpi_soy_tile_url
+    if (activeLayers.includes('nccpi-soy') && (nccpiViz?.soybeans?.tile_url || legacyNccpiViz?.nccpi_soy_tile_url)) {
+      const tileUrl = nccpiViz?.soybeans?.tile_url || legacyNccpiViz?.nccpi_soy_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI Soybean' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
-    if (activeLayers.includes('nccpi-sg') && assessment?.productivity?.visualization?.nccpi_sg_tile_url) {
-      const tileUrl = assessment.productivity.visualization.nccpi_sg_tile_url
+    if (activeLayers.includes('nccpi-sg') && (nccpiViz?.small_grains?.tile_url || legacyNccpiViz?.nccpi_sg_tile_url)) {
+      const tileUrl = nccpiViz?.small_grains?.tile_url || legacyNccpiViz?.nccpi_sg_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI Small Grains' })
       layer.addTo(mapRef.current)
       layers.push(layer)
       overlayLayersRef.current.push(layer)
     }
 
-    if (activeLayers.includes('nccpi-cotton') && assessment?.productivity?.visualization?.nccpi_cotton_tile_url) {
-      const tileUrl = assessment.productivity.visualization.nccpi_cotton_tile_url
+    if (activeLayers.includes('nccpi-cotton') && (nccpiViz?.cotton?.tile_url || legacyNccpiViz?.nccpi_cotton_tile_url)) {
+      const tileUrl = nccpiViz?.cotton?.tile_url || legacyNccpiViz?.nccpi_cotton_tile_url
       const layer = L.tileLayer(tileUrl, { opacity: opacity, attribution: 'GEE - NCCPI Cotton' })
       layer.addTo(mapRef.current)
       layers.push(layer)
@@ -1529,6 +2080,8 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     })
   }, [opacity])
 
+  const assessmentData = geeData?.geeAssessment
+
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="absolute inset-0 w-full h-full" />
@@ -1547,19 +2100,114 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
           {isLegendOpen && (
             <div className="p-3">
               <div className="space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
-                {activeLayers.map(id => LEGEND_DATA[id] && (
-                  <div key={id} className="last:mb-0">
-                      <h4 className="text-xs font-bold text-gray-800 mb-2 pb-1 border-b border-gray-100">{LEGEND_DATA[id].title}</h4>
-                      <div className="space-y-1.5">
-                        {LEGEND_DATA[id].items.map((item, i) => (
-                          <div key={i} className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full shadow-sm flex-shrink-0" style={{ backgroundColor: item.color, border: '1px solid rgba(0,0,0,0.1)' }}></span>
-                            <span className="text-xs text-gray-600 font-medium leading-tight">{item.label}</span>
-                          </div>
-                        ))}
+                {(() => {
+                  // Group NCCPI and SVI layers together for single legends
+                  const nccpiLayers = activeLayers.filter(id => id.startsWith('nccpi-'))
+                  const sviLayers: string[] = activeLayers.filter(
+                    id => id === 'svi-surface' || id === 'svi-subsurface-drained' || id === 'svi-subsurface-undrained'
+                  )
+                  const otherLayers = activeLayers.filter(
+                    id =>
+                      !id.startsWith('nccpi-') &&
+                      !sviLayers.includes(id) &&
+                      LEGEND_DATA[id]
+                  )
+                  
+                  const legendElements: any[] = []
+                  
+                  // Show single NCCPI legend if any NCCPI layer is active, OR if 'nccpi-all' is specifically active
+                  // Note: nccpi-all is the base layer, other nccpi-* layers use the same legend
+                  if (nccpiLayers.length > 0) {
+                    legendElements.push(
+                      <div key="nccpi-group" className="last:mb-0">
+                        <h4 className="text-xs font-bold text-gray-800 mb-2 pb-1 border-b border-gray-100">NCCPI Crop Productivity</h4>
+                        <div className="space-y-1.5">
+                          {LEGEND_DATA['nccpi-all'].items.map((item, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full shadow-sm flex-shrink-0" style={{ backgroundColor: item.color, border: '1px solid rgba(0,0,0,0.1)' }}></span>
+                              <span className="text-xs text-gray-600 font-medium leading-tight">{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                  </div>
-                ))}
+                    )
+                  }
+
+                  if (sviLayers.length > 0) {
+                    const sviLegendSource = (sviLayers.includes('svi-surface')
+                      ? 'svi-surface'
+                      : sviLayers.includes('svi-subsurface-drained')
+                        ? 'svi-subsurface-drained'
+                        : 'svi-subsurface-undrained') as 'svi-surface' | 'svi-subsurface-drained' | 'svi-subsurface-undrained'
+
+                    legendElements.push(
+                      <div key="svi-group" className="last:mb-0">
+                        <h4 className="text-xs font-bold text-gray-800 mb-2 pb-1 border-b border-gray-100">SVI Soil Vulnerability</h4>
+                        <div className="space-y-1.5">
+                          {getSVILegendItems(sviLegendSource, assessmentData).map((item, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full shadow-sm flex-shrink-0" style={{ backgroundColor: item.color, border: '1px solid rgba(0,0,0,0.1)' }}></span>
+                              <span className="text-xs text-gray-600 font-medium leading-tight">{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  }
+                  
+                  // Show other legends normally
+                  otherLayers.forEach(id => {
+                    const layerLegend = id === 'flow-accumulation'
+                      ? {
+                          title: LEGEND_DATA['flow-accumulation'].title,
+                          items: getConcentratedFlowLegendItems(assessmentData)
+                        }
+                      : id === 'convergent-areas'
+                        ? {
+                            title: LEGEND_DATA['convergent-areas'].title,
+                            items: getConvergentAreasLegendItems(assessmentData)
+                          }
+                      : (id === 'erosion-risk' || id === 'k-factor' || id === 'spi' || id === 'runoff' || id === 't-value')
+                        ? {
+                            title: LEGEND_DATA[id].title,
+                            items: getErosionLegendItems(id as 'erosion-risk' | 'k-factor' | 'spi' | 'runoff' | 't-value', assessmentData)
+                          }
+                      : (id === 'twi' || id === 'depressions' || id === 'wet-areas' || id === 'ponding-risk' || id === 'drainage-class')
+                        ? {
+                            title: LEGEND_DATA[id].title,
+                            items: getPondingLegendItems(id as 'twi' | 'depressions' | 'wet-areas' | 'ponding-risk' | 'drainage-class', assessmentData)
+                          }
+                      : id === 'hydrologic-group'
+                        ? {
+                            title: LEGEND_DATA['hydrologic-group'].title,
+                            items: getHydrologicGroupLegendItems(assessmentData)
+                          }
+                      : (id === 'slope' || id === 'elevation' || id === 'aspect')
+                        ? {
+                            title: LEGEND_DATA[id].title,
+                            items: id === 'slope'
+                              ? getErosionLegendItems('slope', assessmentData)
+                              : getTerrainLegendItems(id as 'slope' | 'elevation' | 'aspect', assessmentData, geeData)
+                          }
+                        : LEGEND_DATA[id]
+
+                    legendElements.push(
+                      <div key={id} className="last:mb-0">
+                        <h4 className="text-xs font-bold text-gray-800 mb-2 pb-1 border-b border-gray-100">{layerLegend.title}</h4>
+                        <div className="space-y-1.5">
+                          {layerLegend.items.map((item, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full shadow-sm flex-shrink-0" style={{ backgroundColor: item.color, border: '1px solid rgba(0,0,0,0.1)' }}></span>
+                              <span className="text-xs text-gray-600 font-medium leading-tight">{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })
+                  
+                  return legendElements
+                })()}
               </div>
 
               {/* Opacity Slider */}

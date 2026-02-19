@@ -147,3 +147,11 @@ html {
   opacity: 1 !important;
   transform: scale(1.2);
 }
+
+.leaflet-tile.gee-depressions-layer {
+  image-rendering: pixelated;
+}
+
+.leaflet-tile.gee-ponding-risk-layer {
+  image-rendering: pixelated;
+}

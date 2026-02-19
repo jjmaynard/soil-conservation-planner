@@ -12,6 +12,10 @@ import { geometryToWKT } from '#lib/ssurgo-area-query'
 import type { ComprehensiveFieldAssessment, ProductivityCropSpecificResponse } from '#types/geeApi'
 import type { ProcessedFieldData } from './useFieldSSURGO'
 
+// Cache configuration
+const CACHE_DURATION_HOURS = 24
+const CACHE_KEY_PREFIX = 'gee_assessment_'
+
 export interface EnhancedFieldData {
   // SSURGO soil data
   ssurgoData: ProcessedFieldData | null
@@ -74,14 +78,70 @@ interface UseComprehensiveFieldAssessmentResult {
     geometry: GeoJSON.Polygon | number[][],
     ssurgoData?: ProcessedFieldData | null,
     year?: number,
-    csbId?: string
+    fieldId?: string
   ) => Promise<void>
   assessCropProductivity: (
-    csbId: string,
-    startYear?: number,
-    endYear?: number
+    params: {
+      csbId?: string
+      wkt?: string
+      startYear?: number
+      endYear?: number
+      fieldId?: string
+    }
   ) => Promise<void>
   reset: () => void
+}
+
+// Generate cache key from field identifier
+const getCacheKey = (wkt: string, fieldId?: string): string => {
+  const identifier = fieldId || wkt.substring(0, 50).replace(/[^a-zA-Z0-9]/g, '_')
+  return `${CACHE_KEY_PREFIX}${identifier}`
+}
+
+// Check if cached data is still valid
+const getCachedData = (cacheKey: string): EnhancedFieldData | null => {
+  try {
+    const cached = localStorage.getItem(cacheKey)
+    if (!cached) return null
+
+    const { data, timestamp } = JSON.parse(cached)
+    const now = Date.now()
+    const ageHours = (now - timestamp) / (1000 * 60 * 60)
+
+    if (ageHours < CACHE_DURATION_HOURS) {
+      console.log(`📦 Using cached GEE assessment (${ageHours.toFixed(1)}h old)`)
+      return data
+    } else {
+      console.log(`⏰ Cache expired (${ageHours.toFixed(1)}h old), refreshing...`)
+      localStorage.removeItem(cacheKey)
+      return null
+    }
+  } catch (error) {
+    console.error('Failed to read GEE assessment cache:', error)
+    return null
+  }
+}
+
+// Save data to cache
+const setCachedData = (cacheKey: string, data: EnhancedFieldData) => {
+  try {
+    const cacheEntry = { data, timestamp: Date.now() }
+    localStorage.setItem(cacheKey, JSON.stringify(cacheEntry))
+    console.log('💾 Cached GEE assessment for future use')
+  } catch (error) {
+    console.error('Failed to cache GEE assessment:', error)
+    // Clear old caches if storage is full
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(CACHE_KEY_PREFIX) && key !== cacheKey) {
+          localStorage.removeItem(key)
+        }
+      })
+      localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }))
+    } catch (retryError) {
+      console.warn('Unable to cache GEE assessment - localStorage may be full')
+    }
+  }
 }
 
 /**
@@ -97,21 +157,26 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
       geometry: GeoJSON.Polygon | number[][],
       ssurgoData?: ProcessedFieldData | null,
       year?: number,
-      csbId?: string
+      fieldId?: string
     ) => {
+      const wkt = geometryToWKT(geometry)
+      const cacheKey = getCacheKey(wkt, fieldId)
+      
+      // Check cache first
+      const cachedData = getCachedData(cacheKey)
+      if (cachedData) {
+        setData(cachedData)
+        setError(null)
+        return
+      }
+      
+      // No cache - fetch from API
       setLoading(true)
       setError(null)
-      
-      // Clear any existing data to prevent showing stale cached data
       setData(null)
-      sessionStorage.removeItem('comprehensiveFieldAssessment')
-      console.log('Cleared existing assessment data')
 
       try {
-        // Convert geometry to WKT for GEE API
-        const wkt = geometryToWKT(geometry)
-
-        // Query GEE comprehensive assessment
+        // Query GEE comprehensive assessment (WITHOUT crop-specific - that's lazy loaded)
         console.log('Querying GEE comprehensive assessment...')
         const geeAssessment = await geeApi.getComprehensiveAssessment({
           wkt,
@@ -119,36 +184,12 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
           include_visualizations: true,
         })
 
-        // Query crop-specific productivity if CSB ID is available
-        let cropProductivity: ProductivityCropSpecificResponse | null = null
-        if (csbId) {
-          try {
-            console.log('Querying crop-specific productivity for CSB ID:', csbId)
-            const endYear = year || new Date().getFullYear()
-            const startYear = 2017 // API requires >= 2017, use minimum allowed year
-            console.log('Year range:', startYear, 'to', endYear)
-            cropProductivity = await geeApi.getProductivityCropSpecific({
-              csbid: csbId,
-              start_year: startYear,
-              end_year: endYear
-            })
-            console.log('Crop-specific productivity response:', cropProductivity)
-          } catch (cropError) {
-            console.warn('Failed to fetch crop-specific productivity:', cropError)
-            // Don't fail the whole assessment if crop-specific fails
-          }
-        } else {
-          console.log('No CSB ID available - skipping crop-specific productivity')
-        }
-
-        // Combine SSURGO and GEE data
-        const enhancedData = combineData(ssurgoData, geeAssessment, cropProductivity)
-        console.log('Combined data cropProductivity:', enhancedData.cropProductivity)
+        // Combine SSURGO and GEE data (cropProductivity will be null initially)
+        const enhancedData = combineData(ssurgoData, geeAssessment, null)
         setData(enhancedData)
         
-        // Store in session storage
-        sessionStorage.setItem('comprehensiveFieldAssessment', JSON.stringify(enhancedData))
-        console.log('Stored enhanced data in session storage')
+        // Cache for future use
+        setCachedData(cacheKey, enhancedData)
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Unknown error')
         setError(error)
@@ -161,13 +202,28 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
   )
 
   const assessCropProductivity = useCallback(
-    async (
-      csbId: string,
-      startYear?: number,
+    async (params: {
+      csbId?: string
+      wkt?: string
+      startYear?: number
       endYear?: number
-    ) => {
+      fieldId?: string
+    }) => {
+      const { csbId, wkt, startYear, endYear, fieldId } = params
+      
+      // Check if data already has crop productivity
+      if (data?.cropProductivity) {
+        console.log('📦 Crop-specific productivity already loaded')
+        return
+      }
+
       if (!data) {
         console.warn('No comprehensive assessment data available')
+        return
+      }
+      
+      if (!csbId && !wkt) {
+        console.warn('Either csbId or wkt is required for crop-specific productivity')
         return
       }
 
@@ -176,14 +232,39 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
 
       try {
         const end = endYear || new Date().getFullYear()
-        const start = startYear || end - 6 // 7 years total
+        const start = startYear || 2017 // API minimum
 
-        console.log('Querying crop-specific productivity for CSB ID:', csbId)
-        const cropProductivity = await geeApi.getProductivityCropSpecific({
-          csbid: csbId,
+        console.log('Querying crop-specific productivity with params:', { 
+          csbId: csbId || 'none',
+          wkt: wkt ? `${wkt.substring(0, 60)}...` : 'none',
+          startYear: start, 
+          endYear: end,
+          fieldId 
+        })
+        const requestParams: any = {
           start_year: start,
           end_year: end
-        })
+        }
+        
+        // For custom fields, prioritize WKT over csbId
+        // If csbId starts with 'custom-', treat it as a custom field and require WKT
+        const isCustomField = csbId?.startsWith('custom-')
+        
+        if (isCustomField) {
+          if (!wkt) {
+            throw new Error('Custom fields require WKT geometry')
+          }
+          requestParams.wkt = wkt
+          console.log('[Productivity] Using WKT for custom field')
+        } else if (csbId) {
+          requestParams.csbid = csbId
+          console.log('[Productivity] Using csbId for CSB field')
+        } else if (wkt) {
+          requestParams.wkt = wkt
+          console.log('[Productivity] Using WKT (no csbId provided)')
+        }
+        
+        const cropProductivity = await geeApi.getProductivityCropSpecific(requestParams)
 
         // Update data with crop-specific productivity
         const updatedData: EnhancedFieldData = {
@@ -192,10 +273,13 @@ export function useComprehensiveFieldAssessment(): UseComprehensiveFieldAssessme
         }
         setData(updatedData)
         
-        // Update session storage
-        sessionStorage.setItem('comprehensiveFieldAssessment', JSON.stringify(updatedData))
+        // Update cache with crop-specific data
+        if (wkt || fieldId) {
+          const cacheKey = getCacheKey(wkt || '', fieldId)
+          setCachedData(cacheKey, updatedData)
+        }
       } catch (err) {
-        const error = err instanceof Error ?err : new Error('Unknown error')
+        const error = err instanceof Error ? err : new Error('Unknown error')
         setError(error)
         console.error('Crop-specific productivity error:', error)
       } finally {
@@ -257,6 +341,28 @@ function combineData(
     (ssurgoHydricPct !== null && ssurgoHydricPct > 20) || 
     (geePondingRiskPct > 15)
 
+  const getClassWeightedMean = (classPct: any): number | null => {
+    if (!classPct || typeof classPct !== 'object') return null
+    const low = Number(classPct.low_pct) || 0
+    const moderate = Number(classPct.moderate_pct) || 0
+    const moderatelyHigh = Number(classPct.moderately_high_pct) || 0
+    const high = Number(classPct.high_pct) || 0
+    const classifiedTotal = low + moderate + moderatelyHigh + high
+    if (classifiedTotal <= 0) return null
+    return ((low * 1) + (moderate * 2) + (moderatelyHigh * 3) + (high * 4)) / classifiedTotal
+  }
+
+  const sviMetrics = geeAssessment.svi.svi_metrics
+  const surfaceLossMean =
+    sviMetrics.surface_loss_mean ??
+    getClassWeightedMean(sviMetrics.surface_loss_class_pct)
+  const subsurfaceDrainedMean =
+    sviMetrics.subsurface_drained_mean ??
+    getClassWeightedMean(sviMetrics.subsurface_drained_class_pct)
+  const subsurfaceUndrainedMean =
+    sviMetrics.subsurface_undrained_mean ??
+    getClassWeightedMean(sviMetrics.subsurface_undrained_class_pct)
+
   return {
     ssurgoData,
     geeAssessment,
@@ -288,9 +394,9 @@ function combineData(
         gully_risk_pct: geeAssessment.concentrated_flow.flow_metrics.high_gully_risk_pct,
       },
       svi: {
-        surface_loss_mean: geeAssessment.svi.svi_metrics.surface_loss_mean,
-        subsurface_drained_mean: geeAssessment.svi.svi_metrics.subsurface_drained_mean,
-        subsurface_undrained_mean: geeAssessment.svi.svi_metrics.subsurface_undrained_mean,
+        surface_loss_mean: surfaceLossMean,
+        subsurface_drained_mean: subsurfaceDrainedMean,
+        subsurface_undrained_mean: subsurfaceUndrainedMean,
       },
     },
   }

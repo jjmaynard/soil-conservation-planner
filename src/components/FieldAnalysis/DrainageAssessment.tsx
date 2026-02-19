@@ -178,6 +178,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
               <div className="text-lg font-bold" style={{ color: drainageData.depressionAreaPct > 5 ? '#991b1b' : '#166534' }}>
                 {drainageData.depressionAreaPct.toFixed(1)}%
               </div>
+              <div className="text-xs text-gray-400 mt-1" title="Uses strict ≥0.15m depth threshold. The Depressions map layer may show visually prominent low areas that fall below this depth cutoff.">≥0.15m depth</div>
             </div>
             <div className="p-2 rounded-lg text-center" style={{ backgroundColor: drainageData.twiAbove12Pct > 15 ? '#fef3c7' : '#f0fdf4', border: `1px solid ${drainageData.twiAbove12Pct > 15 ? '#fde68a' : '#bbf7d0'}` }}>
               <div className="text-xs text-gray-600 mb-1">High TWI</div>
@@ -192,6 +193,10 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
               </div>
             </div>
           </div>
+
+          <p className="text-xs text-gray-500 italic px-1">
+            The <strong>Depressions %</strong> metric counts pixels where the 10m DEM is ≥0.15m below its neighborhood mean — a strict threshold. The <em>Depressions</em> map layer uses a separate visual contrast stretch and may highlight shallower low areas not counted here.
+          </p>
 
           {drainageData.twiMean > 0 && (
             <div className="p-3 rounded-lg" style={{ backgroundColor: '#fafafa', border: '1px solid #e5e7eb' }}>
@@ -230,7 +235,12 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
 
       {/* Drainage Class Distribution */}
       <div>
-        <h4 className="text-sm font-semibold text-gray-900 mb-2">Drainage Classes</h4>
+        <h4 className="text-sm font-semibold text-gray-900 mb-2">Drainage Classes (SSURGO Component Summary)</h4>
+        {drainageData.hasGEEData && drainageData.hasSSURGOData && (
+          <p className="text-xs text-gray-500 mb-2">
+            Bars use SSURGO component-weighted acreage. The map "Drainage Class" layer is a GEE raster product and may differ spatially.
+          </p>
+        )}
         <div className="space-y-2">
           {drainageData.drainageClasses.map((drainage: any) => (
             <div key={drainage.class}>

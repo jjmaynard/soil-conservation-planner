@@ -167,10 +167,15 @@ export default function ResourceConcerns({ fieldId, geeData, fieldAcres = 0 }: R
       }
 
       // 6. SOIL QUALITY (SVI) CONCERN
-      if (combined.svi.surface_loss_mean > 0.5) {
-        const severity = 
-          combined.svi.surface_loss_mean > 0.7 ? 'High' :
-          combined.svi.surface_loss_mean > 0.6 ? 'Moderate' : 'Low'
+      // Supports both legacy normalized means (0-1) and class-based means (1-4)
+      const sviMean = combined.svi.surface_loss_mean
+      const isClassScale = sviMean > 1.2
+      const isSviConcern = isClassScale ? sviMean > 2.0 : sviMean > 0.5
+
+      if (isSviConcern) {
+        const severity = isClassScale
+          ? (sviMean > 3.2 ? 'High' : sviMean > 2.5 ? 'Moderate' : 'Low')
+          : (sviMean > 0.7 ? 'High' : sviMean > 0.6 ? 'Moderate' : 'Low')
         
         detectedConcerns.push({
           id: 'svi',

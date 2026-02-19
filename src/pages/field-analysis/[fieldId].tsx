@@ -87,11 +87,20 @@ export default function FieldAnalysisDetail() {
     data: geeData, 
     loading: geeLoading, 
     error: geeError, 
-    assessField 
+    assessField,
+    assessCropProductivity
   } = useComprehensiveFieldAssessment()
 
   // Track if GEE assessment has been called to prevent duplicates
   const [geeAssessed, setGeeAssessed] = useState(false)
+
+  // Debug: Log ssurgoData updates
+  useEffect(() => {
+    console.log('[FieldAnalysisDetail] SSURGO data updated:', ssurgoData)
+    console.log('[FieldAnalysisDetail] ssurgoData.soils:', ssurgoData?.soils)
+    console.log('[FieldAnalysisDetail] ssurgoLoading:', ssurgoLoading)
+    console.log('[FieldAnalysisDetail] ssurgoError:', ssurgoError)
+  }, [ssurgoData, ssurgoLoading, ssurgoError])
 
   useEffect(() => {
     if (fieldId) {
@@ -125,14 +134,14 @@ export default function FieldAnalysisDetail() {
         console.log('Querying GEE comprehensive assessment...')
         setGeeAssessed(true) // Set flag before calling to prevent duplicates
         try {
-          // Pass CSB ID if available for crop-specific productivity
-          // CSB fields have clu_id - use it directly and let the API determine if rotation data exists
-          const csbId = (fieldData as any).clu_id || 
-                        (fieldData as any).csb_id || 
-                        (fieldData as any).csbid
-          console.log('Field data:', fieldData)
-          console.log('Extracted CSB ID:', csbId)
-          await assessField(fieldData.boundary, ssurgoData, new Date().getFullYear(), csbId)
+          // Extract geometry from GeoJSON Feature if needed
+          let geometry = fieldData.boundary
+          if (geometry.type === 'Feature' && geometry.geometry) {
+            geometry = geometry.geometry
+          }
+          
+          // Pass fieldId for better cache management (crop-specific will be lazy loaded)
+          await assessField(geometry, ssurgoData, new Date().getFullYear(), fieldData.id || fieldData.clu_id)
         } catch (error) {
           console.error('Failed to query GEE assessment:', error)
           setGeeAssessed(false) // Reset flag on error to allow retry
@@ -149,8 +158,14 @@ export default function FieldAnalysisDetail() {
     try {
       // Try to get data from session storage first
       const storedData = sessionStorage.getItem('selectedField')
+      console.log('[LoadFieldData] sessionStorage data:', storedData ? 'found' : 'NOT FOUND')
+      
       if (storedData) {
         const parsed = JSON.parse(storedData)
+        console.log('[LoadFieldData] Parsed field data:', parsed)
+        console.log('[LoadFieldData] Parsed boundary:', parsed.boundary)
+        console.log('[LoadFieldData] Boundary exists?', !!parsed.boundary)
+        
         // Add demo conservation data if not present
         setFieldData({
           ...parsed,
@@ -167,18 +182,33 @@ export default function FieldAnalysisDetail() {
         })
         
         // Query SSURGO data if boundary is available
+        console.log('[LoadFieldData] Checking if should query SSURGO...')
         if (parsed.boundary) {
-          console.log('Querying SSURGO for field boundary...')
           const expectedAcres = parsed.acres || parsed.area || 0
+          console.log('[LoadFieldData] Querying SSURGO for field boundary...')
+          console.log('[LoadFieldData] Field ID:', id)
+          console.log('[LoadFieldData] Boundary:', parsed.boundary)
+          console.log('[LoadFieldData] Expected acres:', expectedAcres)
+          
           try {
-            await queryField(parsed.boundary, expectedAcres, id)
+            // Extract geometry from GeoJSON Feature if needed
+            // Custom drawn fields save as Feature, CSB fields save as Polygon geometry
+            let geometry = parsed.boundary
+            if (geometry.type === 'Feature' && geometry.geometry) {
+              console.log('[LoadFieldData] Extracting geometry from Feature object')
+              geometry = geometry.geometry
+            }
+            console.log('[LoadFieldData] Final geometry type:', geometry.type)
+            
+            await queryField(geometry, expectedAcres, id)
+            console.log('[LoadFieldData] ✅ SSURGO query completed successfully')
           } catch (error) {
-            console.error('Failed to query SSURGO:', error)
+            console.error('[LoadFieldData] ❌ Failed to query SSURGO:', error)
           }
           
           // GEE assessment will be triggered separately in useEffect after SSURGO loads
         } else {
-          console.warn('No field boundary available for analysis queries - cannot run GEE assessment')
+          console.warn('[LoadFieldData] No field boundary available for analysis queries - cannot run GEE assessment')
         }
       } else {
         // Fetch from API
@@ -371,26 +401,29 @@ export default function FieldAnalysisDetail() {
               onCardClick={handleCardClick}
             />
           ) : (
-            <DetailView
-              fieldData={fieldData}
-              ssurgoData={ssurgoData}
-              geeData={geeData}
-              activeTab={activeDetailTab}
-              onTabChange={handleDetailTabChange}
-              onSoilSelect={setSelectedSoil}
-              selectedSoil={selectedSoil}
-              selectedUseCase={selectedUseCase}
-              activeLayers={activeLayers}
-              showCSBLayer={showCSBLayer}
-              onCSBLayerToggle={() => setShowCSBLayer(!showCSBLayer)}
-              onLayerToggle={(layerId) => {
-                setActiveLayers(prev => 
-                  prev.includes(layerId) 
-                    ? prev.filter(id => id !== layerId)
-                    : [...prev, layerId]
-                )
-              }}
-            />
+            <>
+              {/* Debug logging */}
+              {console.log('[FieldAnalysisDetail] Rendering DetailView with ssurgoData:', ssurgoData)}
+              <DetailView
+                fieldData={fieldData}
+                ssurgoData={ssurgoData}
+                geeData={geeData}
+                activeTab={activeDetailTab}
+                onTabChange={handleDetailTabChange}
+                onSoilSelect={setSelectedSoil}
+                selectedSoil={selectedSoil}
+                selectedUseCase={selectedUseCase}
+                activeLayers={activeLayers}
+                showCSBLayer={showCSBLayer}
+                onCSBLayerToggle={() => setShowCSBLayer(!showCSBLayer)}
+                onLayerToggle={(layerId) => {
+                  setActiveLayers(prev =>
+                    prev.includes(layerId) ? [] : [layerId]
+                  )
+                }}
+                assessCropProductivity={assessCropProductivity}
+              />
+            </>
           )}
         </div>
       </div>

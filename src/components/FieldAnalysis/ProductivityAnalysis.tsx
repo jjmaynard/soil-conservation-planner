@@ -4,17 +4,32 @@
 
 import { useState, useEffect } from 'react'
 import { TrendingUp, TrendingDown, BarChart3, Info, Wheat, Sprout, ChevronRight } from 'lucide-react'
+import {
+  ComposedChart,
+  Line,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Cell
+} from 'recharts'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
+import { CDL_CROP_CODES } from '../../utils/cdlQuery'
 
 interface ProductivityAnalysisProps {
   fieldId: string
   geeData?: EnhancedFieldData | null
+  onLoadCropSpecific?: () => Promise<void>
 }
 
-export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityAnalysisProps) {
+export default function ProductivityAnalysis({ fieldId, geeData, onLoadCropSpecific }: ProductivityAnalysisProps) {
   const [productivityData, setProductivityData] = useState<any>(null)
   const [selectedCrop, setSelectedCrop] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadingCropSpecific, setLoadingCropSpecific] = useState(false)
 
   useEffect(() => {
     loadProductivityData()
@@ -32,11 +47,12 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
         console.log('Has crop-specific data:', hasCropSpecific)
         
         if (hasCropSpecific) {
-          // Use crop-specific data
+          // Use crop-specific data (already loaded)
           console.log('Using crop-specific productivity data')
           const cropProd = geeData.cropProductivity!
           setProductivityData({
             hasCropSpecific: true,
+            soil_productivity: cropProd.soil_productivity,
             overall_yield_gap_pct: cropProd.overall_yield_gap_pct,
             dominant_crop: cropProd.dominant_crop,
             recommendation: cropProd.recommendation,
@@ -50,32 +66,25 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
           if (!selectedCrop && cropProd.crops_analyzed.length > 0) {
             setSelectedCrop(cropProd.crops_analyzed[0].crop_name)
           }
-        } else if (geeData.geeAssessment?.productivity) {
-          // Use non-crop-specific data from current field assessment
-          console.log('Using current field productivity data (non-crop-specific)')
-          const prod = geeData.geeAssessment.productivity
-          const combined = geeData.combined.productivity
-          
-          setProductivityData({
-            hasCropSpecific: false,
-            ndviPeakMean: combined.ndvi_peak_mean || 0,
-            yieldGap: combined.yield_gap_pct || 0,
-            stability: combined.stability_cv || 0,
-            p75Gap: prod.yield_gap.p75_gap_pct || 0,
-            p90Gap: prod.yield_gap.p90_gap_pct || 0,
-            ndviStd: prod.productivity_metrics.ndvi_peak_std || 0,
-            visualization: prod.visualization,
-            hasData: true,
-          })
+          setLoading(false)
         } else {
-          console.log('No productivity data available for current field')
-          setProductivityData({ hasData: false })
-        }
-      } else {
-        // Show loading state - don't use cached session storage to avoid stale data
-        console.log('No current field data - showing loading state')
-        setProductivityData({ hasData: false, loading: true })
-      }
+          // Try to lazy load crop-specific data if callback is available
+          if (onLoadCropSpecific && !loadingCropSpecific) {
+            console.log('Triggering lazy load of crop-specific productivity')
+            setLoadingCropSpecific(true)
+            try {
+              await onLoadCropSpecific()
+            } catch (error) {
+              console.error('Failed to load crop-specific data:', error)
+            }
+            setLoadingCropSpecific(false)
+          }
+          
+          // Show non-crop-specific data while loading or as fallback
+          if (geeData.geeAssessment?.productivity) {
+            console.log('Using non-crop-specific productivity data')
+            const prod = geeData.geeAssessment.productivity
+            const combined = geeData.combined.productivity
             
             setProductivityData({
               hasCropSpecific: false,
@@ -88,16 +97,22 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
               visualization: prod.visualization,
               hasData: true,
             })
-            return
+            setLoading(false)
+          } else {
+            console.log('No productivity data available')
+            setProductivityData({ hasData: false })
+            setLoading(false)
           }
         }
-        
-        setProductivityData({ hasData: false })
+      } else {
+        // Show loading state - don't use cached session storage to avoid stale data
+        console.log('No current field data - showing loading state')
+        // Keep loading true while waiting for data
+        setProductivityData({ hasData: false, loading: true })
       }
     } catch (error) {
       console.error('Error loading productivity data:', error)
       setProductivityData({ hasData: false })
-    } finally {
       setLoading(false)
     }
   }
@@ -125,6 +140,25 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
     if (gap < 10) return { bg: '#dcfce7', text: '#166534', border: '#bbf7d0' }
     if (gap < 20) return { bg: '#fef3c7', text: '#92400e', border: '#fde68a' }
     return { bg: '#fee2e2', text: '#991b1b', border: '#fecaca' }
+  }
+
+  // Custom X-Axis Tick with CDL Crop Colors
+  const CustomXAxisTick = ({ x, y, payload }: any) => {
+    // Find the data point for this year (safe check for fallback mode)
+    const dataPoint = productivityData?.time_series?.find((d: any) => d.year === payload.value)
+    
+    // Get crop color or default to gray
+    const cropCode = dataPoint?.crop_code
+    const cropColor = cropCode && CDL_CROP_CODES[cropCode] ? CDL_CROP_CODES[cropCode].color : '#9ca3af'
+    
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text x={0} y={0} dy={10} textAnchor="middle" fill="#6b7280" fontSize={10}>
+          {payload.value}
+        </text>
+        <circle cx={0} cy={18} r={4} fill={cropColor} stroke="#fff" strokeWidth={1} />
+      </g>
+    )
   }
 
   // Crop-specific display
@@ -164,6 +198,44 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
           </div>
           <p className="text-xs text-gray-700">{productivityData.recommendation}</p>
         </div>
+
+        {/* NCCPI Crop Productivity Section */}
+        {productivityData.soil_productivity && (
+          <div className="p-3 rounded-lg" style={{ backgroundColor: '#fefce8', border: '1px solid #fde68a' }}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-gray-700">Crop Productivity (NCCPI)</span>
+              <Info className="w-3 h-3 text-gray-500" />
+            </div>
+            <p className="text-xs text-gray-600 mb-2">{productivityData.soil_productivity.description}</p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="p-2 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
+                <div className="text-[10px] text-gray-500 mb-0.5">All Crops</div>
+                <div className="text-sm font-bold text-gray-900">{(productivityData.soil_productivity.all_crops.mean * 100).toFixed(0)}</div>
+                <div className="text-[9px] text-gray-500">Range: {(productivityData.soil_productivity.all_crops.min * 100).toFixed(0)}-{(productivityData.soil_productivity.all_crops.max * 100).toFixed(0)}</div>
+              </div>
+              <div className="p-2 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
+                <div className="text-[10px] text-gray-500 mb-0.5">Corn</div>
+                <div className="text-sm font-bold text-gray-900">{(productivityData.soil_productivity.corn.mean * 100).toFixed(0)}</div>
+                <div className="text-[9px] text-gray-500">Range: {(productivityData.soil_productivity.corn.min * 100).toFixed(0)}-{(productivityData.soil_productivity.corn.max * 100).toFixed(0)}</div>
+              </div>
+              <div className="p-2 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
+                <div className="text-[10px] text-gray-500 mb-0.5">Soybeans</div>
+                <div className="text-sm font-bold text-gray-900">{(productivityData.soil_productivity.soybeans.mean * 100).toFixed(0)}</div>
+                <div className="text-[9px] text-gray-500">Range: {(productivityData.soil_productivity.soybeans.min * 100).toFixed(0)}-{(productivityData.soil_productivity.soybeans.max * 100).toFixed(0)}</div>
+              </div>
+              <div className="p-2 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
+                <div className="text-[10px] text-gray-500 mb-0.5">Small Grains</div>
+                <div className="text-sm font-bold text-gray-900">{(productivityData.soil_productivity.small_grains.mean * 100).toFixed(0)}</div>
+                <div className="text-[9px] text-gray-500">Range: {(productivityData.soil_productivity.small_grains.min * 100).toFixed(0)}-{(productivityData.soil_productivity.small_grains.max * 100).toFixed(0)}</div>
+              </div>
+              <div className="p-2 rounded" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
+                <div className="text-[10px] text-gray-500 mb-0.5">Cotton</div>
+                <div className="text-sm font-bold text-gray-900">{(productivityData.soil_productivity.cotton.mean * 100).toFixed(0)}</div>
+                <div className="text-[9px] text-gray-500">Range: {(productivityData.soil_productivity.cotton.min * 100).toFixed(0)}-{(productivityData.soil_productivity.cotton.max * 100).toFixed(0)}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Crop Selector Tabs */}
         <div>
@@ -247,6 +319,94 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
           </div>
           <p className="text-xs text-gray-600 mt-2">{productivityData.overall_assessment.description}</p>
         </div>
+
+        {/* Productivity Time Series */}
+          <div className="h-64 mt-4 p-3 bg-white rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-semibold text-gray-700">Annual Productivity & Crop Type</h4>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-400"></span> Crop Type (Axis Dot)</span>
+            </div>
+          </div>
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={productivityData.time_series} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis 
+                  dataKey="year" 
+                  tick={<CustomXAxisTick />}
+                  tickLine={false}
+                  axisLine={false}
+                  interval={0}
+                />
+                <YAxis 
+                  yAxisId="left" 
+                  orientation="left" 
+                  domain={[0, 1]} 
+                  tick={{fontSize: 10}} 
+                  tickLine={false}
+                  axisLine={false}
+                  label={{ value: 'Peak NDVI', angle: -90, position: 'insideLeft', style: {fontSize: 10} }} 
+                />
+                <YAxis 
+                  yAxisId="right" 
+                  orientation="right" 
+                  domain={[0, 'auto']} 
+                  tick={{fontSize: 10}} 
+                  tickLine={false}
+                  axisLine={false}
+                  label={{ value: 'Yield Gap %', angle: 90, position: 'insideRight', style: {fontSize: 10} }} 
+                />
+                <Tooltip 
+                  contentStyle={{ fontSize: '12px', borderRadius: '6px' }}
+                  formatter={(value: any, name: string) => {
+                    if (name === 'ndvi_max') return [Number(value).toFixed(3), 'Peak NDVI']
+                    if (name === 'yield_gap_pct') return [`${value !== null ? Number(value).toFixed(1) : '—'}%`, 'Yield Gap']
+                    return [value, name]
+                  }}
+                  labelFormatter={(year) => {
+                    const item = productivityData.time_series.find((t: any) => t.year === year)
+                    const cropInfo = CDL_CROP_CODES[item?.crop_code]
+                    return (
+                      <div className="flex items-center gap-2">
+                         <span>{year}</span>
+                         {cropInfo && (
+                           <>
+                             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.crop_code ? cropInfo.color : '#9ca3af' }}></span>
+                             <span style={{ color: item.crop_code ? cropInfo.color : 'inherit', fontWeight: 600 }}>
+                               {item?.crop_name || cropInfo.name || 'Unknown'}
+                             </span>
+                           </>
+                         )}
+                      </div>
+                    )
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: '10px' }} />
+                <Bar 
+                  yAxisId="right" 
+                  dataKey="yield_gap_pct" 
+                  name="Yield Gap %" 
+                  fill="#fca5a5" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={20}
+                >
+                  {/* Optional: We could color bars by crop too, but using uniform color for metric consistency is safer */}
+                </Bar>
+                <Line 
+                  yAxisId="left" 
+                  type="monotone" 
+                  dataKey="ndvi_max" 
+                  name="Peak NDVI" 
+                  stroke="#10b981" 
+                  strokeWidth={2} 
+                  dot={{ r: 3, fill: '#10b981' }} 
+                  activeDot={{ r: 5 }} 
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
     )
   }
@@ -260,7 +420,7 @@ export default function ProductivityAnalysis({ fieldId, geeData }: ProductivityA
       <div className="flex items-start gap-2 p-2 rounded" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
         <Info className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: '#2563eb' }} />
         <p className="text-xs" style={{ color: '#1e40af' }}>
-          Multi-year NDVI analysis from Landsat 8 (peak growing season)
+          Multi-year NDVI analysis from Sentinel-2 (peak growing season)
         </p>
       </div>
 

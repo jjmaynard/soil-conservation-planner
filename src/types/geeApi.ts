@@ -65,14 +65,47 @@ export interface RUSLECalculateRequest {
 export interface RUSLEResponse {
   // Main results
   soil_loss_rate: number // Annual soil loss (t/ha/yr)
-  soil_loss_rate_tons_acre_yr: number // Annual soil loss (t/ac/yr)
-  soil_loss_statistics: StatisticsResponse | null
-  
-  // Individual factor responses (complete factor objects)
-  r_factor: RFactorResponse
-  k_factor: KFactorResponse
-  ls_factor: LSFactorResponse
-  c_factor: CFactorResponse
+    visualization?: {
+      all_crops?: {
+        tile_url: string
+        min: number
+        max: number
+        palette: string[]
+      }
+      corn?: {
+        tile_url: string
+        min: number
+        max: number
+        palette: string[]
+      }
+      soybeans?: {
+        tile_url: string
+        min: number
+        max: number
+        palette: string[]
+      }
+      small_grains?: {
+        tile_url: string
+        min: number
+        max: number
+        palette: string[]
+      }
+      cotton?: {
+        tile_url: string
+        min: number
+        max: number
+        palette: string[]
+      }
+      description?: string
+    }
+    nccpi_visualization?: {
+      nccpi_corn_tile_url?: string
+      nccpi_soy_tile_url?: string
+      nccpi_sg_tile_url?: string
+      nccpi_cotton_tile_url?: string
+      nccpi_all_tile_url?: string
+      description?: string
+    }
   p_factor: PFactorResponse
   
   // Field information
@@ -353,13 +386,75 @@ export interface SentinelRequest {
   cloud_cover_max?: number // Default: 20
 }
 
+export interface SentinelSpatialStats {
+  ndvi_mean?: number
+  ndvi_std?: number
+  ndvi_p10?: number
+  ndvi_p25?: number
+  ndvi_p50?: number
+  ndvi_p75?: number
+  ndvi_p90?: number
+  pixel_count?: number
+  valid_pixel_pct?: number
+  spatial_cv?: number
+}
+
+export interface SentinelTimeSeriesPoint extends SentinelSpatialStats {
+  date: string
+  ndvi?: number
+  ndvi_mean?: number
+  spatial_stats?: SentinelSpatialStats
+  cloud_cover?: number
+}
+
+export interface SentinelWithinFieldVariability {
+  method?: string
+  in_season_dates_used?: number
+  spatial_cv_median?: number
+  spatial_cv_mean?: number
+  spatial_cv_p90?: number
+  spatial_iqr_mean?: number
+  management_uniformity_score?: number
+}
+
 export interface SentinelResponse {
+  field?: {
+    area_acres?: number
+    area_m2?: number
+    bounds?: any
+  }
+  query?: {
+    start_date?: string
+    end_date?: string
+    cloud_threshold?: number
+    reducer?: string
+    scale_meters?: number
+    images_found?: number
+  }
   ndvi_statistics: SpatialStatistics
-  time_series?: Array<{
-    date: string
-    ndvi_mean: number
-    cloud_cover: number
-  }>
+  statistics?: {
+    mean_ndvi?: number
+    min_ndvi?: number
+    max_ndvi?: number
+    std_dev?: number
+    fractional_vegetation_cover?: number
+  }
+  composite_statistics?: {
+    mean_ndvi?: number
+    min_ndvi?: number
+    max_ndvi?: number
+    std_dev?: number
+    note?: string
+  }
+  time_series?: SentinelTimeSeriesPoint[]
+  within_field_variability?: SentinelWithinFieldVariability
+  visualization?: {
+    thumbnail_url?: string
+    tile_url?: string
+    description?: string
+    tile_format?: string
+  }
+  data_source?: string
   metadata: {
     image_count: number
     date_range: {
@@ -611,12 +706,33 @@ export interface ComprehensiveFieldAssessment {
   }
   svi: {
     svi_metrics: {
-      surface_loss_mean: number
-      surface_loss_high_pct: number
-      subsurface_drained_mean: number
-      subsurface_drained_high_pct: number
-      subsurface_undrained_mean: number
-      subsurface_undrained_high_pct: number
+      surface_loss_class_pct?: {
+        low_pct: number
+        moderate_pct: number
+        moderately_high_pct: number
+        high_pct: number
+        unclassified_pct: number
+      }
+      subsurface_drained_class_pct?: {
+        low_pct: number
+        moderate_pct: number
+        moderately_high_pct: number
+        high_pct: number
+        unclassified_pct: number
+      }
+      subsurface_undrained_class_pct?: {
+        low_pct: number
+        moderate_pct: number
+        moderately_high_pct: number
+        high_pct: number
+        unclassified_pct: number
+      }
+      surface_loss_mean?: number
+      surface_loss_high_pct?: number
+      subsurface_drained_mean?: number
+      subsurface_drained_high_pct?: number
+      subsurface_undrained_mean?: number
+      subsurface_undrained_high_pct?: number
     }
     visualization: {
       surface_tile_url: string
@@ -624,6 +740,32 @@ export interface ComprehensiveFieldAssessment {
       subsurface_undrained_tile_url: string
       surface_thumbnail_url: string
       description: string
+      surface_legend?: {
+        min_value: number
+        max_value: number
+        palette: string[]
+        units?: string
+        labels?: string[]
+      }
+      subsurface_drained_legend?: {
+        min_value: number
+        max_value: number
+        palette: string[]
+        units?: string
+        labels?: string[]
+      }
+      subsurface_undrained_legend?: {
+        min_value: number
+        max_value: number
+        palette: string[]
+        units?: string
+        labels?: string[]
+      }
+      high_vulnerability_threshold?: {
+        value: number
+        units?: string
+        description?: string
+      }
     }
     methodology: string
   }
@@ -649,9 +791,40 @@ export interface ClimateHistoryRequest {
 // ============================================================================
 
 export interface ProductivityCropSpecificRequest {
-  csbid: string
+  csbid?: string
+  wkt?: string
   start_year?: number
   end_year?: number
+}
+
+export interface NCCPIStats {
+  mean: number
+  min: number
+  max: number
+  std: number
+}
+
+export interface NCCPIVisualization {
+  tile_url: string
+  min: number
+  max: number
+  palette: string[]
+}
+
+export interface SoilProductivity {
+  all_crops: NCCPIStats
+  corn: NCCPIStats
+  soybeans: NCCPIStats
+  small_grains: NCCPIStats
+  cotton: NCCPIStats
+  visualization: {
+    all_crops: NCCPIVisualization
+    corn: NCCPIVisualization
+    soybeans: NCCPIVisualization
+    small_grains: NCCPIVisualization
+    cotton: NCCPIVisualization
+  }
+  description: string
 }
 
 export interface CropProductivityViz {
@@ -700,6 +873,7 @@ export interface TimeSeriesEntry {
 
 export interface ProductivityCropSpecificResponse {
   field_id: string
+  soil_productivity: SoilProductivity
   total_years_analyzed: number
   crops_analyzed: CropAnalysis[]
   rotation_summary: Record<string, number>
