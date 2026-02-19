@@ -33,7 +33,7 @@ export function useFilteredTabs(allTabs: Tab[], selectedUseCase: string | null):
     // }
     // const allowedTabIds = useCaseTabMapping[selectedUseCase]
     // return allTabs.filter(tab => allowedTabIds?.includes(tab.id))
-  }, [allTabs, selectedUseCase])
+  }, [allTabs])
 }
 
 export function getDefaultTab(selectedUseCase: string | null): TabId {

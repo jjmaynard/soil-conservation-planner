@@ -3207,6 +3207,7 @@ const MapUnitInterpretations = ({ latitude, longitude }: MapUnitInterpretationsP
     if (expanded && !assessment && !loading && !error) {
       fetchAssessment();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expanded]);
 
   const getRiskColor = (riskClass: string) => {

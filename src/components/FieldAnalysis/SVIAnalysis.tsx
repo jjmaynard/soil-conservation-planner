@@ -138,6 +138,7 @@ export default function SVIAnalysis({ fieldId, geeData }: SVIAnalysisProps) {
 
   useEffect(() => {
     loadSVIData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldId, geeData])
 
   const loadSVIData = async () => {

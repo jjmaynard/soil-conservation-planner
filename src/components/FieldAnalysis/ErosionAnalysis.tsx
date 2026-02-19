@@ -19,6 +19,7 @@ export default function ErosionAnalysis({ fieldId, ssurgoData, geeData }: Erosio
 
   useEffect(() => {
     loadErosionData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldId, ssurgoData, geeData])
 
   const loadErosionData = async () => {

@@ -126,6 +126,7 @@ export default function VegetationMonitoring({ fieldId, geeData, wkt }: Vegetati
         fetchDataSplitStrategy()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wkt, fieldId])
 
   // Filter data when selection changes or data loads
@@ -133,6 +134,7 @@ export default function VegetationMonitoring({ fieldId, geeData, wkt }: Vegetati
     if (allTimeseriesData) {
       filterDataForRange(selectedTimeRange)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTimeRange, allTimeseriesData])
 
   // Recalculate robust metrics whenever full timeseries data is available

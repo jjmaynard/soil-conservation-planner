@@ -33,6 +33,7 @@ export default function ProductivityAnalysis({ fieldId, geeData, onLoadCropSpeci
 
   useEffect(() => {
     loadProductivityData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldId, geeData])
 
   const loadProductivityData = async () => {

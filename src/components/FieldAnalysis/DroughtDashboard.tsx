@@ -26,6 +26,7 @@ export default function DroughtDashboard({ geeData, fieldId }: DroughtDashboardP
 
   useEffect(() => {
     loadDroughtData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geeData, fieldId])
 
   const loadDroughtData = async () => {

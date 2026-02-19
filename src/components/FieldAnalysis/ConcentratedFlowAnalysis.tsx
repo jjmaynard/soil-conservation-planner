@@ -67,7 +67,7 @@ export default function ConcentratedFlowAnalysis({ fieldId, geeData }: Concentra
     } finally {
       setLoading(false)
     }
-  }, [fieldId, geeData])
+  }, [geeData])
 
   useEffect(() => {
     loadFlowData()

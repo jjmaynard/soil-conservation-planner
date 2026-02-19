@@ -82,7 +82,7 @@ interface UseFieldSSURGOResult {
   fieldData: ProcessedFieldData | null
   loading: boolean
   error: Error | null
-  queryField: (geometry: GeoJSON.Polygon | number[][], expectedAcres?: number, fieldId?: string) => Promise<void>
+  queryField: (geometry: GeoJSON.Polygon | GeoJSON.Feature<GeoJSON.Geometry> | number[][], expectedAcres?: number, fieldId?: string) => Promise<void>
   reset: () => void
   currentFieldId: string | null
 }
@@ -161,7 +161,7 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
   const [currentFieldId, setCurrentFieldId] = useState<string | null>(null)
 
   const queryField = useCallback(
-    async (geometry: GeoJSON.Polygon | number[][], expectedAcres?: number, fieldId?: string) => {
+    async (geometry: GeoJSON.Polygon | GeoJSON.Feature<GeoJSON.Geometry> | number[][], expectedAcres?: number, fieldId?: string) => {
       const cacheKey = getCacheKey(geometry, fieldId)
       
       // Check cache first
@@ -182,24 +182,36 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
         console.log('=== SSURGO QUERY DEBUG ===')
         let geomType = 'unknown'
         let coordCount = 0
+        let queryGeometry: GeoJSON.Polygon | number[][]
         
-        // Check if it's a Feature (should not be after extraction)
-        if ('type' in geometry && geometry.type === 'Feature') {
-          console.error('⚠️ ERROR: Received GeoJSON Feature instead of Geometry!')
-          console.error('Please extract .geometry before calling queryField')
-          throw new Error('queryField expects Geometry, not Feature. Use geometry.geometry to extract.')
+        // Normalize GeoJSON Feature input to Polygon geometry
+        if (Array.isArray(geometry)) {
+          queryGeometry = geometry
+        } else if ('type' in geometry && geometry.type === 'Feature') {
+          if (!geometry.geometry) {
+            throw new Error('GeoJSON Feature has no geometry')
+          }
+
+          if (geometry.geometry.type !== 'Polygon') {
+            throw new Error(`queryField only supports Polygon geometry, received ${geometry.geometry.type}`)
+          }
+
+          queryGeometry = geometry.geometry
+          console.warn('Received GeoJSON Feature; extracted .geometry for SSURGO query')
+        } else {
+          queryGeometry = geometry
         }
         
-        if ('type' in geometry && geometry.type === 'Polygon') {
+        if ('type' in queryGeometry && queryGeometry.type === 'Polygon') {
           geomType = 'Polygon'
-          coordCount = geometry.coordinates[0]?.length || 0
+          coordCount = queryGeometry.coordinates[0]?.length || 0
           console.log('Geometry type:', geomType)
           console.log('Coordinate count:', coordCount)
-          console.log('First coordinate:', geometry.coordinates[0]?.[0])
+          console.log('First coordinate:', queryGeometry.coordinates[0]?.[0])
           console.log('Expected field area:', expectedAcres || 'unknown', 'acres')
-        } else if (Array.isArray(geometry)) {
+        } else if (Array.isArray(queryGeometry)) {
           geomType = 'Array'
-          coordCount = geometry.length
+          coordCount = queryGeometry.length
           console.log('Geometry type: Coordinate array')
           console.log('Coordinate count:', coordCount)
         }
@@ -209,7 +221,7 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
         }
         
         // First get map unit polygons with area calculation
-        const muPolygons = await querySSURGOByArea(geometry, {
+        const muPolygons = await querySSURGOByArea(queryGeometry, {
           what: 'mupolygon',
           geomAcres: true,
           geomIntersection: true,
@@ -230,7 +242,7 @@ export function useFieldSSURGO(): UseFieldSSURGOResult {
         }
 
         // Then get components for those map units
-        const mapUnits = await querySSURGOByArea(geometry, {
+        const mapUnits = await querySSURGOByArea(queryGeometry, {
           what: 'components',
         }) as MapUnitWithComponents[]
 

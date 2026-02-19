@@ -18,6 +18,7 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
 
   useEffect(() => {
     loadSoilData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldId, fieldData])
 
   const loadSoilData = async () => {

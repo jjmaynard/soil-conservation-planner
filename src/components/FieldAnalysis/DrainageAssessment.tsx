@@ -98,7 +98,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
     } finally {
       setLoading(false)
     }
-  }, [fieldId, ssurgoData, geeData])
+  }, [ssurgoData, geeData])
 
   useEffect(() => {
     loadDrainageData()

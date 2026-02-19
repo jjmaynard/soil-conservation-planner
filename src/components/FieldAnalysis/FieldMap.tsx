@@ -1291,7 +1291,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
         editControlRef.current = null
       }
     }
-  }, [mode, mapInitialized])
+  }, [mode, mapInitialized, onFieldSelected, selectedCSBField])
 
   // Add CSB/CLU field boundary visualization - Hybrid approach
   // Tile layer for efficient visualization + GeoJSON for interactivity
@@ -1580,7 +1580,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       }
       // Don't remove selected field layer - it should persist independently of CSB layer toggle
     }
-  }, [showCSBLayer, mapInitialized, mode])
+  }, [showCSBLayer, mapInitialized, mode, isInEditMode, onFieldSelected, selectedCSBField])
 
   // Legacy CLU WMS layer (kept for backwards compatibility)
   useEffect(() => {
@@ -2071,6 +2071,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       layers.forEach(layer => layer.remove())
       overlayLayersRef.current = [] 
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLayers, mode, geeData, ssurgoData]) // Intentionally omit opacity to prevent reload
 
   // Update opacity separately

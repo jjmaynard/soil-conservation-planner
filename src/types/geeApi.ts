@@ -65,6 +65,7 @@ export interface RUSLECalculateRequest {
 export interface RUSLEResponse {
   // Main results
   soil_loss_rate: number // Annual soil loss (t/ha/yr)
+  soil_loss_rate_tons_acre_yr: number // Annual soil loss (tons/acre/yr)
     visualization?: {
       all_crops?: {
         tile_url: string
@@ -135,6 +136,9 @@ export interface RUSLEResponse {
     practices_exceeding_t_value: string[]
     t_value_used: number
   }
+
+  // Backward compatibility for additional API fields consumed across the app
+  [key: string]: any
 }
 
 // Factor response interfaces

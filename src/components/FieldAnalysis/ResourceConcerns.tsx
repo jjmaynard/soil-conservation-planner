@@ -30,6 +30,7 @@ export default function ResourceConcerns({ fieldId, geeData, fieldAcres = 0 }: R
 
   useEffect(() => {
     loadResourceConcerns()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldId, geeData])
 
   const loadResourceConcerns = async () => {

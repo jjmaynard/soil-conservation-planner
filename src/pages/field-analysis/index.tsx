@@ -143,7 +143,7 @@ export default function FieldAnalysisLanding() {
       
       router.push(url)
     }
-  }, [router, selectedUseCase])
+  }, [router, selectedUseCase, selectedLandType])
 
   const handleMethodSelect = (method: SelectionMethod) => {
     setSelectionMethod(method)

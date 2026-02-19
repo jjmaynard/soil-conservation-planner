@@ -120,6 +120,7 @@ export default function FieldAnalysisDetail() {
     if (landType) {
       setSelectedLandType(landType)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldId, router.query.useCase])
 
   // Separate effect to trigger GEE assessment after SSURGO data loads
@@ -150,7 +151,7 @@ export default function FieldAnalysisDetail() {
     }
 
     runGeeAssessment()
-  }, [fieldData?.boundary, ssurgoData, geeAssessed, ssurgoLoading, assessField])
+  }, [fieldData?.boundary, fieldData?.id, fieldData?.clu_id, ssurgoData, geeAssessed, ssurgoLoading, assessField])
 
   const loadFieldData = async (id: string) => {
     setLoading(true)
