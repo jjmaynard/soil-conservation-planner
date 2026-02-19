@@ -1,4 +1,5 @@
 {
+  "installCommand": "npm install --include=optional",
   "build": {
     "env": {
       "NEXT_PUBLIC_USDA_WMS_URL": "https://sdmdataaccess.nrcs.usda.gov/Spatial/SDMWGS84Geographic.wms"
