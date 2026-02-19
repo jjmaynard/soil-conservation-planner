@@ -50,7 +50,7 @@ export default function ClimateHistory({ fieldId, geeData, wkt }: ClimateHistory
     if (wkt && !data && !loading) {
       refetch()
     }
-  }, [wkt])
+  }, [wkt, data, loading, refetch])
 
   if (loading) {
     return (

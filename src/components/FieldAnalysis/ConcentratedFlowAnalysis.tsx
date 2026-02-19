@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Droplets, AlertTriangle, Info } from 'lucide-react'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
 
@@ -15,11 +15,7 @@ export default function ConcentratedFlowAnalysis({ fieldId, geeData }: Concentra
   const [flowData, setFlowData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadFlowData()
-  }, [fieldId, geeData])
-
-  const loadFlowData = async () => {
+  const loadFlowData = useCallback(async () => {
     setLoading(true)
     try {
       if (geeData?.geeAssessment?.concentrated_flow) {
@@ -71,7 +67,11 @@ export default function ConcentratedFlowAnalysis({ fieldId, geeData }: Concentra
     } finally {
       setLoading(false)
     }
-  }
+  }, [fieldId, geeData])
+
+  useEffect(() => {
+    loadFlowData()
+  }, [loadFlowData])
 
   if (loading) {
     return (

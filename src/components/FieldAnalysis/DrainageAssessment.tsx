@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Droplet, AlertCircle, Info } from 'lucide-react'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
@@ -17,11 +17,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
   const [drainageData, setDrainageData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadDrainageData()
-  }, [fieldId, ssurgoData, geeData])
-
-  const loadDrainageData = async () => {
+  const loadDrainageData = useCallback(async () => {
     setLoading(true)
     try {
       // Prefer GEE ponding data, supplement with SSURGO
@@ -102,7 +98,11 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
     } finally {
       setLoading(false)
     }
-  }
+  }, [fieldId, ssurgoData, geeData])
+
+  useEffect(() => {
+    loadDrainageData()
+  }, [loadDrainageData])
 
   function generateRecommendations(drainage: any, combinedDrainage: any, pondingMetrics: any): string[] {
     const recs: string[] = []
@@ -238,7 +238,7 @@ export default function DrainageAssessment({ fieldId, ssurgoData, geeData }: Dra
         <h4 className="text-sm font-semibold text-gray-900 mb-2">Drainage Classes (SSURGO Component Summary)</h4>
         {drainageData.hasGEEData && drainageData.hasSSURGOData && (
           <p className="text-xs text-gray-500 mb-2">
-            Bars use SSURGO component-weighted acreage. The map "Drainage Class" layer is a GEE raster product and may differ spatially.
+            Bars use SSURGO component-weighted acreage. The map &quot;Drainage Class&quot; layer is a GEE raster product and may differ spatially.
           </p>
         )}
         <div className="space-y-2">
