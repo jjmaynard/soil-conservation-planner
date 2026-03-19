@@ -40,11 +40,10 @@ const STATE_FIPS_TO_NAME: Record<string, string> = {
 
 const LEGEND_DATA: Record<string, { title: string; items: { color: string; label: string }[] }> = {
   'soil-boundaries': {
-    title: 'Soil Types',
+    title: 'Soil Components',
     items: [
-      { color: '#fcd34d', label: 'Sandy Loam' },
-      { color: '#fb923c', label: 'Silt Loam' },
-      { color: '#a8a29e', label: 'Clay' }
+      { color: '#10b981', label: 'Dominant Component' },
+      { color: '#cccccc', label: 'Component Not Matched' }
     ]
   },
   'erosion-risk': {
@@ -798,6 +797,75 @@ const getTerrainLegendItems = (layerId: 'slope' | 'elevation' | 'aspect', assess
   }
 
   return LEGEND_DATA[layerId].items
+}
+
+const getSoilBoundariesLegendItems = (ssurgoData?: ProcessedFieldData | null): { color: string; label: string }[] => {
+  if (!ssurgoData) {
+    return LEGEND_DATA['soil-boundaries'].items
+  }
+
+  const compNameToColor = new Map<string, string>()
+  ssurgoData.soils.forEach((soil) => {
+    if (soil.mapunit_name && soil.color) {
+      compNameToColor.set(soil.mapunit_name, soil.color)
+    }
+  })
+
+  const dominantComponentArea = new Map<string, number>()
+  const dominantComponentColor = new Map<string, string>()
+
+  if (ssurgoData.rawData && ssurgoData.rawData.length > 0) {
+    ssurgoData.rawData.forEach((mapUnit: any) => {
+      if (!mapUnit.components || mapUnit.components.length === 0) return
+
+      const dominant = mapUnit.components.reduce((prev: any, current: any) =>
+        (Number(prev?.comppct_r || 0) > Number(current?.comppct_r || 0) ? prev : current)
+      )
+
+      const componentName = dominant?.compname
+      if (!componentName) return
+
+      const color = compNameToColor.get(componentName) || '#cccccc'
+      const area =
+        Number(dominant?.acres || 0) ||
+        Number(mapUnit?.area_ac || 0) ||
+        Number(mapUnit?.area || 0) ||
+        0
+
+      dominantComponentArea.set(componentName, (dominantComponentArea.get(componentName) || 0) + area)
+      if (!dominantComponentColor.has(componentName)) {
+        dominantComponentColor.set(componentName, color)
+      }
+    })
+  }
+
+  if (dominantComponentArea.size > 0) {
+    return Array.from(dominantComponentArea.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([componentName]) => ({
+        color: dominantComponentColor.get(componentName) || '#cccccc',
+        label: componentName
+      }))
+  }
+
+  if (ssurgoData.soils.length > 0) {
+    const seen = new Set<string>()
+    const uniqueComponents: { color: string; label: string }[] = []
+
+    ssurgoData.soils.forEach((soil) => {
+      const key = `${soil.mapunit_name}::${soil.color}`
+      if (!seen.has(key)) {
+        seen.add(key)
+        uniqueComponents.push({ color: soil.color || '#cccccc', label: soil.mapunit_name })
+      }
+    })
+
+    if (uniqueComponents.length > 0) {
+      return uniqueComponents
+    }
+  }
+
+  return LEGEND_DATA['soil-boundaries'].items
 }
 
 interface FieldMapProps {
@@ -2163,6 +2231,11 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                           title: LEGEND_DATA['flow-accumulation'].title,
                           items: getConcentratedFlowLegendItems(assessmentData)
                         }
+                      : id === 'soil-boundaries'
+                        ? {
+                            title: LEGEND_DATA['soil-boundaries'].title,
+                            items: getSoilBoundariesLegendItems(ssurgoData)
+                          }
                       : id === 'convergent-areas'
                         ? {
                             title: LEGEND_DATA['convergent-areas'].title,

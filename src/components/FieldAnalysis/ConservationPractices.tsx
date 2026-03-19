@@ -49,10 +49,13 @@ interface ConservationPracticesProps {
   }
 }
 
+type RecommendationRole = 'primary' | 'complementary' | 'alternative'
+
 export default function ConservationPractices({ fieldData }: ConservationPracticesProps) {
   const [expandedPractice, setExpandedPractice] = useState<string | null>(null)
   const [showFunding, setShowFunding] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const fieldAcres = fieldData?.acres || 100
 
   // Debug logging
   console.log('ConservationPractices fieldData:', fieldData)
@@ -61,7 +64,7 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
   const plan: PracticeImplementationPlan = fieldData 
     ? ConservationRecommendationEngine.generateRecommendations(
         fieldData,
-        fieldData.acres || 100
+        fieldAcres
       )
     : {
         fieldId: 'demo',
@@ -74,9 +77,83 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
 
   console.log('Conservation plan generated:', plan.practices.length, 'practices')
 
+  const classifyRecommendationRoles = (recommendations: PracticeRecommendation[]) => {
+    const primary: PracticeRecommendation[] = []
+    const roles: Record<string, RecommendationRole> = {}
+    const linkedTo: Record<string, string | undefined> = {}
+
+    recommendations.forEach((rec) => {
+      const matchedPrimary = primary.find((p) => {
+        const sameCategory = p.practice.category === rec.practice.category
+        const sharedConcerns = p.practice.resourceConcerns.some((c) => rec.practice.resourceConcerns.includes(c))
+        return sameCategory && sharedConcerns
+      })
+
+      if (!matchedPrimary) {
+        primary.push(rec)
+        roles[rec.practice.code] = 'primary'
+        linkedTo[rec.practice.code] = undefined
+        return
+      }
+
+      const isComplementary =
+        rec.practice.relatedPractices.includes(matchedPrimary.practice.code) ||
+        matchedPrimary.practice.relatedPractices.includes(rec.practice.code) ||
+        rec.compatiblePractices.includes(matchedPrimary.practice.code) ||
+        matchedPrimary.compatiblePractices.includes(rec.practice.code)
+
+      roles[rec.practice.code] = isComplementary ? 'complementary' : 'alternative'
+      linkedTo[rec.practice.code] = matchedPrimary.practice.code
+    })
+
+    return {
+      roles,
+      linkedTo,
+      summary: {
+        primary: Object.values(roles).filter(r => r === 'primary').length,
+        complementary: Object.values(roles).filter(r => r === 'complementary').length,
+        alternative: Object.values(roles).filter(r => r === 'alternative').length,
+        highPriorityCandidates: recommendations.filter(r => r.priority === 'critical' || r.priority === 'high').length,
+      }
+    }
+  }
+
+  const recommendationMeta = classifyRecommendationRoles(plan.practices)
+  const practiceByCode = plan.practices.reduce<Record<string, PracticeRecommendation['practice']>>((acc, rec) => {
+    acc[rec.practice.code] = rec.practice
+    return acc
+  }, {})
+
   const filteredPractices = selectedCategory === 'all'
     ? plan.practices
     : plan.practices.filter(p => p.practice.category === selectedCategory)
+
+  const estimatePracticeCostRange = (practice: PracticeRecommendation['practice']) => {
+    const { min, max, unit } = practice.costRange
+
+    if (unit === '$/acre') {
+      return { min: min * fieldAcres, max: max * fieldAcres }
+    }
+
+    if (unit === '$/structure') {
+      const structures = Math.ceil(fieldAcres / 75)
+      return { min: min * structures, max: max * structures }
+    }
+
+    // For $/ft, use same rough perimeter approximation as the engine and convert per 100 ft
+    const perimeter = Math.sqrt(fieldAcres * 43560) * 4
+    return {
+      min: (min * perimeter) / 100,
+      max: (max * perimeter) / 100,
+    }
+  }
+
+  const formatCurrency = (value: number) => `$${Math.round(value).toLocaleString()}`
+
+  const toPerAcreRange = (range: { min: number; max: number }) => ({
+    min: range.min / Math.max(fieldAcres, 1),
+    max: range.max / Math.max(fieldAcres, 1)
+  })
 
   const getPriorityColor = (priority: PracticeRecommendation['priority']) => {
     switch (priority) {
@@ -111,6 +188,19 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
     }
   }
 
+  const getRoleDisplay = (role: RecommendationRole) => {
+    switch (role) {
+      case 'primary':
+        return { label: 'Primary', bg: '#dcfce7', text: '#166534' }
+      case 'complementary':
+        return { label: 'Complementary', bg: '#e0f2fe', text: '#0c4a6e' }
+      case 'alternative':
+        return { label: 'Alternative', bg: '#fef3c7', text: '#92400e' }
+      default:
+        return { label: 'Primary', bg: '#f3f4f6', text: '#374151' }
+    }
+  }
+
   return (
     <div className="space-y-3 md:space-y-4">
       {/* Header */}
@@ -133,35 +223,17 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
       {/* Summary Cards */}
       {plan.practices.length > 0 && (
         <div className="grid grid-cols-1 gap-3">
-          {/* Total Cost Card */}
-          <div className="p-3 md:p-4 rounded-lg border" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
-            <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="h-4 w-4 md:h-5 md:w-5" style={{ color: '#059669' }} />
-              <span className="text-xs md:text-sm font-medium" style={{ color: '#6b7280' }}>Estimated Cost</span>
-            </div>
-            <p className="text-xl md:text-2xl font-bold" style={{ color: '#111827' }}>
-              ${plan.totalCost.toLocaleString()}
-            </p>
-            <button
-              onClick={() => setShowFunding(!showFunding)}
-              className="mt-2 text-xs underline hover:opacity-80"
-              style={{ color: '#2563eb' }}
-            >
-              {showFunding ? 'Hide' : 'View'} Funding
-            </button>
-          </div>
-
           {/* Priority Practices Card */}
           <div className="p-3 md:p-4 rounded-lg border" style={{ backgroundColor: '#fef2f2', borderColor: '#fecaca' }}>
             <div className="flex items-center gap-2 mb-1">
               <AlertTriangle className="h-4 w-4 md:h-5 md:w-5" style={{ color: '#dc2626' }} />
-              <span className="text-xs md:text-sm font-medium" style={{ color: '#6b7280' }}>Priority Actions</span>
+              <span className="text-xs md:text-sm font-medium" style={{ color: '#6b7280' }}>Priority Candidates</span>
             </div>
             <p className="text-xl md:text-2xl font-bold" style={{ color: '#dc2626' }}>
-              {plan.practices.filter(p => p.priority === 'critical' || p.priority === 'high').length}
+              {recommendationMeta.summary.highPriorityCandidates}
             </p>
             <p className="text-xs mt-1" style={{ color: '#6b7280' }}>
-              High-priority items
+              Candidate practices, not all required
             </p>
           </div>
 
@@ -174,6 +246,13 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
             <p className="text-sm md:text-base font-medium" style={{ color: '#111827' }}>
               {plan.timeline}
             </p>
+            <button
+              onClick={() => setShowFunding(!showFunding)}
+              className="mt-2 text-xs underline hover:opacity-80"
+              style={{ color: '#2563eb' }}
+            >
+              {showFunding ? 'Hide' : 'View'} Funding
+            </button>
           </div>
         </div>
       )}
@@ -197,11 +276,9 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
                     <p className="text-sm font-semibold" style={{ color: '#059669' }}>
                       Up to {option.coveragePercent}%
                     </p>
-                    {option.maxAmount && (
-                      <p className="text-xs" style={{ color: '#6b7280' }}>
-                        Max: ${option.maxAmount.toLocaleString()}
-                      </p>
-                    )}
+                    <p className="text-xs" style={{ color: '#6b7280' }}>
+                      Final amount depends on selected practices and local program rules
+                    </p>
                   </div>
                 </div>
                 <div className="text-xs" style={{ color: '#6b7280' }}>
@@ -258,6 +335,22 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
         </div>
       )}
 
+      {/* Recommendation Strategy Summary */}
+      {plan.practices.length > 0 && (
+        <div className="p-3 md:p-4 rounded-lg border" style={{ backgroundColor: '#f8fafc', borderColor: '#cbd5e1' }}>
+          <div className="flex items-start gap-2">
+            <Info className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: '#2563eb' }} />
+            <div className="text-xs md:text-sm" style={{ color: '#334155' }}>
+              <p className="font-semibold mb-1">Implementation Strategy</p>
+              <p>
+                Build the plan with <strong>{recommendationMeta.summary.primary} primary</strong> practices first, then add <strong>{recommendationMeta.summary.complementary}</strong> complementary options as resources allow.
+                Practices tagged as <strong>alternative</strong> often address similar concerns and can be treated as choose-one options.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Practice Recommendations */}
       {plan.practices.length === 0 ? (
         <div className="text-center py-12 px-4 rounded-lg border" style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
@@ -274,6 +367,20 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
           {filteredPractices.map((recommendation) => {
             const practice = recommendation.practice
             const isExpanded = expandedPractice === practice.code
+            const practiceCostRange = estimatePracticeCostRange(practice)
+            const practicePerAcreRange = toPerAcreRange(practiceCostRange)
+            const role = recommendationMeta.roles[practice.code] || 'primary'
+            const roleDisplay = getRoleDisplay(role)
+            const linkedPrimaryCode = recommendationMeta.linkedTo[practice.code]
+            const linkedPrimary = linkedPrimaryCode ? practiceByCode[linkedPrimaryCode] : undefined
+            const relationText =
+              role === 'complementary' && linkedPrimary
+                ? `Complementary to ${linkedPrimary.name} (NRCS ${linkedPrimary.code})`
+                : role === 'alternative' && linkedPrimary
+                  ? `Alternative to ${linkedPrimary.name} (NRCS ${linkedPrimary.code})`
+                  : role === 'primary'
+                    ? 'Core practice in recommended plan'
+                    : null
 
             return (
               <div
@@ -296,6 +403,15 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
                             <h4 className="font-semibold text-sm md:text-base" style={{ color: '#111827' }}>
                               {practice.name}
                             </h4>
+                            <span
+                              className="text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap"
+                              style={{
+                                backgroundColor: roleDisplay.bg,
+                                color: roleDisplay.text
+                              }}
+                            >
+                              {roleDisplay.label}
+                            </span>
                             <span 
                               className="text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap"
                               style={{ 
@@ -309,6 +425,11 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
                           <p className="text-xs" style={{ color: '#6b7280' }}>
                             NRCS {practice.code}
                           </p>
+                          {relationText && (
+                            <p className="text-xs mt-1" style={{ color: roleDisplay.text }}>
+                              {relationText}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <p className="text-xs md:text-sm mb-2 line-clamp-2" style={{ color: '#4b5563' }}>
@@ -324,10 +445,10 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
                       <div className="text-right">
                         <p className="text-sm md:text-base font-semibold whitespace-nowrap" style={{ color: '#111827' }}>
-                          ${recommendation.estimatedCost.toLocaleString()}
+                          {`${formatCurrency(practicePerAcreRange.min)}-${formatCurrency(practicePerAcreRange.max)}`}
                         </p>
                         <p className="text-xs hidden md:block" style={{ color: '#6b7280' }}>
-                          Est. cost
+                          Est. range / acre
                         </p>
                       </div>
                       {isExpanded ? (
@@ -496,7 +617,7 @@ export default function ConservationPractices({ fieldData }: ConservationPractic
           <div className="text-sm" style={{ color: '#1e40af' }}>
             <p className="font-semibold mb-1">Contact Your Local NRCS Office</p>
             <p>
-              These recommendations are based on field data and NRCS practice standards. 
+              These recommendations are based on generalized soil map data, remotely sensed geospatial data and NRCS practice standards.
               For detailed site-specific plans, technical assistance, and funding applications, 
               contact your local NRCS field office or conservation district.
             </p>

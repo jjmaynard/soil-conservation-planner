@@ -3,7 +3,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Layers, TrendingDown, Droplets, Target, Sprout, CloudRain, Wind, AlertTriangle, Eye, EyeOff, Maximize2, Map as MapIcon, TrendingUp, Mountain } from 'lucide-react'
+import { Layers, TrendingDown, Droplets, Target, Sprout, CloudRain, Wind, AlertTriangle, Eye, EyeOff, Maximize2, Map as MapIcon, TrendingUp, Mountain, Info } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import SoilComposition from '../SoilComposition'
 import ErosionAnalysis from '../ErosionAnalysis'
@@ -18,10 +18,12 @@ import ManagementZones from '../ManagementZones'
 import VegetationMonitoring from '../VegetationMonitoring'
 import TerrainAttributes from '../TerrainAttributes'
 import ClimateHistory from '../ClimateHistory'
+import TabNarrativeModal from '../TabNarrativeModal'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
 import { useFilteredTabs, getDefaultTab } from '#hooks/useFilteredTabs'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
+import { getTabNarrative } from '@/config/field-analysis-tab-narratives'
 
 const FieldMap = dynamic(() => import('../FieldMap'), {
   ssr: false,
@@ -123,9 +125,9 @@ const tabs: Tab[] = [
   { id: 'vegetation', label: 'Vegetation Monitoring', icon: TrendingUp, color: '#16a34a', bgColor: '#f0fdf4' },
   { id: 'terrain', label: 'Terrain Attributes', icon: Mountain, color: '#78716c', bgColor: '#fafaf9' },
   { id: 'climate', label: 'Climate History', icon: CloudRain, color: '#0369a1', bgColor: '#e0f2fe' },
+  { id: 'zones', label: 'Management Zones', icon: Layers, color: '#7c3aed', bgColor: '#faf5ff' },
   { id: 'concerns', label: 'Resource Concerns', icon: AlertTriangle, color: '#d97706', bgColor: '#fef3c7' },
   { id: 'practices', label: 'Conservation Practices', icon: Target, color: '#15803d', bgColor: '#f0fdf4' },
-  { id: 'zones', label: 'Management Zones', icon: Layers, color: '#7c3aed', bgColor: '#faf5ff' },
 ]
 
 export default function DetailView({ 
@@ -163,6 +165,8 @@ export default function DetailView({
     (activeTab && filteredTabs.some(t => t.id === activeTab)) ? activeTab as TabId : defaultTab
   )
   const [mapFullscreen, setMapFullscreen] = useState(false)
+  const [showNarrativeModal, setShowNarrativeModal] = useState(false)
+  const tabNarrative = getTabNarrative(selectedTab)
 
   const handleTabChange = (tabId: TabId) => {
     // Only allow tab change if it's in the filtered tabs
@@ -279,12 +283,25 @@ export default function DetailView({
               <div className="p-2 rounded-lg" style={{ backgroundColor: `${currentTab.color}22` }}>
                 <currentTab.icon className="w-6 h-6" style={{ color: currentTab.color }} />
               </div>
-              <h2 className="text-2xl font-bold" style={{ color: currentTab.color }}>
-                {currentTab.label}
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold" style={{ color: currentTab.color }}>
+                  {currentTab.label}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowNarrativeModal(true)}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition-colors"
+                  style={{ backgroundColor: '#ffffff', color: currentTab.color, border: `1px solid ${currentTab.color}66` }}
+                  title="Open tab guidance"
+                  aria-label={`Open guidance for ${currentTab.label}`}
+                >
+                  <Info className="w-4 h-4" />
+                  Guidance
+                </button>
+              </div>
             </div>
-            <p className="text-sm text-gray-600">
-              {getTabDescription(selectedTab)}
+            <p className="text-sm text-gray-700">
+              Click <span className="font-semibold">Guidance</span> to open interpretation, decision support value, and practical examples for {`${currentTab.label.toLowerCase()} analysis`}.
             </p>
           </div>
 
@@ -526,6 +543,7 @@ export default function DetailView({
                 layerOptions={TAB_LAYER_CONFIG[selectedTab] || []}
                 showCSBLayer={showCSBLayer}
                 geeData={geeData}
+                ssurgoData={ssurgoData}
                 onCSBLayerToggle={onCSBLayerToggle}
                 onLayerToggle={onLayerToggle}
               />
@@ -533,25 +551,17 @@ export default function DetailView({
           </div>
         </div>
       </div>
+
+      <TabNarrativeModal
+        isOpen={showNarrativeModal}
+        onClose={() => setShowNarrativeModal(false)}
+        tabId={selectedTab}
+        tabLabel={currentTab.label}
+        tabIcon={<currentTab.icon className="w-6 h-6" />}
+        tabColor={currentTab.color}
+        tabBackground={currentTab.bgColor}
+        narrative={tabNarrative}
+      />
     </div>
   )
-}
-
-function getTabDescription(tab: TabId): string {
-  const descriptions: Record<TabId, string> = {
-    soil: 'Detailed breakdown of soil components, textures, and properties from SSURGO data',
-    erosion: 'Combined SSURGO slope analysis and GEE terrain-based erosion risk assessment',
-    drainage: 'Soil drainage classification, ponding risk, and depression analysis',
-    productivity: 'NDVI-based productivity metrics, yield gaps, and field stability analysis',
-    svi: 'Soil Vulnerability Index - surface and subsurface loss potential assessment',
-    flow: 'Concentrated flow pathways, channel density, and gully erosion risk',
-    drought: 'Water balance, PDSI drought indices, and moisture deficit analysis',
-    vegetation: 'NDVI time series analysis with peak performance, stability, and yield gap metrics',
-    terrain: 'Detailed terrain analysis including slope, TWI, SPI, flow accumulation, and gully risk',
-    climate: 'Growing season water balance, precipitation trends, and drought severity indices',
-    concerns: 'Identified resource concerns based on NRCS criteria and field conditions',
-    practices: 'Recommended conservation practices matched to field resource concerns',
-    zones: 'Management zone delineation based on soil and productivity variability'
-  }
-  return descriptions[tab] || ''
 }
