@@ -105,14 +105,15 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
 
       {/* Combined Table with Visual Bars */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <table className="w-full text-xs">
+        <div className="overflow-x-auto">
+        <table className="min-w-[680px] w-full text-xs">
           <thead>
             <tr style={{ backgroundColor: '#f9fafb' }}>
-              <th className="text-left p-3 font-semibold text-gray-700">Soil Component</th>
-              <th className="text-right p-3 font-semibold text-gray-700">Area</th>
-              <th className="text-left p-3 font-semibold text-gray-700" style={{ minWidth: '200px' }}>Percent</th>
-              <th className="text-right p-3 font-semibold text-gray-700">Slope</th>
-              <th className="text-right p-3 font-semibold text-gray-700">LCC</th>
+              <th className="text-left p-2 sm:p-3 font-semibold text-gray-700">Soil Component</th>
+              <th className="text-right p-2 sm:p-3 font-semibold text-gray-700">Area</th>
+              <th className="text-left p-2 sm:p-3 font-semibold text-gray-700" style={{ minWidth: '200px' }}>Percent</th>
+              <th className="text-right p-2 sm:p-3 font-semibold text-gray-700">Slope</th>
+              <th className="text-right p-2 sm:p-3 font-semibold text-gray-700">LCC</th>
             </tr>
           </thead>
           <tbody>
@@ -126,7 +127,7 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = idx % 2 === 0 ? '#ffffff' : '#fafafa'}
               >
                 {/* Soil Name with Color Indicator */}
-                <td className="p-3">
+                <td className="p-2 sm:p-3">
                   <div className="flex items-center gap-2">
                     <div 
                       className="w-3 h-3 rounded-sm flex-shrink-0"
@@ -140,14 +141,14 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
                 </td>
                 
                 {/* Area */}
-                <td className="p-3 text-right font-medium text-gray-900">
+                <td className="p-2 sm:p-3 text-right font-medium text-gray-900 whitespace-nowrap">
                   {Number(soil.area || 0).toFixed(2)} ac
                 </td>
                 
                 {/* Percentage with Extended Visual Bar */}
-                <td className="p-3">
+                <td className="p-2 sm:p-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex-1 h-7 bg-gray-100 rounded-md overflow-hidden relative" style={{ minWidth: '150px' }}>
+                    <div className="flex-1 h-7 bg-gray-100 rounded-md overflow-hidden relative" style={{ minWidth: '140px' }}>
                       <div
                         className="h-full rounded-md transition-all flex items-center justify-end pr-2"
                         style={{ 
@@ -165,12 +166,12 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
                 </td>
                 
                 {/* Slope */}
-                <td className="p-3 text-right font-medium text-gray-700">
+                <td className="p-2 sm:p-3 text-right font-medium text-gray-700 whitespace-nowrap">
                   {Number(soil.slope || 0).toFixed(1)}%
                 </td>
                 
                 {/* Land Capability Class */}
-                <td className="p-3 text-right">
+                <td className="p-2 sm:p-3 text-right">
                   <span 
                     className="px-2 py-1 rounded text-xs font-semibold"
                     style={{ backgroundColor: '#f0fdf4', color: '#166534' }}
@@ -182,6 +183,7 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

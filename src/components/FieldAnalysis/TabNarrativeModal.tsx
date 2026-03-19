@@ -103,12 +103,12 @@ export default function TabNarrativeModal({
         onClick={onClose}
       />
 
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-lg bg-white shadow-xl">
-          <div className="sticky top-0 z-10 p-6 text-white" style={{ background: `linear-gradient(to right, ${tabColor}, ${tabColor}dd)` }}>
+      <div className="flex min-h-screen items-center justify-center p-2 sm:p-4">
+        <div className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden rounded-lg bg-white shadow-xl">
+          <div className="sticky top-0 z-10 p-4 sm:p-6 text-white" style={{ background: `linear-gradient(to right, ${tabColor}, ${tabColor}dd)` }}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold flex items-center gap-3">
+                <h2 className="text-lg sm:text-2xl font-bold flex items-center gap-2 sm:gap-3">
                   {tabIcon ? <span>{tabIcon}</span> : null}
                   {tabLabel} Guidance
                 </h2>
@@ -127,7 +127,7 @@ export default function TabNarrativeModal({
             </div>
           </div>
 
-          <div className="max-h-[calc(90vh-180px)] overflow-y-auto p-6 pb-18" style={{ backgroundColor: tabBackground }}>
+          <div className="max-h-[calc(95vh-150px)] sm:max-h-[calc(90vh-180px)] overflow-y-auto p-4 sm:p-6 pb-6 sm:pb-8" style={{ backgroundColor: tabBackground }}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <section className="rounded-lg border border-gray-200 bg-white p-4">
                 <h3 className="mb-2 flex items-center text-base font-semibold text-gray-900">
@@ -168,7 +168,7 @@ export default function TabNarrativeModal({
                 Data Properties and Interpretation Guide
               </h3>
               <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse text-sm">
+                <table className="min-w-[760px] w-full border-collapse text-sm">
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="px-2 py-2 text-left font-semibold text-gray-900">Property</th>
@@ -233,7 +233,7 @@ export default function TabNarrativeModal({
             </section>
           </div>
 
-          <div className="sticky bottom-0 border-t border-gray-200 bg-white px-6 py-4">
+          <div className="sticky bottom-0 border-t border-gray-200 bg-white px-4 sm:px-6 py-3 sm:py-4">
             <button
               onClick={onClose}
               className="w-full rounded-lg px-4 py-2 text-white transition-opacity hover:opacity-95"

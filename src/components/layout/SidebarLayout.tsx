@@ -122,7 +122,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex min-h-screen min-h-[100dvh] bg-background">
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
@@ -139,6 +139,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         transition-all duration-300 ease-in-out
         flex flex-col
         sidebar-scroll
+        h-[100dvh] lg:h-auto
         ${sidebarOpen ? 'w-72 min-w-[240px] max-w-[320px]' : 'w-20 min-w-[80px]'}
         ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
@@ -166,7 +167,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                 </Link>
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="p-2 rounded-lg transition-colors hidden lg:block"
+                  className="p-2 rounded-lg transition-colors hidden lg:block min-w-[44px] min-h-[44px]"
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-forest-600)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   aria-label="Collapse sidebar"
@@ -191,7 +192,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
                 </Link>
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="p-1.5 rounded-lg transition-colors hidden lg:block"
+                  className="p-2 rounded-lg transition-colors hidden lg:block min-w-[44px] min-h-[44px]"
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-forest-600)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   aria-label="Expand sidebar"
@@ -348,12 +349,12 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
         {/* Mobile Header */}
         <header className="lg:hidden h-16 flex items-center justify-between px-4 flex-shrink-0 bg-surface border-b border-border">
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg transition-colors"
+            className="p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px]"
             style={{ backgroundColor: 'transparent' }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-background)'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -373,7 +374,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-hidden relative">{children}</div>
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden relative">{children}</div>
       </div>
     </div>
   )

@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Layers, TrendingDown, Droplets, Target, Sprout, CloudRain, Wind, AlertTriangle, Eye, EyeOff, Maximize2, Map as MapIcon, TrendingUp, Mountain, Info } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import SoilComposition from '../SoilComposition'
@@ -21,6 +21,7 @@ import ClimateHistory from '../ClimateHistory'
 import TabNarrativeModal from '../TabNarrativeModal'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
+import type { ZonePolygonProperties } from '#types/geeApi'
 import { useFilteredTabs, getDefaultTab } from '#hooks/useFilteredTabs'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
 import { getTabNarrative } from '@/config/field-analysis-tab-narratives'
@@ -165,9 +166,19 @@ export default function DetailView({
   const [selectedTab, setSelectedTab] = useState<TabId>(
     (activeTab && filteredTabs.some(t => t.id === activeTab)) ? activeTab as TabId : defaultTab
   )
+  const [managementZonesGeoJSON, setManagementZonesGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null>(null)
   const [mapFullscreen, setMapFullscreen] = useState(false)
   const [showNarrativeModal, setShowNarrativeModal] = useState(false)
   const tabNarrative = getTabNarrative(selectedTab)
+
+  const handleZonesGenerated = useCallback((zones: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null) => {
+    setManagementZonesGeoJSON(zones)
+
+    // Auto-enable the management-zones overlay after successful delineation.
+    if (zones && !activeLayers.includes('management-zones')) {
+      onLayerToggle?.('management-zones')
+    }
+  }, [activeLayers, onLayerToggle])
 
   const handleTabChange = (tabId: TabId) => {
     // Only allow tab change if it's in the filtered tabs
@@ -183,16 +194,16 @@ export default function DetailView({
     return (
       <div className="fixed inset-0 z-50 bg-white flex flex-col">
         {/* Fullscreen Map Header */}
-        <div className="p-3 border-b border-gray-200 flex items-center justify-between bg-white">
-          <div className="flex items-center gap-2">
+        <div className="p-3 border-b border-gray-200 bg-white flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 min-w-0">
             <MapIcon className="w-5 h-5" style={{ color: '#16a34a' }} />
-            <span className="text-sm font-semibold text-gray-700">Field Map - {fieldData?.name}</span>
+            <span className="text-xs sm:text-sm font-semibold text-gray-700 truncate">Field Map - {fieldData?.name}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto scrollbar-thin scrollbar-thumb-gray-300">
             {/* Layer Controls */}
             <button
               onClick={onCSBLayerToggle}
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+              className="flex items-center gap-1 px-2.5 py-2 rounded text-xs font-medium transition-colors flex-shrink-0 whitespace-nowrap min-h-[44px]"
               style={{
                 backgroundColor: showCSBLayer ? '#dcfce7' : '#f3f4f6',
                 color: showCSBLayer ? '#166534' : '#6b7280'
@@ -207,7 +218,7 @@ export default function DetailView({
                 <button
                 key={layer.id}
                 onClick={() => onLayerToggle?.(layer.id)}
-                className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors"
+                className="flex items-center gap-1 px-2.5 py-2 rounded text-xs font-medium transition-colors flex-shrink-0 whitespace-nowrap min-h-[44px]"
                 style={{
                     backgroundColor: activeLayers.includes(layer.id) ? '#dcfce7' : '#f3f4f6',
                     color: activeLayers.includes(layer.id) ? '#166534' : '#6b7280'
@@ -220,7 +231,7 @@ export default function DetailView({
 
             <button
               onClick={() => setMapFullscreen(false)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded bg-gray-100 hover:bg-gray-200 transition-colors text-sm font-medium text-gray-700"
+              className="flex items-center gap-1 px-3 py-2 rounded bg-gray-100 hover:bg-gray-200 transition-colors text-sm font-medium text-gray-700 flex-shrink-0 whitespace-nowrap min-h-[44px]"
             >
               Exit Fullscreen
             </button>
@@ -238,6 +249,7 @@ export default function DetailView({
             showCSBLayer={showCSBLayer}
             geeData={geeData}
             ssurgoData={ssurgoData} // Pass ssurgoData
+            managementZonesGeoJSON={managementZonesGeoJSON}
             onCSBLayerToggle={onCSBLayerToggle}
             onLayerToggle={onLayerToggle}
           />
@@ -259,7 +271,7 @@ export default function DetailView({
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap font-medium text-xs sm:text-sm transition-all border-b-2 flex-shrink-0 min-h-[42px] sm:min-h-[48px]"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap font-medium text-xs sm:text-sm transition-all border-b-2 flex-shrink-0 min-h-[44px] sm:min-h-[48px]"
                 style={{
                   color: isActive ? tab.color : '#6b7280',
                   borderBottomColor: isActive ? tab.color : 'transparent',
@@ -269,7 +281,7 @@ export default function DetailView({
                 aria-label={tab.label}
               >
                 <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="sm:hidden">{tab.shortLabel || tab.label}</span>
+                <span className="sm:hidden">{(tab as Tab).shortLabel || tab.label}</span>
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
             )
@@ -277,24 +289,24 @@ export default function DetailView({
         </div>
       </div>
 
-      {/* Tab Content and Map Side-by-Side */}
-      <div className="flex-1 overflow-hidden bg-gray-50 flex gap-4 p-6">
+      {/* Tab Content and Map */}
+      <div className="flex-1 min-h-0 bg-gray-50 flex flex-col xl:flex-row gap-3 sm:gap-4 p-3 sm:p-4 xl:p-6 overflow-y-auto xl:overflow-hidden">
         {/* Left: Tab Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="order-2 xl:order-1 flex-1 min-h-0 xl:overflow-y-auto">
           {/* Tab Header */}
-          <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: currentTab.bgColor, border: `2px solid ${currentTab.color}33` }}>
-            <div className="flex items-center gap-3 mb-2">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg" style={{ backgroundColor: currentTab.bgColor, border: `2px solid ${currentTab.color}33` }}>
+            <div className="flex items-start sm:items-center gap-3 mb-2">
               <div className="p-2 rounded-lg" style={{ backgroundColor: `${currentTab.color}22` }}>
                 <currentTab.icon className="w-6 h-6" style={{ color: currentTab.color }} />
               </div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold" style={{ color: currentTab.color }}>
+              <div className="flex flex-1 flex-wrap items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold" style={{ color: currentTab.color }}>
                   {currentTab.label}
                 </h2>
                 <button
                   type="button"
                   onClick={() => setShowNarrativeModal(true)}
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-1 rounded-md px-2.5 py-2 text-xs font-semibold transition-colors min-h-[44px]"
                   style={{ backgroundColor: '#ffffff', color: currentTab.color, border: `1px solid ${currentTab.color}66` }}
                   title="Open tab guidance"
                   aria-label={`Open guidance for ${currentTab.label}`}
@@ -310,7 +322,7 @@ export default function DetailView({
           </div>
 
           {/* Tab Content Area */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             {selectedTab === 'soil' && (
               <SoilComposition 
                 fieldId={fieldData?.id || fieldData?.clu_id}
@@ -434,7 +446,11 @@ export default function DetailView({
             )}
 
             {selectedTab === 'zones' && (
-              <ManagementZones fieldId={fieldData?.id || fieldData?.clu_id} />
+              <ManagementZones
+                fieldId={fieldData?.id || fieldData?.clu_id}
+                fieldData={fieldData}
+                onZonesGenerated={handleZonesGenerated}
+              />
             )}
 
             {selectedTab === 'vegetation' && (
@@ -485,10 +501,10 @@ export default function DetailView({
         </div>
 
         {/* Right: Map Section */}
-        <div className="w-[500px] flex-shrink-0 flex flex-col">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full flex flex-col">
+        <div className="order-1 xl:order-2 w-full xl:w-[500px] xl:flex-shrink-0 flex flex-col">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-[55vh] min-h-[320px] max-h-[520px] xl:h-full xl:min-h-0 xl:max-h-none flex flex-col">
             {/* Map Header with Layer Controls */}
-            <div className="p-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+            <div className="p-2.5 sm:p-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <MapIcon className="w-5 h-5" style={{ color: '#16a34a' }} />
@@ -498,7 +514,7 @@ export default function DetailView({
                 {/* Fullscreen Button - Always Visible */}
                 <button
                   onClick={() => setMapFullscreen(true)}
-                  className="flex items-center gap-1 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-700 flex-shrink-0"
+                  className="flex items-center gap-1 px-2.5 py-2 rounded bg-gray-100 hover:bg-gray-200 transition-colors text-xs font-medium text-gray-700 flex-shrink-0 min-h-[44px]"
                 >
                   <Maximize2 className="w-3 h-3" />
                   Expand
@@ -509,7 +525,7 @@ export default function DetailView({
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
                 <button
                   onClick={onCSBLayerToggle}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0"
+                  className="flex items-center gap-1 px-2.5 py-2 rounded text-xs font-medium transition-colors flex-shrink-0 min-h-[44px]"
                   style={{
                     backgroundColor: showCSBLayer ? '#dcfce7' : '#f3f4f6',
                     color: showCSBLayer ? '#166534' : '#6b7280'
@@ -524,7 +540,7 @@ export default function DetailView({
                     <button
                     key={layer.id}
                     onClick={() => onLayerToggle?.(layer.id)}
-                    className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors flex-shrink-0"
+                    className="flex items-center gap-1 px-2.5 py-2 rounded text-xs font-medium transition-colors flex-shrink-0 min-h-[44px]"
                     style={{
                         backgroundColor: activeLayers.includes(layer.id) ? '#dcfce7' : '#f3f4f6',
                         color: activeLayers.includes(layer.id) ? '#166534' : '#6b7280'
@@ -548,6 +564,7 @@ export default function DetailView({
                 showCSBLayer={showCSBLayer}
                 geeData={geeData}
                 ssurgoData={ssurgoData}
+                managementZonesGeoJSON={managementZonesGeoJSON}
                 onCSBLayerToggle={onCSBLayerToggle}
                 onLayerToggle={onLayerToggle}
               />

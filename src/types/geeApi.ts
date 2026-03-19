@@ -1066,3 +1066,101 @@ export interface CSBTileParams {
   x: number
   y: number
 }
+
+// ============================================================================
+// Management Zones (Optimization + Delineation)
+// ============================================================================
+
+export type ZoneOptimizationMethod = 'quick' | 'consensus' | 'silhouette' | 'bic' | 'fpc'
+export type ZoneClusteringMethod = 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto'
+export type ZoneDelineationMethod = 'satellite' | 'terrain'
+
+export interface ZoneOptimizationRequest {
+  wkt: string
+  covariates?: string[]
+  year: number
+  k_min?: number
+  k_max?: number
+  method?: ZoneOptimizationMethod
+  field_area_ha?: number
+  max_zones?: number
+  min_zone_area_ha?: number
+}
+
+export interface ZoneAlternative {
+  k: number
+  votes: number
+  silhouette: number | null
+  fpc: number | null
+  quality_level: string
+}
+
+export interface ZoneOptimizationResponse {
+  recommended_k: number
+  statistical_optimal_k: number
+  consensus_votes: number
+  total_methods: number
+  method_votes: {
+    silhouette: number | null
+    calinski_harabasz: number | null
+    davies_bouldin: number | null
+    bic: number | null
+    fpc: number | null
+  }
+  quality: {
+    k: number
+    silhouette: number | null
+    calinski_harabasz: number | null
+    davies_bouldin: number | null
+    bic: number | null
+    fpc: number | null
+    quality_level: string
+  }
+  alternatives: ZoneAlternative[]
+  practical_constraints_applied: boolean
+  reason: string
+  warnings: string[]
+  wkt: string
+}
+
+export interface ZoneDelineationRequest {
+  wkt: string
+  method: ZoneDelineationMethod
+  n_zones: number
+  year: number
+  clustering_method?: ZoneClusteringMethod
+  fuzziness_m?: number
+  smooth_boundaries?: boolean
+  min_zone_area_ha?: number
+  seed?: number
+}
+
+export interface ZoneCharacteristic {
+  zone_id: number
+  area_ha: number
+  area_pct: number
+  pixel_count: number
+  zone_type: string
+  temporal_stability: number | null
+  mean_covariates: Record<string, number>
+}
+
+export interface ZonePolygonProperties {
+  zone_id: number
+  zone_type: string
+  color?: string
+  area_ha?: number
+  area_pct?: number
+}
+
+export interface ZoneDelineationResponse {
+  zone_polygons: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties>
+  zone_characteristics: ZoneCharacteristic[]
+  fpc: number | null
+  clustering_method_used: ZoneClusteringMethod
+  fuzziness_m_used: number | null
+  n_transition_pixels: number | null
+  method_used: ZoneDelineationMethod
+  n_zones: number
+  wkt: string
+}

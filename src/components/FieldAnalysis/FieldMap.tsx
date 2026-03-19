@@ -11,6 +11,7 @@ import * as turf from '@turf/turf'
 import { Layers, Square, MapPin, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { geeApi } from '#lib/geeApiClient'
 import type { CSBFieldDetails } from '#types/geeApi'
+import type { ZonePolygonProperties } from '#types/geeApi'
 import { wktToGeoJSON } from '#lib/ssurgo-area-query'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 
@@ -202,6 +203,15 @@ const LEGEND_DATA: Record<string, { title: string; items: { color: string; label
       { color: '#ef4444', label: 'High Risk' },
       { color: '#eab308', label: 'Moderate' },
       { color: '#22c55e', label: 'Low Risk' }
+    ]
+  },
+  'management-zones': {
+    title: 'Management Zones',
+    items: [
+      { color: '#7c3aed', label: 'Zone 1' },
+      { color: '#16a34a', label: 'Zone 2' },
+      { color: '#0284c7', label: 'Zone 3' },
+      { color: '#f59e0b', label: 'Zone 4' }
     ]
   },
   'nccpi-all': {
@@ -868,12 +878,51 @@ const getSoilBoundariesLegendItems = (ssurgoData?: ProcessedFieldData | null): {
   return LEGEND_DATA['soil-boundaries'].items
 }
 
+const getManagementZonesLegendItems = (
+  managementZonesGeoJSON?: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null
+): { color: string; label: string }[] => {
+  if (!managementZonesGeoJSON?.features?.length) {
+    return LEGEND_DATA['management-zones'].items
+  }
+
+  const zoneMap = new Map<number, { color: string; label: string; areaPct?: number }>()
+
+  managementZonesGeoJSON.features.forEach((feature) => {
+    const props = feature.properties
+    if (!props) return
+
+    const zoneId = Number(props.zone_id)
+    if (!Number.isFinite(zoneId) || zoneId <= 0) return
+
+    const color = props.color || LEGEND_DATA['management-zones'].items[(zoneId - 1) % LEGEND_DATA['management-zones'].items.length].color
+    const label = props.zone_type || `Zone ${zoneId}`
+
+    zoneMap.set(zoneId, {
+      color,
+      label,
+      areaPct: props.area_pct,
+    })
+  })
+
+  if (zoneMap.size === 0) {
+    return LEGEND_DATA['management-zones'].items
+  }
+
+  return Array.from(zoneMap.entries())
+    .sort((a, b) => a[0] - b[0])
+    .map(([zoneId, zone]) => ({
+      color: zone.color,
+      label: zone.areaPct !== undefined ? `${zone.label || `Zone ${zoneId}`} (${zone.areaPct.toFixed(1)}%)` : (zone.label || `Zone ${zoneId}`),
+    }))
+}
+
 interface FieldMapProps {
   mode: 'search' | 'browse' | 'draw' | 'upload' | 'analysis'
   searchQuery?: string
   fieldData?: any
   geeData?: any
   ssurgoData?: ProcessedFieldData | null
+  managementZonesGeoJSON?: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null
   selectedSoil?: any
   activeLayers?: string[]
   layerOptions?: { id: string; label: string }[]
@@ -895,6 +944,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   fieldData,
   geeData,
   ssurgoData,
+  managementZonesGeoJSON,
   selectedSoil,
   activeLayers = [],
   layerOptions = [],
@@ -1852,6 +1902,48 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     const assessment = geeData?.geeAssessment
     const cropProductivity = geeData?.cropProductivity
 
+    if (activeLayers.includes('management-zones') && managementZonesGeoJSON?.features?.length) {
+      const zoneLayer = L.geoJSON(managementZonesGeoJSON as any, {
+        style: (feature) => {
+          const props = (feature?.properties || {}) as ZonePolygonProperties
+          const zoneColor = props.color || '#7c3aed'
+          return {
+            color: zoneColor,
+            weight: 2,
+            opacity,
+            fillColor: zoneColor,
+            fillOpacity: Math.min(opacity * 0.45, 0.55),
+          }
+        },
+        onEachFeature: (feature, layer) => {
+          const props = (feature.properties || {}) as ZonePolygonProperties
+          const zoneLabel = props.zone_type || `Zone ${props.zone_id}`
+          const areaText = typeof props.area_ha === 'number' ? `${props.area_ha.toFixed(2)} ha` : 'N/A'
+          const areaPctText = typeof props.area_pct === 'number' ? `${props.area_pct.toFixed(1)}%` : 'N/A'
+          layer.bindPopup(`
+            <div class="p-2">
+              <strong>${zoneLabel}</strong><br/>
+              Zone ID: ${props.zone_id ?? 'N/A'}<br/>
+              Area: ${areaText}<br/>
+              Field Share: ${areaPctText}
+            </div>
+          `)
+        },
+      })
+
+      zoneLayer.addTo(mapRef.current)
+      layers.push(zoneLayer)
+
+      ;(zoneLayer as any).setOpacity = (nextOpacity: number) => {
+        zoneLayer.setStyle({
+          opacity: nextOpacity,
+          fillOpacity: Math.min(nextOpacity * 0.45, 0.55),
+        })
+      }
+
+      overlayLayersRef.current.push(zoneLayer as any)
+    }
+
     // Erosion Risk (GEE)
     if (activeLayers.includes('erosion-risk') && assessment?.erosion_risk?.visualization?.tile_url) {
       const tileUrl = assessment.erosion_risk.visualization.tile_url
@@ -2140,7 +2232,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       overlayLayersRef.current = [] 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLayers, mode, geeData, ssurgoData]) // Intentionally omit opacity to prevent reload
+  }, [activeLayers, mode, geeData, ssurgoData, managementZonesGeoJSON]) // Intentionally omit opacity to prevent reload
 
   // Update opacity separately
   useEffect(() => {
@@ -2157,7 +2249,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
 
       {/* Dynamic Legend (Bottom Right) */}
       {mode === 'analysis' && activeLayers.some(id => LEGEND_DATA[id]) && (
-        <div className="absolute bottom-24 right-3 bg-white/95 backdrop-blur-sm shadow-xl z-[1000] max-w-[220px] border border-gray-100 rounded-lg overflow-hidden transition-all duration-300">
+        <div className="absolute bottom-20 sm:bottom-24 right-2 sm:right-3 bg-white/95 backdrop-blur-sm shadow-xl z-[1000] max-w-[min(92vw,260px)] sm:max-w-[220px] border border-gray-100 rounded-lg overflow-hidden transition-all duration-300">
           <div 
             className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors"
             onClick={() => setIsLegendOpen(!isLegendOpen)}
@@ -2236,6 +2328,11 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                             title: LEGEND_DATA['soil-boundaries'].title,
                             items: getSoilBoundariesLegendItems(ssurgoData)
                           }
+                      : id === 'management-zones'
+                        ? {
+                            title: LEGEND_DATA['management-zones'].title,
+                            items: getManagementZonesLegendItems(managementZonesGeoJSON)
+                          }
                       : id === 'convergent-areas'
                         ? {
                             title: LEGEND_DATA['convergent-areas'].title,
@@ -2308,18 +2405,17 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       {/* Layer Controls for Browse Mode */}
       {mode === 'browse' && onCSBLayerToggle && (
         <div 
-          className="absolute top-4 rounded-lg shadow-2xl z-[1000] overflow-hidden transition-all duration-300"
+          className="absolute top-2 sm:top-4 right-2 sm:right-[74px] rounded-lg shadow-2xl z-[1000] overflow-hidden transition-all duration-300"
           style={{ 
             backgroundColor: 'rgba(255, 255, 255, 0.95)', 
             border: '1px solid #e5e7eb',
-            right: layerPanelCollapsed ? '74px' : '74px',
-            width: layerPanelCollapsed ? '40px' : '240px'
+            width: layerPanelCollapsed ? '44px' : 'min(240px, calc(100vw - 1rem))'
           }}
         >
           {layerPanelCollapsed ? (
             <button
               onClick={() => setLayerPanelCollapsed(false)}
-              className="p-3 hover:bg-gray-50 transition-colors w-full"
+              className="min-h-[44px] p-3 hover:bg-gray-50 transition-colors w-full"
               title="Expand Layers"
             >
               <Layers className="w-4 h-4 mx-auto" style={{ color: '#16a34a' }} />
@@ -2333,7 +2429,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                 </h3>
                 <button
                   onClick={() => setLayerPanelCollapsed(true)}
-                  className="p-1 hover:bg-gray-200 rounded transition-colors"
+                  className="p-2 hover:bg-gray-200 rounded transition-colors min-w-[44px] min-h-[44px]"
                   title="Collapse"
                 >
                   <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2341,18 +2437,18 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                   </svg>
                 </button>
               </div>
-              <div className="p-4 space-y-3">
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
+              <div className="p-3 sm:p-4 space-y-3">
+              <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1.5 rounded transition-colors">
               <input
                 type="checkbox"
                 checked={showCSBLayer}
                 onChange={onCSBLayerToggle}
-                className="w-4 h-4 rounded"
+                  className="w-5 h-5 rounded"
                 style={{ accentColor: '#3b82f6' }}
               />
               <span className="text-gray-700">Field Boundaries (CSB)</span>
             </label>
-            <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1 rounded transition-colors">
+              <label className="flex items-center gap-3 text-sm cursor-pointer hover:bg-gray-50 -mx-2 px-2 py-1.5 rounded transition-colors">
               <input
                 type="checkbox"
                 checked={showCSBTileLayer}
@@ -2368,7 +2464,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                     }
                   }
                 }}
-                className="w-4 h-4 rounded"
+                className="w-5 h-5 rounded"
                 style={{ accentColor: '#3b82f6' }}
               />
               <span className="text-gray-700">Rotation History</span>
@@ -2435,10 +2531,10 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       {/* Browse Instructions */}
       {mode === 'browse' && !selectedCSBField && (
         <div 
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 rounded-lg shadow-2xl px-4 py-3 z-[1000]"
+          className="absolute bottom-2 sm:bottom-4 left-2 right-2 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 rounded-lg shadow-2xl px-3 sm:px-4 py-2.5 sm:py-3 z-[1000]"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb' }}
         >
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-xs sm:text-sm">
             <div className="p-1.5 rounded" style={{ backgroundColor: '#f0fdf4' }}>
               <MapPin className="w-4 h-4" style={{ color: '#16a34a' }} />
             </div>
@@ -2452,8 +2548,8 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       {/* CSB Field Selection Confirmation */}
       {mode === 'browse' && selectedCSBField && (
         <div 
-          className="absolute top-4 left-4 rounded-lg shadow-2xl z-[1000]"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e5e7eb', minWidth: '400px', maxWidth: '450px' }}
+          className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-auto rounded-lg shadow-2xl z-[1000]"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e5e7eb', minWidth: '0', width: 'min(450px, calc(100vw - 1rem))', maxWidth: '450px' }}
         >
           <div className="px-4 py-3" style={{ backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0' }}>
             <div className="flex items-center justify-between">
@@ -2477,14 +2573,14 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                   vertexMarkersRef.current.forEach(marker => marker.remove())
                   vertexMarkersRef.current = []
                 }}
-                className="text-gray-500 hover:text-gray-700 text-xs font-medium"
+                className="text-gray-500 hover:text-gray-700 text-xs font-medium min-w-[44px] min-h-[44px] px-2"
               >
                 Clear
               </button>
             </div>
           </div>
           <div className="p-4">
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
               <div>
                 <span className="text-gray-600 text-xs">CSB ID:</span>
                 <div className="font-semibold text-gray-900 text-sm">{selectedCSBField.clu_id || 'N/A'}</div>
@@ -2637,7 +2733,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
             </h3>
           </div>
           <div className="p-4">
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
               <div>
                 <span className="text-gray-600 text-xs">Coverage:</span>
                 <div className="font-semibold text-gray-900">{selectedSoil.area} ac ({selectedSoil.percent}%)</div>
@@ -2658,8 +2754,8 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       {/* Drawn Polygon Info and Confirmation */}
       {mode === 'draw' && drawnPolygon && (
         <div 
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 rounded-lg shadow-2xl z-[1000]"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e5e7eb', minWidth: '400px' }}
+          className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-1/2 sm:right-auto sm:transform sm:-translate-x-1/2 rounded-lg shadow-2xl z-[1000]"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)', border: '1px solid #e5e7eb', minWidth: '0', width: 'min(420px, calc(100vw - 1rem))' }}
         >
           <div className="px-4 py-3" style={{ backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0' }}>
             <div className="flex items-center gap-2">
@@ -2708,7 +2804,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       {/* Validation Error */}
       {mode === 'draw' && validationError && (
         <div 
-          className="absolute top-4 right-4 rounded-lg shadow-2xl z-[1000] max-w-sm"
+          className="absolute top-2 left-2 right-2 sm:top-4 sm:right-4 sm:left-auto rounded-lg shadow-2xl z-[1000] sm:max-w-sm"
           style={{ backgroundColor: 'rgba(254, 242, 242, 0.98)', border: '1px solid #fecaca' }}
         >
           <div className="p-4">

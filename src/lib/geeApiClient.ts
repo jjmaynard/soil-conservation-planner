@@ -36,6 +36,10 @@ import type {
   ProductivityCropSpecificResponse,
   ClimateHistoryRequest,
   ClimateHistoryResponse,
+  ZoneOptimizationRequest,
+  ZoneOptimizationResponse,
+  ZoneDelineationRequest,
+  ZoneDelineationResponse,
 } from '#types/geeApi'
 
 // ============================================================================
@@ -664,6 +668,30 @@ class GEEAPIClient {
         `/api/assessment/productivity-crop-specific`,
         request
       )
+      return data
+    } catch (error) {
+      return handleAPIError(error)
+    }
+  }
+
+  /**
+   * Optimize the recommended number of management zones for a field.
+   */
+  async optimizeZones(request: ZoneOptimizationRequest): Promise<ZoneOptimizationResponse> {
+    try {
+      const { data } = await this.client.post<ZoneOptimizationResponse>('/api/zones/optimize', request)
+      return data
+    } catch (error) {
+      return handleAPIError(error)
+    }
+  }
+
+  /**
+   * Delineate management zones and return zone polygons.
+   */
+  async delineateZones(request: ZoneDelineationRequest): Promise<ZoneDelineationResponse> {
+    try {
+      const { data } = await this.client.post<ZoneDelineationResponse>('/api/zones/delineate', request)
       return data
     } catch (error) {
       return handleAPIError(error)

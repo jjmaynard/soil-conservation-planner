@@ -44,10 +44,10 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
   const erosionColors = getRiskColor(erosionRisk)
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Field Analysis Dashboard</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Field Analysis Dashboard</h2>
         <p className="text-sm text-gray-600">
           Comprehensive overview of soil, productivity, and resource concerns
         </p>
@@ -58,7 +58,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
         {/* Soil Composition Card */}
         <button
           onClick={() => onCardClick('soil')}
-          className="p-6 rounded-xl text-left transition-all hover:shadow-lg"
+          className="p-4 sm:p-6 rounded-xl text-left transition-all hover:shadow-lg"
           style={{ backgroundColor: '#f0fdf4', border: '2px solid #86efac' }}
         >
           <div className="flex items-start justify-between mb-4">
@@ -70,7 +70,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
             </span>
           </div>
           <h3 className="text-sm font-medium text-gray-600 mb-1">Dominant Soil</h3>
-          <div className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 break-words">
             {dominantSoil?.mapunit_name || 'Loading...'}
           </div>
           <div className="text-sm text-gray-600">
@@ -81,7 +81,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
         {/* Erosion Risk Card */}
         <button
           onClick={() => onCardClick('erosion')}
-          className="p-6 rounded-xl text-left transition-all hover:shadow-lg"
+          className="p-4 sm:p-6 rounded-xl text-left transition-all hover:shadow-lg"
           style={{ backgroundColor: erosionColors.bg, border: `2px solid ${erosionColors.border}` }}
         >
           <div className="flex items-start justify-between mb-4">
@@ -93,7 +93,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
             </span>
           </div>
           <h3 className="text-sm font-medium" style={{ color: erosionColors.text, opacity: 0.8 }}>Erosion Risk</h3>
-          <div className="text-2xl font-bold mb-1" style={{ color: erosionColors.text }}>
+          <div className="text-xl sm:text-2xl font-bold mb-1" style={{ color: erosionColors.text }}>
             {geeData?.combined?.erosion?.high_risk_area_pct !== null && geeData?.combined?.erosion?.high_risk_area_pct !== undefined
               ? `${Number(geeData.combined.erosion.high_risk_area_pct).toFixed(1)}%`
               : '-'
@@ -107,7 +107,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
         {/* Drainage Card */}
         <button
           onClick={() => onCardClick('drainage')}
-          className="p-6 rounded-xl text-left transition-all hover:shadow-lg"
+          className="p-4 sm:p-6 rounded-xl text-left transition-all hover:shadow-lg"
           style={{ backgroundColor: '#e0f2fe', border: '2px solid #7dd3fc' }}
         >
           <div className="flex items-start justify-between mb-4">
@@ -119,7 +119,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
             </span>
           </div>
           <h3 className="text-sm font-medium text-sky-700 mb-1">Drainage Class</h3>
-          <div className="text-2xl font-bold text-sky-900 mb-1">
+          <div className="text-xl sm:text-2xl font-bold text-sky-900 mb-1">
             {drainageClass.split(' ').slice(0, 2).join(' ')}
           </div>
           <div className="text-sm text-sky-700">
@@ -136,7 +136,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
         {/* Productivity Card */}
         <button
           onClick={() => onCardClick('productivity')}
-          className="p-6 rounded-xl text-left transition-all hover:shadow-lg"
+          className="p-4 sm:p-6 rounded-xl text-left transition-all hover:shadow-lg"
           style={{ backgroundColor: '#f0fdf4', border: '2px solid #bbf7d0' }}
         >
           <div className="flex items-start justify-between mb-4">
@@ -153,7 +153,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
             )}
           </div>
           <h3 className="text-sm font-medium text-green-700 mb-1">Productivity (NDVI Peak)</h3>
-          <div className="text-2xl font-bold text-green-900 mb-1">
+          <div className="text-xl sm:text-2xl font-bold text-green-900 mb-1">
             {productivity !== null ? Number(productivity).toFixed(2) : '-'}
           </div>
           <div className="text-sm text-green-700">
@@ -167,7 +167,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
         {/* SVI Card */}
         <button
           onClick={() => onCardClick('svi')}
-          className="p-6 rounded-xl text-left transition-all hover:shadow-lg"
+          className="p-4 sm:p-6 rounded-xl text-left transition-all hover:shadow-lg"
           style={{ backgroundColor: '#fef3c7', border: '2px solid #fde68a' }}
         >
           <div className="flex items-start justify-between mb-4">
@@ -184,7 +184,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
             )}
           </div>
           <h3 className="text-sm font-medium text-amber-700 mb-1">Soil Vulnerability</h3>
-          <div className="text-2xl font-bold text-amber-900 mb-1">
+          <div className="text-xl sm:text-2xl font-bold text-amber-900 mb-1">
             {sviRisk !== null ? Number(sviRisk).toFixed(2) : '-'}
           </div>
           <div className="text-sm text-amber-700">
@@ -195,7 +195,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
         {/* Drought Risk Card */}
         <button
           onClick={() => onCardClick('drought')}
-          className="p-6 rounded-xl text-left transition-all hover:shadow-lg"
+          className="p-4 sm:p-6 rounded-xl text-left transition-all hover:shadow-lg"
           style={{ 
             backgroundColor: droughtRisk !== null && droughtRisk !== undefined && droughtRisk < 0 ? '#fee2e2' : '#e0f2fe',
             border: droughtRisk !== null && droughtRisk !== undefined && droughtRisk < 0 ? '2px solid #fecaca' : '2px solid #7dd3fc'
@@ -221,7 +221,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
           <h3 className="text-sm font-medium" style={{ 
             color: droughtRisk !== null && droughtRisk !== undefined && droughtRisk < 0 ? '#991b1b' : '#0369a1'
           }}>Water Balance</h3>
-          <div className="text-2xl font-bold mb-1" style={{ 
+          <div className="text-xl sm:text-2xl font-bold mb-1" style={{ 
             color: droughtRisk !== null && droughtRisk !== undefined && droughtRisk < 0 ? '#991b1b' : '#0c4a6e'
           }}>
             {droughtRisk !== null ? `${Number(droughtRisk).toFixed(0)} mm` : '-'}
@@ -284,8 +284,8 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
       </div>
 
       {/* Status Indicators */}
-      <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}>
-        <div className="flex items-center gap-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between p-4 rounded-lg" style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}>
+        <div className="flex flex-wrap items-center gap-3 sm:gap-6">
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${ssurgoData ? 'bg-green-500' : 'bg-gray-300'}`}></div>
             <span className="text-xs text-gray-600">SSURGO Data</span>
@@ -302,14 +302,14 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
 
       {/* Enhanced Analysis Sections */}
       {geeData && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6">
           {/* Priority Resource Concerns */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <RankedConcernsList geeData={geeData} />
           </div>
 
           {/* Conservation Practice Recommendations */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <PracticeRecommendations geeData={geeData} compact={true} />
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function DashboardView({ fieldData, ssurgoData, geeData, onCardCl
 
       {/* Drought Assessment Section */}
       {geeData?.geeAssessment?.drought && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mt-6">
           <DroughtDashboard geeData={geeData} />
         </div>
       )}
