@@ -2,7 +2,6 @@
 
 'use client'
 
-import { Sprout } from 'lucide-react'
 import Image from 'next/image'
 
 interface HeaderProps {
@@ -32,8 +31,8 @@ export default function Header({ className = '' }: HeaderProps) {
               }}
             >
               <Image 
-                src="/data/usda-logo-white.png"
-                alt="USDA Logo"
+                src="/nrcs.png"
+                alt="NRCS logo"
                 width={0}
                 height={0}
                 style={{ objectFit: 'contain', height: '100%', width: 'auto' }}

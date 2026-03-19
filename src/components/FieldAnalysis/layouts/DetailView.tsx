@@ -55,6 +55,7 @@ export type TabId = 'soil' | 'erosion' | 'drainage' | 'productivity' | 'svi' | '
 interface Tab {
   id: TabId
   label: string
+  shortLabel?: string
   icon: any
   color: string
   bgColor: string
@@ -115,19 +116,19 @@ export const TAB_LAYER_CONFIG: Record<TabId, { id: string; label: string; defaul
 }
 
 const tabs: Tab[] = [
-  { id: 'soil', label: 'Soil Composition', icon: Layers, color: '#16a34a', bgColor: '#f0fdf4' },
-  { id: 'erosion', label: 'Erosion Risk', icon: TrendingDown, color: '#ea580c', bgColor: '#fff7ed' },
-  { id: 'drainage', label: 'Drainage', icon: Droplets, color: '#0369a1', bgColor: '#e0f2fe' },
-  { id: 'productivity', label: 'Productivity', icon: Sprout, color: '#16a34a', bgColor: '#f0fdf4' },
-  { id: 'svi', label: 'Soil Vulnerability', icon: AlertTriangle, color: '#ea580c', bgColor: '#fef3c7' },
-  { id: 'flow', label: 'Concentrated Flow', icon: Wind, color: '#0284c7', bgColor: '#e0f2fe' },
-  { id: 'drought', label: 'Drought Risk', icon: CloudRain, color: '#f97316', bgColor: '#fff7ed' },
-  { id: 'vegetation', label: 'Vegetation Monitoring', icon: TrendingUp, color: '#16a34a', bgColor: '#f0fdf4' },
-  { id: 'terrain', label: 'Terrain Attributes', icon: Mountain, color: '#78716c', bgColor: '#fafaf9' },
-  { id: 'climate', label: 'Climate History', icon: CloudRain, color: '#0369a1', bgColor: '#e0f2fe' },
-  { id: 'zones', label: 'Management Zones', icon: Layers, color: '#7c3aed', bgColor: '#faf5ff' },
-  { id: 'concerns', label: 'Resource Concerns', icon: AlertTriangle, color: '#d97706', bgColor: '#fef3c7' },
-  { id: 'practices', label: 'Conservation Practices', icon: Target, color: '#15803d', bgColor: '#f0fdf4' },
+  { id: 'soil', label: 'Soil Composition', shortLabel: 'Soil', icon: Layers, color: '#16a34a', bgColor: '#f0fdf4' },
+  { id: 'erosion', label: 'Erosion Risk', shortLabel: 'Erosion', icon: TrendingDown, color: '#ea580c', bgColor: '#fff7ed' },
+  { id: 'drainage', label: 'Drainage', shortLabel: 'Drainage', icon: Droplets, color: '#0369a1', bgColor: '#e0f2fe' },
+  { id: 'productivity', label: 'Productivity', shortLabel: 'Productivity', icon: Sprout, color: '#16a34a', bgColor: '#f0fdf4' },
+  { id: 'svi', label: 'Soil Vulnerability', shortLabel: 'Vulnerability', icon: AlertTriangle, color: '#ea580c', bgColor: '#fef3c7' },
+  { id: 'flow', label: 'Concentrated Flow', shortLabel: 'Flow', icon: Wind, color: '#0284c7', bgColor: '#e0f2fe' },
+  { id: 'drought', label: 'Drought Risk', shortLabel: 'Drought', icon: CloudRain, color: '#f97316', bgColor: '#fff7ed' },
+  { id: 'vegetation', label: 'Vegetation Monitoring', shortLabel: 'Vegetation', icon: TrendingUp, color: '#16a34a', bgColor: '#f0fdf4' },
+  { id: 'terrain', label: 'Terrain Attributes', shortLabel: 'Terrain', icon: Mountain, color: '#78716c', bgColor: '#fafaf9' },
+  { id: 'climate', label: 'Climate History', shortLabel: 'Climate', icon: CloudRain, color: '#0369a1', bgColor: '#e0f2fe' },
+  { id: 'zones', label: 'Management Zones', shortLabel: 'Zones', icon: Layers, color: '#7c3aed', bgColor: '#faf5ff' },
+  { id: 'concerns', label: 'Resource Concerns', shortLabel: 'Concerns', icon: AlertTriangle, color: '#d97706', bgColor: '#fef3c7' },
+  { id: 'practices', label: 'Conservation Practices', shortLabel: 'Practices', icon: Target, color: '#15803d', bgColor: '#f0fdf4' },
 ]
 
 export default function DetailView({ 
@@ -249,7 +250,7 @@ export default function DetailView({
     <div className="flex flex-col h-full">
       {/* Tab Navigation - Horizontal Scroll */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300">
+        <div className="flex overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scroll-smooth">
           {filteredTabs.map((tab) => {
             const Icon = tab.icon
             const isActive = selectedTab === tab.id
@@ -258,15 +259,18 @@ export default function DetailView({
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className="flex items-center gap-2 px-4 py-3 whitespace-nowrap font-medium text-sm transition-all border-b-2 flex-shrink-0"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap font-medium text-xs sm:text-sm transition-all border-b-2 flex-shrink-0 min-h-[42px] sm:min-h-[48px]"
                 style={{
                   color: isActive ? tab.color : '#6b7280',
                   borderBottomColor: isActive ? tab.color : 'transparent',
                   backgroundColor: isActive ? tab.bgColor : 'transparent'
                 }}
+                title={tab.label}
+                aria-label={tab.label}
               >
-                <Icon className="w-4 h-4" />
-                {tab.label}
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="sm:hidden">{tab.shortLabel || tab.label}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             )
           })}

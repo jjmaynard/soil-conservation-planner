@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { 
   X, 
@@ -154,7 +155,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
               <>
                 <Link href="/" className="flex items-center space-x-2">
                   <div className="bg-white bg-opacity-20 rounded-lg p-1.5">
-                    <Sprout className="w-5 h-5" />
+                    <Image src="/nrcs.png" alt="NRCS logo" width={20} height={20} className="w-5 h-5" priority />
                   </div>
                   <div className="flex flex-col">
                     <span className="font-bold text-sm leading-tight">Soil Interpretation Explorer</span>
@@ -185,7 +186,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
               <div className="w-full flex flex-col items-center gap-2">
                 <Link href="/">
                   <div className="bg-white bg-opacity-20 rounded-lg p-2">
-                    <Sprout className="w-6 h-6" />
+                    <Image src="/nrcs.png" alt="NRCS logo" width={24} height={24} className="w-6 h-6" priority />
                   </div>
                 </Link>
                 <button
@@ -363,7 +364,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
           <Link href="/" className="flex items-center space-x-2">
             <div className="rounded-lg p-1.5 bg-forest-500">
-              <Sprout className="w-5 h-5 text-white" />
+              <Image src="/nrcs.png" alt="NRCS logo" width={20} height={20} className="w-5 h-5" priority />
             </div>
             <span className="font-bold text-sm text-text">Soil Interpretation Explorer</span>
           </Link>
