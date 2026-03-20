@@ -5,7 +5,7 @@ Next.js soil-sampling application.
 
 **GEE API base URL:** `https://gee-api-production.up.railway.app`  
 **Next.js env var:** `GEE_API_URL` (set in `.env.local` and Vercel project settings)  
-**Last updated:** 2026-03-18
+**Last updated:** 2026-03-19
 
 ---
 
@@ -21,6 +21,7 @@ Next.js soil-sampling application.
    - 3.5 POST /api/zones/optimize *(new)*
    - 3.6 POST /api/zones/delineate *(new)*
    - 3.7 POST /api/sampling/design-prep *(new)*
+  - 3.8 Async design-prep endpoints *(new)*
 4. [Implementation Checklist for an AI Agent](#4-implementation-checklist-for-an-ai-agent)
 5. [TypeScript Types — Complete Reference](#5-typescript-types--complete-reference)
 6. [Proxy Route Files — Ready to Create](#6-proxy-route-files--ready-to-create)
@@ -34,19 +35,22 @@ Next.js soil-sampling application.
 
 ## 1. Endpoint Overview
 
-The GEE API now exposes **seven** endpoints for the SoilStrata sampling workflow. All are
-`POST`, accept `application/json`, and must be called server-side through Next.js proxy
+The GEE API now exposes **nine** endpoints for the SoilStrata sampling workflow.
+Most are `POST`; async job polling uses `GET`.
+All accept/return JSON and must be called server-side through Next.js proxy
 route handlers — never directly from the browser.
 
 | Endpoint | Status | Purpose | Timeout |
 |----------|--------|---------|---------|
 | `POST /api/sampling/covariates` | Unchanged | Preview covariate stats over a polygon | 60 s |
-| `POST /api/sampling/optimalK` | Unchanged | K-sweep cluster optimization (5 metrics) | 60 s |
+| `POST /api/sampling/optimalK` | **Revised** | K-sweep with composite-first recommendation and consensus diagnostics | 60 s |
 | `POST /api/sampling/stratify` | **Revised** | Stratified random + optional fuzzy clustering + transition oversampling | 60 s |
 | `POST /api/sampling/design` | **New** | Unified 6-method sampling design (cLHS, stratified, random, grid, GRTS) | 120 s |
-| `POST /api/zones/optimize` | **New** | 5-method consensus zone-count optimization | 60 s |
+| `POST /api/zones/optimize` | **Revised** | Composite-first zone-count optimization with consensus diagnostics | 60 s |
 | `POST /api/zones/delineate` | **New** | Satellite or terrain fuzzy zone delineation | 90 s |
-| `POST /api/sampling/design-prep` | **New** | Combined k-sweep + zone variability + sample-count estimation | 90 s |
+| `POST /api/sampling/design-prep` | **Revised** | Combined k-sweep + zone variability + sample-count estimation + stability controls | 90 s |
+| `POST /api/sampling/design-prep/async` | **New** | Queue long-running design-prep jobs | 10 s |
+| `GET /api/sampling/design-prep/jobs/{job_id}` | **New** | Poll async design-prep job status/result | 10 s |
 
 **The `/api/sampling/design` endpoint is the primary new capability.** It replaces the
 need to build method-specific logic in the UI — the API handles all six sampling methods
@@ -55,6 +59,9 @@ end-to-end and returns consistent, typed output.
 **`/api/sampling/design-prep` is the recommended pre-flight step** for any zone-managed
 design — it combines `optimalK`, `zones/optimize`, per-zone variability analysis, and
 Neyman-guided sample-count estimation in a single call.
+
+`optimalK`, `zones/optimize`, and `design-prep` now use a **canonical composite-first**
+optimizer. Consensus is still returned, but as a diagnostic field.
 
 ---
 
@@ -90,11 +97,11 @@ to change — it forwards the full request body. The new backend fields are:
 2. **`src/components/sampling/StratifyForm.tsx`** (or equivalent) — expose a clustering method selector and the fuzziness/transition controls
 3. **`src/components/sampling/StratifyResults.tsx`** (or equivalent) — display `clustering_method_used`, `fuzziness_m_used`, `mean_membership`, and `n_transition_points`
 
-### 2.2 Five New Endpoints
+### 2.2 New Endpoints (Additive)
 
-All new endpoints (`/sampling/design`, `/sampling/design-prep`, `/zones/optimize`,
-`/zones/delineate`) are **additive** — they do not change existing routes. Implement each
-as a new Next.js route handler. Full file contents are provided in
+New endpoints (`/sampling/design`, `/sampling/design-prep`, `/zones/optimize`,
+`/zones/delineate`, plus async design-prep queue/poll routes) are **additive** — they do
+not remove existing routes. Implement each as a Next.js route handler. Full file contents are provided in
 [Section 6](#6-proxy-route-files--ready-to-create).
 
 ---
@@ -147,9 +154,9 @@ interface CovariateStats {
 
 ### 3.2 `POST /api/sampling/optimalK`
 
-Runs k-means for k=2..k_max and scores each k with five methods (Silhouette, FPC, BIC,
-Davies-Bouldin, Calinski-Harabász). Returns a majority-vote consensus recommendation.
-Use to populate an optimalK chart and let the user choose k before calling `/stratify`.
+Runs k-means for k=2..k_max and scores each k using a canonical composite-first optimizer.
+`optimal_k` is now selected by weighted composite score; consensus is still returned as
+diagnostic context (`consensus_k`).
 
 **Target latency:** 20–45 s
 
@@ -171,6 +178,7 @@ interface OptimalKRequest {
 ```typescript
 interface OptimalKResponse {
   optimal_k: number;
+  consensus_k?: number | null; // diagnostic-only legacy consensus recommendation
   optimal_k_by_method: {
     silhouette: number;
     fpc: number;
@@ -179,8 +187,14 @@ interface OptimalKResponse {
     calinski_harabasz: number;
   };
   consensus_votes: number;
-  total_methods: number;       // 4 if skfuzzy absent, else 5
-  agreement_level: 'perfect' | 'strong' | 'partial' | 'weak';
+  total_methods: number;       // currently 4 in canonical statistical mode
+  agreement_level: 'strong' | 'partial' | 'weak';
+  composite_scores?: Array<{
+    k: number;
+    composite_score: number;
+    components: Record<string, number>;
+    stability_penalty_applied: boolean;
+  }> | null;
   optimal_k_data: OptimalKDataPoint[];
   recommendations: OptimalKRecommendation[];
   warnings: string[];
@@ -444,9 +458,9 @@ interface SamplingDesignMethodMetadata {
 
 ### 3.5 `POST /api/zones/optimize` *(new)*
 
-Scores k=2..8 zones using up to 5 statistical criteria and returns a consensus
-recommendation. Optionally applies practical area constraints when `field_area_ha` is
-provided. Use this for the "How many zones?" UI step before zone delineation.
+Scores k=2..8 zones using a canonical composite-first optimizer.
+`recommended_k` is the primary recommendation; `consensus_k` is returned as diagnostic
+context. Practical area constraints are still applied when `field_area_ha` is provided.
 
 **Target latency:** 20–45 s
 
@@ -472,8 +486,9 @@ interface ZoneOptimizationRequest {
 interface ZoneOptimizationResponse {
   recommended_k: number;
   statistical_optimal_k: number;
+  consensus_k?: number | null;
   consensus_votes: number;
-  total_methods: number;         // 4 if skfuzzy absent, else 5
+  total_methods: number;         // currently 4 in canonical operational mode
   method_votes: {
     silhouette: number | null;
     calinski_harabasz: number | null;
@@ -485,6 +500,12 @@ interface ZoneOptimizationResponse {
   alternatives: ZoneAlternative[];
   practical_constraints_applied: boolean;
   reason: string;                // human-readable explanation
+  composite_scores?: Array<{
+    k: number;
+    composite_score: number;
+    components: Record<string, number>;
+    stability_penalty_applied: boolean;
+  }> | null;
   warnings: string[];
   wkt: string;
 }
@@ -494,11 +515,13 @@ interface ZoneOptimizationResponse {
 
 | Method | Criteria | Speed | Use when |
 |--------|----------|-------|---------|
-| `quick` | Silhouette + FPC | Fast | Live UI preview, drag interaction |
-| `consensus` | All 5 criteria | Moderate | Final run before delineation |
+| `quick` | Compatibility hint (canonical operational mode still used) | Fast | Live UI preview, drag interaction |
+| `consensus` | Compatibility hint (canonical operational mode still used) | Moderate | Final run before delineation |
 | `silhouette` | Silhouette only | Fast | Simple quality check |
 | `bic` | BIC via GMM | Moderate | Model-theoretic preference |
 | `fpc` | FPC only | Moderate | Explicitly fuzzy workflow |
+
+`method` is retained for backward compatibility. Unsupported values are ignored with a warning.
 
 #### Quality level thresholds
 
@@ -604,6 +627,13 @@ interface DesignPrepRequest {
   min_zone_area_ha?: number;           // default 2.0 — minimum viable zone area
   target_relative_error?: number;      // default 0.15 (15 %); range 0.05–0.5
   allocation_method?: 'neyman_multivariate' | 'proportional' | 'equal';
+  stability_config?: {
+    run_stability?: boolean;           // default true (subject to server flags)
+    n_bootstrap?: number;              // default 100; range 50–500
+    subsample_ratio?: number;          // default 0.80; range 0.5–0.95
+    stability_threshold?: number;      // default 0.60
+    composite_weights?: Record<string, number> | null;
+  };
 }
 ```
 
@@ -624,6 +654,36 @@ interface DesignPrepResponse {
   total_suggested_samples: number;     // USE THIS as n_samples for /design
   suggested_n_basis: DesignPrepSuggestedNBasis;
   allocation_method: string;
+
+  // additive diagnostics from canonical optimizer
+  consensus_k?: number | null;
+  composite_optimal_k?: number | null;
+  stability_optimal_k?: number | null;
+  stability_results?: Array<{
+    k: number;
+    mean_ari: number;
+    std_ari: number;
+    mean_jaccard: number;
+    std_jaccard: number;
+    per_cluster_jaccard: number[];
+    stability_class: 'stable' | 'marginal' | 'unstable';
+    n_bootstrap: number;
+    subsample_ratio: number;
+  }> | null;
+  composite_scores?: Array<{
+    k: number;
+    composite_score: number;
+    components: Record<string, number>;
+    stability_penalty_applied: boolean;
+  }> | null;
+  stability_config_used?: {
+    run_stability: boolean;
+    n_bootstrap: number;
+    subsample_ratio: number;
+    stability_threshold: number;
+    composite_weights: Record<string, number> | null;
+  } | null;
+
   warnings: string[];
   wkt: string;
 }
@@ -683,6 +743,12 @@ const prep = await samplingApi.designPrep({
   wkt, year, field_area_ha, covariates,
   target_relative_error: 0.15,
   allocation_method: 'neyman_multivariate',
+  stability_config: {
+    run_stability: true,
+    n_bootstrap: 100,
+    subsample_ratio: 0.8,
+    stability_threshold: 0.6,
+  },
 });
 
 // 2. Feed outputs directly into /api/sampling/design
@@ -696,6 +762,44 @@ const design = await samplingApi.design({
   },
 });
 ```
+
+---
+
+### 3.8 Async design-prep endpoints *(new)*
+
+Use async design-prep when runtime may exceed your proxy/serverless latency budget.
+
+#### `POST /api/sampling/design-prep/async`
+
+Queues a design-prep job and returns a poll URL.
+
+```typescript
+interface AsyncJobAcceptedResponse {
+  job_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+```
+
+#### `GET /api/sampling/design-prep/jobs/{job_id}`
+
+Polls queued job state and returns final `DesignPrepResponse` on success.
+
+```typescript
+interface DesignPrepJobStatusResponse {
+  job_id: string;
+  status: 'pending' | 'running' | 'succeeded' | 'failed';
+  created_at: string;
+  updated_at: string;
+  result: DesignPrepResponse | null;
+  error: string | null;
+}
+```
+
+Expected status transitions:
+
+1. `pending -> running -> succeeded`
+2. `pending -> running -> failed`
 
 ---
 
@@ -724,12 +828,14 @@ Do **not** replace the file. Make targeted additions:
 
 ### Step 4 — Create proxy route handlers
 
-Create these four files. Exact file contents are in [Section 6](#6-proxy-route-files--ready-to-create):
+Create these six files. Exact file contents are in [Section 6](#6-proxy-route-files--ready-to-create):
 
 | File to create | Note |
 |----------------|------|
 | `src/app/api/sampling/design/route.ts` | New — `maxDuration = 120` |
 | `src/app/api/sampling/design-prep/route.ts` | New — `maxDuration = 90` |
+| `src/app/api/sampling/design-prep/async/route.ts` | New — async queue endpoint |
+| `src/app/api/sampling/design-prep/jobs/[jobId]/route.ts` | New — async poll endpoint |
 | `src/app/api/zones/optimize/route.ts` | New — `maxDuration = 60` |
 | `src/app/api/zones/delineate/route.ts` | New — `maxDuration = 60`, retry on 500 |
 
@@ -738,7 +844,7 @@ forwards the full request body, so the new fields are automatically proxied.
 
 ### Step 5 — Update `src/lib/api/sampling.ts`
 
-Add the `design` and `designPrep` methods to the existing `samplingApi` object — see [Section 7.1](#71-extend-srclibapsampling-ts).
+Add the `design`, `designPrep`, `designPrepAsync`, and `getDesignPrepJob` methods to the existing `samplingApi` object — see [Section 7.1](#71-extend-srclibapsampling-ts).
 
 ### Step 6 — Create `src/lib/api/zones.ts`
 
@@ -791,7 +897,8 @@ Test with a small polygon (< 10 ha) using each method:
 5. `design` with `method: 'grid'` → confirm actual sample count matches approximate `n_samples`
 6. `zones/optimize` → confirm `recommended_k` and quality card render
 7. `zones/delineate` → confirm `zone_polygons` renders as a polygon layer
-8. `sampling/design-prep` → confirm `recommended_k`, `total_suggested_samples`, and `zone_variability` all populate correctly
+8. `sampling/design-prep` → confirm `recommended_k`, `composite_optimal_k`, `consensus_k`, `total_suggested_samples`, and `zone_variability` populate correctly
+9. `sampling/design-prep/async` + polling endpoint → confirm pending/running/succeeded transitions and final result payload
 
 ---
 
@@ -860,6 +967,7 @@ export interface ZoneAlternative {
 export interface ZoneOptimizationResponse {
   recommended_k: number;
   statistical_optimal_k: number;
+  consensus_k?: number | null;
   consensus_votes: number;
   total_methods: number;
   method_votes: {
@@ -873,6 +981,12 @@ export interface ZoneOptimizationResponse {
   alternatives: ZoneAlternative[];
   practical_constraints_applied: boolean;
   reason: string;
+  composite_scores?: Array<{
+    k: number;
+    composite_score: number;
+    components: Record<string, number>;
+    stability_penalty_applied: boolean;
+  }> | null;
   warnings: string[];
   wkt: string;
 }
@@ -1073,6 +1187,13 @@ export interface DesignPrepRequest {
   min_zone_area_ha?: number;      // default 2.0
   target_relative_error?: number; // default 0.15
   allocation_method?: DesignPrepAllocationMethod;
+  stability_config?: {
+    run_stability?: boolean;
+    n_bootstrap?: number;
+    subsample_ratio?: number;
+    stability_threshold?: number;
+    composite_weights?: Record<string, number> | null;
+  };
 }
 
 export interface DesignPrepCovariateStats {
@@ -1108,8 +1229,50 @@ export interface DesignPrepResponse {
   total_suggested_samples: number;
   suggested_n_basis: DesignPrepSuggestedNBasis;
   allocation_method: DesignPrepAllocationMethod;
+  consensus_k?: number | null;
+  composite_optimal_k?: number | null;
+  stability_optimal_k?: number | null;
+  stability_results?: Array<{
+    k: number;
+    mean_ari: number;
+    std_ari: number;
+    mean_jaccard: number;
+    std_jaccard: number;
+    per_cluster_jaccard: number[];
+    stability_class: 'stable' | 'marginal' | 'unstable';
+    n_bootstrap: number;
+    subsample_ratio: number;
+  }> | null;
+  composite_scores?: Array<{
+    k: number;
+    composite_score: number;
+    components: Record<string, number>;
+    stability_penalty_applied: boolean;
+  }> | null;
+  stability_config_used?: {
+    run_stability: boolean;
+    n_bootstrap: number;
+    subsample_ratio: number;
+    stability_threshold: number;
+    composite_weights: Record<string, number> | null;
+  } | null;
   warnings: string[];
   wkt: string;
+}
+
+export interface AsyncJobAcceptedResponse {
+  job_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+
+export interface DesignPrepJobStatusResponse {
+  job_id: string;
+  status: 'pending' | 'running' | 'succeeded' | 'failed';
+  created_at: string;
+  updated_at: string;
+  result: DesignPrepResponse | null;
+  error: string | null;
 }
 ```
 
@@ -1156,6 +1319,52 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(90_000),
+  });
+  const data = await upstream.json();
+  return NextResponse.json(data, { status: upstream.status });
+}
+```
+
+### `src/app/api/sampling/design-prep/async/route.ts` — NEW
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+
+export const maxDuration = 30;
+
+const API_BASE = process.env.GEE_API_URL ?? 'https://gee-api-production.up.railway.app';
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  const body = await req.json();
+  const upstream = await fetch(`${API_BASE}/api/sampling/design-prep/async`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(30_000),
+  });
+  const data = await upstream.json();
+  return NextResponse.json(data, { status: upstream.status });
+}
+```
+
+### `src/app/api/sampling/design-prep/jobs/[jobId]/route.ts` — NEW
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+
+export const maxDuration = 30;
+
+const API_BASE = process.env.GEE_API_URL ?? 'https://gee-api-production.up.railway.app';
+
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ jobId: string }> }
+): Promise<NextResponse> {
+  const { jobId } = await params;
+  const upstream = await fetch(`${API_BASE}/api/sampling/design-prep/jobs/${jobId}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(30_000),
   });
   const data = await upstream.json();
   return NextResponse.json(data, { status: upstream.status });
@@ -1220,7 +1429,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 ### 7.1 Extend `src/lib/api/sampling.ts`
 
-Add the `design` method to the existing `samplingApi` object. Add the import first:
+Add/extend methods in the existing `samplingApi` object for sync and async design-prep usage.
+If your helper file currently has only a `post()` utility, add a small `get()` utility too.
 
 ```typescript
 // Add to existing imports at the top:
@@ -1229,14 +1439,31 @@ import type {
   SamplingDesignResponse,
   DesignPrepRequest,
   DesignPrepResponse,
+  AsyncJobAcceptedResponse,
+  DesignPrepJobStatusResponse,
 } from '@/lib/types/sampling';
 
 // Inside the existing samplingApi export, add:
+const get = async <TRes>(path: string): Promise<TRes> => {
+  const res = await fetch(path, { method: 'GET' });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail));
+  }
+  return res.json() as Promise<TRes>;
+};
+
 design: (req: SamplingDesignRequest) =>
   post<SamplingDesignRequest, SamplingDesignResponse>('/api/sampling/design', req),
 
 designPrep: (req: DesignPrepRequest) =>
   post<DesignPrepRequest, DesignPrepResponse>('/api/sampling/design-prep', req),
+
+designPrepAsync: (req: DesignPrepRequest) =>
+  post<DesignPrepRequest, AsyncJobAcceptedResponse>('/api/sampling/design-prep/async', req),
+
+getDesignPrepJob: (jobId: string) =>
+  get<DesignPrepJobStatusResponse>(`/api/sampling/design-prep/jobs/${jobId}`),
 ```
 
 ### 7.2 New file — `src/lib/api/zones.ts`
@@ -1286,6 +1513,8 @@ The intended UI flow for the SoilStrata sampling module:
 3. POST /api/sampling/design-prep  ← **recommended pre-flight for zone-based designs**
    → Renders <DesignPrepPanel>: k-sweep elbow chart, zone variability table,
      and sample-count estimate (feeds recommended_k + total_suggested_samples into step 5)
+    OR POST /api/sampling/design-prep/async and poll /api/sampling/design-prep/jobs/{job_id}
+       for long-running pre-flight requests
    OR [Optional legacy path] POST /api/sampling/optimalK + POST /api/zones/optimize
          ↓
 4. User selects sampling method in <SamplingMethodSelector>
@@ -1348,6 +1577,7 @@ if (!res.ok) {
 |--------|-------|-----------|
 | 400 | Bad WKT / area too large / insufficient pixels | Show inline error near the field input |
 | 422 | Request validation failed (Pydantic) | Show field-level validation messages |
+| 404 | Async job ID not found | Show "Job expired or invalid" and allow resubmission |
 | 500 | GEE computation error or Python exception | Show "Failed to compute — try again or reduce field size" |
 | 503 | Optional package (`clhs`) not installed | Disable `clhs_feature` and `clhs_spatial` in selector, show tooltip. GRTS is always available. |
 
@@ -1423,4 +1653,4 @@ the actual m value used so the result is auditable.
 
 *Source: `src/routers/sampling.py`, `src/routers/zones.py`, `docs/soilstrata/sampling-zones-integration.md`, `docs/soilstrata/sampling-design-api.md`*  
 *GEE API version: commit `f4e06d3` and later*  
-*Last updated: 2026-03-18*
+*Last updated: 2026-03-19*

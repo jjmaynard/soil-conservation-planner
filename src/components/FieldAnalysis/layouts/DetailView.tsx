@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Layers, TrendingDown, Droplets, Target, Sprout, CloudRain, Wind, AlertTriangle, Eye, EyeOff, Maximize2, Map as MapIcon, TrendingUp, Mountain, Info } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import SoilComposition from '../SoilComposition'
@@ -171,14 +171,19 @@ export default function DetailView({
   const [showNarrativeModal, setShowNarrativeModal] = useState(false)
   const tabNarrative = getTabNarrative(selectedTab)
 
-  const handleZonesGenerated = useCallback((zones: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null) => {
+  const handleZonesGenerated = (zones: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null) => {
     setManagementZonesGeoJSON(zones)
+
+    if (zones) {
+      setSelectedTab('zones')
+      onTabChange?.('zones')
+    }
 
     // Auto-enable the management-zones overlay after successful delineation.
     if (zones && !activeLayers.includes('management-zones')) {
       onLayerToggle?.('management-zones')
     }
-  }, [activeLayers, onLayerToggle])
+  }
 
   const handleTabChange = (tabId: TabId) => {
     // Only allow tab change if it's in the filtered tabs

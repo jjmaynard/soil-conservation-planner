@@ -335,7 +335,29 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
       {optimizeResult ? (
         <div className="rounded-lg border border-violet-200 bg-violet-50 p-3">
           <p className="text-sm font-semibold text-violet-900">Recommended Zones: {optimizeResult.recommended_k}</p>
+          {typeof optimizeResult.consensus_k === 'number' ? (
+            <p className="text-xs text-violet-900 mt-1">
+              Consensus (diagnostic): {optimizeResult.consensus_k}
+            </p>
+          ) : null}
           <p className="text-xs text-violet-800 mt-1">{optimizeResult.reason}</p>
+          {Array.isArray(optimizeResult.composite_scores) && optimizeResult.composite_scores.length > 0 ? (
+            <div className="mt-2 rounded border border-violet-200 bg-white p-2">
+              <p className="text-[11px] font-semibold text-violet-900 mb-1">Composite Score Diagnostics</p>
+              <div className="space-y-1">
+                {optimizeResult.composite_scores
+                  .slice()
+                  .sort((a, b) => b.composite_score - a.composite_score)
+                  .slice(0, 3)
+                  .map((item) => (
+                    <div key={item.k} className="flex items-center justify-between text-[11px] text-violet-900">
+                      <span>k={item.k}{item.stability_penalty_applied ? ' (stability penalty)' : ''}</span>
+                      <span className="font-semibold">{item.composite_score.toFixed(3)}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ) : null}
           {optimizeResult.warnings?.length ? (
             <ul className="mt-2 text-xs text-violet-800 list-disc pl-4">
               {optimizeResult.warnings.map((warning) => (

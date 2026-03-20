@@ -1098,6 +1098,7 @@ export interface ZoneAlternative {
 export interface ZoneOptimizationResponse {
   recommended_k: number
   statistical_optimal_k: number
+  consensus_k?: number | null
   consensus_votes: number
   total_methods: number
   method_votes: {
@@ -1119,6 +1120,12 @@ export interface ZoneOptimizationResponse {
   alternatives: ZoneAlternative[]
   practical_constraints_applied: boolean
   reason: string
+  composite_scores?: Array<{
+    k: number
+    composite_score: number
+    components: Record<string, number>
+    stability_penalty_applied: boolean
+  }> | null
   warnings: string[]
   wkt: string
 }
