@@ -3,7 +3,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Layers, Info, Circle, SlidersHorizontal, Target, AlertTriangle } from 'lucide-react'
+import { Layers, Info, SlidersHorizontal, Target, AlertTriangle } from 'lucide-react'
 import { geeApi, GEEAPIError } from '#lib/geeApiClient'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
 import type {
@@ -46,8 +46,6 @@ interface ZoneSummary {
   acres: number
   percent: number
   color: string
-  zoneType: string
-  characteristics: string[]
   meanCovariates: Array<{ key: string; value: number }>
 }
 
@@ -70,6 +68,11 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
     g: (parsed >> 8) & 255,
     b: parsed & 255,
   }
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  const rgb = hexToRgb(hex)
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${clamp01(alpha)})`
 }
 
 function buildRasterDataUrl(
@@ -145,6 +148,7 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated, 
   const [optimizeResult, setOptimizeResult] = useState<ZoneOptimizationResponse | null>(null)
   const [delineationResult, setDelineationResult] = useState<ZoneDelineationResponse | null>(null)
   const [zones, setZones] = useState<ZoneSummary[]>([])
+  const [selectedComparisonCovariate, setSelectedComparisonCovariate] = useState<string>('')
 
   const zoneColorById = useMemo(() => {
     const map = new Map<number, string>()
@@ -153,6 +157,76 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated, 
     })
     return map
   }, [zones])
+
+  const covariateStatsByKey = useMemo(() => {
+    const stats = new Map<string, { min: number; max: number; spread: number }>()
+
+    zones.forEach((zone) => {
+      zone.meanCovariates.forEach(({ key, value }) => {
+        const existing = stats.get(key)
+        if (!existing) {
+          stats.set(key, { min: value, max: value, spread: 0 })
+          return
+        }
+
+        existing.min = Math.min(existing.min, value)
+        existing.max = Math.max(existing.max, value)
+        existing.spread = existing.max - existing.min
+      })
+    })
+
+    return stats
+  }, [zones])
+
+  const orderedCovariateKeys = useMemo(() => {
+    return Array.from(covariateStatsByKey.entries())
+      .sort((a, b) => b[1].spread - a[1].spread)
+      .map(([key]) => key)
+  }, [covariateStatsByKey])
+
+  useEffect(() => {
+    if (!orderedCovariateKeys.length) {
+      setSelectedComparisonCovariate('')
+      return
+    }
+
+    if (!selectedComparisonCovariate || !orderedCovariateKeys.includes(selectedComparisonCovariate)) {
+      setSelectedComparisonCovariate(orderedCovariateKeys[0])
+    }
+  }, [orderedCovariateKeys, selectedComparisonCovariate])
+
+  const selectedCovariateComparison = useMemo(() => {
+    if (!selectedComparisonCovariate) {
+      return null
+    }
+
+    const stats = covariateStatsByKey.get(selectedComparisonCovariate)
+    if (!stats) {
+      return null
+    }
+
+    const rows = zones.map((zone) => {
+      const value = zone.meanCovariates.find((item) => item.key === selectedComparisonCovariate)?.value
+      const normalized = typeof value === 'number'
+        ? (stats.max === stats.min ? 0.5 : (value - stats.min) / (stats.max - stats.min))
+        : 0
+
+      return {
+        zoneId: zone.id,
+        zoneName: zone.name,
+        color: zone.color,
+        value,
+        normalized,
+      }
+    })
+
+    return {
+      key: selectedComparisonCovariate,
+      min: stats.min,
+      max: stats.max,
+      rows,
+    }
+  }, [selectedComparisonCovariate, covariateStatsByKey, zones])
 
   const assignmentRasterPreview = useMemo(() => {
     const raster = delineationResult?.cluster_assignment_raster
@@ -280,11 +354,6 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated, 
           acres,
           percent: zone.area_pct,
           color,
-          zoneType: zone.zone_type || 'Unclassified',
-          characteristics: [
-            `Area: ${zone.area_ha.toFixed(2)} ha (${acres.toFixed(1)} ac)`,
-            `Pixels: ${zone.pixel_count.toLocaleString()}`,
-          ],
           meanCovariates,
         })
       })
@@ -612,45 +681,72 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated, 
         ))}
       </div>
 
-      {/* Zone Details */}
-      <div className="space-y-3">
-        {zones.map((zone) => (
-          <div key={zone.id} className="border border-gray-200 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: zone.color }} />
-              <h4 className="text-sm font-semibold text-gray-900">{zone.name}</h4>
-            </div>
-            <p className="text-xs text-gray-500 mb-2">Type class: {zone.zoneType}</p>
-            
-            <div className="mb-2">
-              <h5 className="text-xs font-semibold text-gray-700 mb-1">Characteristics:</h5>
-              <ul className="space-y-1">
-                {zone.characteristics.map((char: string, idx: number) => (
-                  <li key={idx} className="text-xs text-gray-600 flex items-start gap-1">
-                    <Circle className="w-2 h-2 mt-1 flex-shrink-0" style={{ color: zone.color, fill: zone.color }} />
-                    <span>{char}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <div className="rounded-lg border border-gray-200 bg-white p-3 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900">Cluster Property Comparison</h4>
+            <p className="text-[11px] text-gray-500">Select one property and compare values across all clusters.</p>
+          </div>
+          <label className="text-xs text-gray-700">
+            <span className="block mb-1">Property</span>
+            <select
+              value={selectedComparisonCovariate}
+              onChange={(e) => setSelectedComparisonCovariate(e.target.value)}
+              className="min-w-[180px] rounded border border-gray-300 px-2 py-2"
+            >
+              {orderedCovariateKeys.map((key) => (
+                <option key={key} value={key}>{key}</option>
+              ))}
+            </select>
+          </label>
+        </div>
 
-            <div>
-              <h5 className="text-xs font-semibold text-gray-700 mb-1">Mean Covariates:</h5>
-              {zone.meanCovariates.length ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                  {zone.meanCovariates.map((item) => (
-                    <div key={`${zone.id}-${item.key}`} className="text-xs text-gray-600 flex items-center justify-between rounded bg-gray-50 px-2 py-1">
-                      <span className="font-medium text-gray-700 mr-2">{item.key}</span>
-                      <span>{item.value.toFixed(3)}</span>
+        {selectedCovariateComparison ? (
+          <div className="space-y-2">
+            {selectedCovariateComparison.rows.map((row) => {
+              const hasValue = typeof row.value === 'number'
+              return (
+                <div key={`comparison-${row.zoneId}`} className="rounded border border-gray-200 px-2 py-2 bg-gray-50">
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: row.color }} />
+                      <span className="font-semibold text-gray-800">{row.zoneName}</span>
                     </div>
-                  ))}
+                    <span className="font-semibold text-gray-900">
+                      {hasValue ? row.value.toFixed(3) : 'N/A'}
+                    </span>
+                  </div>
+
+                  <div className="h-2 rounded-full bg-slate-300/70 relative overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${Math.max(4, row.normalized * 100)}%`,
+                        backgroundColor: hexToRgba(row.color, hasValue ? 0.35 : 0.15),
+                      }}
+                    />
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full"
+                      style={{
+                        left: `calc(${Math.max(4, row.normalized * 100)}% - 5px)`,
+                        backgroundColor: row.color,
+                        opacity: hasValue ? 1 : 0.35,
+                      }}
+                    />
+                  </div>
                 </div>
-              ) : (
-                <p className="text-xs text-gray-500">No covariate means returned.</p>
-              )}
+              )
+            })}
+
+            <div className="flex items-center justify-between text-[11px] text-gray-500 px-1">
+              <span>min {selectedCovariateComparison.min.toFixed(3)}</span>
+              <span>{selectedCovariateComparison.key}</span>
+              <span>max {selectedCovariateComparison.max.toFixed(3)}</span>
             </div>
           </div>
-        ))}
+        ) : (
+          <p className="text-xs text-gray-500">No covariate means returned.</p>
+        )}
       </div>
     </div>
   )

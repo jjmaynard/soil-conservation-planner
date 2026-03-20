@@ -896,7 +896,7 @@ const getManagementZonesLegendItems = (
     if (!Number.isFinite(zoneId) || zoneId <= 0) return
 
     const color = props.color || LEGEND_DATA['management-zones'].items[(zoneId - 1) % LEGEND_DATA['management-zones'].items.length].color
-    const label = props.zone_type || `Zone ${zoneId}`
+    const label = `Zone ${zoneId}`
 
     zoneMap.set(zoneId, {
       color,
@@ -910,7 +910,7 @@ const getManagementZonesLegendItems = (
     if (!Number.isFinite(zoneId) || zoneId <= 0) return
 
     const color = LEGEND_DATA['management-zones'].items[(zoneId - 1) % LEGEND_DATA['management-zones'].items.length].color
-    const label = zone.zone_type || `Zone ${zoneId}`
+    const label = `Zone ${zoneId}`
 
     if (!zoneMap.has(zoneId)) {
       zoneMap.set(zoneId, {

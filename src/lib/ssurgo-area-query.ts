@@ -144,6 +144,9 @@ export function wktToGeoJSON(wkt: string): GeoJSON.Polygon | GeoJSON.MultiPolygo
       if (match) {
         const coordString = match[1];
         const coords = parseCoordString(coordString);
+        if (coords.length < 4) {
+          return null;
+        }
         return {
           type: 'Polygon',
           coordinates: [coords],
@@ -163,7 +166,11 @@ export function wktToGeoJSON(wkt: string): GeoJSON.Polygon | GeoJSON.MultiPolygo
            // Clean up parens
            const cleanPart = part.replace(/^\(+/, '').replace(/\)+$/, '');
            return [parseCoordString(cleanPart)];
-       });
+       }).filter((poly) => poly[0].length >= 4);
+
+       if (coordinates.length === 0) {
+         return null;
+       }
        
        return {
            type: 'MultiPolygon',
@@ -179,10 +186,23 @@ export function wktToGeoJSON(wkt: string): GeoJSON.Polygon | GeoJSON.MultiPolygo
 }
 
 function parseCoordString(coordString: string): number[][] {
-    return coordString.split(',').map((pair) => {
-      const [lng, lat] = pair.trim().split(' ').map(Number);
-      return [lng, lat];
-    });
+    return coordString
+      .split(',')
+      .map((pair) => {
+        const parts = pair.trim().split(/\s+/).filter(Boolean);
+        if (parts.length < 2) {
+          return null;
+        }
+
+        const lng = Number(parts[0]);
+        const lat = Number(parts[1]);
+        if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+          return null;
+        }
+
+        return [lng, lat] as number[];
+      })
+      .filter((coord): coord is number[] => coord !== null);
 }
 
 // ============================================================================
