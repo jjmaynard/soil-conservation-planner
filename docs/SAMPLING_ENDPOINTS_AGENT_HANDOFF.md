@@ -14,6 +14,8 @@ Use this handoff to implement client compatibility for the current API contract:
   - POST /api/zones/optimize
   - POST /api/sampling/design-prep
 - Additive response fields (no removals) for consensus/composite/stability diagnostics.
+- `/api/zones/delineate` now requires explicit `covariates` and no longer uses
+  `method: satellite|terrain` presets.
 - New async design-prep endpoints:
   - POST /api/sampling/design-prep/async
   - GET /api/sampling/design-prep/jobs/{job_id}
@@ -133,6 +135,60 @@ interface ZoneOptimizationResponse {
     stability_penalty_applied: boolean;
   }> | null;
   warnings: string[];
+  wkt: string;
+}
+```
+
+### 3.2a zones optimize request method rename
+
+```typescript
+type ZoneOptimizationMethod =
+  | 'quick'
+  | 'composite'
+  | 'silhouette'
+  | 'bic'
+  | 'fpc';
+
+interface ZoneOptimizationRequest {
+  wkt: string;
+  covariates?: Covariate[];
+  year: number;
+  k_min?: number;
+  k_max?: number;
+  method?: ZoneOptimizationMethod; // default 'composite'
+  field_area_ha?: number;
+  max_zones?: number;
+  min_zone_area_ha?: number;
+}
+```
+
+Important: client requests should send `method: 'composite'` (or omit `method`
+to use default). Do not send `method: 'consensus'`.
+
+### 3.2b zones delineate request update
+
+```typescript
+interface ZoneDelineationRequest {
+  wkt: string;
+  covariates: Covariate[]; // required; same catalogue as /api/sampling/design
+  n_zones: number;
+  year: number;
+  clustering_method?: 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto';
+  fuzziness_m?: number;
+  smooth_boundaries?: boolean;
+  min_zone_area_ha?: number;
+  seed?: number;
+}
+
+interface ZoneDelineationResponse {
+  zone_polygons: GeoJSON.FeatureCollection;
+  zone_characteristics: ZoneCharacteristic[];
+  fpc: number | null;
+  clustering_method_used: 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto';
+  fuzziness_m_used: number | null;
+  n_transition_pixels: number | null;
+  method_used: 'custom_covariates';
+  n_zones: number;
   wkt: string;
 }
 ```

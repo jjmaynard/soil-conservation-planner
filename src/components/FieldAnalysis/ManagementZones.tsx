@@ -9,7 +9,6 @@ import { geoJsonToWkt } from '#utils/geoJsonToWkt'
 import type {
   ZoneOptimizationMethod,
   ZoneClusteringMethod,
-  ZoneDelineationMethod,
   ZoneOptimizationResponse,
   ZoneDelineationResponse,
   ZonePolygonProperties,
@@ -58,13 +57,12 @@ function buildWktFromFieldData(fieldData: any): string {
 
 export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }: ManagementZonesProps) {
   const [year, setYear] = useState<number>(new Date().getFullYear())
-  const [optimizeMethod, setOptimizeMethod] = useState<ZoneOptimizationMethod>('consensus')
+  const [optimizeMethod, setOptimizeMethod] = useState<ZoneOptimizationMethod>('composite')
   const [kMin, setKMin] = useState<number>(2)
   const [kMax, setKMax] = useState<number>(8)
   const [maxZones, setMaxZones] = useState<number>(5)
   const [minZoneAreaHa, setMinZoneAreaHa] = useState<number>(2)
 
-  const [delineationMethod, setDelineationMethod] = useState<ZoneDelineationMethod>('satellite')
   const [clusteringMethod, setClusteringMethod] = useState<ZoneClusteringMethod>('fuzzy_auto')
   const [fuzzinessM, setFuzzinessM] = useState<number>(2)
   const [smoothBoundaries, setSmoothBoundaries] = useState<boolean>(true)
@@ -129,7 +127,7 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
       const response = await geeApi.delineateZones({
         wkt,
         year,
-        method: delineationMethod,
+        covariates: DEFAULT_COVARIATES,
         n_zones: nZones,
         clustering_method: clusteringMethod,
         fuzziness_m: clusteringMethod === 'kmeans' ? undefined : fuzzinessM,
@@ -227,7 +225,7 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
               <label className="text-xs text-gray-700">
                 <span className="block mb-1">Method</span>
                 <select value={optimizeMethod} onChange={(e) => setOptimizeMethod(e.target.value as ZoneOptimizationMethod)} className="w-full rounded border border-gray-300 px-2 py-2">
-                  <option value="consensus">consensus</option>
+                  <option value="composite">composite</option>
                   <option value="quick">quick</option>
                   <option value="silhouette">silhouette</option>
                   <option value="bic">bic</option>
@@ -282,11 +280,13 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
                 <input type="number" min={2} max={10} value={nZones} onChange={(e) => setNZones(Number(e.target.value) || 4)} className="w-full rounded border border-gray-300 px-2 py-2" />
               </label>
               <label className="text-xs text-gray-700">
-                <span className="block mb-1">method</span>
-                <select value={delineationMethod} onChange={(e) => setDelineationMethod(e.target.value as ZoneDelineationMethod)} className="w-full rounded border border-gray-300 px-2 py-2">
-                  <option value="satellite">satellite</option>
-                  <option value="terrain">terrain</option>
-                </select>
+                <span className="block mb-1">covariates</span>
+                <input
+                  type="text"
+                  value={DEFAULT_COVARIATES.join(', ')}
+                  readOnly
+                  className="w-full rounded border border-gray-300 px-2 py-2 bg-gray-50 text-gray-600"
+                />
               </label>
             </div>
 

@@ -1071,9 +1071,8 @@ export interface CSBTileParams {
 // Management Zones (Optimization + Delineation)
 // ============================================================================
 
-export type ZoneOptimizationMethod = 'quick' | 'consensus' | 'silhouette' | 'bic' | 'fpc'
+export type ZoneOptimizationMethod = 'quick' | 'composite' | 'silhouette' | 'bic' | 'fpc'
 export type ZoneClusteringMethod = 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto'
-export type ZoneDelineationMethod = 'satellite' | 'terrain'
 
 export interface ZoneOptimizationRequest {
   wkt: string
@@ -1132,7 +1131,7 @@ export interface ZoneOptimizationResponse {
 
 export interface ZoneDelineationRequest {
   wkt: string
-  method: ZoneDelineationMethod
+  covariates: string[]
   n_zones: number
   year: number
   clustering_method?: ZoneClusteringMethod
@@ -1167,7 +1166,7 @@ export interface ZoneDelineationResponse {
   clustering_method_used: ZoneClusteringMethod
   fuzziness_m_used: number | null
   n_transition_pixels: number | null
-  method_used: ZoneDelineationMethod
+  method_used: 'custom_covariates'
   n_zones: number
   wkt: string
 }

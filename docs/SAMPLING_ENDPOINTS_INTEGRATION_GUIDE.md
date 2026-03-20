@@ -47,7 +47,7 @@ route handlers — never directly from the browser.
 | `POST /api/sampling/stratify` | **Revised** | Stratified random + optional fuzzy clustering + transition oversampling | 60 s |
 | `POST /api/sampling/design` | **New** | Unified 6-method sampling design (cLHS, stratified, random, grid, GRTS) | 120 s |
 | `POST /api/zones/optimize` | **Revised** | Composite-first zone-count optimization with consensus diagnostics | 60 s |
-| `POST /api/zones/delineate` | **New** | Satellite or terrain fuzzy zone delineation | 90 s |
+| `POST /api/zones/delineate` | **Revised** | Covariate-driven fuzzy or hard zone delineation | 90 s |
 | `POST /api/sampling/design-prep` | **Revised** | Combined k-sweep + zone variability + sample-count estimation + stability controls | 90 s |
 | `POST /api/sampling/design-prep/async` | **New** | Queue long-running design-prep jobs | 10 s |
 | `GET /api/sampling/design-prep/jobs/{job_id}` | **New** | Poll async design-prep job status/result | 10 s |
@@ -473,7 +473,7 @@ interface ZoneOptimizationRequest {
   year: number;
   k_min?: number;               // default 2
   k_max?: number;               // default 8
-  method?: 'quick' | 'consensus' | 'silhouette' | 'bic' | 'fpc'; // default 'consensus'
+  method?: 'quick' | 'composite' | 'silhouette' | 'bic' | 'fpc'; // default 'composite'
   field_area_ha?: number;       // enables practical constraints
   max_zones?: number;           // default 8 — hard ceiling
   min_zone_area_ha?: number;    // default 2.0 — penalizes smaller zones
@@ -516,7 +516,7 @@ interface ZoneOptimizationResponse {
 | Method | Criteria | Speed | Use when |
 |--------|----------|-------|---------|
 | `quick` | Compatibility hint (canonical operational mode still used) | Fast | Live UI preview, drag interaction |
-| `consensus` | Compatibility hint (canonical operational mode still used) | Moderate | Final run before delineation |
+| `composite` | Canonical composite-first mode | Moderate | Final run before delineation |
 | `silhouette` | Silhouette only | Fast | Simple quality check |
 | `bic` | BIC via GMM | Moderate | Model-theoretic preference |
 | `fpc` | FPC only | Moderate | Explicitly fuzzy workflow |
@@ -536,7 +536,7 @@ interface ZoneOptimizationResponse {
 
 ### 3.6 `POST /api/zones/delineate` *(new)*
 
-Extracts satellite (11 features) or terrain-only (6 features) covariates from GEE, runs
+Extracts the requested covariates from GEE, runs
 clustering, and returns zone polygons as a GeoJSON `FeatureCollection` plus per-zone
 characteristics. The proxy retries once on HTTP 500 (transient GEE timeout).
 
@@ -548,7 +548,7 @@ characteristics. The proxy retries once on HTTP 500 (transient GEE timeout).
 ```typescript
 interface ZoneDelineationRequest {
   wkt: string;
-  method: 'satellite' | 'terrain';
+  covariates: Covariate[];          // required; same catalogue as /api/sampling/design
   n_zones: number;               // 2–10
   year: number;                  // 2015–2030
   clustering_method?: 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto'; // default 'kmeans'
@@ -559,17 +559,8 @@ interface ZoneDelineationRequest {
 }
 ```
 
-#### Covariate sets
-
-**`method: 'satellite'`** — Sentinel-2 + SRTM (11 features):
-`peak_ndvi`, `early_ndvi`, `late_ndvi`, `ndwi`, `evi`, `ndvi_cv`,
-`elevation`, `slope`, `twi`, `aspect_sin`, `aspect_cos`
-
-Requires ≥ 5 cloud-free Sentinel-2 images per season. Returns `HTTP 400` if threshold
-not met — fall back to `method: 'terrain'` in the UI.
-
-**`method: 'terrain'`** — SRTM only (6 features, works for any year):
-`elevation`, `slope`, `twi`, `tpi`, `aspect_sin`, `aspect_cos`
+`covariates` can be any valid list from the shared sampling/zones covariate catalogue.
+There are no `satellite`/`terrain` presets on this endpoint anymore.
 
 #### Response
 
@@ -584,7 +575,7 @@ interface ZoneDelineationResponse {
   clustering_method_used: 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto';
   fuzziness_m_used: number | null;
   n_transition_pixels: number | null;    // pixels with max-membership < 0.6; null for kmeans
-  method_used: 'satellite' | 'terrain';
+  method_used: 'custom_covariates';
   n_zones: number;
   wkt: string;
 }
@@ -910,8 +901,7 @@ Create `src/lib/types/zones.ts`:
 
 ```typescript
 export type ClusteringMethod = 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto';
-export type OptimizationMethod = 'quick' | 'consensus' | 'bic' | 'silhouette' | 'fpc';
-export type ZoneDelineationMethod = 'satellite' | 'terrain';
+export type OptimizationMethod = 'quick' | 'composite' | 'bic' | 'silhouette' | 'fpc';
 export type QualityLevel = 'excellent' | 'good' | 'acceptable' | 'poor';
 
 // Full covariate catalogue — any of these can be passed to all sampling/zones endpoints
@@ -993,7 +983,7 @@ export interface ZoneOptimizationResponse {
 
 export interface ZoneDelineationRequest {
   wkt: string;
-  method: ZoneDelineationMethod;
+  covariates: Covariate[];
   n_zones: number;
   year: number;
   clustering_method?: ClusteringMethod;
@@ -1023,7 +1013,7 @@ export interface ZoneDelineationResponse {
   clustering_method_used: ClusteringMethod;
   fuzziness_m_used: number | null;
   n_transition_pixels: number | null;
-  method_used: ZoneDelineationMethod;
+  method_used: 'custom_covariates';
   n_zones: number;
   wkt: string;
 }

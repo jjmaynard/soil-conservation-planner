@@ -364,7 +364,7 @@ export default function FieldAnalysisLanding() {
         </div>
       ) : (
         // Show Field Selection Interface after use case is selected
-        <div className="h-screen flex flex-col">
+        <div className="h-full min-h-0 flex flex-col overflow-hidden">
         {/* Planning Wizard Banner */}
         {isFromPlanningWizard && (
           <div 
