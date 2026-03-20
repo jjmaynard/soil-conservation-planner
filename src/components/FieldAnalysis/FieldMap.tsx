@@ -11,7 +11,7 @@ import * as turf from '@turf/turf'
 import { Layers, Square, MapPin, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import { geeApi } from '#lib/geeApiClient'
 import type { CSBFieldDetails } from '#types/geeApi'
-import type { ZonePolygonProperties } from '#types/geeApi'
+import type { ZoneDelineationResponse, ZonePolygonProperties } from '#types/geeApi'
 import { wktToGeoJSON } from '#lib/ssurgo-area-query'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 
@@ -879,15 +879,16 @@ const getSoilBoundariesLegendItems = (ssurgoData?: ProcessedFieldData | null): {
 }
 
 const getManagementZonesLegendItems = (
-  managementZonesGeoJSON?: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null
+  managementZonesGeoJSON?: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null,
+  managementZonesRaster?: ZoneDelineationResponse | null
 ): { color: string; label: string }[] => {
-  if (!managementZonesGeoJSON?.features?.length) {
+  if (!managementZonesGeoJSON?.features?.length && !managementZonesRaster?.zone_characteristics?.length) {
     return LEGEND_DATA['management-zones'].items
   }
 
   const zoneMap = new Map<number, { color: string; label: string; areaPct?: number }>()
 
-  managementZonesGeoJSON.features.forEach((feature) => {
+  managementZonesGeoJSON?.features?.forEach((feature) => {
     const props = feature.properties
     if (!props) return
 
@@ -902,6 +903,22 @@ const getManagementZonesLegendItems = (
       label,
       areaPct: props.area_pct,
     })
+  })
+
+  managementZonesRaster?.zone_characteristics?.forEach((zone) => {
+    const zoneId = Number(zone.zone_id)
+    if (!Number.isFinite(zoneId) || zoneId <= 0) return
+
+    const color = LEGEND_DATA['management-zones'].items[(zoneId - 1) % LEGEND_DATA['management-zones'].items.length].color
+    const label = zone.zone_type || `Zone ${zoneId}`
+
+    if (!zoneMap.has(zoneId)) {
+      zoneMap.set(zoneId, {
+        color,
+        label,
+        areaPct: zone.area_pct,
+      })
+    }
   })
 
   if (zoneMap.size === 0) {
@@ -923,6 +940,7 @@ interface FieldMapProps {
   geeData?: any
   ssurgoData?: ProcessedFieldData | null
   managementZonesGeoJSON?: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null
+  managementZonesRaster?: ZoneDelineationResponse | null
   selectedSoil?: any
   activeLayers?: string[]
   layerOptions?: { id: string; label: string }[]
@@ -945,6 +963,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   geeData,
   ssurgoData,
   managementZonesGeoJSON,
+  managementZonesRaster,
   selectedSoil,
   activeLayers = [],
   layerOptions = [],
@@ -978,6 +997,58 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   const [isInEditMode, setIsInEditMode] = useState(false)
   const mapClickHandlerRef = useRef<((e: L.LeafletMouseEvent) => void) | null>(null)
   const vertexMarkersRef = useRef<L.CircleMarker[]>([]) // Store vertex markers
+
+  const clamp01 = (value: number): number => {
+    if (Number.isNaN(value)) return 0
+    if (value < 0) return 0
+    if (value > 1) return 1
+    return value
+  }
+
+  const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+    const normalized = hex.replace('#', '')
+    const full = normalized.length === 3
+      ? normalized.split('').map((c) => c + c).join('')
+      : normalized
+    const parsed = Number.parseInt(full, 16)
+
+    return {
+      r: (parsed >> 16) & 255,
+      g: (parsed >> 8) & 255,
+      b: parsed & 255,
+    }
+  }
+
+  const buildRasterDataUrl = (
+    width: number,
+    height: number,
+    paintPixel: (idx: number) => { r: number; g: number; b: number; a: number }
+  ): string | null => {
+    if (typeof document === 'undefined' || width <= 0 || height <= 0) {
+      return null
+    }
+
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      return null
+    }
+
+    const imageData = ctx.createImageData(width, height)
+    for (let i = 0; i < width * height; i += 1) {
+      const pixel = paintPixel(i)
+      const offset = i * 4
+      imageData.data[offset] = pixel.r
+      imageData.data[offset + 1] = pixel.g
+      imageData.data[offset + 2] = pixel.b
+      imageData.data[offset + 3] = pixel.a
+    }
+
+    ctx.putImageData(imageData, 0, 0)
+    return canvas.toDataURL('image/png')
+  }
   const [customFieldName, setCustomFieldName] = useState<string>('') // Custom field name input
   const [opacity, setOpacity] = useState(0.7)
   const [isLegendOpen, setIsLegendOpen] = useState(true)
@@ -1902,6 +1973,87 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     const assessment = geeData?.geeAssessment
     const cropProductivity = geeData?.cropProductivity
 
+    if (activeLayers.includes('management-zones') && managementZonesRaster?.cluster_assignment_raster) {
+      const assignment = managementZonesRaster.cluster_assignment_raster
+      const zoneColorById = new Map<number, string>()
+      managementZonesRaster.zone_characteristics?.forEach((zone) => {
+        zoneColorById.set(
+          zone.zone_id,
+          LEGEND_DATA['management-zones'].items[(zone.zone_id - 1) % LEGEND_DATA['management-zones'].items.length].color
+        )
+      })
+
+      const assignmentDataUrl = buildRasterDataUrl(assignment.width, assignment.height, (idx) => {
+        const clusterId = assignment.assigned_cluster_ids[idx] || 0
+        if (clusterId <= 0) {
+          return { r: 0, g: 0, b: 0, a: 0 }
+        }
+
+        const colorHex = zoneColorById.get(clusterId) || LEGEND_DATA['management-zones'].items[(clusterId - 1) % LEGEND_DATA['management-zones'].items.length].color
+        const rgb = hexToRgb(colorHex)
+        const membership = clamp01(assignment.winning_memberships[idx] ?? 1)
+        const alpha = Math.round((0.2 + 0.8 * membership) * 255)
+
+        return { r: rgb.r, g: rgb.g, b: rgb.b, a: alpha }
+      })
+
+      if (assignmentDataUrl && assignment.longitudes?.length && assignment.latitudes?.length) {
+        const west = Math.min(...assignment.longitudes)
+        const east = Math.max(...assignment.longitudes)
+        const south = Math.min(...assignment.latitudes)
+        const north = Math.max(...assignment.latitudes)
+
+        const assignmentLayer = L.imageOverlay(assignmentDataUrl, [[south, west], [north, east]], {
+          opacity,
+          attribution: 'GEE - Management Zone Assignment',
+        })
+
+        assignmentLayer.addTo(mapRef.current)
+        layers.push(assignmentLayer)
+        overlayLayersRef.current.push(assignmentLayer as any)
+      }
+
+      if (
+        managementZonesRaster.cluster_membership_rasters?.clusters?.length &&
+        managementZonesRaster.cluster_membership_rasters.longitudes?.length &&
+        managementZonesRaster.cluster_membership_rasters.latitudes?.length
+      ) {
+        const membershipRasters = managementZonesRaster.cluster_membership_rasters
+        const west = Math.min(...membershipRasters.longitudes)
+        const east = Math.max(...membershipRasters.longitudes)
+        const south = Math.min(...membershipRasters.latitudes)
+        const north = Math.max(...membershipRasters.latitudes)
+
+        membershipRasters.clusters.forEach((cluster) => {
+          const colorHex = zoneColorById.get(cluster.cluster_id) || LEGEND_DATA['management-zones'].items[(cluster.cluster_id - 1) % LEGEND_DATA['management-zones'].items.length].color
+          const rgb = hexToRgb(colorHex)
+
+          const membershipDataUrl = buildRasterDataUrl(membershipRasters.width, membershipRasters.height, (idx) => {
+            const membership = clamp01(cluster.memberships[idx] ?? 0)
+            return {
+              r: rgb.r,
+              g: rgb.g,
+              b: rgb.b,
+              a: Math.round(membership * 255),
+            }
+          })
+
+          if (!membershipDataUrl) {
+            return
+          }
+
+          const membershipLayer = L.imageOverlay(membershipDataUrl, [[south, west], [north, east]], {
+            opacity: Math.min(opacity * 0.75, 0.75),
+            attribution: `GEE - Management Zone Membership ${cluster.cluster_id}`,
+          })
+
+          membershipLayer.addTo(mapRef.current)
+          layers.push(membershipLayer)
+          overlayLayersRef.current.push(membershipLayer as any)
+        })
+      }
+    }
+
     if (activeLayers.includes('management-zones') && managementZonesGeoJSON?.features?.length) {
       const zoneLayer = L.geoJSON(managementZonesGeoJSON as any, {
         style: (feature) => {
@@ -2232,7 +2384,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       overlayLayersRef.current = [] 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLayers, mode, geeData, ssurgoData, managementZonesGeoJSON]) // Intentionally omit opacity to prevent reload
+  }, [activeLayers, mode, geeData, ssurgoData, managementZonesGeoJSON, managementZonesRaster]) // Intentionally omit opacity to prevent reload
 
   // Update opacity separately
   useEffect(() => {
@@ -2331,7 +2483,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
                       : id === 'management-zones'
                         ? {
                             title: LEGEND_DATA['management-zones'].title,
-                            items: getManagementZonesLegendItems(managementZonesGeoJSON)
+                            items: getManagementZonesLegendItems(managementZonesGeoJSON, managementZonesRaster)
                           }
                       : id === 'convergent-areas'
                         ? {

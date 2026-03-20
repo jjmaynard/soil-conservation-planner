@@ -282,6 +282,9 @@ Unified sampling design endpoint. Handles all six sampling methods end-to-end. G
 covariate extraction, clustering, sample placement, quality metrics, and cluster
 interpretation are all performed server-side.
 
+For clustering-based methods (`clhs_feature`, `stratified`), the response also includes
+compact raster-style cluster assignment and per-cluster membership layers.
+
 **Target latency:** 15–90 s depending on method  
 **Proxy max duration:** 120 s
 
@@ -362,6 +365,28 @@ interface SamplingDesignResponse {
   optimization: SamplingOptimizationResult | null;         // non-null when auto-k was used
   quality_metrics: SamplingQualityMetrics;
   method_metadata: SamplingDesignMethodMetadata;
+  cluster_assignment_raster?: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];      // west -> east
+    latitudes: number[];       // north -> south
+    assigned_cluster_ids: number[]; // row-major, length=height*width, 0=no data
+    winning_memberships: number[];  // row-major, 0.0=no data
+  } | null;
+  cluster_membership_rasters?: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];
+    latitudes: number[];
+    clusters: Array<{
+      cluster_id: number;      // 1-indexed
+      memberships: number[];   // row-major, length=height*width, 0.0=no data
+    }>;
+  } | null;
 }
 
 interface SamplePointProperties {
@@ -417,6 +442,8 @@ interface SamplingDesignMethodMetadata {
 |-------|:-:|:-:|:-:|:-:|:-:|:-:|
 | `cluster_interpretation` | ✅ | — | — | — | — | — |
 | `optimization` | ✅ if auto-k | — | ✅ if auto-k | — | — | — |
+| `cluster_assignment_raster` | ✅ | — | ✅ | — | — | — |
+| `cluster_membership_rasters` | ✅ | — | ✅ | — | — | — |
 | `quality_metrics.feature_coverage` | ✅ | ✅ | — | — | — | — |
 | `quality_metrics.clhs_objective` | ✅ | ✅ | — | — | — | — |
 | `quality_metrics.cluster_separation` | ✅ | — | ✅ | — | — | — |
@@ -537,8 +564,8 @@ interface ZoneOptimizationResponse {
 ### 3.6 `POST /api/zones/delineate` *(new)*
 
 Extracts the requested covariates from GEE, runs
-clustering, and returns zone polygons as a GeoJSON `FeatureCollection` plus per-zone
-characteristics. The proxy retries once on HTTP 500 (transient GEE timeout).
+clustering, and returns compact raster-style zone assignment and per-cluster membership
+layers plus per-zone characteristics. The proxy retries once on HTTP 500 (transient GEE timeout).
 
 **Target latency:** 30–60 s  
 **Proxy max duration:** 60 s (with one 90 s retry on HTTP 500)
@@ -566,10 +593,6 @@ There are no `satellite`/`terrain` presets on this endpoint anymore.
 
 ```typescript
 interface ZoneDelineationResponse {
-  zone_polygons: GeoJSON.FeatureCollection<GeoJSON.Polygon, {
-    zone_id: number;
-    zone_type: string;
-  }>;
   zone_characteristics: ZoneCharacteristic[];
   fpc: number | null;                    // Fuzzy Partition Coefficient; null for kmeans
   clustering_method_used: 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto';
@@ -578,6 +601,28 @@ interface ZoneDelineationResponse {
   method_used: 'custom_covariates';
   n_zones: number;
   wkt: string;
+  cluster_assignment_raster: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];      // west -> east
+    latitudes: number[];       // north -> south
+    assigned_cluster_ids: number[]; // row-major, length=height*width, 0=no data
+    winning_memberships: number[];  // row-major, 0.0=no data
+  };
+  cluster_membership_rasters: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];
+    latitudes: number[];
+    clusters: Array<{
+      cluster_id: number;      // 1-indexed
+      memberships: number[];   // row-major, length=height*width, 0.0=no data
+    }>;
+  };
 }
 
 interface ZoneCharacteristic {
@@ -865,7 +910,7 @@ Minimum components required to expose the new sampling workflow:
 | `SamplingQualityPanel` | — | feature_coverage, spatial_balance, NN distances, poor_spacing_pct |
 | `DesignPrepPanel` | `samplingApi.designPrep()` | Combined k-sweep chart + zone variability table + sample-count summary |
 | `ZoneOptimizationChart` | `zonesApi.optimize()` | Bar chart of votes by method, recommended_k highlight |
-| `ZoneDelineationMap` | `zonesApi.delineate()` | GeoJSON polygon layer, zone_characteristics table |
+| `ZoneDelineationMap` | `zonesApi.delineate()` | Render assignment/membership raster layers, zone_characteristics table |
 
 ### Step 9 — Handle optional-dependency 503 errors
 
@@ -887,7 +932,7 @@ Test with a small polygon (< 10 ha) using each method:
 4. `design` with `method: 'stratified'` → confirm `samples` GeoJSON renders on map
 5. `design` with `method: 'grid'` → confirm actual sample count matches approximate `n_samples`
 6. `zones/optimize` → confirm `recommended_k` and quality card render
-7. `zones/delineate` → confirm `zone_polygons` renders as a polygon layer
+7. `zones/delineate` → confirm assignment/membership rasters render and zone summaries align
 8. `sampling/design-prep` → confirm `recommended_k`, `composite_optimal_k`, `consensus_k`, `total_suggested_samples`, and `zone_variability` populate correctly
 9. `sampling/design-prep/async` + polling endpoint → confirm pending/running/succeeded transitions and final result payload
 
@@ -1004,10 +1049,6 @@ export interface ZoneCharacteristic {
 }
 
 export interface ZoneDelineationResponse {
-  zone_polygons: GeoJSON.FeatureCollection<GeoJSON.Polygon, {
-    zone_id: number;
-    zone_type: string;
-  }>;
   zone_characteristics: ZoneCharacteristic[];
   fpc: number | null;
   clustering_method_used: ClusteringMethod;
@@ -1016,6 +1057,28 @@ export interface ZoneDelineationResponse {
   method_used: 'custom_covariates';
   n_zones: number;
   wkt: string;
+  cluster_assignment_raster: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];
+    latitudes: number[];
+    assigned_cluster_ids: number[];
+    winning_memberships: number[];
+  };
+  cluster_membership_rasters: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];
+    latitudes: number[];
+    clusters: Array<{
+      cluster_id: number;
+      memberships: number[];
+    }>;
+  };
 }
 ```
 
@@ -1159,6 +1222,28 @@ export interface SamplingDesignResponse {
   optimization: SamplingOptimizationResult | null;
   quality_metrics: SamplingQualityMetrics;
   method_metadata: SamplingDesignMethodMetadata;
+  cluster_assignment_raster?: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];
+    latitudes: number[];
+    assigned_cluster_ids: number[];
+    winning_memberships: number[];
+  } | null;
+  cluster_membership_rasters?: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];
+    latitudes: number[];
+    clusters: Array<{
+      cluster_id: number;
+      memberships: number[];
+    }>;
+  } | null;
 }
 
 // ─── design-prep types ───────────────────────────────────────────────────────
@@ -1524,7 +1609,7 @@ The intended UI flow for the SoilStrata sampling module:
 7. [Optional — Zone Delineation path]
    POST /api/zones/optimize  → show recommended zone count
          ↓
-   POST /api/zones/delineate → render zone polygon layer + characteristics table
+  POST /api/zones/delineate → render assignment/membership raster layers + characteristics table
 ```
 
 **Loading state messages by method:**

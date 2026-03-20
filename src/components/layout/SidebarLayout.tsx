@@ -45,6 +45,10 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     new Set(['Soil Interpretation Toolkit', 'Soil Assessment'])
   )
 
+  const isFieldAnalysisDetailRoute =
+    router.pathname === '/field-analysis/[fieldId]' ||
+    router.pathname === '/field-analysis/hybrid/[fieldId]'
+
   const navigationSections: NavigationSection[] = [
     {
       title: 'Soil Assessment',
@@ -122,7 +126,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   }
 
   return (
-    <div className="flex min-h-screen min-h-[100dvh] bg-background">
+    <div className="flex h-screen h-[100dvh] overflow-hidden bg-background">
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
@@ -374,7 +378,9 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden relative">{children}</div>
+        <div className={`flex-1 min-h-0 overflow-x-hidden relative ${isFieldAnalysisDetailRoute ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+          {children}
+        </div>
       </div>
     </div>
   )

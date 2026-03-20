@@ -34,6 +34,9 @@ const App = ({ Component, pageProps }: AppProps) => {
   // Routes that don't need sidebar (full-width pages)
   const fullWidthRoutes = ['/', '/login', '/setup']
   const isFullWidth = fullWidthRoutes.includes(router.pathname)
+  const isFieldAnalysisDetailRoute =
+    router.pathname === '/field-analysis/[fieldId]' ||
+    router.pathname === '/field-analysis/hybrid/[fieldId]'
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -47,7 +50,7 @@ const App = ({ Component, pageProps }: AppProps) => {
           />
           <title>Soil Interpretation Engine - Soil Survey Interactive Mapping</title>
         </Head>
-        <main className={`${catamaran.variable} font-sans text-base`}>
+        <main className={`${catamaran.variable} font-sans text-base h-screen h-[100dvh] overflow-hidden`}>
           {isFullWidth ? (
             // Dashboard gets no sidebar
             <Component {...pageProps} />
@@ -56,7 +59,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             <SidebarLayout>
               <div className="flex-1 flex flex-col h-full overflow-hidden">
                 <Breadcrumbs />
-                <div className={`flex-1 flex flex-col overflow-auto ${router.pathname === '/soil-map' || router.pathname.startsWith('/soil-health/assessment') ? '' : 'p-4 md:p-6 bg-surface'}`}>
+                <div className={`flex-1 flex flex-col ${isFieldAnalysisDetailRoute ? 'overflow-hidden' : 'overflow-auto'} ${(router.pathname === '/soil-map' || router.pathname.startsWith('/soil-health/assessment') || isFieldAnalysisDetailRoute) ? '' : 'p-4 md:p-6 bg-surface'}`}>
                   <Component {...pageProps} />
                 </div>
               </div>

@@ -21,7 +21,7 @@ import ClimateHistory from '../ClimateHistory'
 import TabNarrativeModal from '../TabNarrativeModal'
 import type { ProcessedFieldData } from '#hooks/useFieldSSURGO'
 import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
-import type { ZonePolygonProperties } from '#types/geeApi'
+import type { ZoneDelineationResponse, ZonePolygonProperties } from '#types/geeApi'
 import { useFilteredTabs, getDefaultTab } from '#hooks/useFilteredTabs'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
 import { getTabNarrative } from '@/config/field-analysis-tab-narratives'
@@ -167,6 +167,7 @@ export default function DetailView({
     (activeTab && filteredTabs.some(t => t.id === activeTab)) ? activeTab as TabId : defaultTab
   )
   const [managementZonesGeoJSON, setManagementZonesGeoJSON] = useState<GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null>(null)
+  const [managementZoneRasters, setManagementZoneRasters] = useState<ZoneDelineationResponse | null>(null)
   const [mapFullscreen, setMapFullscreen] = useState(false)
   const [showNarrativeModal, setShowNarrativeModal] = useState(false)
   const tabNarrative = getTabNarrative(selectedTab)
@@ -181,6 +182,19 @@ export default function DetailView({
 
     // Auto-enable the management-zones overlay after successful delineation.
     if (zones && !activeLayers.includes('management-zones')) {
+      onLayerToggle?.('management-zones')
+    }
+  }
+
+  const handleZoneRastersGenerated = (result: ZoneDelineationResponse | null) => {
+    setManagementZoneRasters(result)
+
+    if (result) {
+      setSelectedTab('zones')
+      onTabChange?.('zones')
+    }
+
+    if (result && !activeLayers.includes('management-zones')) {
       onLayerToggle?.('management-zones')
     }
   }
@@ -255,6 +269,7 @@ export default function DetailView({
             geeData={geeData}
             ssurgoData={ssurgoData} // Pass ssurgoData
             managementZonesGeoJSON={managementZonesGeoJSON}
+            managementZonesRaster={managementZoneRasters}
             onCSBLayerToggle={onCSBLayerToggle}
             onLayerToggle={onLayerToggle}
           />
@@ -295,9 +310,9 @@ export default function DetailView({
       </div>
 
       {/* Tab Content and Map */}
-      <div className="flex-1 min-h-0 bg-gray-50 flex flex-col xl:flex-row gap-3 sm:gap-4 p-3 sm:p-4 xl:p-6 overflow-y-auto xl:overflow-hidden">
+      <div className="flex-1 min-h-0 bg-gray-50 flex flex-col xl:flex-row gap-3 sm:gap-4 p-3 sm:p-4 xl:p-6 overflow-hidden">
         {/* Left: Tab Content */}
-        <div className="order-2 xl:order-1 flex-1 min-h-0 xl:overflow-y-auto">
+        <div className="order-2 xl:order-1 flex-1 min-h-0 overflow-y-auto">
           {/* Tab Header */}
           <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg" style={{ backgroundColor: currentTab.bgColor, border: `2px solid ${currentTab.color}33` }}>
             <div className="flex items-start sm:items-center gap-3 mb-2">
@@ -455,6 +470,7 @@ export default function DetailView({
                 fieldId={fieldData?.id || fieldData?.clu_id}
                 fieldData={fieldData}
                 onZonesGenerated={handleZonesGenerated}
+                onZoneRastersGenerated={handleZoneRastersGenerated}
               />
             )}
 
@@ -570,6 +586,7 @@ export default function DetailView({
                 geeData={geeData}
                 ssurgoData={ssurgoData}
                 managementZonesGeoJSON={managementZonesGeoJSON}
+                managementZonesRaster={managementZoneRasters}
                 onCSBLayerToggle={onCSBLayerToggle}
                 onLayerToggle={onLayerToggle}
               />

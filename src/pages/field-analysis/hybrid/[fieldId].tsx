@@ -176,7 +176,7 @@ export default function HybridFieldAnalysis() {
         <meta name="description" content={`Comprehensive analysis for field ${fieldData.name}`} />
       </Head>
 
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="h-full min-h-0 overflow-hidden bg-gray-50 flex flex-col">
         {/* Header */}
         <div 
           className="p-4 text-white flex-shrink-0"

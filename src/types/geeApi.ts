@@ -1159,8 +1159,33 @@ export interface ZonePolygonProperties {
   area_pct?: number
 }
 
+export interface ZoneClusterAssignmentRaster {
+  scale_m: number
+  n_pixels: number
+  width: number
+  height: number
+  longitudes: number[]
+  latitudes: number[]
+  assigned_cluster_ids: number[]
+  winning_memberships: number[]
+}
+
+export interface ZoneClusterMembershipRasterCluster {
+  cluster_id: number
+  memberships: number[]
+}
+
+export interface ZoneClusterMembershipRasters {
+  scale_m: number
+  n_pixels: number
+  width: number
+  height: number
+  longitudes: number[]
+  latitudes: number[]
+  clusters: ZoneClusterMembershipRasterCluster[]
+}
+
 export interface ZoneDelineationResponse {
-  zone_polygons: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties>
   zone_characteristics: ZoneCharacteristic[]
   fpc: number | null
   clustering_method_used: ZoneClusteringMethod
@@ -1169,4 +1194,7 @@ export interface ZoneDelineationResponse {
   method_used: 'custom_covariates'
   n_zones: number
   wkt: string
+  cluster_assignment_raster?: ZoneClusterAssignmentRaster
+  cluster_membership_rasters?: ZoneClusterMembershipRasters
+  zone_polygons?: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null
 }

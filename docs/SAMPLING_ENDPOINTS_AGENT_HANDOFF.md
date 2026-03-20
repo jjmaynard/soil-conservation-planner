@@ -181,7 +181,6 @@ interface ZoneDelineationRequest {
 }
 
 interface ZoneDelineationResponse {
-  zone_polygons: GeoJSON.FeatureCollection;
   zone_characteristics: ZoneCharacteristic[];
   fpc: number | null;
   clustering_method_used: 'kmeans' | 'fuzzy' | 'fuzzy_soft' | 'fuzzy_auto';
@@ -190,8 +189,32 @@ interface ZoneDelineationResponse {
   method_used: 'custom_covariates';
   n_zones: number;
   wkt: string;
+  cluster_assignment_raster?: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];      // west -> east
+    latitudes: number[];       // north -> south
+    assigned_cluster_ids: number[]; // row-major, length=height*width, 0=no data
+    winning_memberships: number[];  // row-major, 0.0=no data
+  };
+  cluster_membership_rasters?: {
+    scale_m: number;
+    n_pixels: number;
+    width: number;
+    height: number;
+    longitudes: number[];
+    latitudes: number[];
+    clusters: Array<{
+      cluster_id: number;      // 1-indexed
+      memberships: number[];   // row-major, length=height*width, 0.0=no data
+    }>;
+  };
 }
 ```
+
+Note: `/api/zones/delineate` is now raster-first. Polygon output is not returned.
 
 ### 3.3 design-prep request/response additions
 

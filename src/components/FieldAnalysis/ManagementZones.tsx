@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Layers, Info, Circle, SlidersHorizontal, Target, AlertTriangle } from 'lucide-react'
 import { geeApi, GEEAPIError } from '#lib/geeApiClient'
 import { geoJsonToWkt } from '#utils/geoJsonToWkt'
@@ -18,11 +18,27 @@ interface ManagementZonesProps {
   fieldId: string
   fieldData?: any
   onZonesGenerated?: (zones: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null) => void
+  onZoneRastersGenerated?: (result: ZoneDelineationResponse | null) => void
 }
 
 const ZONE_COLORS = ['#7c3aed', '#16a34a', '#0284c7', '#f59e0b', '#ef4444', '#14b8a6', '#9333ea', '#84cc16', '#2563eb', '#db2777']
 
 const DEFAULT_COVARIATES = ['ndvi', 'soci', 'twi', 'slope', 'clay']
+
+const ALL_ZONE_COVARIATES = [
+  'ndvi', 'soci', 'twi', 'slope', 'clay',
+  'elevation', 'rel_elevation',
+  'slope_degrees', 'slope_percent',
+  'aspect', 'aspect_sin', 'aspect_cos',
+  'plan_curvature', 'profile_curvature', 'plan_curvature_8', 'profile_curvature_8',
+  'spi', 'convergence_index',
+  'tpi_fine', 'tpi', 'tpi_broad', 'tri', 'valley_depth',
+  'B2_blue', 'B3_green', 'B4_red', 'B8_nir', 'B11_swir1', 'B12_swir2',
+  'NDVI', 'EVI', 'SAVI',
+  'NDMI', 'NDWI',
+  'BSI', 'Clay', 'Iron',
+  'NDTI', 'NBR', 'SOCI',
+]
 
 interface ZoneSummary {
   id: number
@@ -30,8 +46,61 @@ interface ZoneSummary {
   acres: number
   percent: number
   color: string
+  zoneType: string
   characteristics: string[]
-  recommendations: string[]
+  meanCovariates: Array<{ key: string; value: number }>
+}
+
+function clamp01(value: number): number {
+  if (Number.isNaN(value)) return 0
+  if (value < 0) return 0
+  if (value > 1) return 1
+  return value
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const normalized = hex.replace('#', '')
+  const full = normalized.length === 3
+    ? normalized.split('').map((c) => c + c).join('')
+    : normalized
+
+  const parsed = Number.parseInt(full, 16)
+  return {
+    r: (parsed >> 16) & 255,
+    g: (parsed >> 8) & 255,
+    b: parsed & 255,
+  }
+}
+
+function buildRasterDataUrl(
+  width: number,
+  height: number,
+  paintPixel: (idx: number) => { r: number; g: number; b: number; a: number }
+): string | null {
+  if (typeof document === 'undefined' || width <= 0 || height <= 0) {
+    return null
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    return null
+  }
+
+  const imageData = ctx.createImageData(width, height)
+  for (let i = 0; i < width * height; i += 1) {
+    const pixel = paintPixel(i)
+    const offset = i * 4
+    imageData.data[offset] = pixel.r
+    imageData.data[offset + 1] = pixel.g
+    imageData.data[offset + 2] = pixel.b
+    imageData.data[offset + 3] = pixel.a
+  }
+
+  ctx.putImageData(imageData, 0, 0)
+  return canvas.toDataURL('image/png')
 }
 
 function buildWktFromFieldData(fieldData: any): string {
@@ -55,7 +124,7 @@ function buildWktFromFieldData(fieldData: any): string {
   throw new Error('Field boundary format is not supported for zone analysis.')
 }
 
-export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }: ManagementZonesProps) {
+export default function ManagementZones({ fieldId, fieldData, onZonesGenerated, onZoneRastersGenerated }: ManagementZonesProps) {
   const [year, setYear] = useState<number>(new Date().getFullYear())
   const [optimizeMethod, setOptimizeMethod] = useState<ZoneOptimizationMethod>('composite')
   const [kMin, setKMin] = useState<number>(2)
@@ -67,6 +136,7 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
   const [fuzzinessM, setFuzzinessM] = useState<number>(2)
   const [smoothBoundaries, setSmoothBoundaries] = useState<boolean>(true)
   const [nZones, setNZones] = useState<number>(4)
+  const [selectedCovariates, setSelectedCovariates] = useState<string[]>(DEFAULT_COVARIATES)
 
   const [optimizeLoading, setOptimizeLoading] = useState<boolean>(false)
   const [delineateLoading, setDelineateLoading] = useState<boolean>(false)
@@ -76,13 +146,61 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
   const [delineationResult, setDelineationResult] = useState<ZoneDelineationResponse | null>(null)
   const [zones, setZones] = useState<ZoneSummary[]>([])
 
+  const zoneColorById = useMemo(() => {
+    const map = new Map<number, string>()
+    zones.forEach((zone) => {
+      map.set(zone.id, zone.color)
+    })
+    return map
+  }, [zones])
+
+  const assignmentRasterPreview = useMemo(() => {
+    const raster = delineationResult?.cluster_assignment_raster
+    if (!raster) {
+      return null
+    }
+
+    return buildRasterDataUrl(raster.width, raster.height, (idx) => {
+      const clusterId = raster.assigned_cluster_ids[idx] || 0
+      if (clusterId <= 0) {
+        return { r: 0, g: 0, b: 0, a: 0 }
+      }
+
+      const colorHex = zoneColorById.get(clusterId) || ZONE_COLORS[(clusterId - 1 + ZONE_COLORS.length) % ZONE_COLORS.length]
+      const rgb = hexToRgb(colorHex)
+      const membership = clamp01(raster.winning_memberships[idx] ?? 1)
+      const alpha = Math.round((0.25 + 0.75 * membership) * 255)
+
+      return { r: rgb.r, g: rgb.g, b: rgb.b, a: alpha }
+    })
+  }, [delineationResult, zoneColorById])
+
+  const membershipRasterPreviews = useMemo(() => {
+    const membershipRasters = delineationResult?.cluster_membership_rasters
+    if (!membershipRasters?.clusters?.length) {
+      return [] as Array<{ clusterId: number; src: string | null }>
+    }
+
+    return membershipRasters.clusters.map((cluster) => {
+      const colorHex = zoneColorById.get(cluster.cluster_id) || ZONE_COLORS[(cluster.cluster_id - 1 + ZONE_COLORS.length) % ZONE_COLORS.length]
+      const rgb = hexToRgb(colorHex)
+      const src = buildRasterDataUrl(membershipRasters.width, membershipRasters.height, (idx) => {
+        const membership = clamp01(cluster.memberships[idx] ?? 0)
+        const alpha = Math.round(membership * 255)
+        return { r: rgb.r, g: rgb.g, b: rgb.b, a: alpha }
+      })
+      return { clusterId: cluster.cluster_id, src }
+    })
+  }, [delineationResult, zoneColorById])
+
   useEffect(() => {
     onZonesGenerated?.(null)
+    onZoneRastersGenerated?.(null)
     setOptimizeResult(null)
     setDelineationResult(null)
     setZones([])
     setError('')
-  }, [fieldId, onZonesGenerated])
+  }, [fieldId])
 
   const getFieldAreaHa = (): number | undefined => {
     const acres = fieldData?.acres ?? fieldData?.area
@@ -121,76 +239,63 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
 
   const handleDelineateZones = async () => {
     setError('')
+    if (!selectedCovariates.length) {
+      setError('Select at least one covariate before delineating zones.')
+      return
+    }
+
     setDelineateLoading(true)
     try {
       const wkt = buildWktFromFieldData(fieldData)
       const response = await geeApi.delineateZones({
         wkt,
         year,
-        covariates: DEFAULT_COVARIATES,
+        covariates: selectedCovariates,
         n_zones: nZones,
         clustering_method: clusteringMethod,
         fuzziness_m: clusteringMethod === 'kmeans' ? undefined : fuzzinessM,
-        smooth_boundaries: smoothBoundaries,
+        // Keep kmeans boundaries hard/partitioned to avoid visual overlap.
+        smooth_boundaries: clusteringMethod === 'kmeans' ? false : smoothBoundaries,
         min_zone_area_ha: minZoneAreaHa,
         seed: 42,
       })
 
-      const zoneColorById = new Map<number, string>()
+      const nextZoneColorById = new Map<number, string>()
       response.zone_characteristics.forEach((zone, index) => {
-        zoneColorById.set(zone.zone_id, ZONE_COLORS[index % ZONE_COLORS.length])
-      })
-
-      const coloredFeatures = response.zone_polygons.features.map((feature) => {
-        const zoneId = Number(feature.properties?.zone_id ?? 0)
-        const color = zoneColorById.get(zoneId) || ZONE_COLORS[(zoneId - 1 + ZONE_COLORS.length) % ZONE_COLORS.length]
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            color,
-          },
-        }
+        nextZoneColorById.set(zone.zone_id, ZONE_COLORS[index % ZONE_COLORS.length])
       })
 
       const zoneStatsById = new Map<number, ZoneSummary>()
       response.zone_characteristics.forEach((zone, index) => {
-        const color = zoneColorById.get(zone.zone_id) || ZONE_COLORS[index % ZONE_COLORS.length]
+        const color = nextZoneColorById.get(zone.zone_id) || ZONE_COLORS[index % ZONE_COLORS.length]
         const acres = zone.area_ha * 2.47105
-        const variability = zone.temporal_stability
+        const meanCovariates = Object.entries(zone.mean_covariates || {})
+          .filter(([, value]) => typeof value === 'number' && Number.isFinite(value))
+          .map(([key, value]) => ({ key, value }))
+          .sort((a, b) => a.key.localeCompare(b.key))
 
         zoneStatsById.set(zone.zone_id, {
           id: zone.zone_id,
-          name: zone.zone_type || `Zone ${zone.zone_id}`,
+          name: `Zone ${zone.zone_id}`,
           acres,
           percent: zone.area_pct,
           color,
+          zoneType: zone.zone_type || 'Unclassified',
           characteristics: [
             `Area: ${zone.area_ha.toFixed(2)} ha (${acres.toFixed(1)} ac)`,
             `Pixels: ${zone.pixel_count.toLocaleString()}`,
-            variability !== null ? `Temporal stability: ${(variability * 100).toFixed(1)}%` : 'Temporal stability: N/A',
           ],
-          recommendations: [
-            'Use this zone boundary for targeted soil sampling and variable-rate planning.',
-            'Compare zone response to fertility and drainage interventions over time.',
-          ],
+          meanCovariates,
         })
       })
 
       const nextZones = Array.from(zoneStatsById.values()).sort((a, b) => a.id - b.id)
       setZones(nextZones)
-      setDelineationResult({
-        ...response,
-        zone_polygons: {
-          ...response.zone_polygons,
-          features: coloredFeatures,
-        },
-      })
+      setDelineationResult(response)
+      onZoneRastersGenerated?.(response)
 
-      onZonesGenerated?.({
-        ...response.zone_polygons,
-        features: coloredFeatures,
-      })
+      // Raster-first endpoint no longer returns zone polygons, so clear any legacy map overlay.
+      onZonesGenerated?.(null)
     } catch (e) {
       const message = e instanceof GEEAPIError ? e.message : 'Failed to delineate management zones.'
       setError(message)
@@ -199,13 +304,25 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
     }
   }
 
+  const toggleCovariate = (covariate: string, checked: boolean) => {
+    setSelectedCovariates((prev) => {
+      if (checked) {
+        if (prev.includes(covariate)) {
+          return prev
+        }
+        return [...prev, covariate]
+      }
+      return prev.filter((item) => item !== covariate)
+    })
+  }
+
   return (
     <div className="space-y-4">
       {/* Info Box */}
       <div className="flex items-start gap-2 p-3 rounded-lg" style={{ backgroundColor: '#faf5ff', border: '1px solid #e9d5ff' }}>
         <Info className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#7c3aed' }} />
         <p className="text-xs" style={{ color: '#6b21a8' }}>
-          Configure optimization to determine the recommended zone count, then delineate zones and display them in the map panel.
+          Configure optimization to determine zone count, then delineate zones and review assignment/probability raster outputs below.
         </p>
       </div>
 
@@ -281,12 +398,44 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
               </label>
               <label className="text-xs text-gray-700">
                 <span className="block mb-1">covariates</span>
-                <input
-                  type="text"
-                  value={DEFAULT_COVARIATES.join(', ')}
-                  readOnly
-                  className="w-full rounded border border-gray-300 px-2 py-2 bg-gray-50 text-gray-600"
-                />
+                <details className="rounded border border-gray-300 bg-gray-50">
+                  <summary className="cursor-pointer px-2 py-2 text-xs text-gray-700 select-none">
+                    {selectedCovariates.length} selected
+                  </summary>
+                  <div className="border-t border-gray-200 p-2">
+                    <div className="mb-2 flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCovariates(ALL_ZONE_COVARIATES)}
+                        className="rounded border border-gray-300 px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-100"
+                      >
+                        Select all
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCovariates(DEFAULT_COVARIATES)}
+                        className="rounded border border-gray-300 px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-100"
+                      >
+                        Reset default
+                      </button>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto rounded border border-gray-200 bg-white p-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                        {ALL_ZONE_COVARIATES.map((covariate) => (
+                          <label key={covariate} className="flex items-center gap-2 text-[11px] text-gray-700">
+                            <input
+                              type="checkbox"
+                              checked={selectedCovariates.includes(covariate)}
+                              onChange={(e) => toggleCovariate(covariate, e.target.checked)}
+                              className="h-3 w-3"
+                            />
+                            <span>{covariate}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </details>
               </label>
             </div>
 
@@ -308,9 +457,20 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
             </div>
 
             <label className="flex items-center gap-2 text-xs text-gray-700">
-              <input type="checkbox" checked={smoothBoundaries} onChange={(e) => setSmoothBoundaries(e.target.checked)} className="w-4 h-4" />
+              <input
+                type="checkbox"
+                checked={clusteringMethod === 'kmeans' ? false : smoothBoundaries}
+                disabled={clusteringMethod === 'kmeans'}
+                onChange={(e) => setSmoothBoundaries(e.target.checked)}
+                className="w-4 h-4 disabled:opacity-50"
+              />
               smooth_boundaries
             </label>
+            {clusteringMethod === 'kmeans' ? (
+              <p className="text-[11px] text-gray-500 -mt-2">
+                Disabled for kmeans to preserve non-overlapping hard zone boundaries.
+              </p>
+            ) : null}
 
             <button
               type="button"
@@ -376,6 +536,55 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
           {delineationResult.fuzziness_m_used !== null ? (
             <p className="text-xs text-gray-600 mt-1">Fuzziness m used: {delineationResult.fuzziness_m_used.toFixed(2)}</p>
           ) : null}
+          {typeof delineationResult.n_transition_pixels === 'number' ? (
+            <p className="text-xs text-gray-600 mt-1">Transition pixels: {delineationResult.n_transition_pixels.toLocaleString()}</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {delineationResult ? (
+        <div className="rounded-lg border border-gray-200 bg-white p-3 space-y-3">
+          <h4 className="text-sm font-semibold text-gray-900">Raster Outputs</h4>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="rounded border border-gray-200 p-2 bg-gray-50">
+              <p className="text-xs font-semibold text-gray-700 mb-2">Cluster Assignment</p>
+              {assignmentRasterPreview ? (
+                <img
+                  src={assignmentRasterPreview}
+                  alt="Cluster assignment raster"
+                  className="w-full h-auto rounded border border-gray-200 bg-white"
+                  style={{ imageRendering: 'pixelated' }}
+                />
+              ) : (
+                <p className="text-xs text-gray-500">Assignment raster not returned by API.</p>
+              )}
+            </div>
+
+            <div className="rounded border border-gray-200 p-2 bg-gray-50">
+              <p className="text-xs font-semibold text-gray-700 mb-2">Cluster Probability Layers</p>
+              {membershipRasterPreviews.length ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {membershipRasterPreviews.map((layer) => (
+                    <div key={layer.clusterId} className="rounded border border-gray-200 p-1 bg-white">
+                      <p className="text-[11px] text-gray-700 mb-1">Cluster {layer.clusterId}</p>
+                      {layer.src ? (
+                        <img
+                          src={layer.src}
+                          alt={`Cluster ${layer.clusterId} probability raster`}
+                          className="w-full h-auto rounded"
+                          style={{ imageRendering: 'pixelated' }}
+                        />
+                      ) : (
+                        <p className="text-[11px] text-gray-500">Unavailable</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500">Cluster membership rasters not returned by API.</p>
+              )}
+            </div>
+          </div>
         </div>
       ) : null}
 
@@ -411,6 +620,7 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
               <div className="w-4 h-4 rounded" style={{ backgroundColor: zone.color }} />
               <h4 className="text-sm font-semibold text-gray-900">{zone.name}</h4>
             </div>
+            <p className="text-xs text-gray-500 mb-2">Type class: {zone.zoneType}</p>
             
             <div className="mb-2">
               <h5 className="text-xs font-semibold text-gray-700 mb-1">Characteristics:</h5>
@@ -425,15 +635,19 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated }
             </div>
 
             <div>
-              <h5 className="text-xs font-semibold text-gray-700 mb-1">Recommendations:</h5>
-              <ul className="space-y-1">
-                {zone.recommendations.map((rec: string, idx: number) => (
-                  <li key={idx} className="text-xs text-gray-600 flex items-start gap-1">
-                    <Circle className="w-2 h-2 mt-1 flex-shrink-0" style={{ color: '#16a34a', fill: '#16a34a' }} />
-                    <span>{rec}</span>
-                  </li>
-                ))}
-              </ul>
+              <h5 className="text-xs font-semibold text-gray-700 mb-1">Mean Covariates:</h5>
+              {zone.meanCovariates.length ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                  {zone.meanCovariates.map((item) => (
+                    <div key={`${zone.id}-${item.key}`} className="text-xs text-gray-600 flex items-center justify-between rounded bg-gray-50 px-2 py-1">
+                      <span className="font-medium text-gray-700 mr-2">{item.key}</span>
+                      <span>{item.value.toFixed(3)}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500">No covariate means returned.</p>
+              )}
             </div>
           </div>
         ))}
