@@ -41,7 +41,7 @@ interface DetailViewProps {
   geeData: EnhancedFieldData | null
   activeTab?: string
   onTabChange?: (tab: string) => void
-  onSoilSelect?: (soil: any) => void
+  onSoilSelect?: (soil: any | null) => void
   selectedSoil?: any
   activeLayers?: string[]
   showCSBLayer?: boolean
@@ -263,6 +263,7 @@ export default function DetailView({
             mode="analysis"
             fieldData={fieldData}
             selectedSoil={selectedSoil}
+            onClearSelectedSoil={() => onSoilSelect?.(null)}
             activeLayers={activeLayers}
             layerOptions={TAB_LAYER_CONFIG[selectedTab] || []}
             showCSBLayer={showCSBLayer}
@@ -580,6 +581,7 @@ export default function DetailView({
                 mode="analysis"
                 fieldData={fieldData}
                 selectedSoil={selectedSoil}
+                onClearSelectedSoil={() => onSoilSelect?.(null)}
                 activeLayers={activeLayers}
                 layerOptions={TAB_LAYER_CONFIG[selectedTab] || []}
                 showCSBLayer={showCSBLayer}

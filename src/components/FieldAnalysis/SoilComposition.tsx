@@ -12,7 +12,7 @@ interface SoilCompositionProps {
   onSoilSelect?: (soil: any) => void
 }
 
-export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: SoilCompositionProps) {
+export default function SoilComposition({ fieldId, fieldData }: SoilCompositionProps) {
   const [soils, setSoils] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -89,7 +89,7 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
       <div className="flex items-start gap-2 p-3 rounded-lg" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
         <Info className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#2563eb' }} />
         <p className="text-xs" style={{ color: '#1e40af' }}>
-          This field contains {soils.length} different soil map units with varying properties and capabilities.
+          This field contains {soils.length} different soil map unit components with varying properties and capabilities.
         </p>
       </div>
       
@@ -114,17 +114,16 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
               <th className="text-left p-2 sm:p-3 font-semibold text-gray-700" style={{ minWidth: '200px' }}>Percent</th>
               <th className="text-right p-2 sm:p-3 font-semibold text-gray-700">Slope</th>
               <th className="text-right p-2 sm:p-3 font-semibold text-gray-700">LCC</th>
+              <th className="text-left p-2 sm:p-3 font-semibold text-gray-700">Drainage Class</th>
+              <th className="text-center p-2 sm:p-3 font-semibold text-gray-700">Hydric</th>
             </tr>
           </thead>
           <tbody>
             {soils.map((soil, idx) => (
               <tr 
                 key={soil.id}
-                className="border-t border-gray-200 cursor-pointer transition-colors"
+                className="border-t border-gray-200"
                 style={{ backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa' }}
-                onClick={() => onSoilSelect?.(soil)}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0fdf4'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = idx % 2 === 0 ? '#ffffff' : '#fafafa'}
               >
                 {/* Soil Name with Color Indicator */}
                 <td className="p-2 sm:p-3">
@@ -177,6 +176,24 @@ export default function SoilComposition({ fieldId, fieldData, onSoilSelect }: So
                     style={{ backgroundColor: '#f0fdf4', color: '#166534' }}
                   >
                     {soil.lcc}
+                  </span>
+                </td>
+
+                {/* Drainage Class */}
+                <td className="p-2 sm:p-3 text-left text-gray-700 whitespace-nowrap">
+                  {soil.drainageClass || 'N/A'}
+                </td>
+
+                {/* Hydric Status */}
+                <td className="p-2 sm:p-3 text-center">
+                  <span
+                    className="px-2 py-1 rounded text-xs font-semibold"
+                    style={{
+                      backgroundColor: soil.hydric ? '#ecfdf5' : '#f3f4f6',
+                      color: soil.hydric ? '#065f46' : '#4b5563'
+                    }}
+                  >
+                    {soil.hydric ? 'Yes' : 'No'}
                   </span>
                 </td>
               </tr>

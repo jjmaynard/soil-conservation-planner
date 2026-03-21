@@ -8,7 +8,7 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet-draw'
 import * as turf from '@turf/turf'
-import { Layers, Square, MapPin, CheckCircle, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { Layers, Square, MapPin, CheckCircle, AlertCircle, ChevronDown, ChevronUp, X } from 'lucide-react'
 import { geeApi } from '#lib/geeApiClient'
 import type { CSBFieldDetails } from '#types/geeApi'
 import type { ZoneDelineationResponse, ZonePolygonProperties } from '#types/geeApi'
@@ -942,6 +942,7 @@ interface FieldMapProps {
   managementZonesGeoJSON?: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null
   managementZonesRaster?: ZoneDelineationResponse | null
   selectedSoil?: any
+  onClearSelectedSoil?: () => void
   activeLayers?: string[]
   layerOptions?: { id: string; label: string }[]
   showCLULayer?: boolean
@@ -965,6 +966,7 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
   managementZonesGeoJSON,
   managementZonesRaster,
   selectedSoil,
+  onClearSelectedSoil,
   activeLayers = [],
   layerOptions = [],
   showCLULayer = false,
@@ -1003,6 +1005,18 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
     if (value < 0) return 0
     if (value > 1) return 1
     return value
+  }
+
+  const formatSignificant = (value: unknown, significantDigits: number = 3): string => {
+    const numeric = Number(value)
+    if (!Number.isFinite(numeric)) {
+      return 'N/A'
+    }
+
+    return new Intl.NumberFormat('en-US', {
+      maximumSignificantDigits: significantDigits,
+      useGrouping: false,
+    }).format(numeric)
   }
 
   const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
@@ -2876,27 +2890,39 @@ const FieldMap = forwardRef<FieldMapRef, FieldMapProps>(({
       {/* Selected Soil Detail */}
       {mode === 'analysis' && selectedSoil && (
         <div 
-          className="absolute bottom-4 left-4 right-4 rounded-lg shadow-2xl z-[1000]"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #e5e7eb' }}
+          className="absolute bottom-4 left-4 right-4 rounded-xl shadow-2xl z-[1000]"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.97)', border: '1px solid #e5e7eb' }}
         >
-          <div className="px-4 py-3" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-            <h3 className="font-semibold text-gray-900 text-sm">
-              {selectedSoil.mapunit_name}
-            </h3>
+          <div className="px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm">{selectedSoil.mapunit_name || 'Soil Component'}</h3>
+              {selectedSoil.musym ? (
+                <p className="text-[11px] text-gray-500 mt-0.5">Map Unit Symbol: {selectedSoil.musym}</p>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={onClearSelectedSoil}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              aria-label="Close soil details"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
           <div className="p-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
-              <div>
-                <span className="text-gray-600 text-xs">Coverage:</span>
-                <div className="font-semibold text-gray-900">{selectedSoil.area} ac ({selectedSoil.percent}%)</div>
+              <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                <span className="text-gray-600 text-xs block mb-1">Drainage Class</span>
+                <div className="font-semibold text-gray-900">{selectedSoil.drainageClass || 'N/A'}</div>
               </div>
-              <div>
-                <span className="text-gray-600 text-xs">LCC:</span>
-                <div className="font-semibold text-gray-900">{selectedSoil.lcc}</div>
+              <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                <span className="text-gray-600 text-xs block mb-1">Hydric Soil</span>
+                <div className="font-semibold text-gray-900">{selectedSoil.hydric === true ? 'Yes' : selectedSoil.hydric === false ? 'No' : 'Unknown'}</div>
               </div>
-              <div>
-                <span className="text-gray-600 text-xs">Slope:</span>
-                <div className="font-semibold text-gray-900">{selectedSoil.slope}%</div>
+              <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                <span className="text-gray-600 text-xs block mb-1">Component Key</span>
+                <div className="font-semibold text-gray-900">{selectedSoil.id ?? 'N/A'}</div>
               </div>
             </div>
           </div>
