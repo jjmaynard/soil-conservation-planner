@@ -50,7 +50,7 @@ const App = ({ Component, pageProps }: AppProps) => {
           />
           <title>Soil Interpretation Engine - Soil Survey Interactive Mapping</title>
         </Head>
-        <main className={`${catamaran.variable} font-sans text-base h-screen h-[100dvh] overflow-hidden`}>
+        <main className={`${catamaran.variable} font-sans text-base ${isFullWidth ? 'min-h-screen overflow-y-auto' : 'h-screen h-[100dvh] overflow-hidden'}`}>
           {isFullWidth ? (
             // Dashboard gets no sidebar
             <Component {...pageProps} />
