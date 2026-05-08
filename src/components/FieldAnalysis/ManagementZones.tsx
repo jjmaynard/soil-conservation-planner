@@ -128,7 +128,7 @@ function buildWktFromFieldData(fieldData: any): string {
 }
 
 export default function ManagementZones({ fieldId, fieldData, onZonesGenerated, onZoneRastersGenerated }: ManagementZonesProps) {
-  const [year, setYear] = useState<number>(new Date().getFullYear())
+  const [year, setYear] = useState<number>(new Date().getFullYear() - 1)
   const [optimizeMethod, setOptimizeMethod] = useState<ZoneOptimizationMethod>('composite')
   const [kMin, setKMin] = useState<number>(2)
   const [kMax, setKMax] = useState<number>(8)
@@ -406,7 +406,7 @@ export default function ManagementZones({ fieldId, fieldData, onZonesGenerated, 
             <div className="grid grid-cols-2 gap-2">
               <label className="text-xs text-gray-700">
                 <span className="block mb-1">Year</span>
-                <input type="number" min={2015} max={2030} value={year} onChange={(e) => setYear(Number(e.target.value) || new Date().getFullYear())} className="w-full rounded border border-gray-300 px-2 py-2" />
+                <input type="number" min={2015} max={2030} value={year} onChange={(e) => setYear(Number(e.target.value) || (new Date().getFullYear() - 1))} className="w-full rounded border border-gray-300 px-2 py-2" />
               </label>
               <label className="text-xs text-gray-700">
                 <span className="block mb-1">Method</span>

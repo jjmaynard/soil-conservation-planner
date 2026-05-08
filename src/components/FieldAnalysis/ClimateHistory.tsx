@@ -1,7 +1,6 @@
 // Climate History Component - Comprehensive Climate Analysis via GEE
 'use client'
 
-import { useEffect } from 'react'
 import { 
   CloudRain, 
   Thermometer, 
@@ -45,12 +44,6 @@ export default function ClimateHistory({ fieldId, geeData, wkt }: ClimateHistory
     wkt,
     autoFetch: true
   })
-
-  useEffect(() => {
-    if (wkt && !data && !loading) {
-      refetch()
-    }
-  }, [wkt, data, loading, refetch])
 
   if (loading) {
     return (
