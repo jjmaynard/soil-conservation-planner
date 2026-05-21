@@ -172,6 +172,31 @@ export default function DetailView({
   const [showNarrativeModal, setShowNarrativeModal] = useState(false)
   const tabNarrative = getTabNarrative(selectedTab)
 
+  const getFieldBoundaryWkt = (): string | undefined => {
+    try {
+      if (typeof fieldData?.boundary === 'string') {
+        return fieldData.boundary
+      }
+
+      if (fieldData?.boundary && typeof fieldData.boundary === 'object') {
+        let geometry = fieldData.boundary
+
+        // Custom drawn fields are often stored as GeoJSON Features.
+        if (geometry.type === 'Feature' && geometry.geometry) {
+          geometry = geometry.geometry
+        }
+
+        if (geometry?.type && geometry?.coordinates) {
+          return geoJsonToWkt(geometry)
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to convert boundary to WKT:', error)
+    }
+
+    return undefined
+  }
+
   const handleZonesGenerated = (zones: GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon, ZonePolygonProperties> | null) => {
     setManagementZonesGeoJSON(zones)
 
@@ -381,26 +406,7 @@ export default function DetailView({
                     
                     // Only use csbId for actual CSB fields, not custom drawn fields
                     const csbId = isCustomField ? undefined : (fieldData?.clu_id || fieldData?.csb_id || fieldData?.csbid)
-                    let wkt: string | undefined = undefined
-                    
-                    // Get WKT from boundary if available
-                    try {
-                      if (typeof fieldData?.boundary === 'string') {
-                        wkt = fieldData.boundary
-                      } else if (fieldData?.boundary && typeof fieldData.boundary === 'object') {
-                        // Handle GeoJSON Feature (custom fields)
-                        let geom = fieldData.boundary
-                        if (geom.type === 'Feature' && geom.geometry) {
-                          geom = geom.geometry
-                        }
-                        // Now convert the geometry to WKT
-                        if (geom.type && geom.coordinates) {
-                          wkt = geoJsonToWkt(geom)
-                        }
-                      }
-                    } catch (error) {
-                      console.warn('Failed to convert boundary to WKT:', error)
-                    }
+                    const wkt = getFieldBoundaryWkt()
                     
                     console.log('[DetailView] Productivity query params:', {
                       isCustomField,
@@ -438,18 +444,7 @@ export default function DetailView({
             {selectedTab === 'drought' && (
               <DroughtRiskAnalysis 
                 fieldId={fieldData?.id || fieldData?.clu_id}
-                wkt={(() => {
-                  try {
-                    if (typeof fieldData?.boundary === 'string') {
-                      return fieldData.boundary
-                    } else if (fieldData?.boundary && typeof fieldData.boundary === 'object' && fieldData.boundary.type && fieldData.boundary.coordinates) {
-                      return geoJsonToWkt(fieldData.boundary)
-                    }
-                  } catch (error) {
-                    console.warn('Failed to convert boundary to WKT for drought analysis:', error)
-                  }
-                  return undefined
-                })()}
+                wkt={getFieldBoundaryWkt()}
                 geeData={geeData}
               />
             )}
@@ -479,18 +474,7 @@ export default function DetailView({
               <VegetationMonitoring 
                 fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
-                wkt={(() => {
-                  try {
-                    if (typeof fieldData?.boundary === 'string') {
-                      return fieldData.boundary
-                    } else if (fieldData?.boundary && typeof fieldData.boundary === 'object' && fieldData.boundary.type && fieldData.boundary.coordinates) {
-                      return geoJsonToWkt(fieldData.boundary)
-                    }
-                  } catch (error) {
-                    console.warn('Failed to convert boundary to WKT for vegetation monitoring:', error)
-                  }
-                  return undefined
-                })()}
+                wkt={getFieldBoundaryWkt()}
               />
             )}
 
@@ -505,18 +489,7 @@ export default function DetailView({
               <ClimateHistory 
                 fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
-                wkt={(() => {
-                  try {
-                    if (typeof fieldData?.boundary === 'string') {
-                      return fieldData.boundary
-                    } else if (fieldData?.boundary && typeof fieldData.boundary === 'object' && fieldData.boundary.type && fieldData.boundary.coordinates) {
-                      return geoJsonToWkt(fieldData.boundary)
-                    }
-                  } catch (error) {
-                    console.warn('Failed to convert boundary to WKT for climate history:', error)
-                  }
-                  return undefined
-                })()}
+                wkt={getFieldBoundaryWkt()}
               />
             )}
           </div>
