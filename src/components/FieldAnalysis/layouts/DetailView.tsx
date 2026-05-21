@@ -39,6 +39,8 @@ interface DetailViewProps {
   fieldData: any
   ssurgoData: ProcessedFieldData | null
   geeData: EnhancedFieldData | null
+  geeLoading?: boolean
+  geeError?: Error | null
   activeTab?: string
   onTabChange?: (tab: string) => void
   onSoilSelect?: (soil: any | null) => void
@@ -136,6 +138,8 @@ export default function DetailView({
   fieldData, 
   ssurgoData, 
   geeData, 
+  geeLoading = false,
+  geeError = null,
   activeTab = 'soil',
   onTabChange,
   onSoilSelect,
@@ -431,6 +435,8 @@ export default function DetailView({
               <SVIAnalysis 
                 fieldId={fieldData?.id || fieldData?.clu_id}
                 geeData={geeData}
+                geeLoading={geeLoading}
+                geeError={geeError}
               />
             )}
 

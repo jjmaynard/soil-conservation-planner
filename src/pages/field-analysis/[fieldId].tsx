@@ -409,6 +409,8 @@ export default function FieldAnalysisDetail() {
                 fieldData={fieldData}
                 ssurgoData={ssurgoData}
                 geeData={geeData}
+                geeLoading={geeLoading}
+                geeError={geeError}
                 activeTab={activeDetailTab}
                 onTabChange={handleDetailTabChange}
                 onSoilSelect={setSelectedSoil}

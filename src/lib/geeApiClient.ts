@@ -32,6 +32,8 @@ import type {
   ProductivityAssessment,
   ComprehensiveFieldAssessment,
   ComprehensiveAssessmentRequest,
+  CoreAssessmentResponse,
+  MultitemporalAssessmentResponse,
   ProductivityCropSpecificRequest,
   ProductivityCropSpecificResponse,
   ClimateHistoryRequest,
@@ -599,7 +601,8 @@ class GEEAPIClient {
     try {
       const { data } = await this.client.post<ClimateHistoryResponse>(
         '/api/climate/comprehensive',
-        request
+        request,
+        { timeout: 300000 }
       )
       return data
     } catch (error) {
@@ -628,7 +631,14 @@ class GEEAPIClient {
   // ==========================================================================
 
   /**
-   * Get comprehensive field assessment with all resource concerns
+   * Get comprehensive field assessment with all resource concerns.
+   *
+   * API v2.1+ serves this data from two endpoints:
+   * - /api/assessment/core (non-multitemporal concerns)
+   * - /api/assessment/multitemporal (soil quality + productivity)
+   *
+   * This method merges both responses into the legacy comprehensive shape
+   * expected by existing field-analysis components.
    * @param request - WKT geometry and optional parameters
    * @returns Complete assessment with erosion, ponding, drought, productivity, SVI
    */
@@ -645,11 +655,60 @@ class GEEAPIClient {
         body.include_visualizations = request.include_visualizations
       }
 
-      const { data } = await this.client.post<ComprehensiveFieldAssessment>(
-        `/api/assessment/all`,
-        body
-      )
-      return data
+      const [coreResponse, multitemporalResponse] = await Promise.all([
+        this.client.post<CoreAssessmentResponse>(
+          '/api/assessment/core',
+          body,
+          { timeout: 300000 }
+        ),
+        this.client.post<MultitemporalAssessmentResponse>(
+          '/api/assessment/multitemporal',
+          body,
+          { timeout: 300000 }
+        )
+      ])
+
+      const core = coreResponse.data
+      const multitemporal = multitemporalResponse.data
+
+      const productivityVisualization = {
+        yield_gap_tile_url: '',
+        mean_ndvi_tile_url: '',
+        max_ndvi_tile_url: '',
+        yield_gap_thumbnail_url: '',
+        nccpi_corn_tile_url: core.soil_productivity.visualization.corn.tile_url,
+        nccpi_soy_tile_url: core.soil_productivity.visualization.soybeans.tile_url,
+        nccpi_sg_tile_url: core.soil_productivity.visualization.small_grains.tile_url,
+        nccpi_cotton_tile_url: core.soil_productivity.visualization.cotton.tile_url,
+        nccpi_all_tile_url: core.soil_productivity.visualization.all_crops.tile_url,
+        description: core.soil_productivity.description,
+      }
+
+      const merged: ComprehensiveFieldAssessment = {
+        assessment_year: core.assessment_year || multitemporal.assessment_year,
+        timestamp: core.timestamp || multitemporal.timestamp,
+        erosion_risk: core.erosion_risk,
+        concentrated_flow: core.concentrated_flow,
+        ponding: core.ponding,
+        drought: core.drought,
+        soil_quality: multitemporal.soil_quality,
+        productivity: {
+          productivity_metrics: multitemporal.productivity.productivity_metrics,
+          yield_gap: multitemporal.productivity.yield_gap,
+          nccpi_metrics: {
+            corn_mean: core.soil_productivity.corn.mean,
+            soybean_mean: core.soil_productivity.soybeans.mean,
+            small_grains_mean: core.soil_productivity.small_grains.mean,
+            cotton_mean: core.soil_productivity.cotton.mean,
+            all_crops_mean: core.soil_productivity.all_crops.mean,
+          },
+          visualization: productivityVisualization,
+          methodology: multitemporal.productivity.methodology || 'Merged core + multitemporal assessment',
+        },
+        svi: core.svi,
+      }
+
+      return merged
     } catch (error) {
       return handleAPIError(error)
     }

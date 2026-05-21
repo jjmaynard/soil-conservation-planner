@@ -9,9 +9,11 @@ import type { EnhancedFieldData } from '#hooks/useComprehensiveFieldAssessment'
 interface SVIAnalysisProps {
   fieldId: string
   geeData?: EnhancedFieldData | null
+  geeLoading?: boolean
+  geeError?: Error | null
 }
 
-export default function SVIAnalysis({ fieldId, geeData }: SVIAnalysisProps) {
+export default function SVIAnalysis({ fieldId, geeData, geeLoading = false, geeError = null }: SVIAnalysisProps) {
   const [sviData, setSviData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -233,12 +235,37 @@ export default function SVIAnalysis({ fieldId, geeData }: SVIAnalysisProps) {
     )
   }
 
+  if (geeLoading && !sviData?.hasData) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 mx-auto mb-2" style={{ border: '2px solid #e5e7eb', borderTopColor: '#10b981' }}></div>
+        <p className="text-sm text-gray-600">Waiting for comprehensive assessment...</p>
+      </div>
+    )
+  }
+
+  if (geeError && !sviData?.hasData) {
+    const isTimeout = /timeout/i.test(geeError.message)
+
+    return (
+      <div className="text-center py-8">
+        <Shield className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+        <p className="text-sm text-gray-700">SVI data could not be loaded.</p>
+        <p className="text-xs text-gray-500 mt-1">
+          {isTimeout
+            ? 'The comprehensive assessment timed out. Please retry in a moment.'
+            : geeError.message}
+        </p>
+      </div>
+    )
+  }
+
   if (!sviData?.hasData) {
     return (
       <div className="text-center py-8">
         <Shield className="w-12 h-12 mx-auto mb-2 text-gray-400" />
         <p className="text-sm text-gray-600">SVI data not available</p>
-        <p className="text-xs text-gray-500 mt-1">Select a field to analyze</p>
+        <p className="text-xs text-gray-500 mt-1">SVI results are not available for this field yet.</p>
       </div>
     )
   }

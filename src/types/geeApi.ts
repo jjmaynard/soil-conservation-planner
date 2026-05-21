@@ -583,7 +583,7 @@ export interface ProductivityAssessment {
 }
 
 // ============================================================================
-// Comprehensive Field Assessment (/api/assessment/all)
+// Comprehensive Field Assessment (Merged /api/assessment/core + /api/assessment/multitemporal)
 // ============================================================================
 
 export interface ComprehensiveFieldAssessment {
@@ -779,6 +779,35 @@ export interface ComprehensiveAssessmentRequest {
   wkt: string
   year?: number
   include_visualizations?: boolean
+}
+
+export interface CoreAssessmentResponse {
+  assessment_year: number
+  timestamp: string
+  erosion_risk: ComprehensiveFieldAssessment['erosion_risk']
+  concentrated_flow: ComprehensiveFieldAssessment['concentrated_flow']
+  ponding: ComprehensiveFieldAssessment['ponding']
+  drought: ComprehensiveFieldAssessment['drought']
+  soil_productivity: SoilProductivity
+  svi: ComprehensiveFieldAssessment['svi']
+}
+
+export interface MultitemporalAssessmentResponse {
+  assessment_year: number
+  timestamp: string
+  soil_quality: ComprehensiveFieldAssessment['soil_quality']
+  productivity: {
+    productivity_metrics: {
+      ndvi_peak_mean: number
+      ndvi_peak_std: number
+    }
+    yield_gap: {
+      mean_gap_pct: number
+      p75_gap_pct: number
+      p90_gap_pct: number
+    }
+    methodology?: string
+  }
 }
 
 // ============================================================================ 
